@@ -40,7 +40,9 @@ import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 
 /**
- * Command for switching to the legacy ImageJ 1.x compatibility mode.
+ * An extension of {@link ImageJApp} that provides the legacy ImageJ 1.x
+ * version (in parentheses) in addition to the regular ImageJ version, when
+ * {@link #getVersion()} is called.
  * 
  * @author Johannes Schindelin
  */
