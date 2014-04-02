@@ -282,7 +282,7 @@ public class DefaultLegacyHooks extends EssentialLegacyHooks {
 	 */
 	@Override
 	public URL getIconURL() {
-		return appConfig == null ? null : appConfig.getIconURL();
+		return appConfig == null ? getClass().getResource("/icons/imagej-256.png") : appConfig.getIconURL();
 	}
 
 	/** @inherit */
