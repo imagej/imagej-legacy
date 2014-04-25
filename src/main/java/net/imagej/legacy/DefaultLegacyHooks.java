@@ -45,6 +45,7 @@ import java.util.List;
 import net.imagej.display.ImageDisplay;
 import net.imagej.legacy.plugin.LegacyAppConfiguration;
 import net.imagej.legacy.plugin.LegacyEditor;
+import net.imagej.legacy.plugin.LegacyImageOpener;
 import net.imagej.legacy.plugin.LegacyPostRefreshMenus;
 import net.imagej.patcher.EssentialLegacyHooks;
 import net.imagej.patcher.LegacyHooks;
@@ -95,6 +96,7 @@ public class DefaultLegacyHooks extends EssentialLegacyHooks {
 	private LegacyEditor editor;
 	private LegacyAppConfiguration appConfig;
 	private List<LegacyPostRefreshMenus> afterRefreshMenus;
+	private List<LegacyImageOpener> legacyImageOpeners;
 
 	/** inherit */
 	@Override
@@ -110,6 +112,10 @@ public class DefaultLegacyHooks extends EssentialLegacyHooks {
 		// TODO: inject context automatically?
 		afterRefreshMenus = pluginService.createInstancesOfType(LegacyPostRefreshMenus.class);
 		for (final LegacyPostRefreshMenus o : afterRefreshMenus) {
+			context.inject(o);
+		}
+		legacyImageOpeners = pluginService.createInstancesOfType(LegacyImageOpener.class);
+		for (final LegacyImageOpener o : legacyImageOpeners) {
 			context.inject(o);
 		}
 	}
@@ -363,4 +369,13 @@ public class DefaultLegacyHooks extends EssentialLegacyHooks {
 		return false;
 	}
 
+	/** @inherit */
+	@Override
+	public Object interceptOpenImage(final String path, final int sliceIndex) {
+		for (final LegacyImageOpener opener : legacyImageOpeners) {
+			final Object result = opener.openImage(path, sliceIndex);
+			if (result != null) return result;
+		}
+		return null;
+	}
 }
