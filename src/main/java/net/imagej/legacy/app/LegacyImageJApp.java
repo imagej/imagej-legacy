@@ -48,7 +48,7 @@ import org.scijava.plugin.Plugin;
  * @see org.scijava.app.AppService
  */
 @Plugin(type = App.class, name = ImageJApp.NAME,
-	priority = Priority.HIGH_PRIORITY)
+	priority = Priority.HIGH_PRIORITY + 1)
 public class LegacyImageJApp extends ImageJApp {
 
 	// NB: This app uses the same name as ImageJApp, but with a higher priority,
