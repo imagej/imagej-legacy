@@ -31,8 +31,8 @@
 
 package net.imagej.legacy;
 
+import net.imagej.ImageJService;
 import net.imagej.display.ImageDisplay;
-import net.imagej.service.ImageJService;
 
 import org.scijava.app.StatusService;
 import org.scijava.log.LogService;
