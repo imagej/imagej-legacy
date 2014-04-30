@@ -31,8 +31,8 @@
 
 package net.imagej.legacy;
 
-import imagej.patcher.LegacyEnvironment;
-import imagej.patcher.LegacyInjector;
+import net.imagej.patcher.LegacyEnvironment;
+import net.imagej.patcher.LegacyInjector;
 
 /**
  * An interactive test for the legacy mode of ImageJ2.
@@ -45,8 +45,7 @@ public class TestDrive {
 		LegacyInjector.preinit();
 	}
 
-	public static void main(String[] args) throws ClassNotFoundException,
-			InterruptedException {
+	public static void main(String[] args) throws ClassNotFoundException {
 		System.setProperty("ij1.plugin.dirs", "/nirvana/");
 		final LegacyEnvironment ij1 = new LegacyEnvironment(null, false);
 		ij1.addPluginClasspath(TestDrive.class.getClassLoader());
