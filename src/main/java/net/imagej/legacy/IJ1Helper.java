@@ -44,6 +44,7 @@ import ij.io.Opener;
 import ij.plugin.PlugIn;
 import ij.plugin.filter.PlugInFilter;
 import ij.plugin.filter.PlugInFilterRunner;
+import ij.plugin.Commands;
 
 import java.awt.Component;
 import java.awt.GraphicsEnvironment;
@@ -230,6 +231,10 @@ public class IJ1Helper extends AbstractContextual {
 
 	public boolean showMessageWithCancel(String title, String message) {
 		return IJ.showMessageWithCancel(title, message);
+	}
+
+	public String commandsName() {
+		return Commands.class.getName();
 	}
 
 	/**

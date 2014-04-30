@@ -69,9 +69,11 @@ public class DefaultLegacyHooks extends EssentialLegacyHooks {
 	private Context context;
 	private PluginService pluginService;
 	private LogService log;
+	private IJ1Helper helper;
 
-	public DefaultLegacyHooks(LegacyService legacyService) {
+	public DefaultLegacyHooks(LegacyService legacyService, IJ1Helper helper) {
 		this.legacyService = legacyService;
+		this.helper = helper;
 	}
 
 	/** @inherit */

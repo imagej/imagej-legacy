@@ -292,7 +292,7 @@ public final class DefaultLegacyService extends AbstractService implements
 		synchronized (DefaultLegacyService.class) {
 			checkInstance();
 			instance = this;
-			LegacyInjector.installHooks(getClass().getClassLoader(), new DefaultLegacyHooks(this));
+			LegacyInjector.installHooks(getClass().getClassLoader(), new DefaultLegacyHooks(this, ij1Helper));
 		}
 
 		ij1Helper.initialize();
