@@ -143,6 +143,17 @@ public class DefaultLegacyHooks extends EssentialLegacyHooks {
 			return legacyService;
 		if (Context.class.getName().equals(className))
 			return legacyService == null ? null : legacyService.getContext();
+
+		// Intercept IJ1 commands
+		if (helper != null) {
+			// intercept ij.plugins.Commands
+			if (helper.commandsName().equals(className)) {
+				if (arg.equals("open")) {
+					return interceptOpen(null, -1, true);
+				}
+			}
+		}
+
 		return null;
 	}
 
