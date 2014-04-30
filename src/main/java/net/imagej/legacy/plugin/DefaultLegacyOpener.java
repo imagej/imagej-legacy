@@ -35,7 +35,9 @@ import ij.IJ;
 import ij.ImagePlus;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Future;
 
@@ -45,10 +47,15 @@ import net.imglib2.img.display.imagej.ImageJFunctions;
 
 import org.scijava.Context;
 import org.scijava.Priority;
-import org.scijava.command.CommandModule;
+import org.scijava.command.CommandInfo;
 import org.scijava.command.CommandService;
+import org.scijava.display.DisplayPostprocessor;
+import org.scijava.module.Module;
 import org.scijava.module.ModuleService;
+import org.scijava.module.process.PostprocessorPlugin;
+import org.scijava.module.process.PreprocessorPlugin;
 import org.scijava.plugin.Plugin;
+import org.scijava.plugin.PluginService;
 import org.scijava.plugins.commands.io.OpenFile;
 
 /**
@@ -72,27 +79,44 @@ public class DefaultLegacyOpener implements LegacyOpener {
 		final boolean displayResult)
 	{
 		Context c = (Context) IJ.runPlugIn("org.scijava.Context", null);
+		ImagePlus imp = null;
 
-		CommandService cmd = c.getService(CommandService.class);
+		// TODO: the legacy UI should handle this display postprocessing
+		// appropriately
+		// Remove any DisplayPostprocessors so the image is not distplayed by IJ2
+		PluginService pluginService = c.getService(PluginService.class);
+		final List<PostprocessorPlugin> postprocessors =
+			new ArrayList<PostprocessorPlugin>();
+		for (final PostprocessorPlugin pp : pluginService.createInstancesOfType(PostprocessorPlugin.class)) {
+			if (!(pp instanceof DisplayPostprocessor)) {
+				postprocessors.add(pp);
+			}
+		}
+
+		CommandService commandService = c.getService(CommandService.class);
+		CommandInfo command = commandService.getCommand(OpenFile.class);
+		ModuleService moduleService = c.getService(ModuleService.class);
 		Map<String, Object> inputs = new HashMap<String, Object>();
 		if (path != null) inputs.put("inputFile", new File(path));
-		Future<CommandModule> result = cmd.run(OpenFile.class, true, inputs);
+		Future<Module> result =
+			moduleService.run(command, pluginService
+				.createInstancesOfType(PreprocessorPlugin.class), postprocessors,
+				inputs);
 
-		CommandModule module = c.getService(ModuleService.class).waitFor(result);
+		Module module = moduleService.waitFor(result);
 		Object data = module.getOutput("data");
 
 		if (data instanceof Dataset) {
 			Dataset d = (Dataset) data;
-			ImagePlus imp =
+			imp =
 				ImageJFunctions.wrap((RandomAccessibleInterval) d.getImgPlus(), d
 					.getName());
 
 			if (displayResult) {
 				imp.show();
 			}
-			return imp;
 		}
 
-		return null;
+		return imp;
 	}
 }
