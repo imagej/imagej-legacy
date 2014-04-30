@@ -45,7 +45,7 @@ import java.util.List;
 import net.imagej.display.ImageDisplay;
 import net.imagej.legacy.plugin.LegacyAppConfiguration;
 import net.imagej.legacy.plugin.LegacyEditor;
-import net.imagej.legacy.plugin.LegacyImageOpener;
+import net.imagej.legacy.plugin.LegacyOpener;
 import net.imagej.legacy.plugin.LegacyPostRefreshMenus;
 import net.imagej.patcher.EssentialLegacyHooks;
 import net.imagej.patcher.LegacyHooks;
@@ -96,7 +96,7 @@ public class DefaultLegacyHooks extends EssentialLegacyHooks {
 	private LegacyEditor editor;
 	private LegacyAppConfiguration appConfig;
 	private List<LegacyPostRefreshMenus> afterRefreshMenus;
-	private List<LegacyImageOpener> legacyImageOpeners;
+	private List<LegacyOpener> legacyOpeners;
 
 	/** inherit */
 	@Override
@@ -114,8 +114,8 @@ public class DefaultLegacyHooks extends EssentialLegacyHooks {
 		for (final LegacyPostRefreshMenus o : afterRefreshMenus) {
 			context.inject(o);
 		}
-		legacyImageOpeners = pluginService.createInstancesOfType(LegacyImageOpener.class);
-		for (final LegacyImageOpener o : legacyImageOpeners) {
+		legacyOpeners = pluginService.createInstancesOfType(LegacyOpener.class);
+		for (final LegacyOpener o : legacyOpeners) {
 			context.inject(o);
 		}
 	}
@@ -371,11 +371,13 @@ public class DefaultLegacyHooks extends EssentialLegacyHooks {
 
 	/** @inherit */
 	@Override
-	public Object interceptOpenImage(final String path, final int sliceIndex) {
-		for (final LegacyImageOpener opener : legacyImageOpeners) {
-			final Object result = opener.openImage(path, sliceIndex);
+	public Object interceptOpen(final String path, final int planeIndex,
+		final boolean display)
+	{
+		for (final LegacyOpener opener : legacyOpeners) {
+			final Object result = opener.open(path, planeIndex, display);
 			if (result != null) return result;
 		}
 		return null;
-	}
+	}	
 }

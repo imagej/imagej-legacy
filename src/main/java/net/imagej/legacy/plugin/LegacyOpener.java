@@ -31,8 +31,6 @@
 
 package net.imagej.legacy.plugin;
 
-import ij.ImagePlus;
-
 import org.scijava.plugin.SciJavaPlugin;
 
 /**
@@ -41,20 +39,21 @@ import org.scijava.plugin.SciJavaPlugin;
  * 
  * @author Johannes Schindelin
  */
-public interface LegacyImageOpener extends SciJavaPlugin {
+public interface LegacyOpener extends SciJavaPlugin {
 
 	/**
-	 * Optionally override opening images via legacy hooks.
+	 * Optionally override opening resources via legacy hooks.
 	 * <p>
 	 * This is intended as a "HandleExtraFileTypesPlus".
 	 * </p>
 	 * 
-	 * @param path
-	 *            the path to the image, or {@code null} if a dialog needs to be
-	 *            shown
-	 * @param sliceIndex
-	 *            the index of the single slice to open, or -1 for all slices
-	 * @return an image, or {@code null} to let ImageJ 1.x open the image
+	 * @param path the path to the resource to open, or {@code null} if a dialog
+	 *          needs to be shown
+	 * @param planeIndex
+	 *            If applicable - the index of plane to open or -1 for all planes
+	 * @param displayResult
+	 *            if true, the opened object should be displayed before returning
+	 * @return The opened object, or {@code null} to let ImageJ 1.x open the path.
 	 */
-	ImagePlus openImage(final String path, final int sliceIndex);
+	Object open(final String path, final int planeIndex, final boolean displayResult);
 }

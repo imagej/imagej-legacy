@@ -91,6 +91,10 @@
 			<groupId>org.scijava</groupId>
 			<artifactId>scripting-java</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>org.scijava</groupId>
+			<artifactId>scijava-plugins-commands</artifactId>
+		</dependency>
 
 		<!-- Optional SciJava dependencies -->
 		<dependency>
