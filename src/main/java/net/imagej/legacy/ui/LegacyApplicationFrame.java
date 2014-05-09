@@ -28,20 +28,33 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+
 package net.imagej.legacy.ui;
 
-import ij.IJ;
-import ij.ImageJ;
+import java.awt.Frame;
+
+import net.imagej.legacy.LegacyService;
 
 import org.scijava.ui.ApplicationFrame;
 import org.scijava.widget.UIComponent;
 
+/**
+ * {@link LegacyAdapter} between the {@link ApplicationFrame} class and active
+ * {@code ij.ImageJ}.
+ * 
+ * @author Mark Hiner
+ */
+public class LegacyApplicationFrame extends AbstractLegacyAdapter implements
+	UIComponent<Frame>, ApplicationFrame
+{
 
-public class LegacyApplicationFrame implements UIComponent<ImageJ>, ApplicationFrame {
+	public LegacyApplicationFrame(final LegacyService legacyService) {
+		super(legacyService);
+	}
 
 	@Override
-	public void setLocation(int x, int y) {
-		final ImageJ ij = IJ.getInstance();
+	public void setLocation(final int x, final int y) {
+		final Frame ij = helper().getIJ();
 		if (ij != null) {
 			ij.setLocation(x, y);
 		}
@@ -49,14 +62,14 @@ public class LegacyApplicationFrame implements UIComponent<ImageJ>, ApplicationF
 
 	@Override
 	public int getLocationX() {
-		final ImageJ ij = IJ.getInstance();
+		final Frame ij = helper().getIJ();
 		if (ij == null) return 0;
 		return ij.getX();
 	}
 
 	@Override
 	public int getLocationY() {
-		final ImageJ ij = IJ.getInstance();
+		final Frame ij = helper().getIJ();
 		if (ij == null) return 0;
 		return ij.getY();
 	}
@@ -67,21 +80,22 @@ public class LegacyApplicationFrame implements UIComponent<ImageJ>, ApplicationF
 	}
 
 	@Override
-	public void setVisible(boolean visible) {
-		final ImageJ ij = IJ.getInstance();
+	public void setVisible(final boolean visible) {
+		final Frame ij = helper().getIJ();
 		if (ij != null) {
 			ij.setVisible(visible);
 		}
 	}
 
 	@Override
-	public ImageJ getComponent() {
-		return IJ.getInstance();
+	public Frame getComponent() {
+		return helper().getIJ();
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public Class<ImageJ> getComponentType() {
-		return ij.ImageJ.class;
+	public Class<Frame> getComponentType() {
+		return (Class<Frame>) getComponent().getClass();
 	}
 
 }

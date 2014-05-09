@@ -31,36 +31,35 @@
 
 package net.imagej.legacy.ui;
 
-import ij.IJ;
-
 import java.awt.Panel;
+
+import net.imagej.legacy.LegacyService;
 
 import org.scijava.ui.StatusBar;
 import org.scijava.widget.UIComponent;
 
-
 /**
- * Adapter {@link StatusBar} implementation that delegates to {@link IJ}
+ * Adapter {@link StatusBar} implementation that delegates to legacy ImageJ
  * methods.
- *
+ * 
  * @author Mark Hiner
  */
-public class LegacyStatusBar implements UIComponent<Panel>, StatusBar {
+public class LegacyStatusBar extends AbstractLegacyAdapter implements
+	UIComponent<Panel>, StatusBar
+{
 
-	/**
-	 * As {@link IJ#showStatus(String)}
-	 */
-	@Override
-	public void setStatus(String message) {
-		IJ.showStatus(message);
+	public LegacyStatusBar(final LegacyService legacyService) {
+		super(legacyService);
 	}
 
-	/**
-	 * As {@link IJ#showProgress(int, int)}
-	 */
 	@Override
-	public void setProgress(int val, int max) {
-		IJ.showProgress(val, max);
+	public void setStatus(final String message) {
+		helper().setStatus(message);
+	}
+
+	@Override
+	public void setProgress(final int val, final int max) {
+		helper().setProgress(val, max);
 	}
 
 	/**
@@ -68,7 +67,7 @@ public class LegacyStatusBar implements UIComponent<Panel>, StatusBar {
 	 */
 	@Override
 	public Panel getComponent() {
-		return IJ.getInstance().getStatusBar();
+		return helper().getIJ().getStatusBar();
 	}
 
 	/**

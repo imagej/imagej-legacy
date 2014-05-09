@@ -39,11 +39,13 @@ import ij.Macro;
 import ij.Menus;
 import ij.WindowManager;
 import ij.gui.ImageWindow;
+import ij.gui.Toolbar;
 import ij.io.Opener;
 import ij.plugin.PlugIn;
 import ij.plugin.filter.PlugInFilter;
 import ij.plugin.filter.PlugInFilterRunner;
 
+import java.awt.Component;
 import java.awt.GraphicsEnvironment;
 import java.io.File;
 import java.lang.reflect.Method;
@@ -208,6 +210,26 @@ public class IJ1Helper extends AbstractContextual {
 
 	public void setProgress(int val, int max) {
 		IJ.showProgress(val, max);
+	}
+
+	public Component getToolBar() {
+		return Toolbar.getInstance();
+	}
+
+	public ImageJ getIJ() {
+		initialize();
+		if (hasInstance()) {
+			return IJ.getInstance();
+		}
+		return null;
+	}
+
+	public void showMessage(String title, String message) {
+		IJ.showMessage(title, message);
+	}
+
+	public boolean showMessageWithCancel(String title, String message) {
+		return IJ.showMessageWithCancel(title, message);
 	}
 
 	/**

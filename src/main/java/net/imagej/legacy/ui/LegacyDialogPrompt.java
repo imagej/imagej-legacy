@@ -28,33 +28,50 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+
 package net.imagej.legacy.ui;
 
-import ij.IJ;
+import net.imagej.legacy.LegacyService;
 
 import org.scijava.ui.DialogPrompt;
 
+/**
+ * {@link LegacyAdapter} implementation for adapting between
+ * {@link DialogPrompt} and the ImageJ1 dialog prompts.
+ * 
+ * @author Mark Hiner
+ */
+public class LegacyDialogPrompt extends AbstractLegacyAdapter implements
+	DialogPrompt
+{
 
-public class LegacyDialogPrompt implements DialogPrompt {
+	private final String message;
+	private final String title;
+	private final OptionType optionType;
 
-	private String message;
-	private String title;
-	private OptionType optionType;
-
-	public LegacyDialogPrompt(String message, String title, OptionType optionType) {
+	public LegacyDialogPrompt(final LegacyService service, final String message,
+		final String title, final OptionType optionType)
+	{
+		super(service);
 		this.message = message;
-		this.title= title;
+		this.title = title;
 		this.optionType = optionType;
 	}
 
 	@Override
 	public Result prompt() {
-		IJ.showMessageWithCancel(title, message);
+		helper().showMessageWithCancel(title, message);
 		switch (optionType) {
-			case DEFAULT_OPTION: IJ.showMessage(title, message); return Result.OK_OPTION;
-			case OK_CANCEL_OPTION: return IJ.showMessageWithCancel(title, message) ? Result.OK_OPTION : Result.CANCEL_OPTION;
-			//FIXME: scijava-ui-awt should extend a Swing or AWT dialog prompt. Then return super.prompt(). Pass fields to super constructor.
-			default: throw new UnsupportedOperationException();
+			case DEFAULT_OPTION:
+				helper().showMessage(title, message);
+				return Result.OK_OPTION;
+			case OK_CANCEL_OPTION:
+				return helper().showMessageWithCancel(title, message)
+					? Result.OK_OPTION : Result.CANCEL_OPTION;
+				// FIXME: scijava-ui-awt should extend a Swing or AWT dialog prompt.
+				// Then return super.prompt(). Pass fields to super constructor.
+			default:
+				throw new UnsupportedOperationException();
 		}
 	}
 

@@ -31,9 +31,6 @@
 
 package net.imagej.legacy.ui;
 
-import ij.IJ;
-import ij.ImageJ;
-
 import java.beans.PropertyChangeListener;
 import java.io.File;
 
@@ -140,77 +137,25 @@ public class LegacyUI extends AbstractUserInterface {
 
 	@Override
 	public synchronized ApplicationFrame getApplicationFrame() {
-		if (applicationFrame != null) return applicationFrame;
-		if (ij1Helper() == null) return null;
-		applicationFrame = new ApplicationFrame() {
-
-			@Override
-			public void setVisible(boolean visible) {
-				final ImageJ ij = IJ.getInstance();
-				if (ij != null) {
-					ij.setVisible(visible);
-				}
-			}
-
-			@Override
-			public void setLocation(int x, int y) {
-				final ImageJ ij = IJ.getInstance();
-				if (ij != null) {
-					ij.setLocation(x, y);
-				}
-			}
-
-			@Override
-			public int getLocationX() {
-				final ImageJ ij = IJ.getInstance();
-				if (ij == null) return 0;
-				return ij.getX();
-			}
-
-			@Override
-			public int getLocationY() {
-				final ImageJ ij = IJ.getInstance();
-				if (ij == null) return 0;
-				return ij.getY();
-			}
-
-			@Override
-			public void activate() {
-				setVisible(true);
-			}
-
-		};
+		if (applicationFrame == null) {
+			applicationFrame = new LegacyApplicationFrame(legacyService);
+		}
 		return applicationFrame;
 	}
 
 	@Override
 	public synchronized ToolBar getToolBar() {
-		//TODO make toolbar interface adapt a gui component instead of extend it. Reflect reality.
-		// See UIComponent interface
-		if (toolBar != null) return toolBar;
-		toolBar = new ToolBar() {
-		};
+		if (toolBar == null) {
+			toolBar = new LegacyToolBar(legacyService);
+		}
 		return toolBar;
 	}
 
 	@Override
 	public synchronized StatusBar getStatusBar() {
-		//TODO make statusbar interface adapt a gui component instead of extend it. Reflect reality.
-		// See UIComponent interface
-		if (statusBar != null) return statusBar;
-		if (ij1Helper() == null) return null;
-		statusBar = new StatusBar() {
-
-			@Override
-			public void setStatus(String message) {
-				ij1Helper.setStatus(message);
-			}
-
-			@Override
-			public void setProgress(int val, int max) {
-				ij1Helper.setProgress(val, max);
-			}
-		};
+		if (statusBar == null) {
+			statusBar = new LegacyStatusBar(legacyService);
+		}
 		return statusBar;
 	}
 
@@ -230,7 +175,7 @@ public class LegacyUI extends AbstractUserInterface {
 	@Override
 	public DialogPrompt dialogPrompt(String message, String title,
 			MessageType messageType, OptionType optionType) {
-		return new LegacyDialogPrompt(message, title, optionType);
+		return new LegacyDialogPrompt(legacyService, message, title, optionType);
 	}
 
 	@Override

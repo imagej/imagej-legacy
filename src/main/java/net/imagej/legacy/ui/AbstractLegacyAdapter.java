@@ -31,36 +31,34 @@
 
 package net.imagej.legacy.ui;
 
-import java.awt.Component;
-
+import net.imagej.legacy.DefaultLegacyService;
+import net.imagej.legacy.IJ1Helper;
 import net.imagej.legacy.LegacyService;
 
-import org.scijava.ui.ToolBar;
-import org.scijava.widget.UIComponent;
+import org.scijava.Contextual;
 
 /**
- * {@link LegacyAdapter} implementation for adapting between {@link ToolBar} and
- * the ImageJ1 tool bar.
+ * Abstract {@link LegacyAdapter} implementation. Note that the
+ * {@link IJ1Helper} class requires a {@link DefaultLegacyService} explicitly,
+ * thus we require one here in a constructor instead of going through the usual
+ * {@link Contextual} injection.
  * 
  * @author Mark Hiner
  */
-public class LegacyToolBar extends AbstractLegacyAdapter implements ToolBar,
-	UIComponent<Component>
-{
+public abstract class AbstractLegacyAdapter implements LegacyAdapter {
 
-	public LegacyToolBar(final LegacyService legacyService) {
-		super(legacyService);
+	private DefaultLegacyService legacyService;
+
+	public AbstractLegacyAdapter(final LegacyService legacyService) {
+		if (legacyService instanceof DefaultLegacyService) {
+			this.legacyService = ((DefaultLegacyService) legacyService);
+		}
 	}
 
 	@Override
-	public Component getComponent() {
-		return helper().getToolBar();
-	}
-
-	@SuppressWarnings("unchecked")
-	@Override
-	public Class<Component> getComponentType() {
-		return (Class<Component>) getComponent().getClass();
+	public IJ1Helper helper() {
+		if (legacyService != null) return legacyService.getIJ1Helper();
+		return null;
 	}
 
 }
