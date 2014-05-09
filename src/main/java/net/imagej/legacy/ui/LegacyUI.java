@@ -230,7 +230,7 @@ public class LegacyUI extends AbstractUserInterface {
 	@Override
 	public DialogPrompt dialogPrompt(String message, String title,
 			MessageType messageType, OptionType optionType) {
-		throw new UnsupportedOperationException("TODO");
+		return new LegacyDialogPrompt(message, title, optionType);
 	}
 
 	@Override
