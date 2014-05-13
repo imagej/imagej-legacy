@@ -92,24 +92,6 @@ public class LegacyUI extends AbstractUserInterface {
 	}
 
 	@Override
-	public void show(Object o) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void show(String name, Object o) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void show(Display<?> display) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
 	public synchronized Desktop getDesktop() {
 		if (desktop != null) return desktop;
 		desktop = new Desktop() {
