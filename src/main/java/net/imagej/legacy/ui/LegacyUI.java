@@ -33,14 +33,20 @@ package net.imagej.legacy.ui;
 
 import java.beans.PropertyChangeListener;
 import java.io.File;
+import java.util.List;
 
 import net.imagej.legacy.DefaultLegacyService;
 import net.imagej.legacy.IJ1Helper;
 import net.imagej.legacy.LegacyService;
+import net.imagej.legacy.display.ImagePlusDisplayViewer;
 
 import org.scijava.display.Display;
+import org.scijava.log.LogService;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
+import org.scijava.plugin.PluginInfo;
+import org.scijava.plugin.PluginService;
+import org.scijava.thread.ThreadService;
 import org.scijava.ui.AbstractUserInterface;
 import org.scijava.ui.ApplicationFrame;
 import org.scijava.ui.Desktop;
@@ -50,15 +56,31 @@ import org.scijava.ui.DialogPrompt.OptionType;
 import org.scijava.ui.StatusBar;
 import org.scijava.ui.SystemClipboard;
 import org.scijava.ui.ToolBar;
+import org.scijava.ui.UIService;
 import org.scijava.ui.UserInterface;
 import org.scijava.ui.awt.AWTClipboard;
+import org.scijava.ui.viewer.DisplayViewer;
 import org.scijava.ui.viewer.DisplayWindow;
 
-@Plugin(type = UserInterface.class)
+@Plugin(type = UserInterface.class, name = LegacyUI.NAME)
 public class LegacyUI extends AbstractUserInterface {
+
+	public static final String NAME = "legacy";
 
 	@Parameter
 	private LegacyService legacyService;
+
+	@Parameter
+	private UIService uiService;
+
+	@Parameter
+	private LogService log;
+
+	@Parameter
+	private PluginService pluginService;
+
+	@Parameter
+	private ThreadService threadService;
 
 	private IJ1Helper ij1Helper;
 	private Desktop desktop;
@@ -71,9 +93,9 @@ public class LegacyUI extends AbstractUserInterface {
 
 	private IJ1Helper ij1Helper() {
 		if (legacyService instanceof DefaultLegacyService) {
-			return ((DefaultLegacyService) legacyService).getIJ1Helper();
+			ij1Helper = ((DefaultLegacyService) legacyService).getIJ1Helper();
 		}
-		return null;
+		return ij1Helper;
 	}
 
 	@Override
@@ -84,6 +106,46 @@ public class LegacyUI extends AbstractUserInterface {
 	@Override
 	public void show() {
 		if (ij1Helper() != null) ij1Helper.setVisible(true);
+	}
+
+	@Override
+	public void show(final Display<?> display) {
+		if (uiService.getDisplayViewer(display) != null) {
+			// display is already being shown
+			return;
+		}
+
+		final List<PluginInfo<DisplayViewer<?>>> viewers =
+			uiService.getViewerPlugins();
+
+		DisplayViewer<?> displayViewer = null;
+		for (final PluginInfo<DisplayViewer<?>> info : viewers) {
+			// check that viewer can actually handle the given display
+			final DisplayViewer<?> viewer = pluginService.createInstance(info);
+			if (viewer == null) continue;
+			if (!viewer.canView(display)) continue;
+			if (!viewer.isCompatible(this)) continue;
+			displayViewer = viewer;
+			break; // found a suitable viewer; we are done
+		}
+		if (displayViewer == null) {
+			log.warn("For UI '" + getClass().getName() +
+				"': no suitable viewer for display: " + display);
+			return;
+		}
+
+		if (displayViewer instanceof ImagePlusDisplayViewer) {
+			final DisplayViewer<?> finalViewer = displayViewer;
+			threadService.queue(new Runnable() {
+				@Override
+				public void run() {
+					finalViewer.view(null, display);
+				}
+			});
+		}
+		else {
+			super.show(display);
+		}
 	}
 
 	@Override
