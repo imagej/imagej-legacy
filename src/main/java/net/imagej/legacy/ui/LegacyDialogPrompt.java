@@ -60,7 +60,6 @@ public class LegacyDialogPrompt extends AbstractLegacyAdapter implements
 
 	@Override
 	public Result prompt() {
-		helper().showMessageWithCancel(title, message);
 		switch (optionType) {
 			case DEFAULT_OPTION:
 				helper().showMessage(title, message);
@@ -68,6 +67,12 @@ public class LegacyDialogPrompt extends AbstractLegacyAdapter implements
 			case OK_CANCEL_OPTION:
 				return helper().showMessageWithCancel(title, message)
 					? Result.OK_OPTION : Result.CANCEL_OPTION;
+			case YES_NO_OPTION:
+				return helper().showMessageWithCancel(title, message)
+					? Result.YES_OPTION : Result.CANCEL_OPTION;
+			case YES_NO_CANCEL_OPTION:
+				return helper().showMessageWithCancel(title, message)
+					? Result.YES_OPTION : Result.CANCEL_OPTION;
 				// FIXME: scijava-ui-awt should extend a Swing or AWT dialog prompt.
 				// Then return super.prompt(). Pass fields to super constructor.
 			default:
