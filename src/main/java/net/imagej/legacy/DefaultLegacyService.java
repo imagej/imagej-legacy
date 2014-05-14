@@ -152,9 +152,6 @@ public final class DefaultLegacyService extends AbstractService implements
 	/** Keep references to ImageJ 1.x separate */
 	private IJ1Helper ij1Helper;
 
-	/** Legacy ImageJ 1.x mode: stop synchronizing */
-	private boolean legacyIJ1Mode;
-
 	public IJ1Helper getIJ1Helper() {
 		return ij1Helper;
 	}
@@ -225,7 +222,7 @@ public final class DefaultLegacyService extends AbstractService implements
 	 */
 	@Override
 	public boolean isLegacyMode() {
-		return legacyIJ1Mode;
+		return ij1Helper != null && ij1Helper.isVisible();
 	}
 
 	/**
@@ -237,8 +234,6 @@ public final class DefaultLegacyService extends AbstractService implements
 	}
 
 	public synchronized void toggleLegacyMode(final boolean wantIJ1, final boolean initializing) {
-		if (wantIJ1) legacyIJ1Mode = true;
-
 		// TODO: hide/show Brightness/Contrast, Color Picker, Command Launcher, etc
 		// TODO: prevent IJ1 from quitting without IJ2 quitting, too
 
@@ -274,7 +269,6 @@ public final class DefaultLegacyService extends AbstractService implements
 			optionsSynchronizer.updateLegacyImageJSettingsFromModernImageJ();
 		}
 
-		if (!wantIJ1) legacyIJ1Mode = false;
 		imageMap.toggleLegacyMode(wantIJ1);
 	}
 
@@ -291,9 +285,6 @@ public final class DefaultLegacyService extends AbstractService implements
 
 		ij1Helper = new IJ1Helper(this);
 		boolean hasIJ1Instance = ij1Helper.hasInstance();
-
-		// as long as we're starting up, we're in legacy mode
-		legacyIJ1Mode = true;
 
 		imageMap = new LegacyImageMap(this);
 		optionsSynchronizer = new OptionsSynchronizer(optionsService);
