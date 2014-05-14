@@ -50,7 +50,6 @@ import net.imagej.patcher.EssentialLegacyHooks;
 import net.imagej.patcher.LegacyHooks;
 
 import org.scijava.Context;
-import org.scijava.InstantiableException;
 import org.scijava.log.LogService;
 import org.scijava.log.StderrLogService;
 import org.scijava.plugin.PluginInfo;
@@ -119,15 +118,7 @@ public class DefaultLegacyHooks extends EssentialLegacyHooks {
 	private<PT extends SciJavaPlugin> PT createInstanceOfType(final Class<PT> type) {
 		if (pluginService == null) return null;
 		PluginInfo<PT> info = ListUtils.first(pluginService.getPluginsOfType(type));
-		if (info == null) return null;
-		try {
-			final PT result = info.createInstance();
-			context.inject(result);
-			return result;
-		} catch (InstantiableException e) {
-			log.error(e);
-			return null;
-		}
+		return info == null ? null : pluginService.createInstance(info);
 	}
 
 	/** @inherit */
