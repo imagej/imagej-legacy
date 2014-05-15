@@ -83,6 +83,10 @@
 			<groupId>org.scijava</groupId>
 			<artifactId>scijava-ui-awt</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>org.scijava</groupId>
+			<artifactId>scripting-java</artifactId>
+		</dependency>
 
 		<!-- Optional SciJava dependencies -->
 		<dependency>
