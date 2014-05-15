@@ -31,7 +31,7 @@
 
 package net.imagej.legacy;
 
-import imagej.patcher.LegacyInjector;
+import net.imagej.patcher.LegacyInjector;
 
 import java.awt.GraphicsEnvironment;
 import java.util.ArrayList;

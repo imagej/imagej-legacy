@@ -36,11 +36,10 @@ import static org.junit.Assert.assertNotSame;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.process.ByteProcessor;
-import imagej.patcher.LegacyInjector;
 import io.scif.img.axes.SCIFIOAxes;
 import net.imagej.Extents;
 import net.imagej.Position;
-import net.imagej.legacy.translate.LegacyUtils;
+import net.imagej.patcher.LegacyInjector;
 import net.imglib2.meta.Axes;
 import net.imglib2.meta.AxisType;
 

@@ -32,13 +32,14 @@
 package net.imagej.legacy;
 
 import static org.junit.Assume.assumeTrue;
-import imagej.patcher.LegacyClassLoader;
-import imagej.patcher.LegacyEnvironment;
-import imagej.patcher.LegacyInjector;
 
 import java.awt.GraphicsEnvironment;
 import java.net.URL;
 import java.net.URLClassLoader;
+
+import net.imagej.patcher.LegacyClassLoader;
+import net.imagej.patcher.LegacyEnvironment;
+import net.imagej.patcher.LegacyInjector;
 
 import org.junit.Test;
 
