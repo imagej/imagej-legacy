@@ -41,6 +41,7 @@ import net.imagej.ui.viewer.image.AbstractImageDisplayViewer;
 
 import org.scijava.Priority;
 import org.scijava.display.Display;
+import org.scijava.display.DisplayService;
 import org.scijava.log.LogService;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
@@ -53,6 +54,9 @@ public class LegacyImageDisplayViewer extends AbstractImageDisplayViewer {
 
 	@Parameter
 	LegacyService legacyService;
+
+	@Parameter
+	DisplayService displayService;
 
 	@Parameter
 	LogService logService;
@@ -82,6 +86,9 @@ public class LegacyImageDisplayViewer extends AbstractImageDisplayViewer {
 		}
 
 		imagePlus.show();
+
+		// Need to tell the framework this display was displayed
+		displayService.setActiveDisplay(imageDisplay);
 	}
 
 	@Override
