@@ -51,7 +51,7 @@ public class LegacyJavaRunner extends AbstractJavaRunner {
 
 	@Override
 	public void run(final Class<?> c) {
-		legacyService.runLegacyCommand(c.getName(), "");
+		IJ1Helper.run(c);
 	}
 
 	// -- Typed methods --

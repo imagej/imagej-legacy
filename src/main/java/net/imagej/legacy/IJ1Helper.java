@@ -39,6 +39,9 @@ import ij.Macro;
 import ij.WindowManager;
 import ij.gui.ImageWindow;
 import ij.io.Opener;
+import ij.plugin.PlugIn;
+import ij.plugin.filter.PlugInFilter;
+import ij.plugin.filter.PlugInFilterRunner;
 
 import java.awt.GraphicsEnvironment;
 import java.io.File;
@@ -310,6 +313,38 @@ public class IJ1Helper extends AbstractContextual {
 			eventDelegator = new LegacyEventDelegator();
 			eventDelegator.setContext(context);
 		}
+	}
+
+	static void run(Class<?> c) {
+		IJ.resetEscape();
+		if (PlugIn.class.isAssignableFrom(c)) {
+			try {
+				final PlugIn plugin = (PlugIn) c.newInstance();
+				plugin.run("");
+			} catch (Exception e) {
+				throw e instanceof RuntimeException ? (RuntimeException) e
+						: new RuntimeException(e);
+			}
+			return;
+		}
+		if (PlugInFilter.class.isAssignableFrom(c)) {
+			try {
+				final PlugInFilter plugin = (PlugInFilter) c.newInstance();
+				ImagePlus image = WindowManager.getCurrentImage();
+				if (image != null && image.isLocked()) {
+					if (!IJ.showMessageWithCancel("Unlock image?", "The image '" + image.getTitle()
+							+ "'appears to be locked... Unlock?"))
+						return;
+					image.unlock();
+				}
+				new PlugInFilterRunner(plugin, c.getName(), "");
+			} catch (Exception e) {
+				throw e instanceof RuntimeException ? (RuntimeException) e
+						: new RuntimeException(e);
+			}
+			return;
+		}
+		throw new RuntimeException("TODO: construct class loader");
 	}
 
 }
