@@ -32,6 +32,7 @@
 package net.imagej.legacy.translate;
 
 import ij.ImagePlus;
+import net.imagej.Dataset;
 import net.imagej.display.ImageDisplay;
 
 /**
@@ -41,6 +42,27 @@ import net.imagej.display.ImageDisplay;
  */
 public interface ImagePlusCreator {
 
+	/**
+	 * Creates an {@link ImagePlus} from a {@link ImageDisplay}, as
+	 * {@link #createLegacyImage(Dataset, ImageDisplay)}.
+	 */
 	ImagePlus createLegacyImage(ImageDisplay display);
 
+	/**
+	 * Creates an {@link ImagePlus} from a {@link Dataset}, when no
+	 * {@link ImageDisplay} is available. This is sufficient but will be less
+	 * informative than if a display was provided.
+	 */
+	ImagePlus createLegacyImage(final Dataset ds);
+
+	/**
+	 * Creates an {@link ImagePlus} from a given {@link Dataset} and
+	 * {@link ImageDisplay}. The display is optional, but will create a more
+	 * robust image.
+	 *
+	 * @param ds Dataset to use to create the base ImagePlus
+	 * @param display OPTIONAL image display
+	 * @return The created ImagePlus
+	 */
+	ImagePlus createLegacyImage(final Dataset ds, final ImageDisplay display);
 }

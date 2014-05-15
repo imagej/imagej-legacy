@@ -58,11 +58,14 @@ public class DefaultImageTranslator extends AbstractContextual implements
 	private final ImagePlusCreator colorImagePlusCreator;
 	private final ImagePlusCreator grayImagePlusCreator;
 
+	private final LegacyService legacyService;
+
 	@Parameter
 	private ImageDisplayService imageDisplayService;
 
 	public DefaultImageTranslator(final LegacyService legacyService) {
 		setContext(legacyService.getContext());
+		this.legacyService = legacyService;
 		colorDisplayCreator = new ColorDisplayCreator(legacyService);
 		grayDisplayCreator = new GrayDisplayCreator(legacyService);
 		colorImagePlusCreator = new ColorImagePlusCreator(imageDisplayService);
@@ -102,12 +105,29 @@ public class DefaultImageTranslator extends AbstractContextual implements
 	@Override
 	public ImagePlus createLegacyImage(final ImageDisplay display) {
 		final Dataset ds = imageDisplayService.getActiveDataset(display);
+		return createLegacyImage(ds, display);
+	}
 
+	@Override
+	public ImagePlus createLegacyImage(final Dataset ds) {
+		return createLegacyImage(ds, null);
+	}
+
+	@Override
+	public ImagePlus createLegacyImage(final Dataset ds,
+		final ImageDisplay display)
+	{
+		ImagePlus imp = null;
 		if (ds.isRGBMerged()) {
-			return colorImagePlusCreator.createLegacyImage(display);
+			imp = colorImagePlusCreator.createLegacyImage(ds, display);
+		}
+		else {
+			imp = grayImagePlusCreator.createLegacyImage(ds, display);
 		}
 
-		return grayImagePlusCreator.createLegacyImage(display);
+		legacyService.getImageMap().registerLegacyImage(imp);
+
+		return imp;
 	}
 
 }

@@ -81,7 +81,18 @@ public class ColorImagePlusCreator implements ImagePlusCreator {
 	 */
 	@Override
 	public ImagePlus createLegacyImage(final ImageDisplay display) {
-		final Dataset ds = imgDispSrv.getActiveDataset(display);
+		final Dataset dataset = imgDispSrv.getActiveDataset(display);
+		return createLegacyImage(dataset, display);
+	}
+
+	@Override
+	public ImagePlus createLegacyImage(Dataset ds) {
+		return createLegacyImage(ds, null);
+	}
+
+	@Override
+	public ImagePlus createLegacyImage(Dataset ds, ImageDisplay display) {
+		if (ds == null) return null;
 		Img<?> img = ds.getImgPlus().getImg();
 		final ImagePlus imp;
 		if (AbstractCellImg.class.isAssignableFrom(img.getClass())) {
@@ -92,11 +103,14 @@ public class ColorImagePlusCreator implements ImagePlusCreator {
 			pixelHarmonizer.updateLegacyImage(ds, imp);
 		}
 		metadataHarmonizer.updateLegacyImage(ds, imp);
-		positionHarmonizer.updateLegacyImage(display, imp);
-		nameHarmonizer.updateLegacyImage(display, imp);
+
+		if (display != null) {
+			positionHarmonizer.updateLegacyImage(display, imp);
+			nameHarmonizer.updateLegacyImage(display, imp);
+		}
+
 		return imp;
 	}
-
 	// -- private interface --
 
 	/**

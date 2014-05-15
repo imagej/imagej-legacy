@@ -93,10 +93,21 @@ public class GrayImagePlusCreator extends AbstractContextual implements
 		positionHarmonizer = new PositionHarmonizer();
 		nameHarmonizer = new NameHarmonizer();
 	}
-	
+
 	@Override
 	public ImagePlus createLegacyImage(final ImageDisplay display) {
 		final Dataset dataset = imageDisplayService.getActiveDataset(display);
+		return createLegacyImage(dataset, display);
+	}
+
+	@Override
+	public ImagePlus createLegacyImage(Dataset ds) {
+		return createLegacyImage(ds, null);
+	}
+
+	@Override
+	public ImagePlus createLegacyImage(Dataset dataset, ImageDisplay display) {
+		if (dataset == null) return null;
 		Img<?> img = dataset.getImgPlus().getImg();
 		ImagePlus imp;
 		if (AbstractCellImg.class.isAssignableFrom(img.getClass())) {
@@ -111,15 +122,18 @@ public class GrayImagePlusCreator extends AbstractContextual implements
 			pixelHarmonizer.updateLegacyImage(dataset, imp);
 		}
 		metadataHarmonizer.updateLegacyImage(dataset, imp);
-		if (shouldBeComposite(display, dataset, imp)) {
-			imp = makeCompositeImage(imp);
+
+		if (display != null) {
+			if (shouldBeComposite(display, dataset, imp)) {
+				imp = makeCompositeImage(imp);
+			}
+			colorTableHarmonizer.updateLegacyImage(display, imp);
+			positionHarmonizer.updateLegacyImage(display, imp);
+			nameHarmonizer.updateLegacyImage(display, imp);
 		}
-		colorTableHarmonizer.updateLegacyImage(display, imp);
-		positionHarmonizer.updateLegacyImage(display, imp);
-		nameHarmonizer.updateLegacyImage(display, imp);
+
 		return imp;
 	}
-
 	// -- private interface --
 
 	/**
@@ -389,4 +403,5 @@ public class GrayImagePlusCreator extends AbstractContextual implements
 		}
 
 	}
+
 }
