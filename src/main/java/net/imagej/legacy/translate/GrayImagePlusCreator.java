@@ -40,7 +40,6 @@ import net.imagej.display.ColorMode;
 import net.imagej.display.DatasetView;
 import net.imagej.display.ImageDisplay;
 import net.imagej.display.ImageDisplayService;
-import net.imagej.legacy.LegacyService;
 import net.imglib2.converter.Converter;
 import net.imglib2.img.Img;
 import net.imglib2.img.basictypeaccess.PlanarAccess;
@@ -55,6 +54,7 @@ import net.imglib2.type.numeric.integer.UnsignedShortType;
 import net.imglib2.type.numeric.real.FloatType;
 
 import org.scijava.AbstractContextual;
+import org.scijava.Context;
 import org.scijava.log.LogService;
 import org.scijava.plugin.Parameter;
 
@@ -84,8 +84,8 @@ public class GrayImagePlusCreator extends AbstractContextual implements
 
 	// -- public interface --
 
-	public GrayImagePlusCreator(LegacyService legacyService) {
-		setContext(legacyService.getContext());
+	public GrayImagePlusCreator(Context context) {
+		setContext(context);
 		pixelHarmonizer = new GrayPixelHarmonizer();
 		colorTableHarmonizer = new ColorTableHarmonizer(imageDisplayService);
 		metadataHarmonizer = new MetadataHarmonizer();

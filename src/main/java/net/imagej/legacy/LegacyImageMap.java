@@ -188,7 +188,7 @@ public class LegacyImageMap extends AbstractContextual {
 
 	public synchronized void toggleLegacyMode(boolean toggle) {
 		final Harmonizer harmonizer =
-			new Harmonizer(legacyService, imageTranslator);
+			new Harmonizer(legacyService.getContext(), imageTranslator);
 		if (toggle) {
 			// make sure that all ImageDisplays have a corresponding ImagePlus
 			final List<ImageDisplay> imageDisplays =

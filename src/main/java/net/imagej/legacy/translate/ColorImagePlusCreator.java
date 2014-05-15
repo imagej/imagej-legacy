@@ -39,6 +39,10 @@ import net.imagej.display.ImageDisplayService;
 import net.imglib2.img.Img;
 import net.imglib2.img.cell.AbstractCellImg;
 
+import org.scijava.AbstractContextual;
+import org.scijava.Context;
+import org.scijava.plugin.Parameter;
+
 // TODO: virtual stack support is minorly problematic. Imglib has vstack impls
 // but they use 1-pixel to 1-pixel converters. However in IJ2 in this case we
 // have a 3 channel image going to a 1-channel rgb image. So to support virtual
@@ -53,21 +57,24 @@ import net.imglib2.img.cell.AbstractCellImg;
  * 
  * @author Barry DeZonia
  */
-public class ColorImagePlusCreator implements ImagePlusCreator {
+public class ColorImagePlusCreator extends AbstractContextual implements
+	ImagePlusCreator
+{
 
 	// -- instance variables --
 
-	private final ImageDisplayService imgDispSrv;
-	
 	private final ColorPixelHarmonizer pixelHarmonizer;
 	private final MetadataHarmonizer metadataHarmonizer;
 	private final PositionHarmonizer positionHarmonizer;
 	private final NameHarmonizer nameHarmonizer;
 
+	@Parameter
+	private ImageDisplayService imageDisplayService;
+
 	// -- public interface --
 
-	public ColorImagePlusCreator(ImageDisplayService imgDispSrv) {
-		this.imgDispSrv = imgDispSrv;
+	public ColorImagePlusCreator(final Context context) {
+		setContext(context);
 		pixelHarmonizer = new ColorPixelHarmonizer();
 		metadataHarmonizer = new MetadataHarmonizer();
 		positionHarmonizer = new PositionHarmonizer();
@@ -81,7 +88,7 @@ public class ColorImagePlusCreator implements ImagePlusCreator {
 	 */
 	@Override
 	public ImagePlus createLegacyImage(final ImageDisplay display) {
-		final Dataset dataset = imgDispSrv.getActiveDataset(display);
+		final Dataset dataset = imageDisplayService.getActiveDataset(display);
 		return createLegacyImage(dataset, display);
 	}
 

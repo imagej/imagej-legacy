@@ -53,7 +53,6 @@ import java.util.List;
 
 import net.imagej.display.ImageDisplay;
 import net.imagej.display.OverlayService;
-import net.imagej.legacy.LegacyService;
 import net.imagej.overlay.AngleOverlay;
 import net.imagej.overlay.BinaryMaskOverlay;
 import net.imagej.overlay.EllipseOverlay;
@@ -85,6 +84,7 @@ import net.imglib2.roi.RegionOfInterest;
 import net.imglib2.type.logic.BitType;
 
 import org.scijava.AbstractContextual;
+import org.scijava.Context;
 import org.scijava.log.LogService;
 import org.scijava.plugin.Parameter;
 import org.scijava.ui.awt.AWTColors;
@@ -110,8 +110,8 @@ public class OverlayHarmonizer extends AbstractContextual implements
 	@Parameter
 	private LogService log;
 
-	public OverlayHarmonizer(final LegacyService legacyService) {
-		setContext(legacyService.getContext());
+	public OverlayHarmonizer(final Context context) {
+		setContext(context);
 	}
 
 	/**

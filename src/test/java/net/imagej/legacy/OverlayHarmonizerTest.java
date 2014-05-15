@@ -147,7 +147,7 @@ public class OverlayHarmonizerTest {
 			// for particulars of the decoding.
 			final Random r = new Random(1234);
 			final OverlayHarmonizer ot =
-				new OverlayHarmonizer(context.getService(LegacyService.class));
+				new OverlayHarmonizer(context);
 			final ImagePlus imagePlus =
 				Helper.makeImagePlus("Bar", Helper.makeRandomByteArray(r, 11, 15));
 			imagePlus.setRoi(Helper.makePolygonROI(new int[] { 0, 5, 5, 0, 0 },
@@ -167,7 +167,7 @@ public class OverlayHarmonizerTest {
 		synchronized (DefaultLegacyService.class) {
 			final Random r = new Random(1234);
 			final OverlayHarmonizer ot =
-				new OverlayHarmonizer(context.getService(LegacyService.class));
+				new OverlayHarmonizer(context);
 			final ImagePlus imagePlus =
 				Helper.makeImagePlus("Bar", Helper.makeRandomByteArray(r, 11, 15));
 			final ArrayList<Overlay> l = new ArrayList<Overlay>();
@@ -193,7 +193,7 @@ public class OverlayHarmonizerTest {
 			int index = 1;
 			for (final int[][] testCase : vertices) {
 				final OverlayHarmonizer ot =
-					new OverlayHarmonizer(context.getService(LegacyService.class));
+					new OverlayHarmonizer(context);
 				final ImagePlus imagePlus =
 					Helper.makeImagePlus("Bar", Helper.makeRandomByteArray(r, 11, 15));
 				imagePlus.setRoi(Helper.makePolygonROI(testCase[0], testCase[1]));
@@ -233,7 +233,7 @@ public class OverlayHarmonizerTest {
 			int index = 1;
 			for (final double[][] testCase : vertices) {
 				final OverlayHarmonizer ot =
-					new OverlayHarmonizer(context.getService(LegacyService.class));
+					new OverlayHarmonizer(context);
 				final PolygonOverlay overlay =
 					Helper.makePolygonOverlay(context, testCase[0], testCase[1]);
 				final ImagePlus imagePlus =
@@ -273,7 +273,7 @@ public class OverlayHarmonizerTest {
 			 * The composite Roi has an offset and its contained Rois are relative to that offset
 			 */
 			final OverlayHarmonizer ot =
-				new OverlayHarmonizer(context.getService(LegacyService.class));
+				new OverlayHarmonizer(context);
 			final Random r = new Random(1234);
 			final ImagePlus imagePlus =
 				Helper.makeImagePlus("Bar", Helper.makeRandomByteArray(r, 11, 15));
@@ -328,7 +328,7 @@ public class OverlayHarmonizerTest {
 	public void testDonut() {
 		synchronized (DefaultLegacyService.class) {
 			final OverlayHarmonizer ot =
-				new OverlayHarmonizer(context.getService(LegacyService.class));
+				new OverlayHarmonizer(context);
 			final Random r = new Random(1234);
 			final ImagePlus imagePlus =
 				Helper.makeImagePlus("Bar", Helper.makeRandomByteArray(r, 11, 15));
@@ -361,7 +361,7 @@ public class OverlayHarmonizerTest {
 	public void testCreateBinaryMaskOverlay() {
 		synchronized (DefaultLegacyService.class) {
 			final OverlayHarmonizer ot =
-				new OverlayHarmonizer(context.getService(LegacyService.class));
+				new OverlayHarmonizer(context);
 			final Random r = new Random(1234);
 			final ImagePlus imagePlus =
 				Helper.makeImagePlus("Bar", Helper.makeRandomByteArray(r, 11, 15));
@@ -399,7 +399,7 @@ public class OverlayHarmonizerTest {
 			final RealRandomAccess<BitType> ra =
 				overlay.getRegionOfInterest().realRandomAccess();
 			final OverlayHarmonizer ot =
-				new OverlayHarmonizer(context.getService(LegacyService.class));
+				new OverlayHarmonizer(context);
 			final ImagePlus imagePlus =
 				Helper.makeImagePlus("Bar", Helper.makeRandomByteArray(r, 15, 20));
 			final ArrayList<Overlay> overlays = new ArrayList<Overlay>();

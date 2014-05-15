@@ -36,10 +36,10 @@ import net.imagej.Dataset;
 import net.imagej.DatasetService;
 import net.imagej.display.ImageDisplay;
 import net.imagej.display.ImageDisplayService;
-import net.imagej.legacy.LegacyService;
 import net.imglib2.meta.AxisType;
 
 import org.scijava.AbstractContextual;
+import org.scijava.Context;
 import org.scijava.display.DisplayService;
 import org.scijava.plugin.Parameter;
 
@@ -77,13 +77,13 @@ public class ColorDisplayCreator extends AbstractContextual implements
 
 	// -- constructor --
 
-	public ColorDisplayCreator(final LegacyService legacyService) {
-		setContext(legacyService.getContext());
+	public ColorDisplayCreator(final Context context) {
+		setContext(context);
 		pixelHarmonizer = new ColorPixelHarmonizer();
 		colorTableHarmonizer = new ColorTableHarmonizer(imageDisplayService);
 		metadataHarmonizer = new MetadataHarmonizer();
 		compositeHarmonizer = new CompositeHarmonizer();
-		overlayHarmonizer = new OverlayHarmonizer(legacyService);
+		overlayHarmonizer = new OverlayHarmonizer(context);
 		positionHarmonizer = new PositionHarmonizer();
 		nameHarmonizer = new NameHarmonizer();
 	}

@@ -39,6 +39,7 @@ import net.imagej.legacy.LegacyService;
 import net.imglib2.meta.AxisType;
 
 import org.scijava.AbstractContextual;
+import org.scijava.Context;
 import org.scijava.plugin.Parameter;
 
 /**
@@ -64,12 +65,13 @@ public class DefaultImageTranslator extends AbstractContextual implements
 	private ImageDisplayService imageDisplayService;
 
 	public DefaultImageTranslator(final LegacyService legacyService) {
-		setContext(legacyService.getContext());
+		final Context context = legacyService.getContext();
+		context.inject(this);
 		this.legacyService = legacyService;
-		colorDisplayCreator = new ColorDisplayCreator(legacyService);
-		grayDisplayCreator = new GrayDisplayCreator(legacyService);
-		colorImagePlusCreator = new ColorImagePlusCreator(imageDisplayService);
-		grayImagePlusCreator = new GrayImagePlusCreator(legacyService);
+		colorDisplayCreator = new ColorDisplayCreator(context);
+		grayDisplayCreator = new GrayDisplayCreator(context);
+		colorImagePlusCreator = new ColorImagePlusCreator(context);
+		grayImagePlusCreator = new GrayImagePlusCreator(context);
 	}
 
 	/**

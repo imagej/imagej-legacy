@@ -41,13 +41,13 @@ import java.util.Map;
 import net.imagej.Dataset;
 import net.imagej.display.ImageDisplay;
 import net.imagej.display.ImageDisplayService;
-import net.imagej.legacy.LegacyService;
 import net.imglib2.meta.Axes;
 import net.imglib2.meta.ImgPlus;
 import net.imglib2.meta.SpaceUtils;
 import net.imglib2.type.numeric.RealType;
 
 import org.scijava.AbstractContextual;
+import org.scijava.Context;
 import org.scijava.log.LogService;
 import org.scijava.plugin.Parameter;
 
@@ -82,10 +82,9 @@ public class Harmonizer extends AbstractContextual {
 
 	// -- constructor --
 
-	public Harmonizer(final LegacyService legacyService,
-		final ImageTranslator trans)
+	public Harmonizer(final Context context, final ImageTranslator trans)
 	{
-		setContext(legacyService.getContext());
+		setContext(context);
 		imageTranslator = trans;
 		bitDepthMap = new HashMap<ImagePlus, Integer>();
 		grayPixelHarmonizer = new GrayPixelHarmonizer();
@@ -94,7 +93,7 @@ public class Harmonizer extends AbstractContextual {
 		metadataHarmonizer = new MetadataHarmonizer();
 		compositeHarmonizer = new CompositeHarmonizer();
 		planeHarmonizer = new PlaneHarmonizer(log);
-		overlayHarmonizer = new OverlayHarmonizer(legacyService);
+		overlayHarmonizer = new OverlayHarmonizer(context);
 		positionHarmonizer = new PositionHarmonizer();
 		nameHarmonizer = new NameHarmonizer();
 	}

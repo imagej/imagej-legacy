@@ -38,13 +38,13 @@ import net.imagej.Dataset;
 import net.imagej.DatasetService;
 import net.imagej.display.ImageDisplay;
 import net.imagej.display.ImageDisplayService;
-import net.imagej.legacy.LegacyService;
 import net.imglib2.RandomAccess;
 import net.imglib2.meta.Axes;
 import net.imglib2.meta.AxisType;
 import net.imglib2.type.numeric.RealType;
 
 import org.scijava.AbstractContextual;
+import org.scijava.Context;
 import org.scijava.display.DisplayService;
 import org.scijava.log.LogService;
 import org.scijava.plugin.Parameter;
@@ -88,15 +88,15 @@ public class GrayDisplayCreator extends AbstractContextual implements
 
 	// -- constructor --
 
-	public GrayDisplayCreator(final LegacyService legacyService) {
-		setContext(legacyService.getContext());
+	public GrayDisplayCreator(final Context context) {
+		setContext(context);
 		pixelHarmonizer = new GrayPixelHarmonizer();
 		colorTableHarmonizer =
 			new ColorTableHarmonizer(imageDisplayService);
 		metadataHarmonizer = new MetadataHarmonizer();
 		compositeHarmonizer = new CompositeHarmonizer();
 		planeHarmonizer = new PlaneHarmonizer(log);
-		overlayHarmonizer = new OverlayHarmonizer(legacyService);
+		overlayHarmonizer = new OverlayHarmonizer(context);
 		positionHarmonizer = new PositionHarmonizer();
 		nameHarmonizer = new NameHarmonizer();
 	}

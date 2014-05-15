@@ -173,7 +173,8 @@ public class LegacyCommand implements Command {
 			this.map = legacyService.getImageMap();
 			final ImageTranslator imageTranslator =
 				new DefaultImageTranslator(legacyService);
-			this.harmonizer = new Harmonizer(legacyService, imageTranslator);
+			this.harmonizer =
+				new Harmonizer(legacyService.getContext(), imageTranslator);
 		}
 
 		@Override
