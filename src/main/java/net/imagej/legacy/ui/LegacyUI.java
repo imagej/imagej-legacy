@@ -35,10 +35,13 @@ import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.util.List;
 
+import javax.swing.JFileChooser;
+
 import net.imagej.legacy.DefaultLegacyService;
 import net.imagej.legacy.IJ1Helper;
 import net.imagej.legacy.LegacyService;
 import net.imagej.legacy.display.ImagePlusDisplayViewer;
+import net.imagej.legacy.display.LegacyDisplayViewer;
 
 import org.scijava.Priority;
 import org.scijava.display.Display;
@@ -49,7 +52,6 @@ import org.scijava.plugin.PluginInfo;
 import org.scijava.plugin.PluginService;
 import org.scijava.thread.ThreadService;
 import org.scijava.ui.AbstractUserInterface;
-import org.scijava.ui.ApplicationFrame;
 import org.scijava.ui.Desktop;
 import org.scijava.ui.DialogPrompt;
 import org.scijava.ui.DialogPrompt.MessageType;
@@ -63,6 +65,7 @@ import org.scijava.ui.awt.AWTClipboard;
 import org.scijava.ui.swing.SwingUI;
 import org.scijava.ui.viewer.DisplayViewer;
 import org.scijava.ui.viewer.DisplayWindow;
+import org.scijava.widget.FileWidget;
 
 // TODO may want to extend AbstractSwingUI instead.. but many of the implementations
 // it provides are overridden here anyway, in the delegation to IJ.
@@ -89,7 +92,7 @@ public class LegacyUI extends AbstractUserInterface implements SwingUI {
 
 	private IJ1Helper ij1Helper;
 	private Desktop desktop;
-	private ApplicationFrame applicationFrame;
+	private LegacyApplicationFrame applicationFrame;
 	private ToolBar toolBar;
 
 	private StatusBar statusBar;
@@ -185,7 +188,7 @@ public class LegacyUI extends AbstractUserInterface implements SwingUI {
 	}
 
 	@Override
-	public synchronized ApplicationFrame getApplicationFrame() {
+	public synchronized LegacyApplicationFrame getApplicationFrame() {
 		if (applicationFrame == null) {
 			applicationFrame = new LegacyApplicationFrame(legacyService);
 		}
@@ -229,8 +232,19 @@ public class LegacyUI extends AbstractUserInterface implements SwingUI {
 
 	@Override
 	public File chooseFile(File file, String style) {
-		throw new UnsupportedOperationException("TODO");
-	}
+		final JFileChooser chooser = new JFileChooser(file);
+		if (FileWidget.DIRECTORY_STYLE.equals(style)) {
+			chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+		}
+		final int rval;
+		if (FileWidget.SAVE_STYLE.equals(style)) {
+			rval = chooser.showSaveDialog(getApplicationFrame().getComponent());
+		}
+		else { // default behavior
+			rval = chooser.showOpenDialog(getApplicationFrame().getComponent());
+		}
+		if (rval != JFileChooser.APPROVE_OPTION) return null;
+		return chooser.getSelectedFile();	}
 
 	@Override
 	public void showContextMenu(String menuRoot, Display<?> display, int x,
