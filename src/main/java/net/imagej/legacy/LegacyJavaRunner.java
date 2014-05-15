@@ -58,6 +58,7 @@ public class LegacyJavaRunner extends AbstractJavaRunner {
 
 	@Override
 	public boolean supports(final Class<?> c) {
+		if (c == null) return false;
 		if (c.getName().equals("ij.plugin.PlugIn")) return true;
 		if (supports(c.getSuperclass())) return true;
 		for (final Class<?> iface : c.getInterfaces()) {
