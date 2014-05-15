@@ -42,14 +42,17 @@ import java.util.Map;
 import java.util.concurrent.Future;
 
 import net.imagej.Dataset;
-import net.imglib2.RandomAccessibleInterval;
-import net.imglib2.img.display.imagej.ImageJFunctions;
+import net.imagej.display.ImageDisplay;
+import net.imagej.legacy.LegacyService;
+import net.imagej.legacy.translate.DefaultImageTranslator;
+import net.imagej.legacy.translate.ImageTranslator;
 
 import org.scijava.Context;
 import org.scijava.Priority;
 import org.scijava.command.CommandInfo;
 import org.scijava.command.CommandService;
 import org.scijava.display.DisplayPostprocessor;
+import org.scijava.display.DisplayService;
 import org.scijava.module.Module;
 import org.scijava.module.ModuleService;
 import org.scijava.module.process.PostprocessorPlugin;
@@ -78,42 +81,52 @@ public class DefaultLegacyOpener implements LegacyOpener {
 	public Object open(final String path, final int planeIndex,
 		final boolean displayResult)
 	{
-		Context c = (Context) IJ.runPlugIn("org.scijava.Context", null);
+		final Context c = (Context) IJ.runPlugIn("org.scijava.Context", null);
 		ImagePlus imp = null;
 
-		// TODO: the legacy UI should handle this display postprocessing
-		// appropriately
-		// Remove any DisplayPostprocessors so the image is not distplayed by IJ2
-		PluginService pluginService = c.getService(PluginService.class);
+		final PluginService pluginService = c.getService(PluginService.class);
+		final LegacyService legacyService = c.getService(LegacyService.class);
+		final DisplayService displayService = c.getService(DisplayService.class);
+
 		final List<PostprocessorPlugin> postprocessors =
 			new ArrayList<PostprocessorPlugin>();
-		for (final PostprocessorPlugin pp : pluginService.createInstancesOfType(PostprocessorPlugin.class)) {
-			if (!(pp instanceof DisplayPostprocessor)) {
+		for (final PostprocessorPlugin pp : pluginService
+			.createInstancesOfType(PostprocessorPlugin.class))
+		{
+			// If we're not supposed to display the result, remove any
+			// DisplayPostprocessors
+			if (displayResult || !(pp instanceof DisplayPostprocessor)) {
 				postprocessors.add(pp);
 			}
 		}
 
-		CommandService commandService = c.getService(CommandService.class);
-		CommandInfo command = commandService.getCommand(OpenFile.class);
-		ModuleService moduleService = c.getService(ModuleService.class);
-		Map<String, Object> inputs = new HashMap<String, Object>();
+		// Run the OpenFile command to get our data
+		final CommandService commandService = c.getService(CommandService.class);
+		final CommandInfo command = commandService.getCommand(OpenFile.class);
+		final ModuleService moduleService = c.getService(ModuleService.class);
+		final Map<String, Object> inputs = new HashMap<String, Object>();
 		if (path != null) inputs.put("inputFile", new File(path));
-		Future<Module> result =
+		final Future<Module> result =
 			moduleService.run(command, pluginService
 				.createInstancesOfType(PreprocessorPlugin.class), postprocessors,
 				inputs);
 
-		Module module = moduleService.waitFor(result);
-		Object data = module.getOutput("data");
+		final Module module = moduleService.waitFor(result);
+		final Object data = module.getOutput("data");
 
-		if (data instanceof Dataset) {
-			Dataset d = (Dataset) data;
-			imp =
-				ImageJFunctions.wrap((RandomAccessibleInterval) d.getImgPlus(), d
-					.getName());
-
+		if (data != null && data instanceof Dataset) {
 			if (displayResult) {
-				imp.show();
+				// Image was displayed during the command execution, so we just get the
+				// ImageDisplay and lookup its ImagePlus
+				final ImageDisplay imageDisplay =
+					displayService.getActiveDisplay(ImageDisplay.class);
+				imp = legacyService.getImageMap().lookupImagePlus(imageDisplay);
+			}
+			else {
+				// Need to manually register the ImagePlus and return it
+				final Dataset d = (Dataset) data;
+				final ImageTranslator it = new DefaultImageTranslator(legacyService);
+				imp = it.createLegacyImage(d);
 			}
 		}
 
