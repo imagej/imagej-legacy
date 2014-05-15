@@ -40,6 +40,7 @@ import net.imagej.legacy.IJ1Helper;
 import net.imagej.legacy.LegacyService;
 import net.imagej.legacy.display.ImagePlusDisplayViewer;
 
+import org.scijava.Priority;
 import org.scijava.display.Display;
 import org.scijava.log.LogService;
 import org.scijava.plugin.Parameter;
@@ -65,7 +66,8 @@ import org.scijava.ui.viewer.DisplayWindow;
 
 // TODO may want to extend AbstractSwingUI instead.. but many of the implementations
 // it provides are overridden here anyway, in the delegation to IJ.
-@Plugin(type = UserInterface.class, name = LegacyUI.NAME)
+@Plugin(type = UserInterface.class, name = LegacyUI.NAME,
+	priority = Priority.HIGH_PRIORITY)
 public class LegacyUI extends AbstractUserInterface implements SwingUI {
 
 	public static final String NAME = "legacy";
