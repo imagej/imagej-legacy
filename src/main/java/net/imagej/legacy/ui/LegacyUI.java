@@ -59,11 +59,14 @@ import org.scijava.ui.ToolBar;
 import org.scijava.ui.UIService;
 import org.scijava.ui.UserInterface;
 import org.scijava.ui.awt.AWTClipboard;
+import org.scijava.ui.swing.SwingUI;
 import org.scijava.ui.viewer.DisplayViewer;
 import org.scijava.ui.viewer.DisplayWindow;
 
+// TODO may want to extend AbstractSwingUI instead.. but many of the implementations
+// it provides are overridden here anyway, in the delegation to IJ.
 @Plugin(type = UserInterface.class, name = LegacyUI.NAME)
-public class LegacyUI extends AbstractUserInterface {
+public class LegacyUI extends AbstractUserInterface implements SwingUI {
 
 	public static final String NAME = "legacy";
 
