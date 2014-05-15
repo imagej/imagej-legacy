@@ -28,22 +28,15 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+
 package net.imagej.legacy.display;
 
-import ij.ImagePlus;
-
-import org.scijava.ui.viewer.DisplayViewer;
-
 /**
- * Marker interface for {@link DisplayViewer} implementations that will be
- * displaying {@link ImagePlus}es.
- *
+ * Marker interface to indicate display viewers that do not need a display
+ * window, as ImageJ1 will be handling the display.
+ * 
  * @author Mark Hiner
  */
-public interface ImagePlusDisplayViewer extends DisplayViewer<ImagePlus>,
-	LegacyDisplayViewer
-{
-
-	@Override
-	ImagePlusDisplay getDisplay();
+public interface LegacyDisplayViewer {
+// Intentionally left empty
 }

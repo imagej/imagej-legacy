@@ -142,7 +142,7 @@ public class LegacyUI extends AbstractUserInterface implements SwingUI {
 			return;
 		}
 
-		if (displayViewer instanceof ImagePlusDisplayViewer) {
+		if (LegacyDisplayViewer.class.isAssignableFrom(displayViewer.getClass())) {
 			final DisplayViewer<?> finalViewer = displayViewer;
 			threadService.queue(new Runnable() {
 				@Override

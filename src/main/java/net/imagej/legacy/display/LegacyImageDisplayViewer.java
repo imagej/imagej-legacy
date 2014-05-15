@@ -32,12 +32,14 @@
 package net.imagej.legacy.display;
 
 import ij.ImagePlus;
+import net.imagej.Data;
 import net.imagej.Dataset;
 import net.imagej.display.ImageDisplay;
 import net.imagej.legacy.LegacyImageMap;
 import net.imagej.legacy.LegacyService;
 import net.imagej.legacy.ui.LegacyUI;
 import net.imagej.ui.viewer.image.AbstractImageDisplayViewer;
+import net.imagej.ui.viewer.image.ImageDisplayViewer;
 
 import org.scijava.Priority;
 import org.scijava.display.Display;
@@ -49,8 +51,16 @@ import org.scijava.ui.UserInterface;
 import org.scijava.ui.viewer.DisplayViewer;
 import org.scijava.ui.viewer.DisplayWindow;
 
+/**
+ * Default {@link ImageDisplayViewer} implementation for viewing the IJ2
+ * {@link Dataset} and {@link Data} outputs via an {@link ImagePlus}.
+ *
+ * @author Mark Hiner
+ */
 @Plugin(type = DisplayViewer.class, priority = Priority.HIGH_PRIORITY)
-public class LegacyImageDisplayViewer extends AbstractImageDisplayViewer {
+public class LegacyImageDisplayViewer extends AbstractImageDisplayViewer
+	implements LegacyDisplayViewer
+{
 
 	@Parameter
 	LegacyService legacyService;
@@ -65,10 +75,11 @@ public class LegacyImageDisplayViewer extends AbstractImageDisplayViewer {
 
 	@Override
 	public void view(final DisplayWindow w, final Display<?> d) {
-		LegacyImageMap limp = legacyService.getImageMap();
+		final LegacyImageMap limp = legacyService.getImageMap();
 		ImageDisplay imageDisplay = null;
 		ImagePlus imagePlus = null;
 
+		// We can only handle ImageDisplays right now
 		if (d instanceof ImageDisplay) {
 			imageDisplay = (ImageDisplay) d;
 		}
@@ -79,15 +90,21 @@ public class LegacyImageDisplayViewer extends AbstractImageDisplayViewer {
 			return;
 		}
 
+		// If there is already a mapping for this display, just get its ImagePlus.
 		imagePlus = limp.lookupImagePlus(imageDisplay);
 
+		// Otherwise, we register the display, which triggers wrapping in an
+		// ImagePlus
 		if (imagePlus == null) {
 			imagePlus = limp.registerDisplay(imageDisplay);
 		}
 
+		// Display the ImagePlus via the IJ1 framework.
 		imagePlus.show();
 
-		// Need to tell the framework this display was displayed
+		// Need to tell the IJ2 framework what the "active" display is. This allows
+		// other consumers to look up the corresponding ImagePlus using the
+		// active display.
 		displayService.setActiveDisplay(imageDisplay);
 	}
 
@@ -99,7 +116,7 @@ public class LegacyImageDisplayViewer extends AbstractImageDisplayViewer {
 	}
 
 	@Override
-	public boolean isCompatible(UserInterface ui) {
+	public boolean isCompatible(final UserInterface ui) {
 		return ui instanceof LegacyUI;
 	}
 
