@@ -110,8 +110,7 @@ public class LegacyPluginFinder implements PluginFinder {
 		final Hashtable<?, ?> commands = Menus.getCommands();
 		final int startSize = plugins.size();
 		for (final Object key : commands.keySet()) {
-			final PluginInfo<Command> pe =
-				createEntry(key, commands, menuTable);
+			final PluginInfo<Command> pe = createEntry(key, commands, menuTable);
 			if (pe != null) plugins.add(pe);
 		}
 		final int pluginCount = plugins.size() - startSize;
@@ -151,7 +150,8 @@ public class LegacyPluginFinder implements PluginFinder {
 		// NB: Check whether menu path is already taken by a modern ImageJ command.
 		// This allows transparent override of legacy commands.
 		final MenuPath menuPath = menuTable.get(key);
-		final boolean overridden = menuPath != null && appMenu.getMenu(menuPath) != null;
+		final boolean overridden =
+			menuPath != null && appMenu.getMenu(menuPath) != null;
 
 		if (log.isDebug()) {
 			// output discovery info for this legacy command
@@ -160,9 +160,11 @@ public class LegacyPluginFinder implements PluginFinder {
 			else if (blacklisted) status = "[BLACKLISTED] ";
 			else if (overridden) status = "[OVERRIDDEN] ";
 			else status = "";
-			log.debug("- " + status + ij1PluginString + " [menu = " +
-				(menuPath == null ? "" :
-					menuPath.getMenuString() + ", weight = " +
+			log.debug("- " +
+				status +
+				ij1PluginString +
+				" [menu = " +
+				(menuPath == null ? "" : menuPath.getMenuString() + ", weight = " +
 					menuPath.getLeaf().getWeight()) + "]");
 		}
 		if (blacklisted && overridden) {
@@ -227,8 +229,7 @@ public class LegacyPluginFinder implements PluginFinder {
 			final boolean shift = shortcut.usesShiftModifier();
 			final KeyCode keyCode = KeyCode.get(code);
 			final InputModifiers modifiers =
-				new InputModifiers(false, false, ctrl, meta, shift, false, false,
-					false);
+				new InputModifiers(false, false, ctrl, meta, shift, false, false, false);
 			final Accelerator acc = new Accelerator(keyCode, modifiers);
 			entry.setAccelerator(acc);
 		}

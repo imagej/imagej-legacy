@@ -159,7 +159,6 @@ public class LegacyCommand implements Command {
 		final private ThreadGroup group;
 		final private LegacyImageMap map;
 		final private Harmonizer harmonizer;
-		
 
 		// NB - BDZ
 		// In order to keep threads from waiting on each other unnecessarily when
@@ -189,18 +188,18 @@ public class LegacyCommand implements Command {
 
 			updateImagePlusesFromDisplays();
 
-			//reportStackIssues("Before IJ1 plugin run");
-			
+			// reportStackIssues("Before IJ1 plugin run");
+
 			// must happen after updateImagePlusesFromDisplays()
 			LegacyOutputTracker.clearOutputs();
 			LegacyOutputTracker.clearClosed();
 
 			// set ImageJ1's active image
 			legacyService.syncActiveImage();
-			
+
 			// set ImageJ1's colors
 			legacyService.syncColors();
-			
+
 			try {
 				// execute the legacy plugin
 				IJ.runPlugIn(className, arg);
@@ -228,9 +227,10 @@ public class LegacyCommand implements Command {
 				}
 
 				// reflect any changes to globals in modern ImageJ options/prefs
-				legacyService.getOptionsSynchronizer().updateModernImageJSettingsFromLegacyImageJ();
+				legacyService.getOptionsSynchronizer()
+					.updateModernImageJSettingsFromLegacyImageJ();
 
-				//reportStackIssues("After IJ1 plugin run");
+				// reportStackIssues("After IJ1 plugin run");
 			}
 			catch (final Exception e) {
 				final String msg = "ImageJ 1.x plugin threw exception";
@@ -247,7 +247,7 @@ public class LegacyCommand implements Command {
 				LegacyOutputTracker.clearOutputs();
 				LegacyOutputTracker.clearClosed();
 			}
-			
+
 			rtHarmonizer.setModernImageJResultsTable();
 		}
 
@@ -316,8 +316,7 @@ public class LegacyCommand implements Command {
 			// Like Timer threads we will ignore Timed Waiting threads as they too
 			// wait on another running thread. Not sure how safe this is but it
 			// seems necessary.
-			if (thread.getState() == Thread.State.TIMED_WAITING)
-			{
+			if (thread.getState() == Thread.State.TIMED_WAITING) {
 				return true;
 			}
 			/*

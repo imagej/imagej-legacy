@@ -63,6 +63,7 @@ public class DefaultLegacyEditor implements LegacyEditor {
 	private synchronized TextEditor editor() {
 		if (editor == null) {
 			editor = new TextEditor(context) {
+
 				private static final long serialVersionUID = 1L;
 
 				@Override
@@ -88,14 +89,14 @@ public class DefaultLegacyEditor implements LegacyEditor {
 
 	/** @inherit */
 	@Override
-	public boolean open(File file) {
+	public boolean open(final File file) {
 		editor().open(file);
 		return true;
 	}
 
 	/** @inherit */
 	@Override
-	public boolean create(String title, String content) {
+	public boolean create(final String title, final String content) {
 		editor().createNewDocument(title, content);
 		return true;
 	}

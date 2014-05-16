@@ -49,11 +49,12 @@ public interface LegacyOpener extends SciJavaPlugin {
 	 * 
 	 * @param path the path to the resource to open, or {@code null} if a dialog
 	 *          needs to be shown
-	 * @param planeIndex
-	 *            If applicable - the index of plane to open or -1 for all planes
-	 * @param displayResult
-	 *            if true, the opened object should be displayed before returning
+	 * @param planeIndex If applicable - the index of plane to open or -1 for all
+	 *          planes
+	 * @param displayResult if true, the opened object should be displayed before
+	 *          returning
 	 * @return The opened object, or {@code null} to let ImageJ 1.x open the path.
 	 */
-	Object open(final String path, final int planeIndex, final boolean displayResult);
+	Object open(final String path, final int planeIndex,
+		final boolean displayResult);
 }

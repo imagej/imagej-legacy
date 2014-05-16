@@ -36,11 +36,14 @@ import java.io.File;
 import org.scijava.plugin.SciJavaPlugin;
 
 /**
- * A minimal interface for the editor to use instead of ImageJ 1.x' limited AWT-based one.
+ * A minimal interface for the editor to use instead of ImageJ 1.x' limited
+ * AWT-based one.
  * 
  * @author Johannes Schindelin
  */
 public interface LegacyEditor extends SciJavaPlugin {
+
 	public boolean open(final File path);
+
 	public boolean create(final String title, final String content);
 }

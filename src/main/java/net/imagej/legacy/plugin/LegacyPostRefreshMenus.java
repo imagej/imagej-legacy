@@ -39,5 +39,4 @@ import org.scijava.plugin.SciJavaPlugin;
  * 
  * @author Johannes Schindelin
  */
-public interface LegacyPostRefreshMenus extends Runnable, SciJavaPlugin {
-}
+public interface LegacyPostRefreshMenus extends Runnable, SciJavaPlugin {}

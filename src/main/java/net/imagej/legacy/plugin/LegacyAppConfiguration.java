@@ -37,7 +37,6 @@ import org.scijava.plugin.SciJavaPlugin;
 
 /**
  * Interface for configuring the legacy application appearance.
- * 
  * <p>
  * Implementing a plugin of this type lets applications override the appearance
  * of the ImageJ 1.x instance, e.g. the window icon.
@@ -49,6 +48,7 @@ public interface LegacyAppConfiguration extends SciJavaPlugin {
 
 	/**
 	 * Returns the application name for use with ImageJ 1.x.
+	 * 
 	 * @return the application name
 	 */
 	String getAppName();

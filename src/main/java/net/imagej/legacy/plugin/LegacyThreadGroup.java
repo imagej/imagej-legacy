@@ -41,7 +41,7 @@ import net.imagej.legacy.LegacyService;
 public class LegacyThreadGroup extends ThreadGroup {
 
 	private static final String GROUP_NAME = "IJ1 legacy group";
-	private LegacyService legacyService;
+	private final LegacyService legacyService;
 
 	public LegacyThreadGroup(final LegacyService legacyService) {
 		super(GROUP_NAME);
