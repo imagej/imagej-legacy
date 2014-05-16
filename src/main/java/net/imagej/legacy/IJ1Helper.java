@@ -36,6 +36,7 @@ import ij.IJ;
 import ij.ImageJ;
 import ij.ImagePlus;
 import ij.Macro;
+import ij.Menus;
 import ij.WindowManager;
 import ij.gui.ImageWindow;
 import ij.io.Opener;
@@ -45,6 +46,7 @@ import ij.plugin.filter.PlugInFilterRunner;
 
 import java.awt.GraphicsEnvironment;
 import java.io.File;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -95,6 +97,14 @@ public class IJ1Helper extends AbstractContextual {
 		if (IJ.getInstance() == null) try {
 			if (GraphicsEnvironment.isHeadless()) {
 				IJ.runPlugIn("ij.IJ.init", null);
+				if (Menus.getCommands() == null) try {
+					// assume that it failed and try again, via reflection
+					final Method init = IJ.class.getDeclaredMethod("init");
+					init.setAccessible(true);
+					init.invoke(null);
+				} catch (Throwable t) {
+					t.printStackTrace();
+				}
 			} else {
 				new ImageJ(ImageJ.NO_SHOW);
 			}
