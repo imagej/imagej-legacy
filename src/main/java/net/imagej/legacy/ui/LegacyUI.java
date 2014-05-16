@@ -40,7 +40,6 @@ import javax.swing.JFileChooser;
 import net.imagej.legacy.DefaultLegacyService;
 import net.imagej.legacy.IJ1Helper;
 import net.imagej.legacy.LegacyService;
-import net.imagej.legacy.display.ImagePlusDisplayViewer;
 import net.imagej.legacy.display.LegacyDisplayViewer;
 
 import org.scijava.Priority;
@@ -67,8 +66,13 @@ import org.scijava.ui.viewer.DisplayViewer;
 import org.scijava.ui.viewer.DisplayWindow;
 import org.scijava.widget.FileWidget;
 
-// TODO may want to extend AbstractSwingUI instead.. but many of the implementations
-// it provides are overridden here anyway, in the delegation to IJ.
+/**
+ * Swing-based {@link UserInterface} implementation for working between
+ * ImageJ2 ({@code net.imagej.*}) and ImageJ1 ({@code ij.*}) applications.
+ *
+ * @author Johannes Schindelin
+ * @author Mark Hiner
+ */
 @Plugin(type = UserInterface.class, name = LegacyUI.NAME,
 	priority = Priority.HIGH_PRIORITY)
 public class LegacyUI extends AbstractUserInterface implements SwingUI {
@@ -142,9 +146,12 @@ public class LegacyUI extends AbstractUserInterface implements SwingUI {
 			return;
 		}
 
+		// LegacyDisplayViewers will display through ImagePlus.show, so they don't
+		// need DisplayWindows and extra processing that other viewers might..
 		if (LegacyDisplayViewer.class.isAssignableFrom(displayViewer.getClass())) {
 			final DisplayViewer<?> finalViewer = displayViewer;
 			threadService.queue(new Runnable() {
+
 				@Override
 				public void run() {
 					finalViewer.view(null, display);
@@ -167,8 +174,7 @@ public class LegacyUI extends AbstractUserInterface implements SwingUI {
 		desktop = new Desktop() {
 
 			@Override
-			public void setArrangement(Arrangement newValue) {
-			}
+			public void setArrangement(final Arrangement newValue) {}
 
 			@Override
 			public Arrangement getArrangement() {
@@ -176,12 +182,10 @@ public class LegacyUI extends AbstractUserInterface implements SwingUI {
 			}
 
 			@Override
-			public void addPropertyChangeListener(PropertyChangeListener l) {
-			}
+			public void addPropertyChangeListener(final PropertyChangeListener l) {}
 
 			@Override
-			public void removePropertyChangeListener(PropertyChangeListener l) {
-			}
+			public void removePropertyChangeListener(final PropertyChangeListener l) {}
 
 		};
 		return desktop;
@@ -213,25 +217,26 @@ public class LegacyUI extends AbstractUserInterface implements SwingUI {
 
 	@Override
 	public synchronized SystemClipboard getSystemClipboard() {
-		//TODO consider extending abstractAWTUI common class..
+		// TODO consider extending abstractAWTUI common class..
 		if (systemClipboard != null) return systemClipboard;
 		systemClipboard = new AWTClipboard();
 		return systemClipboard;
 	}
 
 	@Override
-	public DisplayWindow createDisplayWindow(Display<?> display) {
+	public DisplayWindow createDisplayWindow(final Display<?> display) {
 		throw new UnsupportedOperationException("TODO");
 	}
 
 	@Override
-	public DialogPrompt dialogPrompt(String message, String title,
-			MessageType messageType, OptionType optionType) {
+	public DialogPrompt dialogPrompt(final String message, final String title,
+		final MessageType messageType, final OptionType optionType)
+	{
 		return new LegacyDialogPrompt(legacyService, message, title, optionType);
 	}
 
 	@Override
-	public File chooseFile(File file, String style) {
+	public File chooseFile(final File file, final String style) {
 		final JFileChooser chooser = new JFileChooser(file);
 		if (FileWidget.DIRECTORY_STYLE.equals(style)) {
 			chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
@@ -244,11 +249,13 @@ public class LegacyUI extends AbstractUserInterface implements SwingUI {
 			rval = chooser.showOpenDialog(getApplicationFrame().getComponent());
 		}
 		if (rval != JFileChooser.APPROVE_OPTION) return null;
-		return chooser.getSelectedFile();	}
+		return chooser.getSelectedFile();
+	}
 
 	@Override
-	public void showContextMenu(String menuRoot, Display<?> display, int x,
-			int y) {
+	public void showContextMenu(final String menuRoot, final Display<?> display,
+		final int x, final int y)
+	{
 		throw new UnsupportedOperationException("TODO");
 	}
 
