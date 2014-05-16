@@ -32,8 +32,6 @@
 package net.imagej.legacy;
 
 import ij.ImagePlus;
-import imagej.patcher.EssentialLegacyHooks;
-import imagej.patcher.LegacyHooks;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -48,6 +46,8 @@ import net.imagej.display.ImageDisplay;
 import net.imagej.legacy.plugin.LegacyAppConfiguration;
 import net.imagej.legacy.plugin.LegacyEditor;
 import net.imagej.legacy.plugin.LegacyPostRefreshMenus;
+import net.imagej.patcher.EssentialLegacyHooks;
+import net.imagej.patcher.LegacyHooks;
 
 import org.scijava.Context;
 import org.scijava.InstantiableException;

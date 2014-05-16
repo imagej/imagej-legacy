@@ -33,7 +33,6 @@ package net.imagej.legacy.plugin;
 
 import ij.IJ;
 import ij.ImageJ;
-import imagej.patcher.LegacyHooks;
 
 import java.awt.GraphicsEnvironment;
 import java.awt.Image;
@@ -43,6 +42,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 
 import javax.swing.SwingUtilities;
+
+import net.imagej.patcher.LegacyHooks;
 
 import org.scijava.Context;
 

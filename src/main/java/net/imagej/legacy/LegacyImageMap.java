@@ -34,7 +34,6 @@ package net.imagej.legacy;
 import ij.ImagePlus;
 import ij.gui.ImageWindow;
 import ij.gui.Roi;
-import imagej.patcher.LegacyInjector;
 
 import java.lang.ref.WeakReference;
 import java.util.Collection;
@@ -53,6 +52,7 @@ import net.imagej.legacy.translate.Harmonizer;
 import net.imagej.legacy.translate.ImageTranslator;
 import net.imagej.legacy.translate.LegacyUtils;
 import net.imagej.overlay.Overlay;
+import net.imagej.patcher.LegacyInjector;
 import net.imagej.ui.viewer.image.ImageDisplayViewer;
 
 import org.scijava.AbstractContextual;

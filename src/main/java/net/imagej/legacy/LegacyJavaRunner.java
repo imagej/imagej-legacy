@@ -1,8 +1,8 @@
 /*
  * #%L
- * ImageJ software for multidimensional image processing and analysis.
+ * JSR-223-compliant Java scripting language plugin.
  * %%
- * Copyright (C) 2009 - 2014 Board of Regents of the University of
+ * Copyright (C) 2008 - 2014 Board of Regents of the University of
  * Wisconsin-Madison, Broad Institute of MIT and Harvard, and Max Planck
  * Institute of Molecular Cell Biology and Genetics.
  * %%
@@ -31,52 +31,41 @@
 
 package net.imagej.legacy;
 
-import static org.junit.Assume.assumeTrue;
-
-import java.awt.GraphicsEnvironment;
-import java.net.URL;
-import java.net.URLClassLoader;
-
-import net.imagej.patcher.LegacyClassLoader;
-import net.imagej.patcher.LegacyEnvironment;
-import net.imagej.patcher.LegacyInjector;
-
-import org.junit.Test;
+import org.scijava.plugin.Parameter;
+import org.scijava.plugin.Plugin;
+import org.scijava.plugins.scripting.java.AbstractJavaRunner;
+import org.scijava.plugins.scripting.java.JavaRunner;
 
 /**
- * Ensures that <i>Help>Switch to Modern Mode</i> in patched ImageJ 1.x works as
- * advertised.
+ * Runs the given ImageJ 1.x {@code PlugIn} class.
  * 
- * @author Johannes Schindelin
+ * @author Curtis Rueden
  */
-public class SwitchToModernTest {
+@Plugin(type = JavaRunner.class)
+public class LegacyJavaRunner extends AbstractJavaRunner {
 
-	static {
-		LegacyInjector.preinit();
+	@Parameter
+	private LegacyService legacyService;
+
+	// -- JavaRunner methods --
+
+	@Override
+	public void run(final Class<?> c) {
+		IJ1Helper.run(c);
 	}
 
-	@Test
-	public void testSwitchToModernMode() throws Exception {
-		assumeTrue(!GraphicsEnvironment.isHeadless());
+	// -- Typed methods --
 
-		final Thread thread = Thread.currentThread();
-		final ClassLoader savedContextClassLoader = thread.getContextClassLoader();
-
-		try {
-			final ClassLoader thisLoader = getClass().getClassLoader();
-			final URL[] urls = thisLoader instanceof URLClassLoader ? ((URLClassLoader)thisLoader).getURLs() : new URL[0];
-			final ClassLoader loader = new LegacyClassLoader(false) {
-				{
-					for (final URL url : urls) {
-						addURL(url);
-					}
-				}
-			};
-			final LegacyEnvironment ij1 = new LegacyEnvironment(loader, false);
-			ij1.runMacro("call(\"ij.IJ.redirectErrorMessages\");", "");
-			ij1.run("Switch to Modern Mode", "");
-		} finally {
-			thread.setContextClassLoader(savedContextClassLoader);
+	@Override
+	public boolean supports(final Class<?> c) {
+		if (c == null) return false;
+		if (c.getName().equals("ij.plugin.PlugIn")) return true;
+		if (c.getName().equals("ij.plugin.filter.PlugInFilter")) return true;
+		if (supports(c.getSuperclass())) return true;
+		for (final Class<?> iface : c.getInterfaces()) {
+			if (supports(iface)) return true;
 		}
+		return false;
 	}
+
 }

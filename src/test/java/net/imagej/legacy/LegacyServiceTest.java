@@ -35,8 +35,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assume.assumeTrue;
 import ij.IJ;
-import imagej.patcher.LegacyInjector;
-import net.imagej.legacy.LegacyService;
+import net.imagej.patcher.LegacyInjector;
 
 import org.junit.After;
 import org.junit.Test;
