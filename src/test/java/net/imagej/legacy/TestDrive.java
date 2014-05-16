@@ -29,7 +29,7 @@
  * #L%
  */
 
-package imagej.legacy;
+package net.imagej.legacy;
 
 import imagej.patcher.LegacyEnvironment;
 import imagej.patcher.LegacyInjector;

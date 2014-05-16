@@ -155,6 +155,10 @@ public final class DefaultLegacyService extends AbstractService implements
 	/** Legacy ImageJ 1.x mode: stop synchronizing */
 	private boolean legacyIJ1Mode;
 
+	public IJ1Helper getIJ1Helper() {
+		return ij1Helper;
+	}
+
 	// -- LegacyService methods --
 
 	@Override

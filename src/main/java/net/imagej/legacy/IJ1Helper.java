@@ -151,6 +151,12 @@ public class IJ1Helper extends AbstractContextual {
 		}
 	}
 
+	public boolean isVisible() {
+		final ImageJ ij = IJ.getInstance();
+		if (ij == null) return false;
+		return ij.isVisible();
+	}
+
 	public void setVisible(boolean toggle) {
 		final ImageJ ij = IJ.getInstance();
 		if (ij != null) {
@@ -194,6 +200,14 @@ public class IJ1Helper extends AbstractContextual {
 
 	public boolean isMacintosh() {
 		return IJ.isMacintosh();
+	}
+
+	public void setStatus(String message) {
+		IJ.showStatus(message);
+	}
+
+	public void setProgress(int val, int max) {
+		IJ.showProgress(val, max);
 	}
 
 	/**
