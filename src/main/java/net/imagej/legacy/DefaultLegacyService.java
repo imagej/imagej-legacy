@@ -31,8 +31,6 @@
 
 package net.imagej.legacy;
 
-import net.imagej.patcher.LegacyInjector;
-
 import java.awt.GraphicsEnvironment;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -46,6 +44,7 @@ import net.imagej.display.OverlayService;
 import net.imagej.legacy.plugin.LegacyCommand;
 import net.imagej.legacy.plugin.LegacyPluginFinder;
 import net.imagej.options.OptionsChannels;
+import net.imagej.patcher.LegacyInjector;
 import net.imagej.threshold.ThresholdService;
 import net.imagej.ui.viewer.image.ImageDisplayViewer;
 
