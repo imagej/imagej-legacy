@@ -61,4 +61,7 @@ public abstract class AbstractLegacyAdapter implements LegacyAdapter {
 		return null;
 	}
 
+	protected DefaultLegacyService getLegacyService() {
+		return legacyService;
+	}
 }
