@@ -153,6 +153,8 @@ public class DefaultLegacyHooks extends EssentialLegacyHooks {
 				}
 			}
 		}
+		final Object legacyCompatibleCommand = legacyService.runLegacyCompatibleCommand(className);
+		if (legacyCompatibleCommand != null) return legacyCompatibleCommand;
 
 		return null;
 	}
