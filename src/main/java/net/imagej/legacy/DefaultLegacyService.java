@@ -93,6 +93,7 @@ import org.scijava.util.ColorRGB;
  * @author Barry DeZonia
  * @author Curtis Rueden
  * @author Johannes Schindelin
+ * @author Mark Hiner
  */
 @Plugin(type = Service.class)
 public final class DefaultLegacyService extends AbstractService implements
@@ -155,6 +156,8 @@ public final class DefaultLegacyService extends AbstractService implements
 	public IJ1Helper getIJ1Helper() {
 		return ij1Helper;
 	}
+
+	private ThreadLocal<Boolean> isProcessingEvents = new ThreadLocal<Boolean>();
 
 	// -- LegacyService methods --
 
@@ -304,6 +307,39 @@ public final class DefaultLegacyService extends AbstractService implements
 		addLegacyCommands(enableBlacklist);
 
 		if (!hasIJ1Instance && !GraphicsEnvironment.isHeadless()) toggleLegacyMode(false, true);
+	}
+
+	// -- Package protected events processing methods --
+
+	/**
+	 * NB: This method is not intended for public consumption. It is really
+	 * intended to be "jar protected". It is used to toggle a {@link ThreadLocal}
+	 * flag as to whether or not legacy UI components are in the process of
+	 * handling {@code StatusEvents}.
+	 * <p>
+	 * USE AT YOUR OWN RISK!
+	 * </p>
+	 *
+	 * @return the old processing value
+	 */
+	public boolean setProcessingEvents(boolean processing) {
+		boolean result = isProcessingEvents();
+		if (result != processing) {
+			isProcessingEvents.set(processing);
+		}
+		return result;
+	}
+
+	/**
+	 * {@link ThreadLocal} check to see if components are in the middle of
+	 * processing events.
+	 * 
+	 * @return True iff this thread is already processing events through the
+	 *         {@code DefaultLegacyService}.
+	 */
+	public boolean isProcessingEvents() {
+		Boolean result = isProcessingEvents.get();
+		return result == Boolean.TRUE;
 	}
 
 	// -- Disposable methods --
