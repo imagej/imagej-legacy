@@ -31,9 +31,17 @@
 
 package net.imagej.legacy;
 
+import ij.Menus;
+
 import java.awt.GraphicsEnvironment;
+import java.awt.Menu;
+import java.awt.MenuBar;
+import java.awt.MenuItem;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.Map;
 
 import net.imagej.DatasetService;
@@ -42,6 +50,7 @@ import net.imagej.display.ImageDisplay;
 import net.imagej.display.ImageDisplayService;
 import net.imagej.display.OverlayService;
 import net.imagej.legacy.plugin.LegacyCommand;
+import net.imagej.legacy.plugin.LegacyCompatibleCommand;
 import net.imagej.legacy.plugin.LegacyPluginFinder;
 import net.imagej.options.OptionsChannels;
 import net.imagej.patcher.LegacyInjector;
@@ -59,6 +68,9 @@ import org.scijava.event.EventService;
 import org.scijava.input.KeyCode;
 import org.scijava.log.LogService;
 import org.scijava.menu.MenuService;
+import org.scijava.menu.ShadowMenu;
+import org.scijava.module.Module;
+import org.scijava.module.ModuleService;
 import org.scijava.options.OptionsService;
 import org.scijava.options.event.OptionsEvent;
 import org.scijava.plugin.Parameter;
@@ -97,7 +109,7 @@ import org.scijava.util.ColorRGB;
  */
 @Plugin(type = Service.class)
 public final class DefaultLegacyService extends AbstractService implements
-	LegacyService
+	LegacyService, ActionListener
 {
 	static {
 		LegacyInjector.preinit();
@@ -135,6 +147,9 @@ public final class DefaultLegacyService extends AbstractService implements
 
 	@Parameter
 	private MenuService menuService;
+
+	@Parameter
+	private ModuleService moduleService;
 
 	@Parameter
 	private StatusService statusService;
@@ -302,6 +317,8 @@ public final class DefaultLegacyService extends AbstractService implements
 
 		SwitchToModernMode.registerMenuItem();
 
+		addLegacyCompatibleCommands(menuService.getMenu());
+
 		// discover legacy plugins
 		final boolean enableBlacklist = true;
 		addLegacyCommands(enableBlacklist);
@@ -453,5 +470,116 @@ public final class DefaultLegacyService extends AbstractService implements
 		final ArrayList<PluginInfo<?>> plugins = new ArrayList<PluginInfo<?>>();
 		finder.findPlugins(plugins);
 		pluginService.addPlugins(plugins);
+	}
+
+	// -- Menu population --
+
+	/**
+	 * Adds all {@link LegacyCompatibleCommand}s in the provided
+	 * {@link ShadowMenu} to the ImageJ1 menus. The nested menu structure of each
+	 * {@code LegacyCompatibleCommand} is preserved.
+	 */
+	private void addLegacyCompatibleCommands(final ShadowMenu menu) {
+		if (menu.getChildren().isEmpty()) {
+			final Module m = moduleService.createModule(menu.getModuleInfo());
+			if (m != null &&
+				LegacyCompatibleCommand.class.isAssignableFrom(m.getClass()))
+			{
+				// Build menu hierarchy
+				String[] menuHierarchy = new String[menu.getMenuDepth()];
+				ShadowMenu parent = menu.getParent();
+
+				for (int i = menuHierarchy.length - 1; i >= 0; i--) {
+					menuHierarchy[i] = parent.getName();
+					parent = parent.getParent();
+				}
+
+				@SuppressWarnings("unchecked")
+				final Hashtable<String, String> commands = Menus.getCommands();
+				if (!commands.containsKey(menu.getName())) {
+					final MenuBar menuBar = Menus.getMenuBar();
+					Menu ij1Menu = null;
+
+					for (int i = 0; ij1Menu == null && i < menuBar.getMenuCount(); i++) {
+						if (menuBar.getMenu(i).getLabel().equals(menuHierarchy[0])) {
+							ij1Menu = menuBar.getMenu(i);
+						}
+					}
+
+					// Create the desired IJ2 menu structure in IJ1
+					ij1Menu = findOrCreateMenu(ij1Menu, menuHierarchy, 1);
+
+					final MenuItem item = new MenuItem(menu.getName());
+					item.addActionListener(this);
+					// insert at the bottom of the IJ1 menu
+					ij1Menu.insert(item, ij1Menu.getItemCount());
+
+					commands.put(menu.getName(), m.getClass().getName());
+				}
+			}
+		}
+		else {
+			for (final ShadowMenu child : menu.getChildren()) {
+				addLegacyCompatibleCommands(child);
+			}
+		}
+	}
+
+	/**
+	 * Given a base, parent {@code Menu}, this method will return the tail menu
+	 * item based on the given {@code menuHierarchy}. If the hierarchy does not
+	 * exist as specified, it will be built.
+	 */
+	private Menu findOrCreateMenu(final Menu menu, final String[] menuHierarchy,
+		final int depth)
+	{
+		// if we reached the menu hierarchy depth, we can return our current menu.
+		// This means that our desired IJ2 menu structure was exactly discovered
+		// in the IJ1 menus.
+		if (depth == menuHierarchy.length) {
+			return menu;
+		}
+
+		// Check the current IJ1 menu to see if we have an entry that satisfies the
+		// current depth of the IJ2 menu hierarchy
+		for (int i = 0; i < menu.getItemCount(); i++) {
+			final MenuItem menuItem = menu.getItem(i);
+			if (menuItem.getLabel().equals(menuHierarchy[depth])) {
+				// if a matching item is a Menu, we recurse
+				if (menuItem instanceof Menu) {
+					return findOrCreateMenu((Menu) menu.getItem(i), menuHierarchy,
+						depth + 1);
+				}
+				// Otherwise, we mangle the menu hierarchy name as it is clashing with
+				// an existing item in the IJ1 menu structure.
+				menuHierarchy[depth] += "_IJ2";
+			}
+		}
+
+		// We couldn't match the desired menu structure in existing IJ1 menus, so
+		// we need to recreate the menu structure from the current depth onwards
+		Menu expandedMenu = menu;
+		for (int i=depth; i<menuHierarchy.length; i++) {
+			Menu nextLevel = new Menu(menuHierarchy[depth], true);
+			expandedMenu.add(nextLevel);
+			expandedMenu = nextLevel;
+		}
+
+		return expandedMenu;
+	}
+
+	// -- ActionListener methods --
+
+	/**
+	 * Listen for IJ2 commands being selected from the IJ1 menu and run them
+	 * using the {@link CommandService}.
+	 */
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		if (commandService != null && (e.getSource() instanceof MenuItem)) {
+			final String cmd = e.getActionCommand();
+			final String commandClass = (String)Menus.getCommands().get(cmd);
+			commandService.run(commandClass, true, new Object[0]);
+		}
 	}
 }

@@ -31,14 +31,14 @@
 
 package net.imagej.legacy.plugin;
 
-import org.scijava.command.DynamicCommand;
 
 /**
- * Executes an ImageJ v1.x command.
+ * Marker interface indicating a command should be placed in the IJ1 menu.
  * 
  * @author Curtis Rueden
  * @author Barry DeZonia
+ * @author Mark Hiner
  */
-public abstract class LegacyCompatibleCommand extends DynamicCommand {
+public interface LegacyCompatibleCommand {
 
 }
