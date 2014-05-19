@@ -41,17 +41,24 @@ import ij.WindowManager;
 import ij.gui.ImageWindow;
 import ij.gui.Toolbar;
 import ij.io.Opener;
+import ij.plugin.Commands;
 import ij.plugin.PlugIn;
 import ij.plugin.filter.PlugInFilter;
 import ij.plugin.filter.PlugInFilterRunner;
-import ij.plugin.Commands;
 
 import java.awt.Component;
 import java.awt.GraphicsEnvironment;
+import java.awt.Menu;
+import java.awt.MenuBar;
+import java.awt.MenuItem;
 import java.io.File;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
 
 import javax.swing.SwingUtilities;
 
@@ -59,6 +66,7 @@ import net.imagej.display.ImageDisplay;
 
 import org.scijava.AbstractContextual;
 import org.scijava.Context;
+import org.scijava.command.CommandInfo;
 import org.scijava.event.EventHandler;
 import org.scijava.log.LogService;
 import org.scijava.platform.event.AppAboutEvent;
@@ -398,4 +406,80 @@ public class IJ1Helper extends AbstractContextual {
 		throw new RuntimeException("TODO: construct class loader");
 	}
 
+	public void addMenuItems(Collection<CommandInfo> commands) {
+		@SuppressWarnings("unchecked")
+		final Hashtable<String, String> ij1Commands = Menus.getCommands();
+		final ImageJ ij1 = getIJ();
+		final IJ1MenuWrapper wrapper = ij1 == null ? null : new IJ1MenuWrapper(ij1);
+		for (final CommandInfo info : commands) {
+			final String name = info.getMenuPath().getLeaf().getName();
+			if (!ij1Commands.containsKey(name)) {
+				final String path = info.getMenuPath().getMenuString();
+				if (wrapper != null) wrapper.create(path);
+				ij1Commands.put(name, info.getDelegateClassName());
+			}
+		}
+	}
+
+	private static class IJ1MenuWrapper {
+		final ImageJ ij1;
+		final MenuBar menuBar = Menus.getMenuBar();
+		final Map<String, Menu> structure = new HashMap<String, Menu>();
+
+		private IJ1MenuWrapper(final ImageJ ij1) {
+			this.ij1 = ij1;
+		}
+
+		private MenuItem create(final String path) {
+			final int gt = path.lastIndexOf('>');
+			if (gt < 0) throw new IllegalArgumentException("Not a valid menu path: " + path);
+			final Menu menu = get(path.substring(0, gt));
+			final MenuItem item = new MenuItem(path.substring(gt + 1));
+			menu.add(item);
+			item.addActionListener(ij1);
+			return item;
+		}
+
+		private Menu get(final String path) {
+			final Menu cached = structure.get(path);
+			if (cached != null) return cached;
+			final int gt = path.lastIndexOf('>');
+			if (gt < 0) {
+				if ("Help".equals(path)) {
+					final Menu menu = menuBar.getHelpMenu();
+					structure.put(path, menu);
+					return menu;
+				}
+				for (int i = 0; i < menuBar.getMenuCount(); i++) {
+					final Menu menu = menuBar.getMenu(i);
+					if (path.equals(menu.getName())) {
+						structure.put(path, menu);
+						return menu;
+					}
+				}
+				final Menu menu = new Menu(path);
+				menuBar.add(menu);
+				structure.put(path, menu);
+				return menu;
+			}
+			final Menu parent = get(path.substring(0, gt));
+			final String name = path.substring(gt + 1);
+			for (int i = 0; i < parent.getItemCount(); i++) {
+				final MenuItem item = parent.getItem(i);
+				if (name.equals(item.getName())) {
+					if (item instanceof Menu) {
+						final Menu menu = (Menu) item;
+						structure.put(path, menu);
+						return menu;
+					}
+					throw new IllegalArgumentException("Not a menu: " + path);
+				}
+			}
+			final Menu menu = new Menu(name);
+			parent.add(menu);
+			structure.put(path, menu);
+			return menu;
+		}
+
+	}
 }
