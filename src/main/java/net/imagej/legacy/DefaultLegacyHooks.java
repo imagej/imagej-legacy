@@ -65,13 +65,13 @@ import org.scijava.util.ListUtils;
  */
 public class DefaultLegacyHooks extends EssentialLegacyHooks {
 
-	private LegacyService legacyService;
+	private DefaultLegacyService legacyService;
 	private Context context;
 	private PluginService pluginService;
 	private LogService log;
 	private IJ1Helper helper;
 
-	public DefaultLegacyHooks(LegacyService legacyService, IJ1Helper helper) {
+	public DefaultLegacyHooks(DefaultLegacyService legacyService, IJ1Helper helper) {
 		this.legacyService = legacyService;
 		this.helper = helper;
 	}
@@ -171,7 +171,11 @@ public class DefaultLegacyHooks extends EssentialLegacyHooks {
 	/** @inherit */
 	@Override
 	public void showProgress(int currentIndex, int finalIndex) {
-		if (!isLegacyMode()) {
+		// if we are already processing events on this thread, then we know that
+		// the LegacyStatusBar has already called its setProgress mode. So we do
+		// not want to re-trigger a showProgress method, otherwise we can end up
+		// with an infinite loop.
+		if (!isLegacyMode() && !legacyService.isProcessingEvents()) {
 			legacyService.status().showProgress(currentIndex, finalIndex);
 		}
 	}
@@ -182,7 +186,7 @@ public class DefaultLegacyHooks extends EssentialLegacyHooks {
 		if (!isInitialized()) {
 			return;
 		}
-		if (!isLegacyMode()) {
+		if (!isLegacyMode() && !legacyService.isProcessingEvents())  {
 			legacyService.status().showStatus(status);
 		}
 	}
