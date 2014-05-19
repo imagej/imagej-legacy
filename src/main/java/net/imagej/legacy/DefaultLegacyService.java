@@ -481,7 +481,13 @@ public final class DefaultLegacyService extends AbstractService implements
 	 */
 	private void addLegacyCompatibleCommands(final ShadowMenu menu) {
 		if (menu.getChildren().isEmpty()) {
-			final Module m = moduleService.createModule(menu.getModuleInfo());
+			Module m = null;
+			try {
+				m = moduleService.createModule(menu.getModuleInfo());
+			}
+			catch (Exception e) {
+				log.error("Module was not created successfully: " + menu.getModuleInfo());
+			}
 			if (m != null &&
 				LegacyCompatibleCommand.class.isAssignableFrom(m.getClass()))
 			{
