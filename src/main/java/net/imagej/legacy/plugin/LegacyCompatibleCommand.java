@@ -31,6 +31,8 @@
 
 package net.imagej.legacy.plugin;
 
+import org.scijava.command.Command;
+
 
 /**
  * Marker interface indicating a command should be placed in the IJ1 menu.
@@ -39,6 +41,6 @@ package net.imagej.legacy.plugin;
  * @author Barry DeZonia
  * @author Mark Hiner
  */
-public interface LegacyCompatibleCommand {
+public interface LegacyCompatibleCommand extends Command {
 
 }
