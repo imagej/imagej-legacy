@@ -406,6 +406,9 @@ public class IJ1Helper extends AbstractContextual {
 		throw new RuntimeException("TODO: construct class loader");
 	}
 
+	/**
+	 * Adds all of the provided commands to the ImageJ1 menu structure.
+	 */
 	public void addMenuItems(Collection<CommandInfo> commands) {
 		@SuppressWarnings("unchecked")
 		final Hashtable<String, String> ij1Commands = Menus.getCommands();
@@ -421,6 +424,11 @@ public class IJ1Helper extends AbstractContextual {
 		}
 	}
 
+	/**
+	 * Helper class for wrapping ImageJ2 menu paths to ImageJ1 {@link Menu}
+	 * structures, and inserting them into the proper positions of the
+	 * {@link MenuBar}.
+	 */
 	private static class IJ1MenuWrapper {
 		final ImageJ ij1;
 		final MenuBar menuBar = Menus.getMenuBar();
@@ -430,6 +438,19 @@ public class IJ1Helper extends AbstractContextual {
 			this.ij1 = ij1;
 		}
 
+		/**
+		 * Creates a {@link MenuItem} matching the structure of the provided path.
+		 * Expected path structure is:
+		 * <p>
+		 * <ul>Level1 > Level2 > ... > Leaf entry</ul>
+		 * </p>
+		 * <p>
+		 * For example, a valid path would be:
+		 * </p>
+		 * <p>
+		 * <ul>Edit > Options > ImageJ2 plugins > Discombobulator</ul>
+		 * </p>
+		 */
 		private MenuItem create(final String path) {
 			final int gt = path.lastIndexOf('>');
 			if (gt < 0) throw new IllegalArgumentException("Not a valid menu path: " + path);
