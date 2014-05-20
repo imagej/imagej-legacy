@@ -455,7 +455,7 @@ public class IJ1Helper extends AbstractContextual {
 			final int gt = path.lastIndexOf('>');
 			if (gt < 0) throw new IllegalArgumentException("Not a valid menu path: " + path);
 			final Menu menu = get(path.substring(0, gt));
-			final MenuItem item = new MenuItem(path.substring(gt + 1));
+			final MenuItem item = new MenuItem(path.substring(gt + 1).trim());
 			menu.add(item);
 			item.addActionListener(ij1);
 			return item;
