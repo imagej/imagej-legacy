@@ -440,41 +440,61 @@ public class IJ1Helper extends AbstractContextual {
 			return item;
 		}
 
-		private Menu get(final String path) {
+		/**
+		 * Recursive helper method to builds the final {@link Menu} structure.
+		 */
+		private Menu get(final String rawPath) {
+			// Remove trailing whitespace from the path
+			final String path = rawPath.trim();
+			// Check to see if we already know the menu associated with the desired
+			// label/path
 			final Menu cached = structure.get(path);
 			if (cached != null) return cached;
 			final int gt = path.lastIndexOf('>');
+			// We are at the leaf of the menu, so see if we have a matching menu
 			if (gt < 0) {
+				// Special case check the help menu
 				if ("Help".equals(path)) {
 					final Menu menu = menuBar.getHelpMenu();
 					structure.put(path, menu);
 					return menu;
 				}
+				// Check the other menus of the menu bar to see if our desired label
+				// already exists
 				for (int i = 0; i < menuBar.getMenuCount(); i++) {
 					final Menu menu = menuBar.getMenu(i);
-					if (path.equals(menu.getName())) {
+					if (path.equals(menu.getLabel())) {
 						structure.put(path, menu);
 						return menu;
 					}
 				}
+				// Didn't find a match so we have to create a new menu entry
 				final Menu menu = new Menu(path);
 				menuBar.add(menu);
 				structure.put(path, menu);
 				return menu;
 			}
-			final Menu parent = get(path.substring(0, gt));
-			final String name = path.substring(gt + 1);
+			final Menu parent = get(path.substring(0, gt).trim());
+			final String name = path.substring(gt + 1).trim();
+			// Once the parent of this entry is obtained, we need to check if it
+			// already contains the current entry.
 			for (int i = 0; i < parent.getItemCount(); i++) {
 				final MenuItem item = parent.getItem(i);
-				if (name.equals(item.getName())) {
+				if (name.equals(item.getLabel())) {
 					if (item instanceof Menu) {
+						// Found a menu entry that matches our desired label, so return
 						final Menu menu = (Menu) item;
 						structure.put(path, menu);
 						return menu;
 					}
+					// Found a match but it was an existing non-menu item, so our menu
+					// structure is invalid.
+					//TODO consider mangling the IJ2 menu name instead...
 					throw new IllegalArgumentException("Not a menu: " + path);
 				}
 			}
+			// An existing entry in the parent menu was not found, so we need to
+			// create a new entry.
 			final Menu menu = new Menu(name);
 			parent.add(menu);
 			structure.put(path, menu);
