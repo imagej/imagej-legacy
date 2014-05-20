@@ -64,7 +64,6 @@ import org.scijava.event.EventService;
 import org.scijava.input.KeyCode;
 import org.scijava.log.LogService;
 import org.scijava.menu.MenuService;
-import org.scijava.menu.ShadowMenu;
 import org.scijava.module.ModuleService;
 import org.scijava.options.OptionsService;
 import org.scijava.options.event.OptionsEvent;
