@@ -43,6 +43,7 @@ import java.util.concurrent.Future;
 
 import net.imagej.Dataset;
 import net.imagej.display.ImageDisplay;
+import net.imagej.legacy.ImageJ2Options;
 import net.imagej.legacy.LegacyService;
 import net.imagej.legacy.translate.DefaultImageTranslator;
 import net.imagej.legacy.translate.ImageTranslator;
@@ -85,6 +86,15 @@ public class DefaultLegacyOpener implements LegacyOpener {
 		final PluginService pluginService = c.getService(PluginService.class);
 		final LegacyService legacyService = c.getService(LegacyService.class);
 		final DisplayService displayService = c.getService(DisplayService.class);
+		final ModuleService moduleService = c.getService(ModuleService.class);
+		final CommandService commandService = c.getService(CommandService.class);
+
+		// Check to see if SCIFIO has been disabled
+		CommandInfo ij2Options = commandService.getCommand(ImageJ2Options.class);
+		Object useSCIFIO = ij2Options.getInput(ImageJ2Options.USE_SCIFIO).loadValue();
+		if (useSCIFIO == null || !((Boolean)useSCIFIO)) {
+			return null;
+		}
 
 		final List<PostprocessorPlugin> postprocessors =
 			new ArrayList<PostprocessorPlugin>();
@@ -99,9 +109,7 @@ public class DefaultLegacyOpener implements LegacyOpener {
 		}
 
 		// Run the OpenFile command to get our data
-		final CommandService commandService = c.getService(CommandService.class);
 		final CommandInfo command = commandService.getCommand(OpenFile.class);
-		final ModuleService moduleService = c.getService(ModuleService.class);
 		final Map<String, Object> inputs = new HashMap<String, Object>();
 		if (path != null) inputs.put("inputFile", new File(path));
 		final Future<Module> result =
