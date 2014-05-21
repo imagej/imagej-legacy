@@ -48,11 +48,15 @@ import ij.plugin.filter.PlugInFilterRunner;
 
 import java.awt.Component;
 import java.awt.GraphicsEnvironment;
+import java.awt.Image;
 import java.awt.Menu;
 import java.awt.MenuBar;
 import java.awt.MenuItem;
+import java.awt.image.ImageProducer;
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Method;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -63,6 +67,7 @@ import java.util.Map;
 import javax.swing.SwingUtilities;
 
 import net.imagej.display.ImageDisplay;
+import net.imagej.patcher.LegacyHooks;
 
 import org.scijava.AbstractContextual;
 import org.scijava.Context;
@@ -105,7 +110,8 @@ public class IJ1Helper extends AbstractContextual {
 
 	public void initialize() {
 		// initialize legacy ImageJ application
-		if (IJ.getInstance() == null) try {
+		final ImageJ ij1 = IJ.getInstance();
+		if (ij1 == null) try {
 			if (GraphicsEnvironment.isHeadless()) {
 				IJ.runPlugIn("ij.IJ.init", null);
 				if (Menus.getCommands() == null) try {
@@ -123,6 +129,44 @@ public class IJ1Helper extends AbstractContextual {
 		catch (final Throwable t) {
 			log.warn("Failed to instantiate IJ1.", t);
 		} else {
+			// make sure that the Event Dispatch Thread's class loader is set
+			SwingUtilities.invokeLater(new Runnable() {
+
+				@Override
+				public void run() {
+					Thread.currentThread().setContextClassLoader(IJ.getClassLoader());
+				}
+			});
+
+			// set icon and title of main window (which are instantiated before the
+			// initializer is called)
+			try {
+				final LegacyHooks hooks =
+					(LegacyHooks) IJ.class.getField("_hooks").get(null);
+				ij1.setTitle(hooks.getAppName());
+				final URL iconURL = hooks.getIconURL();
+				if (iconURL != null) try {
+					final Object producer = iconURL.getContent();
+					final Image image = ij1.createImage((ImageProducer) producer);
+					ij1.setIconImage(image);
+					if (IJ.isMacOSX()) try {
+						// NB: We also need to set the dock icon
+						final Class<?> clazz = Class.forName("com.apple.eawt.Application");
+						final Object app = clazz.getMethod("getApplication").invoke(null);
+						clazz.getMethod("setDockIconImage", Image.class).invoke(app, image);
+					}
+					catch (final Throwable t) {
+						t.printStackTrace();
+					}
+				}
+				catch (final IOException e) {
+					IJ.handleException(e);
+				}
+			}
+			catch (final Throwable t) {
+				t.printStackTrace();
+			}
+
 			final LegacyImageMap imageMap = legacyService.getImageMap();
 			for (int i = 1; i <= WindowManager.getImageCount(); i++) {
 				imageMap.registerLegacyImage(WindowManager.getImage(i));
