@@ -67,4 +67,9 @@ public class ImageJ2Options extends OptionsPlugin implements Command
 	@Parameter(persist = false)
 	private DefaultLegacyService legacyService;
 
+	// -- Option accessors --
+
+	public Boolean isUseSCIFIO() {
+		return useSCIFIO;
+	}
 }
