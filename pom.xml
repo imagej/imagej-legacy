@@ -112,6 +112,16 @@
 			<artifactId>imagej-ui-swing</artifactId>
 			<optional>true</optional>
 		</dependency>
+		<dependency>
+			<groupId>org.scijava</groupId>
+			<artifactId>scijava-plugins-text-plain</artifactId>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>org.scijava</groupId>
+			<artifactId>scijava-plugins-text-markdown</artifactId>
+			<optional>true</optional>
+		</dependency>
 
 		<!-- Test dependencies -->
 		<dependency>
