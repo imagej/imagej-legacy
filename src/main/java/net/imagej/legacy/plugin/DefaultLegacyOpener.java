@@ -47,6 +47,7 @@ import net.imagej.legacy.LegacyService;
 import net.imagej.legacy.translate.DefaultImageTranslator;
 import net.imagej.legacy.translate.ImageTranslator;
 
+import org.scijava.Cancelable;
 import org.scijava.Context;
 import org.scijava.Priority;
 import org.scijava.command.CommandInfo;
@@ -112,6 +113,12 @@ public class DefaultLegacyOpener implements LegacyOpener {
 				inputs);
 
 		final Module module = moduleService.waitFor(result);
+		if (Cancelable.class.isAssignableFrom(module.getClass())) {
+			if (((Cancelable)module).isCanceled()) {
+				return Boolean.TRUE;
+			}
+		}
+
 		final Object data = module.getOutput("data");
 
 		if (data != null && data instanceof Dataset) {
