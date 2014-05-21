@@ -59,6 +59,7 @@ import org.scijava.module.Module;
 import org.scijava.module.ModuleService;
 import org.scijava.module.process.PostprocessorPlugin;
 import org.scijava.module.process.PreprocessorPlugin;
+import org.scijava.options.OptionsService;
 import org.scijava.plugin.Plugin;
 import org.scijava.plugin.PluginService;
 import org.scijava.plugins.commands.io.OpenFile;
@@ -88,13 +89,11 @@ public class DefaultLegacyOpener implements LegacyOpener {
 		final DisplayService displayService = c.getService(DisplayService.class);
 		final ModuleService moduleService = c.getService(ModuleService.class);
 		final CommandService commandService = c.getService(CommandService.class);
+		final OptionsService optionsService = c.getService(OptionsService.class);
 
 		// Check to see if SCIFIO has been disabled
-		CommandInfo ij2Options = commandService.getCommand(ImageJ2Options.class);
-		Object useSCIFIO = ij2Options.getInput(ImageJ2Options.USE_SCIFIO).loadValue();
-		if (useSCIFIO == null || !((Boolean)useSCIFIO)) {
-			return null;
-		}
+		Boolean useSCIFIO = optionsService.getOptions(ImageJ2Options.class).isUseSCIFIO();
+		if (useSCIFIO == null || !useSCIFIO) return null;
 
 		final List<PostprocessorPlugin> postprocessors =
 			new ArrayList<PostprocessorPlugin>();
