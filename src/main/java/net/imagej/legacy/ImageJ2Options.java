@@ -44,7 +44,7 @@ import org.scijava.plugin.Plugin;
  * 
  * @author Mark Hiner
  */
-@Plugin(type = Command.class, visible = false,
+@Plugin(type = ImageJ2Options.class, visible = false,
 	label = "ImageJ2 Options", menu = {
 		@Menu(label = MenuConstants.EDIT_LABEL, weight = MenuConstants.EDIT_WEIGHT,
 			mnemonic = MenuConstants.EDIT_MNEMONIC), @Menu(label = "Options"),
