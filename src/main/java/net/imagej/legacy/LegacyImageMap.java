@@ -180,8 +180,6 @@ public class LegacyImageMap extends AbstractContextual {
 			// mapping does not exist; mirror display to image window
 			imp = imageTranslator.createLegacyImage(display);
 			addMapping(display, imp);
-			// Note - we need to register ImagePlus with IJ1 also
-			new ImageWindow(imp);
 		}
 		return imp;
 	}
