@@ -30,6 +30,7 @@
  */
 package net.imagej.legacy.plugin;
 
+import java.lang.reflect.Modifier;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -102,6 +103,7 @@ public class LegacyAutoImporter implements AutoImporter {
 				if (path.matches(".*\\$[0-9].*")) continue;
 				final String className = path.substring(0, path.length() - 6)
 						.replace('/', '.').replace('$', '.');
+				if (!isPublicClass(className)) continue;
 				int dot = className.lastIndexOf('.');
 				final String packageName = className.substring(0, dot);
 				final String baseName = className.substring(dot + 1);
@@ -133,6 +135,16 @@ public class LegacyAutoImporter implements AutoImporter {
 			}
 		}
 		return defaultImports;
+	}
+
+	private boolean isPublicClass(String className) {
+		try {
+			return (Class.forName(className).getModifiers() & Modifier.PUBLIC) != 0;
+		}
+		catch (Throwable t) {
+			// ignore class that cannot even be loaded
+		}
+		return false;
 	}
 
 	public static void main(String... args) {
