@@ -73,6 +73,7 @@ import org.scijava.plugin.PluginInfo;
 import org.scijava.plugin.PluginService;
 import org.scijava.service.AbstractService;
 import org.scijava.service.Service;
+import org.scijava.service.event.ServicesLoadedEvent;
 import org.scijava.ui.ApplicationFrame;
 import org.scijava.ui.UIService;
 import org.scijava.ui.UserInterface;
@@ -148,7 +149,6 @@ public final class DefaultLegacyService extends AbstractService implements
 	@Parameter
 	private StatusService statusService;
 
-	@Parameter(required = false)
 	private UIService uiService;
 
 	private static DefaultLegacyService instance;
@@ -183,7 +183,8 @@ public final class DefaultLegacyService extends AbstractService implements
 	}
 
 	@Override
-	public LegacyImageMap getImageMap() {
+	public synchronized LegacyImageMap getImageMap() {
+		if (imageMap == null) imageMap = new LegacyImageMap(this);
 		return imageMap;
 	}
 
@@ -274,7 +275,7 @@ public final class DefaultLegacyService extends AbstractService implements
 			// TODO: move this into the LegacyImageMap's toggleLegacyMode, passing
 			// the uiService
 			// hide/show the IJ2 datasets corresponding to legacy ImagePlus instances
-			for (final ImageDisplay display : imageMap.getImageDisplays()) {
+			for (final ImageDisplay display : getImageMap().getImageDisplays()) {
 				final ImageDisplayViewer viewer =
 					(ImageDisplayViewer) uiService.getDisplayViewer(display);
 				if (viewer == null) continue;
@@ -290,7 +291,7 @@ public final class DefaultLegacyService extends AbstractService implements
 			optionsSynchronizer.updateLegacyImageJSettingsFromModernImageJ();
 		}
 
-		imageMap.toggleLegacyMode(wantIJ1);
+		getImageMap().toggleLegacyMode(wantIJ1);
 	}
 
 	@Override
@@ -373,6 +374,10 @@ public final class DefaultLegacyService extends AbstractService implements
 	}
 
 	// -- Event handlers --
+
+	protected void onEvent(final ServicesLoadedEvent e) {
+		uiService = getContext().getService(UIService.class);
+	}
 
 	/**
 	 * Keeps the active legacy {@link ij.ImagePlus} in sync with the active modern
@@ -489,5 +494,10 @@ public final class DefaultLegacyService extends AbstractService implements
 		for (final CommandInfo info : commands) {
 			legacyCompatibleCommands.add(info.getDelegateClassName());
 		}
+	}
+
+	public synchronized UIService uiService() {
+		if (uiService == null) uiService = getContext().getService(UIService.class);
+		return uiService;
 	}
 }
