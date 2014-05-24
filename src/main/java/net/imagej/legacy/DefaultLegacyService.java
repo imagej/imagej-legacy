@@ -52,6 +52,7 @@ import net.imagej.patcher.LegacyInjector;
 import net.imagej.threshold.ThresholdService;
 import net.imagej.ui.viewer.image.ImageDisplayViewer;
 
+import org.scijava.Priority;
 import org.scijava.app.StatusService;
 import org.scijava.command.CommandInfo;
 import org.scijava.command.CommandService;
@@ -102,7 +103,7 @@ import org.scijava.util.ColorRGB;
  * @author Johannes Schindelin
  * @author Mark Hiner
  */
-@Plugin(type = Service.class)
+@Plugin(type = Service.class, priority = Priority.NORMAL_PRIORITY + 1)
 public final class DefaultLegacyService extends AbstractService implements
 	LegacyService
 {
