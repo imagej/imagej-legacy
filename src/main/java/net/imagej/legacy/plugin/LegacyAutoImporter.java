@@ -63,8 +63,8 @@ public class LegacyAutoImporter implements AutoImporter {
 			return defaultImports;
 
 		defaultImports = new HashMap<String, List<String>>();
-		final String[] classNames = { "ij.IJ", "java.lang.String",
-				"ini.trakem2.Project", "script.imglib.math.Compute" };
+		final String[] classNames =
+			{ "ij.IJ", "ini.trakem2.Project", "script.imglib.math.Compute" };
 
 		final StringBuilder builder = new StringBuilder();
 		builder.append("(");
