@@ -185,11 +185,15 @@ public class DefaultLegacyHooks extends EssentialLegacyHooks {
 	/** @inherit */
 	@Override
 	public void showStatus(final String status) {
-		if (!isInitialized()) {
+		if (!isInitialized() || isLegacyMode()) {
 			return;
 		}
-		if (!isLegacyMode() && !legacyService.isProcessingEvents())  {
+		boolean processing = legacyService.setProcessingEvents(true);
+		if (processing) return; // already sent
+		try {
 			legacyService.status().showStatus(status);
+		} finally {
+			legacyService.setProcessingEvents(processing);
 		}
 	}
 

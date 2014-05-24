@@ -54,7 +54,17 @@ public class LegacyStatusBar extends AbstractLegacyAdapter implements
 
 	@Override
 	public void setStatus(final String message) {
-		helper().setStatus(message);
+		boolean processing = getLegacyService().setProcessingEvents(true);
+		// if we are already in the middle of processing events, then we must have
+		// gotten here from an event that originated in the LegacyStatusBar. So,
+		// return, knowing that the value will eventually be restored by another
+		// finally block earlier in this stack trace.
+		if (processing) return;
+		try {
+			helper().setStatus(message);
+		} finally {
+			getLegacyService().setProcessingEvents(processing);
+		}
 	}
 
 	@Override
