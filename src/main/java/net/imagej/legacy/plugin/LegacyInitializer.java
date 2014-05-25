@@ -32,18 +32,11 @@
 package net.imagej.legacy.plugin;
 
 import ij.IJ;
-import ij.ImageJ;
 
 import java.awt.GraphicsEnvironment;
-import java.awt.Image;
-import java.awt.image.ImageProducer;
-import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.net.URL;
 
 import javax.swing.SwingUtilities;
-
-import net.imagej.patcher.LegacyHooks;
 
 import org.scijava.Context;
 
@@ -88,45 +81,6 @@ public class LegacyInitializer implements Runnable {
 		catch (final Throwable t) {
 			// do nothing; we're not in the PluginClassLoader's class path
 			return;
-		}
-
-		// make sure that the Event Dispatch Thread's class loader is set
-		SwingUtilities.invokeLater(new Runnable() {
-
-			@Override
-			public void run() {
-				Thread.currentThread().setContextClassLoader(IJ.getClassLoader());
-			}
-		});
-
-		// set icon and title of main window (which are instantiated before the
-		// initializer is called)
-		final ImageJ ij = IJ.getInstance();
-		if (ij != null) try {
-			final LegacyHooks hooks =
-				(LegacyHooks) IJ.class.getField("_hooks").get(null);
-			ij.setTitle(hooks.getAppName());
-			final URL iconURL = hooks.getIconURL();
-			if (iconURL != null) try {
-				final Object producer = iconURL.getContent();
-				final Image image = ij.createImage((ImageProducer) producer);
-				ij.setIconImage(image);
-				if (IJ.isMacOSX()) try {
-					// NB: We also need to set the dock icon
-					final Class<?> clazz = Class.forName("com.apple.eawt.Application");
-					final Object app = clazz.getMethod("getApplication").invoke(null);
-					clazz.getMethod("setDockIconImage", Image.class).invoke(app, image);
-				}
-				catch (final Throwable t) {
-					t.printStackTrace();
-				}
-			}
-			catch (final IOException e) {
-				IJ.handleException(e);
-			}
-		}
-		catch (final Throwable t) {
-			t.printStackTrace();
 		}
 	}
 
