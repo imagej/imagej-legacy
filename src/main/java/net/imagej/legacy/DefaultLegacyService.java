@@ -48,6 +48,7 @@ import net.imagej.legacy.plugin.LegacyCommand;
 import net.imagej.legacy.plugin.LegacyCompatibleCommand;
 import net.imagej.legacy.plugin.LegacyPluginFinder;
 import net.imagej.options.OptionsChannels;
+import net.imagej.patcher.LegacyEnvironment;
 import net.imagej.patcher.LegacyInjector;
 import net.imagej.threshold.ThresholdService;
 import net.imagej.ui.viewer.image.ImageDisplayViewer;
@@ -306,11 +307,18 @@ public final class DefaultLegacyService extends AbstractService implements
 	public void initialize() {
 		checkInstance();
 
-		ij1Helper = new IJ1Helper(this);
-		boolean hasIJ1Instance = ij1Helper.hasInstance();
-
-		imageMap = new LegacyImageMap(this);
 		optionsSynchronizer = new OptionsSynchronizer(optionsService);
+
+		try {
+			final ClassLoader loader = getClass().getClassLoader();
+			final boolean ij1Initialized = LegacyEnvironment.isImageJ1Initialized(loader);
+			if (!ij1Initialized) {
+				getLegacyEnvironment(loader).newImageJ1(true);
+			}
+			ij1Helper = new IJ1Helper(this);
+		} catch (final Throwable t) {
+			throw new RuntimeException("Failed to instantiate IJ1.", t);
+		}
 
 		synchronized (DefaultLegacyService.class) {
 			checkInstance();
@@ -327,8 +335,6 @@ public final class DefaultLegacyService extends AbstractService implements
 		// discover legacy plugins
 		final boolean enableBlacklist = true;
 		addLegacyCommands(enableBlacklist);
-
-		if (!hasIJ1Instance && !GraphicsEnvironment.isHeadless()) toggleLegacyMode(false, true);
 	}
 
 	// -- Package protected events processing methods --
@@ -436,7 +442,23 @@ public final class DefaultLegacyService extends AbstractService implements
 	 * @deprecated use {@link LegacyInjector#preinit()} instead
 	 */
 	public static void preinit() {
-		LegacyInjector.preinit();
+		try {
+			getLegacyEnvironment(Thread.currentThread().getContextClassLoader());
+		} catch (Throwable t) {
+			t.printStackTrace();
+		}
+	}
+
+	private static LegacyEnvironment
+		getLegacyEnvironment(final ClassLoader loader)
+			throws ClassNotFoundException
+	{
+		final boolean headless = GraphicsEnvironment.isHeadless();
+		final LegacyEnvironment ij1 = new LegacyEnvironment(loader, headless);
+		ij1.disableInitializer();
+		ij1.noPluginClassLoader();
+		ij1.applyPatches();
+		return ij1;
 	}
 
 	// -- helpers --
