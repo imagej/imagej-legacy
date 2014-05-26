@@ -567,4 +567,9 @@ public class IJ1Helper extends AbstractContextual {
 		}
 
 	}
+
+	public String runMacro(String macro) {
+		return IJ.runMacro(macro);
+	}
+
 }

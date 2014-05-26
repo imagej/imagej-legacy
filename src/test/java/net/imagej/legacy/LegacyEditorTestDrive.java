@@ -31,41 +31,35 @@
 
 package net.imagej.legacy;
 
-import org.scijava.plugin.Parameter;
-import org.scijava.plugin.Plugin;
-import org.scijava.plugins.scripting.java.AbstractJavaRunner;
-import org.scijava.plugins.scripting.java.JavaRunner;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+
+import javax.swing.SwingUtilities;
+
+import net.imagej.ui.swing.script.TextEditor;
+
+import org.scijava.Context;
 
 /**
- * Runs the given ImageJ 1.x {@code PlugIn} class.
- * 
- * @author Curtis Rueden
+ * Interactive test for the script editor in legacy mode.
+ *
+ * @author Johannes Schindelin
  */
-@Plugin(type = JavaRunner.class)
-public class LegacyJavaRunner extends AbstractJavaRunner {
-
-	@Parameter
-	private LegacyService legacyService;
-
-	// -- JavaRunner methods --
-
-	@Override
-	public void run(final Class<?> c) {
-		IJ1Helper.run(c);
+public class LegacyEditorTestDrive {
+	public static void main(String[] args) throws Exception {
+		final Context context = new Context();
+		final TextEditor editor = new TextEditor(context);
+		editor.addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowClosed(final WindowEvent e) {
+				SwingUtilities.invokeLater(new Runnable() {
+					@Override
+					public void run() {
+						context.dispose();
+					}
+				});
+			}
+		});
+		editor.setVisible(true);
 	}
-
-	// -- Typed methods --
-
-	@Override
-	public boolean supports(final Class<?> c) {
-		if (c == null) return false;
-		if (c.getName().equals("ij.plugin.PlugIn")) return true;
-		if (c.getName().equals("ij.plugin.filter.PlugInFilter")) return true;
-		if (supports(c.getSuperclass())) return true;
-		for (final Class<?> iface : c.getInterfaces()) {
-			if (supports(iface)) return true;
-		}
-		return false;
-	}
-
 }

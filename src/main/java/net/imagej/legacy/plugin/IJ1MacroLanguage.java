@@ -29,43 +29,36 @@
  * #L%
  */
 
-package net.imagej.legacy;
+package net.imagej.legacy.plugin;
+
+import javax.script.ScriptEngine;
+
+import net.imagej.legacy.DefaultLegacyService;
 
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
-import org.scijava.plugins.scripting.java.AbstractJavaRunner;
-import org.scijava.plugins.scripting.java.JavaRunner;
+import org.scijava.script.AbstractScriptLanguage;
+import org.scijava.script.ScriptLanguage;
 
 /**
- * Runs the given ImageJ 1.x {@code PlugIn} class.
+ * Implements a factory for the ImageJ 1.x Macro language engine.
  * 
- * @author Curtis Rueden
+ * @author Johannes Schindelin
  */
-@Plugin(type = JavaRunner.class)
-public class LegacyJavaRunner extends AbstractJavaRunner {
+@Plugin(type = ScriptLanguage.class)
+public class IJ1MacroLanguage extends AbstractScriptLanguage {
 
 	@Parameter
-	private LegacyService legacyService;
-
-	// -- JavaRunner methods --
+	private DefaultLegacyService legacyService;
 
 	@Override
-	public void run(final Class<?> c) {
-		IJ1Helper.run(c);
+	public String getLanguageName() {
+		return "IJ1 Macro";
 	}
 
-	// -- Typed methods --
-
 	@Override
-	public boolean supports(final Class<?> c) {
-		if (c == null) return false;
-		if (c.getName().equals("ij.plugin.PlugIn")) return true;
-		if (c.getName().equals("ij.plugin.filter.PlugInFilter")) return true;
-		if (supports(c.getSuperclass())) return true;
-		for (final Class<?> iface : c.getInterfaces()) {
-			if (supports(iface)) return true;
-		}
-		return false;
+	public ScriptEngine getScriptEngine() {
+		return new IJ1MacroEngine(legacyService.getIJ1Helper());
 	}
 
 }
