@@ -133,8 +133,6 @@ public class LegacyImageMap extends AbstractContextual {
 	@Parameter
 	private ImageDisplayService imageDisplayService;
 
-	@Parameter
-	private UIService uiService;
 
 	// -- Constructor --
 
@@ -200,7 +198,7 @@ public class LegacyImageMap extends AbstractContextual {
 					if (LegacyUtils.dimensionsIJ1Compatible(ds)) {
 						imp = registerDisplay(display);
 						final ImageDisplayViewer viewer =
-								(ImageDisplayViewer) uiService.getDisplayViewer(display);
+								(ImageDisplayViewer) legacyService.uiService().getDisplayViewer(display);
 						if (viewer != null) {
 							final DisplayWindow window = viewer.getWindow();
 							if (window != null) window.showDisplay(!toggle);

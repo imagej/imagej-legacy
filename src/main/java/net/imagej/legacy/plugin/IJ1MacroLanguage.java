@@ -29,26 +29,36 @@
  * #L%
  */
 
-package net.imagej.legacy.ui;
+package net.imagej.legacy.plugin;
 
-import org.scijava.module.process.PreprocessorPlugin;
+import javax.script.ScriptEngine;
+
+import net.imagej.legacy.DefaultLegacyService;
+
+import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
-import org.scijava.ui.swing.widget.SwingInputHarvester;
-import org.scijava.widget.InputHarvester;
+import org.scijava.script.AbstractScriptLanguage;
+import org.scijava.script.ScriptLanguage;
 
 /**
- * Trivial Legacy extension of the {@link SwingInputHarvester}. Just need to
- * link it to the {@link LegacyUI}.
+ * Implements a factory for the ImageJ 1.x Macro language engine.
+ * 
+ * @author Johannes Schindelin
  */
-@Plugin(type = PreprocessorPlugin.class, priority = InputHarvester.PRIORITY)
-public class LegacyInputHarvester extends SwingInputHarvester
-{
+@Plugin(type = ScriptLanguage.class)
+public class IJ1MacroLanguage extends AbstractScriptLanguage {
 
-	// -- Internal methods --
+	@Parameter
+	private DefaultLegacyService legacyService;
 
 	@Override
-	protected String getUI() {
-		return LegacyUI.NAME;
+	public String getLanguageName() {
+		return "IJ1 Macro";
+	}
+
+	@Override
+	public ScriptEngine getScriptEngine() {
+		return new IJ1MacroEngine(legacyService.getIJ1Helper());
 	}
 
 }

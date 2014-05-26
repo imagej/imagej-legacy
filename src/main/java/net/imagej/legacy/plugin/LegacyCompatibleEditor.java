@@ -28,27 +28,16 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+package net.imagej.legacy.plugin;
 
-package net.imagej.legacy.ui;
+import net.imagej.ui.swing.script.ScriptEditor;
 
-import org.scijava.module.process.PreprocessorPlugin;
+import org.scijava.plugin.Menu;
 import org.scijava.plugin.Plugin;
-import org.scijava.ui.swing.widget.SwingInputHarvester;
-import org.scijava.widget.InputHarvester;
 
-/**
- * Trivial Legacy extension of the {@link SwingInputHarvester}. Just need to
- * link it to the {@link LegacyUI}.
- */
-@Plugin(type = PreprocessorPlugin.class, priority = InputHarvester.PRIORITY)
-public class LegacyInputHarvester extends SwingInputHarvester
-{
-
-	// -- Internal methods --
-
-	@Override
-	protected String getUI() {
-		return LegacyUI.NAME;
-	}
+@Plugin(type = LegacyCompatibleCommand.class, menu = { @Menu(label = "File"),
+	@Menu(label = "New"),
+	@Menu(label = "Script...", accelerator = "open_bracket") })
+public class LegacyCompatibleEditor extends ScriptEditor implements LegacyCompatibleCommand {
 
 }

@@ -29,26 +29,37 @@
  * #L%
  */
 
-package net.imagej.legacy.ui;
+package net.imagej.legacy;
 
-import org.scijava.module.process.PreprocessorPlugin;
-import org.scijava.plugin.Plugin;
-import org.scijava.ui.swing.widget.SwingInputHarvester;
-import org.scijava.widget.InputHarvester;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+
+import javax.swing.SwingUtilities;
+
+import net.imagej.ui.swing.script.TextEditor;
+
+import org.scijava.Context;
 
 /**
- * Trivial Legacy extension of the {@link SwingInputHarvester}. Just need to
- * link it to the {@link LegacyUI}.
+ * Interactive test for the script editor in legacy mode.
+ *
+ * @author Johannes Schindelin
  */
-@Plugin(type = PreprocessorPlugin.class, priority = InputHarvester.PRIORITY)
-public class LegacyInputHarvester extends SwingInputHarvester
-{
-
-	// -- Internal methods --
-
-	@Override
-	protected String getUI() {
-		return LegacyUI.NAME;
+public class LegacyEditorTestDrive {
+	public static void main(String[] args) throws Exception {
+		final Context context = new Context();
+		final TextEditor editor = new TextEditor(context);
+		editor.addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowClosed(final WindowEvent e) {
+				SwingUtilities.invokeLater(new Runnable() {
+					@Override
+					public void run() {
+						context.dispose();
+					}
+				});
+			}
+		});
+		editor.setVisible(true);
 	}
-
 }

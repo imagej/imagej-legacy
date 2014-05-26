@@ -47,7 +47,6 @@ import net.imagej.legacy.plugin.LegacyAppConfiguration;
 import net.imagej.legacy.plugin.LegacyEditor;
 import net.imagej.legacy.plugin.LegacyOpener;
 import net.imagej.legacy.plugin.LegacyPostRefreshMenus;
-import net.imagej.patcher.EssentialLegacyHooks;
 import net.imagej.patcher.LegacyHooks;
 
 import org.scijava.Context;
@@ -63,7 +62,7 @@ import org.scijava.util.ListUtils;
  * 
  * @author Johannes Schindelin
  */
-public class DefaultLegacyHooks extends EssentialLegacyHooks {
+public class DefaultLegacyHooks extends LegacyHooks {
 
 	private DefaultLegacyService legacyService;
 	private Context context;
@@ -185,11 +184,15 @@ public class DefaultLegacyHooks extends EssentialLegacyHooks {
 	/** @inherit */
 	@Override
 	public void showStatus(final String status) {
-		if (!isInitialized()) {
+		if (!isInitialized() || isLegacyMode()) {
 			return;
 		}
-		if (!isLegacyMode() && !legacyService.isProcessingEvents())  {
+		boolean processing = legacyService.setProcessingEvents(true);
+		if (processing) return; // already sent
+		try {
 			legacyService.status().showStatus(status);
+		} finally {
+			legacyService.setProcessingEvents(processing);
 		}
 	}
 

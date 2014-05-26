@@ -48,10 +48,12 @@ import net.imagej.legacy.plugin.LegacyCommand;
 import net.imagej.legacy.plugin.LegacyCompatibleCommand;
 import net.imagej.legacy.plugin.LegacyPluginFinder;
 import net.imagej.options.OptionsChannels;
+import net.imagej.patcher.LegacyEnvironment;
 import net.imagej.patcher.LegacyInjector;
 import net.imagej.threshold.ThresholdService;
 import net.imagej.ui.viewer.image.ImageDisplayViewer;
 
+import org.scijava.Priority;
 import org.scijava.app.StatusService;
 import org.scijava.command.CommandInfo;
 import org.scijava.command.CommandService;
@@ -73,6 +75,7 @@ import org.scijava.plugin.PluginInfo;
 import org.scijava.plugin.PluginService;
 import org.scijava.service.AbstractService;
 import org.scijava.service.Service;
+import org.scijava.service.event.ServicesLoadedEvent;
 import org.scijava.ui.ApplicationFrame;
 import org.scijava.ui.UIService;
 import org.scijava.ui.UserInterface;
@@ -101,7 +104,7 @@ import org.scijava.util.ColorRGB;
  * @author Johannes Schindelin
  * @author Mark Hiner
  */
-@Plugin(type = Service.class)
+@Plugin(type = Service.class, priority = Priority.NORMAL_PRIORITY + 1)
 public final class DefaultLegacyService extends AbstractService implements
 	LegacyService
 {
@@ -148,7 +151,6 @@ public final class DefaultLegacyService extends AbstractService implements
 	@Parameter
 	private StatusService statusService;
 
-	@Parameter(required = false)
 	private UIService uiService;
 
 	private static DefaultLegacyService instance;
@@ -183,7 +185,8 @@ public final class DefaultLegacyService extends AbstractService implements
 	}
 
 	@Override
-	public LegacyImageMap getImageMap() {
+	public synchronized LegacyImageMap getImageMap() {
+		if (imageMap == null) imageMap = new LegacyImageMap(this);
 		return imageMap;
 	}
 
@@ -274,7 +277,7 @@ public final class DefaultLegacyService extends AbstractService implements
 			// TODO: move this into the LegacyImageMap's toggleLegacyMode, passing
 			// the uiService
 			// hide/show the IJ2 datasets corresponding to legacy ImagePlus instances
-			for (final ImageDisplay display : imageMap.getImageDisplays()) {
+			for (final ImageDisplay display : getImageMap().getImageDisplays()) {
 				final ImageDisplayViewer viewer =
 					(ImageDisplayViewer) uiService.getDisplayViewer(display);
 				if (viewer == null) continue;
@@ -290,7 +293,7 @@ public final class DefaultLegacyService extends AbstractService implements
 			optionsSynchronizer.updateLegacyImageJSettingsFromModernImageJ();
 		}
 
-		imageMap.toggleLegacyMode(wantIJ1);
+		getImageMap().toggleLegacyMode(wantIJ1);
 	}
 
 	@Override
@@ -304,11 +307,18 @@ public final class DefaultLegacyService extends AbstractService implements
 	public void initialize() {
 		checkInstance();
 
-		ij1Helper = new IJ1Helper(this);
-		boolean hasIJ1Instance = ij1Helper.hasInstance();
-
-		imageMap = new LegacyImageMap(this);
 		optionsSynchronizer = new OptionsSynchronizer(optionsService);
+
+		try {
+			final ClassLoader loader = getClass().getClassLoader();
+			final boolean ij1Initialized = LegacyEnvironment.isImageJ1Initialized(loader);
+			if (!ij1Initialized) {
+				getLegacyEnvironment(loader).newImageJ1(true);
+			}
+			ij1Helper = new IJ1Helper(this);
+		} catch (final Throwable t) {
+			throw new RuntimeException("Failed to instantiate IJ1.", t);
+		}
 
 		synchronized (DefaultLegacyService.class) {
 			checkInstance();
@@ -325,8 +335,6 @@ public final class DefaultLegacyService extends AbstractService implements
 		// discover legacy plugins
 		final boolean enableBlacklist = true;
 		addLegacyCommands(enableBlacklist);
-
-		if (!hasIJ1Instance && !GraphicsEnvironment.isHeadless()) toggleLegacyMode(false, true);
 	}
 
 	// -- Package protected events processing methods --
@@ -373,6 +381,10 @@ public final class DefaultLegacyService extends AbstractService implements
 	}
 
 	// -- Event handlers --
+
+	protected void onEvent(final ServicesLoadedEvent e) {
+		uiService = getContext().getService(UIService.class);
+	}
 
 	/**
 	 * Keeps the active legacy {@link ij.ImagePlus} in sync with the active modern
@@ -430,7 +442,23 @@ public final class DefaultLegacyService extends AbstractService implements
 	 * @deprecated use {@link LegacyInjector#preinit()} instead
 	 */
 	public static void preinit() {
-		LegacyInjector.preinit();
+		try {
+			getLegacyEnvironment(Thread.currentThread().getContextClassLoader());
+		} catch (Throwable t) {
+			t.printStackTrace();
+		}
+	}
+
+	private static LegacyEnvironment
+		getLegacyEnvironment(final ClassLoader loader)
+			throws ClassNotFoundException
+	{
+		final boolean headless = GraphicsEnvironment.isHeadless();
+		final LegacyEnvironment ij1 = new LegacyEnvironment(loader, headless);
+		ij1.disableInitializer();
+		ij1.noPluginClassLoader();
+		ij1.applyPatches();
+		return ij1;
 	}
 
 	// -- helpers --
@@ -489,5 +517,10 @@ public final class DefaultLegacyService extends AbstractService implements
 		for (final CommandInfo info : commands) {
 			legacyCompatibleCommands.add(info.getDelegateClassName());
 		}
+	}
+
+	public synchronized UIService uiService() {
+		if (uiService == null) uiService = getContext().getService(UIService.class);
+		return uiService;
 	}
 }
