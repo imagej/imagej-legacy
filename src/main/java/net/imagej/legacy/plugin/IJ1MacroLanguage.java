@@ -31,6 +31,9 @@
 
 package net.imagej.legacy.plugin;
 
+import java.util.Arrays;
+import java.util.List;
+
 import javax.script.ScriptEngine;
 
 import net.imagej.legacy.DefaultLegacyService;
@@ -50,6 +53,11 @@ public class IJ1MacroLanguage extends AbstractScriptLanguage {
 
 	@Parameter
 	private DefaultLegacyService legacyService;
+
+	@Override
+	public List<String> getExtensions() {
+		return Arrays.asList("ijm");
+	}
 
 	@Override
 	public String getLanguageName() {
