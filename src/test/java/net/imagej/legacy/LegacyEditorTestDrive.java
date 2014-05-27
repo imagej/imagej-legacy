@@ -39,6 +39,7 @@ import javax.swing.SwingUtilities;
 import net.imagej.ui.swing.script.TextEditor;
 
 import org.scijava.Context;
+import org.scijava.ui.UIService;
 
 /**
  * Interactive test for the script editor in legacy mode.
@@ -48,6 +49,7 @@ import org.scijava.Context;
 public class LegacyEditorTestDrive {
 	public static void main(String[] args) throws Exception {
 		final Context context = new Context();
+		context.getService(UIService.class).showUI();
 		final TextEditor editor = new TextEditor(context);
 		editor.addWindowListener(new WindowAdapter() {
 			@Override
