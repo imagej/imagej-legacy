@@ -75,9 +75,6 @@ import org.scijava.plugins.commands.io.OpenFile;
 @Plugin(type = LegacyOpener.class, priority = Priority.LOW_PRIORITY)
 public class DefaultLegacyOpener implements LegacyOpener {
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public Object open(final String path, final int planeIndex,
 		final boolean displayResult)

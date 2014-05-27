@@ -235,23 +235,11 @@ public final class DefaultLegacyService extends AbstractService implements
 		optionsSynchronizer.colorOptions(fgColor, bgColor);
 	}
 
-	/**
-	 * States whether we're running in legacy ImageJ 1.x mode.
-	 * <p>
-	 * To support work flows which are incompatible with ImageJ2, we want to allow
-	 * users to run in legacy ImageJ 1.x mode, where the ImageJ2 GUI is hidden and
-	 * the ImageJ 1.x GUI is shown. During this time, no synchronization should
-	 * take place.
-	 * </p>
-	 */
 	@Override
 	public boolean isLegacyMode() {
 		return ij1Helper != null && ij1Helper.isVisible();
 	}
 
-	/**
-	 * Switch to/from running legacy ImageJ 1.x mode.
-	 */
 	@Override
 	public void toggleLegacyMode(final boolean wantIJ1) {
 		toggleLegacyMode(wantIJ1, false);
