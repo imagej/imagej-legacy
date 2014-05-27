@@ -110,6 +110,7 @@ public class DefaultLegacyOpener implements LegacyOpener {
 				inputs);
 
 		final Module module = moduleService.waitFor(result);
+		if (module == null) return null;
 		if (Cancelable.class.isAssignableFrom(module.getClass())) {
 			if (((Cancelable)module).isCanceled()) {
 				return Boolean.TRUE;
