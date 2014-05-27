@@ -47,6 +47,7 @@ import net.imagej.display.OverlayService;
 import net.imagej.legacy.plugin.LegacyCommand;
 import net.imagej.legacy.plugin.LegacyCompatibleCommand;
 import net.imagej.legacy.plugin.LegacyPluginFinder;
+import net.imagej.legacy.ui.LegacyUI;
 import net.imagej.options.OptionsChannels;
 import net.imagej.patcher.LegacyEnvironment;
 import net.imagej.patcher.LegacyInjector;
@@ -250,15 +251,40 @@ public final class DefaultLegacyService extends AbstractService implements
 		// TODO: prevent IJ1 from quitting without IJ2 quitting, too
 
 		if (!initializing) {
-			if (uiService != null) {
+			if (uiService() != null) {
 				// hide/show the IJ2 main window
 				final UserInterface ui = uiService.getDefaultUI();
-				final ApplicationFrame appFrame =
-					ui == null ? null : ui.getApplicationFrame();
-				if (appFrame == null) {
-					if (ui != null && !wantIJ1) uiService.showUI();
+				if (ui != null && ui instanceof LegacyUI) {
+					UserInterface modern = null;
+					for (final UserInterface ui2 : uiService.getAvailableUIs()) {
+						if (ui2 == ui) continue;
+						modern = ui2;
+						break;
+					}
+					if (modern == null) {
+						log.error("No modern UI available");
+						return;
+					}
+					final ApplicationFrame frame = ui.getApplicationFrame();
+					ApplicationFrame modernFrame = modern.getApplicationFrame();
+					if (!wantIJ1 && modernFrame == null) {
+						modern.show();
+						modernFrame = modern.getApplicationFrame();
+					}
+					if (frame == null || modernFrame == null) {
+						log.error("Application frame missing: " + frame + " / " + modernFrame);
+						return;
+					}
+					frame.setVisible(wantIJ1);
+					modernFrame.setVisible(!wantIJ1);
 				} else {
-					appFrame.setVisible(!wantIJ1);
+					final ApplicationFrame appFrame =
+						ui == null ? null : ui.getApplicationFrame();
+					if (appFrame == null) {
+						if (ui != null && !wantIJ1) uiService.showUI();
+					} else {
+						appFrame.setVisible(!wantIJ1);
+					}
 				}
 			}
 
