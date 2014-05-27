@@ -31,15 +31,24 @@
 
 package net.imagej.legacy.plugin;
 
+import ij.ImagePlus;
+import ij.WindowManager;
+
+import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
+import java.util.HashMap;
+import java.util.Map.Entry;
 
+import javax.script.Bindings;
 import javax.script.ScriptException;
 
 import net.imagej.legacy.IJ1Helper;
 
+import org.scijava.module.ModuleItem;
 import org.scijava.script.AbstractScriptEngine;
+import org.scijava.script.ScriptModule;
 
 /**
  * An almost JSR-223-compliant script engine for the ImageJ 1.x macro language.
@@ -55,6 +64,13 @@ import org.scijava.script.AbstractScriptEngine;
 public class IJ1MacroEngine extends AbstractScriptEngine {
 
 	private final IJ1Helper ij1Helper;
+	private ScriptModule module;
+
+	private static ThreadLocal<Bindings> outputs = new ThreadLocal<Bindings>();
+
+	public static void setOutput(final String key, final String value) {
+		outputs.get().put(key, value);
+	}
 
 	/**
 	 * Constructs an ImageJ 1.x macro engine.
@@ -64,11 +80,62 @@ public class IJ1MacroEngine extends AbstractScriptEngine {
 	 */
 	public IJ1MacroEngine(final IJ1Helper ij1Helper) {
 		this.ij1Helper = ij1Helper;
+		engineScopeBindings = new IJ1MacroBindings();
 	}
 
 	@Override
 	public Object eval(final String macro) throws ScriptException {
-		return ij1Helper.runMacro(macro);
+		final Integer noResult = 0xfeedbabe;
+		final StringBuilder pre = new StringBuilder().append("result = ").append(noResult).append("\n");
+		final StringBuilder post = new StringBuilder();
+		if (module != null) {
+			for (final Entry<String, Object> entry : module.getInputs().entrySet()) {
+				final String key = entry.getKey();
+				Object value = entry.getValue();
+				if (value == null) continue;
+				if (value instanceof ImagePlus) {
+					value = ((ImagePlus) value).getID();
+				} else if (value instanceof File) {
+					value = ((File) value).getAbsolutePath();
+				}
+				if (value instanceof Number) {
+					pre.append(key).append(" = ").append(value).append(";\n");
+				} else {
+					String quoted = quote(value.toString());
+					pre.append(key).append(" = \"").append(quoted).append("\";\n");
+				}
+			}
+
+			outputs.set(engineScopeBindings);
+			for (final Entry<String, Object> entry : module.getOutputs().entrySet()) {
+				post.append("call(\"").append(getClass().getName()).append(".setOutput\", \"");
+				post.append(entry.getKey()).append("\", ");
+				post.append(entry.getKey()).append(");\n");
+			}
+		}
+
+		final String result = ij1Helper.runMacro(pre.toString() + macro + post.toString());
+		if (module != null) {
+			if (noResult.equals(get("result"))) put("result", null);
+			// No need to convert the outputs except for ImagePlus instances;
+			// ScriptModule.run() does that for us already!
+			for (final ModuleItem<?> item : module.getInfo().outputs()) {
+				if (ImagePlus.class.isAssignableFrom(item.getType())) {
+					final String name = item.getName();
+					final int imageID = Integer.parseInt((String) get(name));
+					put(name, WindowManager.getImage(imageID));
+				}
+			}
+			outputs.remove();
+		}
+		return result;
+	}
+
+	private String quote(final String value) {
+		String quoted = value.replaceAll("([\"\\\\])", "\\\\$1");
+		quoted = quoted.replaceAll("\f", "\\\\f").replaceAll("\n", "\\\\n");
+		quoted = quoted.replaceAll("\r", "\\\\r").replaceAll("\t", "\\\\t");
+		return quoted;
 	}
 
 	@Override
@@ -92,19 +159,12 @@ public class IJ1MacroEngine extends AbstractScriptEngine {
 
 	@Override
 	public void put(final String key, final Object value) {
-		if (FILENAME.equals(key)) {
-			return; // ignore
+		if (ScriptModule.class.getName().equals(key)) {
+			module = (ScriptModule) value;
+			return;
 		}
-		final String message = "Unhandled key: " + key + ": " + value;
-		final Writer writer = getContext().getErrorWriter();
-		if (writer != null) {
-			try {
-				writer.write(message + "\n");
-				return;
-			} catch (final IOException e) {
-				e.printStackTrace();
-			}
-		}
-		System.err.println(message);
+		engineScopeBindings.put(key, value);
 	}
+
+	private static class IJ1MacroBindings extends HashMap<String, Object> implements Bindings {}
 }
