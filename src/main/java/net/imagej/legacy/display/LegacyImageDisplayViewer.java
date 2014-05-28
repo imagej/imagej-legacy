@@ -54,7 +54,7 @@ import org.scijava.ui.viewer.DisplayWindow;
 /**
  * Default {@link ImageDisplayViewer} implementation for viewing the IJ2
  * {@link Dataset} and {@link Data} outputs via an {@link ImagePlus}.
- *
+ * 
  * @author Mark Hiner
  */
 @Plugin(type = DisplayViewer.class, priority = Priority.HIGH_PRIORITY)
@@ -63,10 +63,10 @@ public class LegacyImageDisplayViewer extends AbstractImageDisplayViewer
 {
 
 	@Parameter
-	LegacyService legacyService;
+	private LegacyService legacyService;
 
 	@Parameter
-	DisplayService displayService;
+	private DisplayService displayService;
 
 	@Parameter
 	LogService logService;

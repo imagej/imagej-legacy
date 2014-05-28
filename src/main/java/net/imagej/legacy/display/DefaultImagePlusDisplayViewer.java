@@ -42,7 +42,7 @@ import org.scijava.ui.viewer.DisplayWindow;
 /**
  * Default {@link ImagePlusDisplayViewer} implementation. Compatible with the
  * {@link LegacyUI}.
- *
+ * 
  * @author Mark Hiner
  */
 @Plugin(type = DisplayViewer.class)

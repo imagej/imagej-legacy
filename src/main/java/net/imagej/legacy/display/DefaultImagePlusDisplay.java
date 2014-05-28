@@ -39,7 +39,7 @@ import org.scijava.plugin.Plugin;
 
 /**
  * Default {@link ImagePlusDisplay} implementation.
- *
+ * 
  * @author Mark Hiner
  */
 @Plugin(type = Display.class)

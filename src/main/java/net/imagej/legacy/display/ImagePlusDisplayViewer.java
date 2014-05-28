@@ -28,6 +28,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+
 package net.imagej.legacy.display;
 
 import ij.ImagePlus;
@@ -37,7 +38,7 @@ import org.scijava.ui.viewer.DisplayViewer;
 /**
  * Marker interface for {@link DisplayViewer} implementations that will be
  * displaying {@link ImagePlus}es.
- *
+ * 
  * @author Mark Hiner
  */
 public interface ImagePlusDisplayViewer extends DisplayViewer<ImagePlus>,

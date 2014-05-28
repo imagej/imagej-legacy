@@ -39,9 +39,9 @@ import org.scijava.ui.viewer.DisplayViewer;
 import org.scijava.ui.viewer.DisplayWindow;
 
 /**
- * Abstract {@link DisplayViewer} for displaying {@link ImagePlus}es.
- * Just delegates to their {@code show} method.
- *
+ * Abstract {@link DisplayViewer} for displaying {@link ImagePlus}es. Just
+ * delegates to their {@code show} method.
+ * 
  * @author Mark Hiner
  */
 public abstract class AbstractImagePlusDisplayViewer extends

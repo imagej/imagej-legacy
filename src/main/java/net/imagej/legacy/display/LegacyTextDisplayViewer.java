@@ -46,29 +46,29 @@ import org.scijava.ui.viewer.text.AbstractTextDisplayViewer;
 import org.scijava.ui.viewer.text.TextDisplayViewer;
 
 /**
- * ImageJ1 implementation of a {@link TextDisplayViewer}. Passes text outputs
- * to ImageJ1 as messages.
+ * ImageJ1 implementation of a {@link TextDisplayViewer}. Passes text outputs to
+ * ImageJ1 as messages.
  * 
  * @author Mark Hiner
  */
 @Plugin(type = DisplayViewer.class, priority = Priority.HIGH_PRIORITY)
-public class LegacyTextDisplayViewer extends AbstractTextDisplayViewer implements
-	LegacyDisplayViewer
+public class LegacyTextDisplayViewer extends AbstractTextDisplayViewer
+	implements LegacyDisplayViewer
 {
 
 	@Parameter
-	DefaultLegacyService legacyService;
+	private DefaultLegacyService legacyService;
 
 	@Override
 	public void view(final DisplayWindow w, final Display<?> d) {
-		TextDisplay textDisplay = (TextDisplay) d;
-		for (String message : textDisplay) {
-			legacyService.getIJ1Helper().showMessage("",  message);
+		final TextDisplay textDisplay = (TextDisplay) d;
+		for (final String message : textDisplay) {
+			legacyService.getIJ1Helper().showMessage("", message);
 		}
 	}
 
 	@Override
-	public boolean isCompatible(UserInterface ui) {
+	public boolean isCompatible(final UserInterface ui) {
 		return ui instanceof LegacyUI;
 	}
 
