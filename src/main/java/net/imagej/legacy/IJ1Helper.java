@@ -69,6 +69,7 @@ import net.imagej.patcher.LegacyHooks;
 
 import org.scijava.AbstractContextual;
 import org.scijava.Context;
+import org.scijava.MenuEntry;
 import org.scijava.command.CommandInfo;
 import org.scijava.event.EventHandler;
 import org.scijava.log.LogService;
@@ -439,7 +440,9 @@ public class IJ1Helper extends AbstractContextual {
 		final ImageJ ij1 = getIJ();
 		final IJ1MenuWrapper wrapper = ij1 == null ? null : new IJ1MenuWrapper(ij1);
 		for (final CommandInfo info : commands) {
-			final String name = info.getMenuPath().getLeaf().getName();
+			final MenuEntry leaf = info.getMenuPath().getLeaf();
+			if (leaf == null) continue;
+			final String name = leaf.getName();
 			if (!ij1Commands.containsKey(name)) {
 				final String path = info.getMenuPath().getMenuString();
 				if (wrapper != null) wrapper.create(path);
