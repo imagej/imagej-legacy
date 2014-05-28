@@ -123,35 +123,35 @@ public class IJ1Helper extends AbstractContextual {
 			for (int i = 1; i <= WindowManager.getImageCount(); i++) {
 				imageMap.registerLegacyImage(WindowManager.getImage(i));
 			}
-		}
 
-		// set icon and title of main window (which are instantiated before the
-		// initializer is called)
-		try {
-			final LegacyHooks hooks =
-				(LegacyHooks) IJ.class.getField("_hooks").get(null);
-			ij1.setTitle(hooks.getAppName());
-			final URL iconURL = hooks.getIconURL();
-			if (iconURL != null) try {
-				final Object producer = iconURL.getContent();
-				final Image image = ij1.createImage((ImageProducer) producer);
-				ij1.setIconImage(image);
-				if (IJ.isMacOSX()) try {
-					// NB: We also need to set the dock icon
-					final Class<?> clazz = Class.forName("com.apple.eawt.Application");
-					final Object app = clazz.getMethod("getApplication").invoke(null);
-					clazz.getMethod("setDockIconImage", Image.class).invoke(app, image);
+			// set icon and title of main window (which are instantiated before the
+			// initializer is called)
+			try {
+				final LegacyHooks hooks =
+					(LegacyHooks) IJ.class.getField("_hooks").get(null);
+				ij1.setTitle(hooks.getAppName());
+				final URL iconURL = hooks.getIconURL();
+				if (iconURL != null) try {
+					final Object producer = iconURL.getContent();
+					final Image image = ij1.createImage((ImageProducer) producer);
+					ij1.setIconImage(image);
+					if (IJ.isMacOSX()) try {
+						// NB: We also need to set the dock icon
+						final Class<?> clazz = Class.forName("com.apple.eawt.Application");
+						final Object app = clazz.getMethod("getApplication").invoke(null);
+						clazz.getMethod("setDockIconImage", Image.class).invoke(app, image);
+					}
+					catch (final Throwable t) {
+						t.printStackTrace();
+					}
 				}
-				catch (final Throwable t) {
-					t.printStackTrace();
+				catch (final IOException e) {
+					IJ.handleException(e);
 				}
 			}
-			catch (final IOException e) {
-				IJ.handleException(e);
+			catch (final Throwable t) {
+				t.printStackTrace();
 			}
-		}
-		catch (final Throwable t) {
-			t.printStackTrace();
 		}
 	}
 
