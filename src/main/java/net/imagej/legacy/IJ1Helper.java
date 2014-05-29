@@ -507,9 +507,26 @@ public class IJ1Helper extends AbstractContextual {
 				}
 			}
 			final MenuItem item = new MenuItem(label);
-			menu.add(item);
+			menu.insert(item, getIndex(menu, label));
 			item.addActionListener(ij1);
 			return item;
+		}
+
+		/**
+		 * Helper method to look up special cases for menu weighting
+		 */
+		private int getIndex(Menu menu, String label) {
+					// Place export sub-menu after import sub-menu
+			if (menu.getLabel().equals("File") && label.equals("Export")) {
+				for (int i=0; i<menu.getItemCount(); i++) {
+					final MenuItem menuItem = menu.getItem(i);
+					if (menuItem.getLabel().equals("Import")) return i + 1;
+				}
+			}
+
+			//TODO pass and use actual command weight from IJ2.. maybe?
+			// No special case: append to end of menu
+			return menu.getItemCount();
 		}
 
 		/**
@@ -568,7 +585,8 @@ public class IJ1Helper extends AbstractContextual {
 			// An existing entry in the parent menu was not found, so we need to
 			// create a new entry.
 			final Menu menu = new Menu(name);
-			parent.add(menu);
+			parent.insert(menu, getIndex(parent, menu.getLabel()));
+
 			structure.put(path, menu);
 			return menu;
 		}
