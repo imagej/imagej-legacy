@@ -78,6 +78,7 @@ import org.scijava.platform.event.AppOpenFilesEvent;
 import org.scijava.platform.event.AppPreferencesEvent;
 import org.scijava.platform.event.AppQuitEvent;
 import org.scijava.plugin.Parameter;
+import org.scijava.util.ClassUtils;
 
 /**
  * A helper class to interact with ImageJ 1.x.
@@ -442,12 +443,26 @@ public class IJ1Helper extends AbstractContextual {
 		for (final CommandInfo info : commands) {
 			final MenuEntry leaf = info.getMenuPath().getLeaf();
 			if (leaf == null) continue;
+			final String path = info.getMenuPath().getMenuString();
 			final String name = leaf.getName();
-			if (!ij1Commands.containsKey(name)) {
-				final String path = info.getMenuPath().getMenuString();
-				if (wrapper != null) wrapper.create(path);
-				ij1Commands.put(name, info.getDelegateClassName());
+			if (ij1Commands.containsKey(name)) {
+				legacyService.log().info("Overriding " + name
+					+ "; class: " + info.getDelegateClassName()
+					+ "; jar: " + ClassUtils.getLocation(info.getDelegateClassName()));
+				if (wrapper != null) try {
+					wrapper.create(path, true);
+				}
+				catch (final Throwable t) {
+					legacyService.log().error(t);
+				}
 			}
+			else if (wrapper != null) try {
+				wrapper.create(path, false);
+			}
+			catch (final Throwable t) {
+				legacyService.log().error(t);
+			}
+			ij1Commands.put(name, info.getDelegateClassName());
 		}
 	}
 
@@ -478,11 +493,20 @@ public class IJ1Helper extends AbstractContextual {
 		 * <ul>Edit > Options > ImageJ2 plugins > Discombobulator</ul>
 		 * </p>
 		 */
-		private MenuItem create(final String path) {
+		private MenuItem create(final String path, final boolean reuseExisting) {
 			final int gt = path.lastIndexOf('>');
 			if (gt < 0) throw new IllegalArgumentException("Not a valid menu path: " + path);
 			final Menu menu = get(path.substring(0, gt));
-			final MenuItem item = new MenuItem(path.substring(gt + 1).trim());
+			final String label = path.substring(gt + 1).trim();
+			if (reuseExisting) {
+				for (int i = 0; i < menu.getItemCount(); i++) {
+					final MenuItem item = menu.getItem(i);
+					if (label.equals(item.getLabel())) {
+						return item;
+					}
+				}
+			}
+			final MenuItem item = new MenuItem(label);
 			menu.add(item);
 			item.addActionListener(ij1);
 			return item;
