@@ -65,9 +65,12 @@ import org.scijava.display.event.input.KyPressedEvent;
 import org.scijava.display.event.input.KyReleasedEvent;
 import org.scijava.event.EventHandler;
 import org.scijava.event.EventService;
+import org.scijava.input.Accelerator;
 import org.scijava.input.KeyCode;
 import org.scijava.log.LogService;
 import org.scijava.menu.MenuService;
+import org.scijava.module.Module;
+import org.scijava.module.ModuleInfo;
 import org.scijava.module.ModuleService;
 import org.scijava.options.OptionsService;
 import org.scijava.options.event.OptionsEvent;
@@ -544,6 +547,15 @@ public final class DefaultLegacyService extends AbstractService implements
 			}
 		}
 		ij1Helper.addMenuItems(commands);
+	}
+
+	boolean handleShortcut(final String accelerator) {
+		final Accelerator acc = Accelerator.create(accelerator);
+		if (acc == null) return false;
+		final ModuleInfo module = moduleService.getModuleForAccelerator(acc);
+		if (module == null || module.is("no-legacy")) return false;
+		moduleService.run(module, true);
+		return true;
 	}
 
 	public synchronized UIService uiService() {
