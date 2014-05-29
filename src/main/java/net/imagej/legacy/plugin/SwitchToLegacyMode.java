@@ -36,6 +36,7 @@ import net.imagej.legacy.LegacyService;
 
 import org.scijava.command.Command;
 import org.scijava.command.ContextCommand;
+import org.scijava.plugin.Attr;
 import org.scijava.plugin.Menu;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
@@ -48,7 +49,7 @@ import org.scijava.plugin.Plugin;
  * @author Johannes Schindelin
  */
 @Plugin(type = Command.class, menu = { @Menu(label = "Help"),
-	@Menu(label = "Switch to Legacy Mode") })
+	@Menu(label = "Switch to Legacy Mode") }, attrs = { @Attr(name = "no-legacy") })
 public class SwitchToLegacyMode extends ContextCommand {
 
 	@Parameter
