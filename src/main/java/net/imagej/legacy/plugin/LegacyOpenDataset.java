@@ -35,7 +35,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 import net.imagej.Dataset;
-import net.imagej.DefaultOpenDataset;
 import net.imagej.OpenDataset;
 
 import org.scijava.Priority;
@@ -54,7 +53,7 @@ import org.scijava.widget.Button;
  */
 @Plugin(type = OpenDataset.class, menuPath = "File > Import > Image",
 	label = "Select import options...", priority = Priority.HIGH_PRIORITY)
-public class LegacyOpenDataset extends DefaultOpenDataset {
+public class LegacyOpenDataset extends OpenDataset {
 
 	@Parameter
 	private LogService logService;
