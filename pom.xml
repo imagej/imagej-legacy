@@ -15,6 +15,11 @@
 	<name>ImageJ Legacy Bridge</name>
 	<description>The legacy component enables backward compatibility with the legacy version of ImageJ (1.x). It contains the code necessary to translate ImageJ images into ImageJ1 format and back, so that legacy plugins can be executed faithfully.</description>
 
+	<properties>
+		<!-- TEMP: only needed until pom-imagej 2.16 comes out -->
+		<ij1-patcher.version>0.5.1-SNAPSHOT</ij1-patcher.version>
+	</properties>
+
 	<scm>
 		<connection>scm:git:git://github.com/imagej/imagej-legacy</connection>
 		<developerConnection>scm:git:git@github.com:imagej/imagej-legacy</developerConnection>
