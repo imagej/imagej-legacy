@@ -98,6 +98,11 @@
 
 		<!-- Optional SciJava dependencies -->
 		<dependency>
+			<groupId>org.scijava</groupId>
+			<artifactId>scripting-beanshell</artifactId>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
 			<groupId>net.imagej</groupId>
 			<artifactId>imagej-ui-swing</artifactId>
 			<optional>true</optional>
