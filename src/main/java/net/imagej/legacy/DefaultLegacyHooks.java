@@ -33,6 +33,7 @@ package net.imagej.legacy;
 
 import ij.ImagePlus;
 
+import java.awt.event.KeyEvent;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
@@ -41,6 +42,8 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.Date;
 import java.util.List;
+
+import javax.swing.KeyStroke;
 
 import net.imagej.display.ImageDisplay;
 import net.imagej.legacy.plugin.LegacyAppConfiguration;
@@ -402,4 +405,15 @@ public class DefaultLegacyHooks extends LegacyHooks {
 		}
 		return null;
 	}	
+
+	/** @inherit */
+	@Override
+	public boolean interceptKeyPressed(final KeyEvent e) {
+		String accelerator = KeyStroke.getKeyStrokeForEvent(e).toString();
+		if (accelerator.startsWith("pressed ")) {
+			accelerator = accelerator.substring("pressed ".length());
+		}
+		return legacyService.handleShortcut(accelerator) ||
+				(!e.isControlDown() && legacyService.handleShortcut("control " + accelerator));
+	}
 }
