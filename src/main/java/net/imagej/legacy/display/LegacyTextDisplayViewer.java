@@ -31,38 +31,45 @@
 
 package net.imagej.legacy.display;
 
-import ij.ImagePlus;
+import net.imagej.legacy.DefaultLegacyService;
+import net.imagej.legacy.ui.LegacyUI;
 
+import org.scijava.Priority;
 import org.scijava.display.Display;
-import org.scijava.ui.viewer.AbstractDisplayViewer;
+import org.scijava.display.TextDisplay;
+import org.scijava.plugin.Parameter;
+import org.scijava.plugin.Plugin;
+import org.scijava.ui.UserInterface;
 import org.scijava.ui.viewer.DisplayViewer;
 import org.scijava.ui.viewer.DisplayWindow;
+import org.scijava.ui.viewer.text.AbstractTextDisplayViewer;
+import org.scijava.ui.viewer.text.TextDisplayViewer;
 
 /**
- * Abstract {@link DisplayViewer} for displaying {@link ImagePlus}es. Just
- * delegates to their {@code show} method.
+ * ImageJ1 implementation of a {@link TextDisplayViewer}. Passes text outputs to
+ * ImageJ1 as messages.
  * 
  * @author Mark Hiner
  */
-public abstract class AbstractImagePlusDisplayViewer extends
-	AbstractDisplayViewer<ImagePlus> implements ImagePlusDisplayViewer
+@Plugin(type = DisplayViewer.class, priority = Priority.HIGH_PRIORITY)
+public class LegacyTextDisplayViewer extends AbstractTextDisplayViewer
+	implements LegacyDisplayViewer
 {
 
-	@Override
-	public boolean canView(final Display<?> d) {
-		return d instanceof ImagePlusDisplay;
-	}
+	@Parameter
+	private DefaultLegacyService legacyService;
 
 	@Override
 	public void view(final DisplayWindow w, final Display<?> d) {
-		final ImagePlusDisplay impDisplay = (ImagePlusDisplay) d;
-		for (final ImagePlus imp : impDisplay) {
-			imp.show();
+		final TextDisplay textDisplay = (TextDisplay) d;
+		for (final String message : textDisplay) {
+			legacyService.getIJ1Helper().showMessage("", message);
 		}
 	}
 
 	@Override
-	public ImagePlusDisplay getDisplay() {
-		return (ImagePlusDisplay) super.getDisplay();
+	public boolean isCompatible(final UserInterface ui) {
+		return ui instanceof LegacyUI;
 	}
+
 }

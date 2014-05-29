@@ -28,41 +28,54 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+package net.imagej.legacy.plugin;
 
-package net.imagej.legacy.display;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 
-import ij.ImagePlus;
+import net.imagej.Dataset;
+import net.imagej.DefaultOpenDataset;
+import net.imagej.OpenDataset;
 
-import org.scijava.display.Display;
-import org.scijava.ui.viewer.AbstractDisplayViewer;
-import org.scijava.ui.viewer.DisplayViewer;
-import org.scijava.ui.viewer.DisplayWindow;
+import org.scijava.Priority;
+import org.scijava.command.Command;
+import org.scijava.log.LogService;
+import org.scijava.platform.PlatformService;
+import org.scijava.plugin.Parameter;
+import org.scijava.plugin.Plugin;
+import org.scijava.widget.Button;
 
 /**
- * Abstract {@link DisplayViewer} for displaying {@link ImagePlus}es. Just
- * delegates to their {@code show} method.
+ * {@link Command} for opening a {@link Dataset}. Provides configuration
+ * options for the import process.
  * 
  * @author Mark Hiner
  */
-public abstract class AbstractImagePlusDisplayViewer extends
-	AbstractDisplayViewer<ImagePlus> implements ImagePlusDisplayViewer
-{
+@Plugin(type = OpenDataset.class, menuPath = "File > Import > Image",
+	label = "Select import options...", priority = Priority.HIGH_PRIORITY)
+public class LegacyOpenDataset extends DefaultOpenDataset {
 
-	@Override
-	public boolean canView(final Display<?> d) {
-		return d instanceof ImagePlusDisplay;
-	}
+	@Parameter
+	private LogService logService;
 
-	@Override
-	public void view(final DisplayWindow w, final Display<?> d) {
-		final ImagePlusDisplay impDisplay = (ImagePlusDisplay) d;
-		for (final ImagePlus imp : impDisplay) {
-			imp.show();
+	@Parameter
+	private PlatformService platformService;
+
+	@Parameter(label = "Read more...", callback = "readMore")
+	private Button button;
+
+	// Button press callback method
+	@SuppressWarnings("unused")
+	private void readMore() {
+		try {
+			platformService.open(new URI("http://fiji.sc/SCIFIO_in_ImageJ") .toURL());
 		}
-	}
-
-	@Override
-	public ImagePlusDisplay getDisplay() {
-		return (ImagePlusDisplay) super.getDisplay();
+		catch (IOException e) {
+			logService.error(e);
+		}
+		catch (URISyntaxException e) {
+			logService.error(e);
+		}
 	}
 }

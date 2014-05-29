@@ -36,9 +36,9 @@ import ij.ImagePlus;
 import org.scijava.display.Display;
 
 /**
- * Marker interface for  {@link Display} implementations that will be displaying
+ * Marker interface for {@link Display} implementations that will be displaying
  * {@link ImagePlus}es.
- *
+ * 
  * @author Mark Hiner
  */
 public interface ImagePlusDisplay extends Display<ImagePlus> {

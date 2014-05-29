@@ -39,6 +39,7 @@ import java.lang.reflect.InvocationTargetException;
 import javax.swing.SwingUtilities;
 
 import org.scijava.Context;
+import org.scijava.ui.UIService;
 
 /**
  * The <i>ij1-patcher</i> defaults to running this class whenever a new
@@ -81,7 +82,12 @@ public class LegacyInitializer implements Runnable {
 			 * If no legacy hooks are installed, ImageJ 1.x will instantiate the Context using
 			 * the PluginClassLoader and the LegacyService will install the legacy hooks. 
 			 */
-			IJ.runPlugIn(Context.class.getName(), null);
+			final Context context =
+				(Context) IJ.runPlugIn(Context.class.getName(), null);
+			if (context != null) {
+				final UIService ui = context.getService(UIService.class);
+				if (ui != null) ui.showUI();
+			}
 		}
 		catch (final Throwable t) {
 			// do nothing; we're not in the PluginClassLoader's class path

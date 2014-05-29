@@ -29,40 +29,47 @@
  * #L%
  */
 
-package net.imagej.legacy.display;
+package net.imagej.legacy;
 
-import ij.ImagePlus;
-
-import org.scijava.display.Display;
-import org.scijava.ui.viewer.AbstractDisplayViewer;
-import org.scijava.ui.viewer.DisplayViewer;
-import org.scijava.ui.viewer.DisplayWindow;
+import org.scijava.command.Command;
+import org.scijava.menu.MenuConstants;
+import org.scijava.options.OptionsPlugin;
+import org.scijava.plugin.Menu;
+import org.scijava.plugin.Parameter;
+import org.scijava.plugin.Plugin;
 
 /**
- * Abstract {@link DisplayViewer} for displaying {@link ImagePlus}es. Just
- * delegates to their {@code show} method.
+ * Allows the setting and persisting of options relevant to ImageJ2, in ImageJ1.
+ * Not displayed in the IJ2 UI.
  * 
  * @author Mark Hiner
  */
-public abstract class AbstractImagePlusDisplayViewer extends
-	AbstractDisplayViewer<ImagePlus> implements ImagePlusDisplayViewer
+@Plugin(type = ImageJ2Options.class, visible = false,
+	label = "ImageJ2 Options", menu = {
+		@Menu(label = MenuConstants.EDIT_LABEL, weight = MenuConstants.EDIT_WEIGHT,
+			mnemonic = MenuConstants.EDIT_MNEMONIC), @Menu(label = "Options"),
+		@Menu(label = "ImageJ2") })
+public class ImageJ2Options extends OptionsPlugin implements Command
 {
 
-	@Override
-	public boolean canView(final Display<?> d) {
-		return d instanceof ImagePlusDisplay;
-	}
+	// Constants for field lookup
 
-	@Override
-	public void view(final DisplayWindow w, final Display<?> d) {
-		final ImagePlusDisplay impDisplay = (ImagePlusDisplay) d;
-		for (final ImagePlus imp : impDisplay) {
-			imp.show();
-		}
-	}
+	public static final String USE_SCIFIO = "useSCIFIO";
 
-	@Override
-	public ImagePlusDisplay getDisplay() {
-		return (ImagePlusDisplay) super.getDisplay();
+	// Fields
+
+	/**
+	 * If true, SCIFIO will be used during {@code File > Open} IJ1 calls.
+	 */
+	@Parameter(label = "Use SCIFIO for File > Open")
+	private Boolean useSCIFIO = true;
+
+	@Parameter()
+	private DefaultLegacyService legacyService;
+
+	// -- Option accessors --
+
+	public Boolean isUseSCIFIO() {
+		return useSCIFIO;
 	}
 }
