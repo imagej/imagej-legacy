@@ -48,8 +48,13 @@ import org.scijava.Context;
  */
 public class LegacyInitializer implements Runnable {
 
+	private final static ThreadLocal<Class<?>> semaphore =
+			new ThreadLocal<Class<?>>();
+
 	@Override
 	public void run() {
+		if (getClass() == semaphore.get()) return;
+		semaphore.set(getClass());
 		final ClassLoader loader = IJ.getClassLoader();
 		Thread.currentThread().setContextClassLoader(loader);
 		if (!GraphicsEnvironment.isHeadless() &&
@@ -81,6 +86,9 @@ public class LegacyInitializer implements Runnable {
 		catch (final Throwable t) {
 			// do nothing; we're not in the PluginClassLoader's class path
 			return;
+		}
+		finally {
+			semaphore.remove();
 		}
 	}
 
