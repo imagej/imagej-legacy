@@ -42,6 +42,7 @@ import net.imagej.patcher.LegacyEnvironment;
 import net.imagej.patcher.LegacyInjector;
 
 import org.junit.Test;
+import org.scijava.annotations.EclipseHelper;
 
 /**
  * Ensures that <i>Help>Switch to Modern Mode</i> in patched ImageJ 1.x works as
@@ -61,6 +62,7 @@ public class SwitchToModernTest {
 
 		final Thread thread = Thread.currentThread();
 		final ClassLoader savedContextClassLoader = thread.getContextClassLoader();
+		EclipseHelper.updateAnnotationIndex(savedContextClassLoader);
 
 		try {
 			final ClassLoader thisLoader = getClass().getClassLoader();
