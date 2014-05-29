@@ -155,6 +155,7 @@ public final class DefaultLegacyService extends AbstractService implements
 	private UIService uiService;
 
 	private static DefaultLegacyService instance;
+	private static Throwable instantiationStackTrace;
 
 	/** Mapping between modern and legacy image data structures. */
 	private LegacyImageMap imageMap;
@@ -337,6 +338,7 @@ public final class DefaultLegacyService extends AbstractService implements
 		synchronized (DefaultLegacyService.class) {
 			checkInstance();
 			instance = this;
+			instantiationStackTrace = new Throwable("Initialized here:");
 			LegacyInjector.installHooks(getClass().getClassLoader(), new DefaultLegacyHooks(this, ij1Helper));
 		}
 
@@ -391,7 +393,10 @@ public final class DefaultLegacyService extends AbstractService implements
 		ij1Helper.dispose();
 
 		LegacyInjector.installHooks(getClass().getClassLoader(), null);
-		instance = null;
+		synchronized(DefaultLegacyService.class) {
+			instance = null;
+			instantiationStackTrace = null;
+		}
 	}
 
 	// -- Event handlers --
@@ -495,7 +500,7 @@ public final class DefaultLegacyService extends AbstractService implements
 	private void checkInstance() {
 		if (instance != null) {
 			throw new UnsupportedOperationException(
-				"Cannot instantiate more than one DefaultLegacyService");
+				"Cannot instantiate more than one DefaultLegacyService", instantiationStackTrace);
 		}
 	}
 
