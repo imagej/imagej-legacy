@@ -35,6 +35,7 @@ import java.awt.GraphicsEnvironment;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -45,7 +46,6 @@ import net.imagej.display.ImageDisplay;
 import net.imagej.display.ImageDisplayService;
 import net.imagej.display.OverlayService;
 import net.imagej.legacy.plugin.LegacyCommand;
-import net.imagej.legacy.plugin.LegacyCompatibleCommand;
 import net.imagej.legacy.plugin.LegacyPluginFinder;
 import net.imagej.legacy.ui.LegacyUI;
 import net.imagej.options.OptionsChannels;
@@ -56,6 +56,7 @@ import net.imagej.ui.viewer.image.ImageDisplayViewer;
 
 import org.scijava.Priority;
 import org.scijava.app.StatusService;
+import org.scijava.command.Command;
 import org.scijava.command.CommandInfo;
 import org.scijava.command.CommandService;
 import org.scijava.display.DisplayService;
@@ -155,6 +156,7 @@ public final class DefaultLegacyService extends AbstractService implements
 	private UIService uiService;
 
 	private static DefaultLegacyService instance;
+	private static Throwable instantiationStackTrace;
 
 	/** Mapping between modern and legacy image data structures. */
 	private LegacyImageMap imageMap;
@@ -337,6 +339,7 @@ public final class DefaultLegacyService extends AbstractService implements
 		synchronized (DefaultLegacyService.class) {
 			checkInstance();
 			instance = this;
+			instantiationStackTrace = new Throwable("Initialized here:");
 			LegacyInjector.installHooks(getClass().getClassLoader(), new DefaultLegacyHooks(this, ij1Helper));
 		}
 
@@ -344,7 +347,7 @@ public final class DefaultLegacyService extends AbstractService implements
 
 		SwitchToModernMode.registerMenuItem();
 
-		addLegacyCompatibleCommands();
+		addNonLegacyCommandsToMenu();
 
 		// discover legacy plugins
 		final boolean enableBlacklist = true;
@@ -391,7 +394,10 @@ public final class DefaultLegacyService extends AbstractService implements
 		ij1Helper.dispose();
 
 		LegacyInjector.installHooks(getClass().getClassLoader(), null);
-		instance = null;
+		synchronized(DefaultLegacyService.class) {
+			instance = null;
+			instantiationStackTrace = null;
+		}
 	}
 
 	// -- Event handlers --
@@ -495,7 +501,7 @@ public final class DefaultLegacyService extends AbstractService implements
 	private void checkInstance() {
 		if (instance != null) {
 			throw new UnsupportedOperationException(
-				"Cannot instantiate more than one DefaultLegacyService");
+				"Cannot instantiate more than one DefaultLegacyService", instantiationStackTrace);
 		}
 	}
 
@@ -524,13 +530,20 @@ public final class DefaultLegacyService extends AbstractService implements
 	 * nested menu structure of each {@code LegacyCompatibleCommand} is
 	 * preserved.
 	 */
-	private void addLegacyCompatibleCommands() {
-		List<CommandInfo> commands = commandService.getCommandsOfType(LegacyCompatibleCommand.class);
-		ij1Helper.addMenuItems(commands);
+	private void addNonLegacyCommandsToMenu() {
+		List<CommandInfo> commands =
+			commandService.getCommandsOfType(Command.class);
 		legacyCompatibleCommands = new HashSet<String>();
-		for (final CommandInfo info : commands) {
-			legacyCompatibleCommands.add(info.getDelegateClassName());
+		for (final Iterator<CommandInfo> iter = commands.iterator(); iter.hasNext(); ) {
+			final CommandInfo info = iter.next();
+			if (info.getMenuPath().size() == 0 || info.is("no-legacy")) {
+				iter.remove();
+			}
+			else {
+				legacyCompatibleCommands.add(info.getDelegateClassName());
+			}
 		}
+		ij1Helper.addMenuItems(commands);
 	}
 
 	public synchronized UIService uiService() {

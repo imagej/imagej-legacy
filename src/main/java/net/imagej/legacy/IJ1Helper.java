@@ -69,6 +69,7 @@ import net.imagej.patcher.LegacyHooks;
 
 import org.scijava.AbstractContextual;
 import org.scijava.Context;
+import org.scijava.MenuEntry;
 import org.scijava.command.CommandInfo;
 import org.scijava.event.EventHandler;
 import org.scijava.log.LogService;
@@ -77,6 +78,7 @@ import org.scijava.platform.event.AppOpenFilesEvent;
 import org.scijava.platform.event.AppPreferencesEvent;
 import org.scijava.platform.event.AppQuitEvent;
 import org.scijava.plugin.Parameter;
+import org.scijava.util.ClassUtils;
 
 /**
  * A helper class to interact with ImageJ 1.x.
@@ -123,35 +125,35 @@ public class IJ1Helper extends AbstractContextual {
 			for (int i = 1; i <= WindowManager.getImageCount(); i++) {
 				imageMap.registerLegacyImage(WindowManager.getImage(i));
 			}
-		}
 
-		// set icon and title of main window (which are instantiated before the
-		// initializer is called)
-		try {
-			final LegacyHooks hooks =
-				(LegacyHooks) IJ.class.getField("_hooks").get(null);
-			ij1.setTitle(hooks.getAppName());
-			final URL iconURL = hooks.getIconURL();
-			if (iconURL != null) try {
-				final Object producer = iconURL.getContent();
-				final Image image = ij1.createImage((ImageProducer) producer);
-				ij1.setIconImage(image);
-				if (IJ.isMacOSX()) try {
-					// NB: We also need to set the dock icon
-					final Class<?> clazz = Class.forName("com.apple.eawt.Application");
-					final Object app = clazz.getMethod("getApplication").invoke(null);
-					clazz.getMethod("setDockIconImage", Image.class).invoke(app, image);
+			// set icon and title of main window (which are instantiated before the
+			// initializer is called)
+			try {
+				final LegacyHooks hooks =
+					(LegacyHooks) IJ.class.getField("_hooks").get(null);
+				ij1.setTitle(hooks.getAppName());
+				final URL iconURL = hooks.getIconURL();
+				if (iconURL != null) try {
+					final Object producer = iconURL.getContent();
+					final Image image = ij1.createImage((ImageProducer) producer);
+					ij1.setIconImage(image);
+					if (IJ.isMacOSX()) try {
+						// NB: We also need to set the dock icon
+						final Class<?> clazz = Class.forName("com.apple.eawt.Application");
+						final Object app = clazz.getMethod("getApplication").invoke(null);
+						clazz.getMethod("setDockIconImage", Image.class).invoke(app, image);
+					}
+					catch (final Throwable t) {
+						t.printStackTrace();
+					}
 				}
-				catch (final Throwable t) {
-					t.printStackTrace();
+				catch (final IOException e) {
+					IJ.handleException(e);
 				}
 			}
-			catch (final IOException e) {
-				IJ.handleException(e);
+			catch (final Throwable t) {
+				t.printStackTrace();
 			}
-		}
-		catch (final Throwable t) {
-			t.printStackTrace();
 		}
 	}
 
@@ -439,12 +441,28 @@ public class IJ1Helper extends AbstractContextual {
 		final ImageJ ij1 = getIJ();
 		final IJ1MenuWrapper wrapper = ij1 == null ? null : new IJ1MenuWrapper(ij1);
 		for (final CommandInfo info : commands) {
-			final String name = info.getMenuPath().getLeaf().getName();
-			if (!ij1Commands.containsKey(name)) {
-				final String path = info.getMenuPath().getMenuString();
-				if (wrapper != null) wrapper.create(path);
-				ij1Commands.put(name, info.getDelegateClassName());
+			final MenuEntry leaf = info.getMenuPath().getLeaf();
+			if (leaf == null) continue;
+			final String path = info.getMenuPath().getMenuString();
+			final String name = leaf.getName();
+			if (ij1Commands.containsKey(name)) {
+				legacyService.log().info("Overriding " + name
+					+ "; class: " + info.getDelegateClassName()
+					+ "; jar: " + ClassUtils.getLocation(info.getDelegateClassName()));
+				if (wrapper != null) try {
+					wrapper.create(path, true);
+				}
+				catch (final Throwable t) {
+					legacyService.log().error(t);
+				}
 			}
+			else if (wrapper != null) try {
+				wrapper.create(path, false);
+			}
+			catch (final Throwable t) {
+				legacyService.log().error(t);
+			}
+			ij1Commands.put(name, info.getDelegateClassName());
 		}
 	}
 
@@ -475,11 +493,20 @@ public class IJ1Helper extends AbstractContextual {
 		 * <ul>Edit > Options > ImageJ2 plugins > Discombobulator</ul>
 		 * </p>
 		 */
-		private MenuItem create(final String path) {
+		private MenuItem create(final String path, final boolean reuseExisting) {
 			final int gt = path.lastIndexOf('>');
 			if (gt < 0) throw new IllegalArgumentException("Not a valid menu path: " + path);
 			final Menu menu = get(path.substring(0, gt));
-			final MenuItem item = new MenuItem(path.substring(gt + 1).trim());
+			final String label = path.substring(gt + 1).trim();
+			if (reuseExisting) {
+				for (int i = 0; i < menu.getItemCount(); i++) {
+					final MenuItem item = menu.getItem(i);
+					if (label.equals(item.getLabel())) {
+						return item;
+					}
+				}
+			}
+			final MenuItem item = new MenuItem(label);
 			menu.add(item);
 			item.addActionListener(ij1);
 			return item;
