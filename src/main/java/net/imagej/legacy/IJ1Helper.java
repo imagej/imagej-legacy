@@ -271,6 +271,27 @@ public class IJ1Helper extends AbstractContextual {
 		return Commands.class.getName();
 	}
 
+	public void updateRecentMenu(final String path) {
+		Menu menu = Menus.getOpenRecentMenu();
+		int n = menu.getItemCount();
+		int index = 0;
+		for (int i=0; i<n; i++) {
+			if (menu.getItem(i).getLabel().equals(path)) {
+				index = i;
+				break;
+			}
+		}
+		if (index>0) {
+			MenuItem item = menu.getItem(index);
+			menu.remove(index);
+			menu.insert(item, 0);
+		}
+		else {
+			menu.remove(menu.getItemCount() - 1);
+			menu.insert(path, 0);
+		}
+	}
+
 	/**
 	 * Gets a macro parameter of type <i>boolean</i>.
 	 * 

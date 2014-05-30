@@ -43,8 +43,8 @@ import java.util.concurrent.Future;
 
 import net.imagej.Dataset;
 import net.imagej.display.ImageDisplay;
+import net.imagej.legacy.DefaultLegacyService;
 import net.imagej.legacy.ImageJ2Options;
-import net.imagej.legacy.LegacyService;
 import net.imagej.legacy.translate.DefaultImageTranslator;
 import net.imagej.legacy.translate.ImageTranslator;
 
@@ -85,7 +85,7 @@ public class DefaultLegacyOpener implements LegacyOpener {
 		ImagePlus imp = null;
 
 		final PluginService pluginService = c.getService(PluginService.class);
-		final LegacyService legacyService = c.getService(LegacyService.class);
+		final DefaultLegacyService legacyService = c.getService(DefaultLegacyService.class);
 		final DisplayService displayService = c.getService(DisplayService.class);
 		final ModuleService moduleService = c.getService(ModuleService.class);
 		final CommandService commandService = c.getService(CommandService.class);
@@ -133,6 +133,8 @@ public class DefaultLegacyOpener implements LegacyOpener {
 				final ImageDisplay imageDisplay =
 					displayService.getActiveDisplay(ImageDisplay.class);
 				imp = legacyService.getImageMap().lookupImagePlus(imageDisplay);
+				legacyService.getIJ1Helper().updateRecentMenu(
+					((Dataset) data).getImgPlus().getSource());
 			}
 			else {
 				// Need to manually register the ImagePlus and return it
