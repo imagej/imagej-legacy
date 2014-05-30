@@ -32,7 +32,6 @@
 package net.imagej.legacy;
 
 import java.awt.GraphicsEnvironment;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -46,7 +45,6 @@ import net.imagej.display.ImageDisplay;
 import net.imagej.display.ImageDisplayService;
 import net.imagej.display.OverlayService;
 import net.imagej.legacy.plugin.LegacyCommand;
-import net.imagej.legacy.plugin.LegacyPluginFinder;
 import net.imagej.legacy.ui.LegacyUI;
 import net.imagej.options.OptionsChannels;
 import net.imagej.patcher.LegacyEnvironment;
@@ -75,7 +73,6 @@ import org.scijava.options.OptionsService;
 import org.scijava.options.event.OptionsEvent;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
-import org.scijava.plugin.PluginInfo;
 import org.scijava.plugin.PluginService;
 import org.scijava.service.AbstractService;
 import org.scijava.service.Service;
@@ -349,10 +346,6 @@ public final class DefaultLegacyService extends AbstractService implements
 		SwitchToModernMode.registerMenuItem();
 
 		addNonLegacyCommandsToMenu();
-
-		// discover legacy plugins
-		final boolean enableBlacklist = true;
-		addLegacyCommands(enableBlacklist);
 	}
 
 	// -- Package protected events processing methods --
@@ -510,20 +503,6 @@ public final class DefaultLegacyService extends AbstractService implements
 
 	private OptionsChannels getChannels() {
 		return optionsService.getOptions(OptionsChannels.class);
-	}
-
-	@SuppressWarnings("unused")
-	private void updateMenus(final boolean enableBlacklist) {
-		pluginService.reloadPlugins();
-		addLegacyCommands(enableBlacklist);
-	}
-
-	private void addLegacyCommands(final boolean enableBlacklist) {
-		final LegacyPluginFinder finder =
-			new LegacyPluginFinder(log, menuService.getMenu(), enableBlacklist);
-		final ArrayList<PluginInfo<?>> plugins = new ArrayList<PluginInfo<?>>();
-		finder.findPlugins(plugins);
-		pluginService.addPlugins(plugins);
 	}
 
 	// -- Menu population --
