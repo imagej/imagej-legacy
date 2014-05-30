@@ -32,7 +32,6 @@
 package net.imagej.legacy;
 
 import java.awt.GraphicsEnvironment;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -46,7 +45,6 @@ import net.imagej.display.ImageDisplay;
 import net.imagej.display.ImageDisplayService;
 import net.imagej.display.OverlayService;
 import net.imagej.legacy.plugin.LegacyCommand;
-import net.imagej.legacy.plugin.LegacyPluginFinder;
 import net.imagej.legacy.ui.LegacyUI;
 import net.imagej.options.OptionsChannels;
 import net.imagej.patcher.LegacyEnvironment;
@@ -69,18 +67,15 @@ import org.scijava.input.Accelerator;
 import org.scijava.input.KeyCode;
 import org.scijava.log.LogService;
 import org.scijava.menu.MenuService;
-import org.scijava.module.Module;
 import org.scijava.module.ModuleInfo;
 import org.scijava.module.ModuleService;
 import org.scijava.options.OptionsService;
 import org.scijava.options.event.OptionsEvent;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
-import org.scijava.plugin.PluginInfo;
 import org.scijava.plugin.PluginService;
 import org.scijava.service.AbstractService;
 import org.scijava.service.Service;
-import org.scijava.service.event.ServicesLoadedEvent;
 import org.scijava.ui.ApplicationFrame;
 import org.scijava.ui.UIService;
 import org.scijava.ui.UserInterface;
@@ -351,10 +346,6 @@ public final class DefaultLegacyService extends AbstractService implements
 		SwitchToModernMode.registerMenuItem();
 
 		addNonLegacyCommandsToMenu();
-
-		// discover legacy plugins
-		final boolean enableBlacklist = true;
-		addLegacyCommands(enableBlacklist);
 	}
 
 	// -- Package protected events processing methods --
@@ -404,10 +395,6 @@ public final class DefaultLegacyService extends AbstractService implements
 	}
 
 	// -- Event handlers --
-
-	protected void onEvent(final ServicesLoadedEvent e) {
-		uiService = getContext().getService(UIService.class);
-	}
 
 	/**
 	 * Keeps the active legacy {@link ij.ImagePlus} in sync with the active modern
@@ -469,6 +456,7 @@ public final class DefaultLegacyService extends AbstractService implements
 	 * 
 	 * @deprecated use {@link LegacyInjector#preinit()} instead
 	 */
+	@Deprecated
 	public static void preinit() {
 		try {
 			getLegacyEnvironment(Thread.currentThread().getContextClassLoader());
@@ -493,8 +481,8 @@ public final class DefaultLegacyService extends AbstractService implements
 
 	/**
 	 * Returns the legacy service associated with the ImageJ 1.x instance in the
-	 * current class loader. This method is intended to be used by the
-	 * {@link CodeHacker}; it is invoked by the javassisted methods.
+	 * current class loader. This method is invoked by the javassisted methods of
+	 * ImageJ 1.x.
 	 * 
 	 * @return the legacy service
 	 */
@@ -517,26 +505,11 @@ public final class DefaultLegacyService extends AbstractService implements
 		return optionsService.getOptions(OptionsChannels.class);
 	}
 
-	@SuppressWarnings("unused")
-	private void updateMenus(final boolean enableBlacklist) {
-		pluginService.reloadPlugins();
-		addLegacyCommands(enableBlacklist);
-	}
-
-	private void addLegacyCommands(final boolean enableBlacklist) {
-		final LegacyPluginFinder finder =
-			new LegacyPluginFinder(log, menuService.getMenu(), enableBlacklist);
-		final ArrayList<PluginInfo<?>> plugins = new ArrayList<PluginInfo<?>>();
-		finder.findPlugins(plugins);
-		pluginService.addPlugins(plugins);
-	}
-
 	// -- Menu population --
 
 	/**
-	 * Adds all {@link LegacyCompatibleCommand}s to the ImageJ1 menus. The
-	 * nested menu structure of each {@code LegacyCompatibleCommand} is
-	 * preserved.
+	 * Adds all legacy compatible commands to the ImageJ1 menus. The nested menu
+	 * structure of each command is preserved.
 	 */
 	private void addNonLegacyCommandsToMenu() {
 		List<CommandInfo> commands =
