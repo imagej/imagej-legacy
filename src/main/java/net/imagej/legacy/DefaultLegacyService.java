@@ -80,7 +80,6 @@ import org.scijava.plugin.PluginInfo;
 import org.scijava.plugin.PluginService;
 import org.scijava.service.AbstractService;
 import org.scijava.service.Service;
-import org.scijava.service.event.ServicesLoadedEvent;
 import org.scijava.ui.ApplicationFrame;
 import org.scijava.ui.UIService;
 import org.scijava.ui.UserInterface;
@@ -404,10 +403,6 @@ public final class DefaultLegacyService extends AbstractService implements
 	}
 
 	// -- Event handlers --
-
-	protected void onEvent(final ServicesLoadedEvent e) {
-		uiService = getContext().getService(UIService.class);
-	}
 
 	/**
 	 * Keeps the active legacy {@link ij.ImagePlus} in sync with the active modern
