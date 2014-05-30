@@ -68,6 +68,7 @@ public class MergedRgbVirtualStackTest {
 				Axes.X, Axes.Y, Axes.CHANNEL}, 8, false, false);
 
 		try {
+			ds.setRGBMerged(false);
 			new MergedRgbVirtualStack(ds);
 			fail();
 		}
