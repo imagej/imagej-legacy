@@ -489,8 +489,8 @@ public final class DefaultLegacyService extends AbstractService implements
 
 	/**
 	 * Returns the legacy service associated with the ImageJ 1.x instance in the
-	 * current class loader. This method is intended to be used by the
-	 * {@link CodeHacker}; it is invoked by the javassisted methods.
+	 * current class loader. This method is invoked by the javassisted methods of
+	 * ImageJ 1.x.
 	 * 
 	 * @return the legacy service
 	 */
@@ -530,9 +530,8 @@ public final class DefaultLegacyService extends AbstractService implements
 	// -- Menu population --
 
 	/**
-	 * Adds all {@link LegacyCompatibleCommand}s to the ImageJ1 menus. The
-	 * nested menu structure of each {@code LegacyCompatibleCommand} is
-	 * preserved.
+	 * Adds all legacy compatible commands to the ImageJ1 menus. The nested menu
+	 * structure of each command is preserved.
 	 */
 	private void addNonLegacyCommandsToMenu() {
 		List<CommandInfo> commands =
