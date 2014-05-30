@@ -31,7 +31,6 @@
 
 package net.imagej.legacy;
 
-import org.scijava.command.Command;
 import org.scijava.menu.MenuConstants;
 import org.scijava.options.OptionsPlugin;
 import org.scijava.plugin.Menu;
@@ -44,12 +43,12 @@ import org.scijava.plugin.Plugin;
  * 
  * @author Mark Hiner
  */
-@Plugin(type = ImageJ2Options.class, visible = false,
+@Plugin(type = OptionsPlugin.class, visible = false,
 	label = "ImageJ2 Options", menu = {
 		@Menu(label = MenuConstants.EDIT_LABEL, weight = MenuConstants.EDIT_WEIGHT,
 			mnemonic = MenuConstants.EDIT_MNEMONIC), @Menu(label = "Options"),
 		@Menu(label = "ImageJ2") })
-public class ImageJ2Options extends OptionsPlugin implements Command
+public class ImageJ2Options extends OptionsPlugin
 {
 
 	// Constants for field lookup
