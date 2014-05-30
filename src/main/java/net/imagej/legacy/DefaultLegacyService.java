@@ -69,7 +69,6 @@ import org.scijava.input.Accelerator;
 import org.scijava.input.KeyCode;
 import org.scijava.log.LogService;
 import org.scijava.menu.MenuService;
-import org.scijava.module.Module;
 import org.scijava.module.ModuleInfo;
 import org.scijava.module.ModuleService;
 import org.scijava.options.OptionsService;
