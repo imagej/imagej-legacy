@@ -254,7 +254,6 @@ public final class DefaultLegacyService extends AbstractService implements
 
 	public synchronized void toggleLegacyMode(final boolean wantIJ1, final boolean initializing) {
 		// TODO: hide/show Brightness/Contrast, Color Picker, Command Launcher, etc
-		// TODO: prevent IJ1 from quitting without IJ2 quitting, too
 
 		if (!initializing) {
 			if (uiService() != null) {

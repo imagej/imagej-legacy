@@ -94,7 +94,8 @@ public class DefaultLegacyHooks extends LegacyHooks {
 	@Override
 	public boolean quit() {
 		dispose();
-		return isLegacyMode();
+		legacyService.getContext().dispose();
+		return false;
 	}
 
 	private LegacyEditor editor;
