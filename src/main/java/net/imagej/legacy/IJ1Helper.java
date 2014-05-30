@@ -70,6 +70,7 @@ import net.imagej.patcher.LegacyHooks;
 import org.scijava.AbstractContextual;
 import org.scijava.Context;
 import org.scijava.MenuEntry;
+import org.scijava.MenuPath;
 import org.scijava.command.CommandInfo;
 import org.scijava.event.EventHandler;
 import org.scijava.log.LogService;
@@ -464,7 +465,7 @@ public class IJ1Helper extends AbstractContextual {
 		for (final CommandInfo info : commands) {
 			final MenuEntry leaf = info.getMenuPath().getLeaf();
 			if (leaf == null) continue;
-			final String path = info.getMenuPath().getMenuString();
+			final MenuPath path = info.getMenuPath();
 			final String name = leaf.getName();
 			if (ij1Commands.containsKey(name)) {
 				legacyService.log().info("Overriding " + name
@@ -514,11 +515,13 @@ public class IJ1Helper extends AbstractContextual {
 		 * <ul>Edit > Options > ImageJ2 plugins > Discombobulator</ul>
 		 * </p>
 		 */
-		private MenuItem create(final String path, final boolean reuseExisting) {
-			final int gt = path.lastIndexOf('>');
-			if (gt < 0) throw new IllegalArgumentException("Not a valid menu path: " + path);
-			final Menu menu = get(path.substring(0, gt));
-			final String label = path.substring(gt + 1).trim();
+		private MenuItem create(final MenuPath path, final boolean reuseExisting) {
+			// Find the menu structure where we can insert our command.
+			// NB: size - 1 is the leaf position, so we want to go to size - 2 to
+			// find the parent menu location
+			final Menu menu = getParentMenu(path, path.size() - 2);
+			final String label = path.getLeaf().getName();
+			// If we are overriding an item, find the item being overridden
 			if (reuseExisting) {
 				for (int i = 0; i < menu.getItemCount(); i++) {
 					final MenuItem item = menu.getItem(i);
@@ -527,6 +530,7 @@ public class IJ1Helper extends AbstractContextual {
 					}
 				}
 			}
+			// Otherwise, we are creating a new item
 			final MenuItem item = new MenuItem(label);
 			menu.insert(item, getIndex(menu, label));
 			item.addActionListener(ij1);
@@ -553,62 +557,61 @@ public class IJ1Helper extends AbstractContextual {
 		/**
 		 * Recursive helper method to builds the final {@link Menu} structure.
 		 */
-		private Menu get(final String rawPath) {
-			// Remove trailing whitespace from the path
-			final String path = rawPath.trim();
+		private Menu getParentMenu(final MenuPath menuPath, int depth) {
+			final MenuEntry currentItem = menuPath.get(depth);
+			final String currentLabel = currentItem.getName();
 			// Check to see if we already know the menu associated with the desired
 			// label/path
-			final Menu cached = structure.get(path);
+			final Menu cached = structure.get(currentLabel);
 			if (cached != null) return cached;
-			final int gt = path.lastIndexOf('>');
-			// We are at the leaf of the menu, so see if we have a matching menu
-			if (gt < 0) {
+
+			// We are at the root of the menu, so see if we have a matching menu
+			if (depth == 0) {
 				// Special case check the help menu
-				if ("Help".equals(path)) {
+				if ("Help".equals(currentLabel)) {
 					final Menu menu = menuBar.getHelpMenu();
-					structure.put(path, menu);
+					structure.put(currentLabel, menu);
 					return menu;
 				}
 				// Check the other menus of the menu bar to see if our desired label
 				// already exists
 				for (int i = 0; i < menuBar.getMenuCount(); i++) {
 					final Menu menu = menuBar.getMenu(i);
-					if (path.equals(menu.getLabel())) {
-						structure.put(path, menu);
+					if (currentLabel.equals(menu.getLabel())) {
+						structure.put(currentLabel, menu);
 						return menu;
 					}
 				}
 				// Didn't find a match so we have to create a new menu entry
-				final Menu menu = new Menu(path);
+				final Menu menu = new Menu(currentLabel);
 				menuBar.add(menu);
-				structure.put(path, menu);
+				structure.put(currentLabel, menu);
 				return menu;
 			}
-			final Menu parent = get(path.substring(0, gt).trim());
-			final String name = path.substring(gt + 1).trim();
+			final Menu parent = getParentMenu(menuPath, depth - 1);
 			// Once the parent of this entry is obtained, we need to check if it
 			// already contains the current entry.
 			for (int i = 0; i < parent.getItemCount(); i++) {
 				final MenuItem item = parent.getItem(i);
-				if (name.equals(item.getLabel())) {
+				if (currentLabel.equals(item.getLabel())) {
 					if (item instanceof Menu) {
 						// Found a menu entry that matches our desired label, so return
 						final Menu menu = (Menu) item;
-						structure.put(path, menu);
+						structure.put(currentLabel, menu);
 						return menu;
 					}
 					// Found a match but it was an existing non-menu item, so our menu
 					// structure is invalid.
 					//TODO consider mangling the IJ2 menu name instead...
-					throw new IllegalArgumentException("Not a menu: " + path);
+					throw new IllegalArgumentException("Not a menu: " + currentLabel);
 				}
 			}
 			// An existing entry in the parent menu was not found, so we need to
 			// create a new entry.
-			final Menu menu = new Menu(name);
+			final Menu menu = new Menu(currentLabel);
 			parent.insert(menu, getIndex(parent, menu.getLabel()));
 
-			structure.put(path, menu);
+			structure.put(currentLabel, menu);
 			return menu;
 		}
 
