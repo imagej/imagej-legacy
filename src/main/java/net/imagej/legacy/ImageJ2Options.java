@@ -60,7 +60,7 @@ public class ImageJ2Options extends OptionsPlugin
 	/**
 	 * If true, SCIFIO will be used during {@code File > Open} IJ1 calls.
 	 */
-	@Parameter(label = "Use SCIFIO for File > Open")
+	@Parameter(label = "Use SCIFIO when opening files")
 	private Boolean useSCIFIO = true;
 
 	@Parameter()
