@@ -408,6 +408,36 @@ public class DefaultLegacyHooks extends LegacyHooks {
 
 	/** @inherit */
 	@Override
+	public Object interceptFileOpen(final String path) {
+		for (final LegacyOpener opener : legacyOpeners) {
+			final Object result = opener.open(path, -1, true);
+			if (result != null) return result;
+		}
+		return super.interceptFileOpen(path);
+	}
+
+	/** @inherit */
+	@Override
+	public Object interceptOpenImage(final String path, final int planeIndex) {
+		for (final LegacyOpener opener : legacyOpeners) {
+			final Object result = opener.open(path, planeIndex, false);
+			if (result != null) return result;
+		}
+		return super.interceptFileOpen(path);
+	}
+
+	/** @inherit */
+	@Override
+	public Object interceptOpenRecent(final String path) {
+		for (final LegacyOpener opener : legacyOpeners) {
+			final Object result = opener.open(path, -1, true);
+			if (result != null) return result;
+		}
+		return super.interceptFileOpen(path);
+	}
+
+	/** @inherit */
+	@Override
 	public boolean interceptKeyPressed(final KeyEvent e) {
 		String accelerator = KeyStroke.getKeyStrokeForEvent(e).toString();
 		if (accelerator.startsWith("pressed ")) {
