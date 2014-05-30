@@ -31,18 +31,13 @@
 
 package net.imagej.legacy.display;
 
-import net.imagej.legacy.DefaultLegacyService;
 import net.imagej.legacy.ui.LegacyUI;
 
 import org.scijava.Priority;
-import org.scijava.display.Display;
-import org.scijava.display.TextDisplay;
-import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 import org.scijava.ui.UserInterface;
+import org.scijava.ui.swing.viewer.text.SwingTextDisplayViewer;
 import org.scijava.ui.viewer.DisplayViewer;
-import org.scijava.ui.viewer.DisplayWindow;
-import org.scijava.ui.viewer.text.AbstractTextDisplayViewer;
 import org.scijava.ui.viewer.text.TextDisplayViewer;
 
 /**
@@ -52,20 +47,8 @@ import org.scijava.ui.viewer.text.TextDisplayViewer;
  * @author Mark Hiner
  */
 @Plugin(type = DisplayViewer.class, priority = Priority.HIGH_PRIORITY)
-public class LegacyTextDisplayViewer extends AbstractTextDisplayViewer
-	implements LegacyDisplayViewer
+public class LegacyTextDisplayViewer extends SwingTextDisplayViewer
 {
-
-	@Parameter
-	private DefaultLegacyService legacyService;
-
-	@Override
-	public void view(final DisplayWindow w, final Display<?> d) {
-		final TextDisplay textDisplay = (TextDisplay) d;
-		for (final String message : textDisplay) {
-			legacyService.getIJ1Helper().showMessage("", message);
-		}
-	}
 
 	@Override
 	public boolean isCompatible(final UserInterface ui) {
