@@ -261,12 +261,12 @@ public class LegacyUI extends AbstractUserInterface implements SwingUI {
 
 	@Override
 	public void saveLocation() {
-		throw new UnsupportedOperationException("TODO");
+		// let ImageJ 1.x do its own thing
 	}
 
 	@Override
 	public void restoreLocation() {
-		throw new UnsupportedOperationException("TODO");
+		// let ImageJ 1.x do its own thing
 	}
 
 	@Override
