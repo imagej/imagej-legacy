@@ -74,7 +74,10 @@ public class SwitchToModernTest {
 					}
 				}
 			};
-			final LegacyEnvironment ij1 = new LegacyEnvironment(loader, false);
+			final LegacyEnvironment ij1 = new LegacyEnvironment(loader, true);
+			ij1.disableIJ1PluginDirs();
+			ij1.disableInitializer();
+			ij1.noPluginClassLoader();
 			ij1.runMacro("call(\"ij.IJ.redirectErrorMessages\");", "");
 			ij1.run("Switch to Modern Mode", "");
 		} finally {

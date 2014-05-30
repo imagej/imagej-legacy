@@ -76,6 +76,7 @@ public class LegacyInitializer implements Runnable {
 		}
 
 		try {
+			Object ij1 = IJ.getInstance();
 			/*
 			 * Instantiate a Context if there is none; IJ.runPlugIn() will be intercepted
 			 * by the legacy hooks if they are installed and return the current Context.
@@ -84,7 +85,7 @@ public class LegacyInitializer implements Runnable {
 			 */
 			final Context context =
 				(Context) IJ.runPlugIn(Context.class.getName(), null);
-			if (context != null) {
+			if (ij1 != null && context != null) {
 				final UIService ui = context.getService(UIService.class);
 				if (ui != null) ui.showUI();
 			}
