@@ -126,24 +126,29 @@ public class DefaultLegacyOpener implements LegacyOpener {
 
 		final Object data = module.getOutput("data");
 
-		if (data != null && data instanceof Dataset) {
-			if (displayResult) {
-				// Image was displayed during the command execution, so we just get the
-				// ImageDisplay and lookup its ImagePlus
-				final ImageDisplay imageDisplay =
-					displayService.getActiveDisplay(ImageDisplay.class);
-				imp = legacyService.getImageMap().lookupImagePlus(imageDisplay);
-				legacyService.getIJ1Helper().updateRecentMenu(
-					((Dataset) data).getImgPlus().getSource());
+		if (data != null) {
+			if (data instanceof Dataset) {
+				if (displayResult) {
+					// Image was displayed during the command execution, so we just get
+					// the
+					// ImageDisplay and lookup its ImagePlus
+					final ImageDisplay imageDisplay =
+						displayService.getActiveDisplay(ImageDisplay.class);
+					imp = legacyService.getImageMap().lookupImagePlus(imageDisplay);
+					imp.setProperty("Info", "SCIFIO");
+					legacyService.getIJ1Helper().updateRecentMenu(
+						((Dataset) data).getImgPlus().getSource());
+				}
+				else {
+					// Need to manually register the ImagePlus and return it
+					final Dataset d = (Dataset) data;
+					final ImageTranslator it = new DefaultImageTranslator(legacyService);
+					imp = it.createLegacyImage(d);
+				}
+				return imp;
 			}
-			else {
-				// Need to manually register the ImagePlus and return it
-				final Dataset d = (Dataset) data;
-				final ImageTranslator it = new DefaultImageTranslator(legacyService);
-				imp = it.createLegacyImage(d);
-			}
+			return data;
 		}
-
-		return imp;
+		return null;
 	}
 }
