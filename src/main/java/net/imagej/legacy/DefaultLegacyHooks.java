@@ -151,7 +151,7 @@ public class DefaultLegacyHooks extends LegacyHooks {
 			// intercept ij.plugins.Commands
 			if (helper.commandsName().equals(className)) {
 				if (arg.equals("open")) {
-					return interceptOpen(null, -1, true);
+					return interceptFileOpen(null);
 				}
 			}
 		}
