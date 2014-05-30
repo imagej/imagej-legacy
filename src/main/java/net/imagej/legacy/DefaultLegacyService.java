@@ -464,6 +464,7 @@ public final class DefaultLegacyService extends AbstractService implements
 	 * 
 	 * @deprecated use {@link LegacyInjector#preinit()} instead
 	 */
+	@Deprecated
 	public static void preinit() {
 		try {
 			getLegacyEnvironment(Thread.currentThread().getContextClassLoader());
