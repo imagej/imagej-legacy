@@ -344,6 +344,25 @@ public class IJ1Helper extends AbstractContextual {
 		return Macro.getValue(Macro.getOptions(), label, null);
 	}
 
+	/** Gets the SciJava application context linked to the ImageJ 1.x instance. */
+	public static Context getLegacyContext() {
+		// NB: This call instantiates a Context if there is none.
+		//
+		// IJ.runPlugIn() will be intercepted by the legacy hooks if they are
+		// installed and return the current Context.
+		//
+		// If no legacy hooks are installed, ImageJ 1.x will instantiate the Context
+		// using the PluginClassLoader and the LegacyService will install the legacy
+		// hooks.
+		final Object o = IJ.runPlugIn("org.scijava.Context", "");
+		if (o == null) return null;
+		if (!(o instanceof Context)) {
+			throw new IllegalStateException("Unexpected type of context: " +
+				o.getClass().getName());
+		}
+		return (Context) o;
+	}
+
 	/**
 	 * Replacement for ImageJ 1.x' MacAdapter.
 	 * <p>
