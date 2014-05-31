@@ -31,7 +31,6 @@
 
 package net.imagej.legacy.plugin;
 
-import ij.IJ;
 import ij.ImagePlus;
 
 import java.io.File;
@@ -44,6 +43,7 @@ import java.util.concurrent.Future;
 import net.imagej.Dataset;
 import net.imagej.display.ImageDisplay;
 import net.imagej.legacy.DefaultLegacyService;
+import net.imagej.legacy.IJ1Helper;
 import net.imagej.legacy.ImageJ2Options;
 import net.imagej.legacy.translate.DefaultImageTranslator;
 import net.imagej.legacy.translate.ImageTranslator;
@@ -81,7 +81,7 @@ public class DefaultLegacyOpener implements LegacyOpener {
 	public Object open(final String path, final int planeIndex,
 		final boolean displayResult)
 	{
-		final Context c = (Context) IJ.runPlugIn("org.scijava.Context", null);
+		final Context c = IJ1Helper.getLegacyContext();
 		ImagePlus imp = null;
 
 		final PluginService pluginService = c.getService(PluginService.class);

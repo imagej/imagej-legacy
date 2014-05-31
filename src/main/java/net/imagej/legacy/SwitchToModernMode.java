@@ -64,7 +64,7 @@ public class SwitchToModernMode implements PlugIn {
 					Thread.currentThread().setContextClassLoader(classLoader);
 
 					// Make sure that we have a valid context.
-					final Context context = (Context)IJ.runPlugIn(Context.class.getName(), null);
+					final Context context = IJ1Helper.getLegacyContext();
 					/*
 					 * The LegacyService which has the ImageJ context.
 					 * 
