@@ -47,6 +47,7 @@ import ij.plugin.filter.PlugInFilter;
 import ij.plugin.filter.PlugInFilterRunner;
 
 import java.awt.Component;
+import java.awt.Frame;
 import java.awt.Image;
 import java.awt.Menu;
 import java.awt.MenuBar;
@@ -183,6 +184,11 @@ public class IJ1Helper extends AbstractContextual {
 			} catch (Exception e) {
 				// report & ignore
 				e.printStackTrace();
+			}
+
+			// make sure that all other windows are closed
+			for (final Frame frame : Frame.getFrames()) {
+				frame.dispose();
 			}
 
 			// quit legacy ImageJ on the same thread
