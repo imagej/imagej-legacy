@@ -120,7 +120,7 @@ public class LegacyUI extends AbstractUserInterface implements SwingUI {
 
 	@Override
 	public void dispose() {
-		// do nothing
+		if (ij1Helper() != null) ij1Helper.dispose();
 	}
 
 	@Override
