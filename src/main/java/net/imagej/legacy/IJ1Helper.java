@@ -275,22 +275,25 @@ public class IJ1Helper extends AbstractContextual {
 	public void updateRecentMenu(final String path) {
 		Menu menu = Menus.getOpenRecentMenu();
 		int n = menu.getItemCount();
-		int index = 0;
+		int index = -1;
 		for (int i=0; i<n; i++) {
 			if (menu.getItem(i).getLabel().equals(path)) {
 				index = i;
 				break;
 			}
 		}
-		if (index>0) {
+		// Move to most recent
+		if (index > 0) {
 			MenuItem item = menu.getItem(index);
 			menu.remove(index);
 			menu.insert(item, 0);
 		}
-		else {
+		// not found, so replace oldest
+		else if (index < 0){
 			menu.remove(menu.getItemCount() - 1);
 			menu.insert(path, 0);
 		}
+		// if index was 0, already at the head so do nothing
 	}
 
 	/**
