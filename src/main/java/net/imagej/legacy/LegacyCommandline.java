@@ -111,6 +111,7 @@ public abstract class LegacyCommandline extends AbstractConsoleArgument {
 		else {
 			return;
 		}
+		ij1Helper().invalidateInstance();
 		ij1Helper().setBatchMode(true);
 		batchMode = true;
 	}

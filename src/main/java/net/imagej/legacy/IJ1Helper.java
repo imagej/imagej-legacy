@@ -55,6 +55,7 @@ import java.awt.MenuItem;
 import java.awt.image.ImageProducer;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -211,6 +212,17 @@ public class IJ1Helper extends AbstractContextual {
 	void setBatchMode(boolean batch) {
 		Interpreter.batchMode = batch;
 		batchMode = batch;
+	}
+
+	void invalidateInstance() {
+		try {
+			final Method cleanup = IJ.class.getDeclaredMethod("cleanup");
+			cleanup.setAccessible(true);
+			cleanup.invoke(null);
+		} catch (Throwable t) {
+			t.printStackTrace();
+			legacyService.log().error(t);
+		}
 	}
 
 	public void setVisible(boolean toggle) {
