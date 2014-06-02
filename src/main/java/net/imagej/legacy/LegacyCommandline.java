@@ -1,0 +1,288 @@
+/*
+ * #%L
+ * ImageJ software for multidimensional image processing and analysis.
+ * %%
+ * Copyright (C) 2009 - 2014 Board of Regents of the University of
+ * Wisconsin-Madison, Broad Institute of MIT and Harvard, and Max Planck
+ * Institute of Molecular Cell Biology and Genetics.
+ * %%
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ * 
+ * 1. Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDERS OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ * #L%
+ */
+package net.imagej.legacy;
+
+import java.util.LinkedList;
+
+import org.scijava.console.AbstractConsoleArgument;
+import org.scijava.console.ConsoleArgument;
+import org.scijava.plugin.Parameter;
+import org.scijava.plugin.Plugin;
+
+
+/**
+ * Handles the following ImageJ 1.x commands, as per {@link ij.ImageJ}'s
+ * documentation:
+ * <dl>
+ * <dt>"file-name"</dt>
+ * <dd>Opens a file<br />
+ * Example 1: blobs.tif<br />
+ * Example 2: /Users/wayne/images/blobs.tif<br />
+ * Example 3: e81*.tif<br />
+ * </dd>
+ * <dt>-macro path [arg]</dt>
+ * <dd>Runs a macro or script (JavaScript, BeanShell or Python), passing an
+ * optional string argument, which the macro or script can be retrieve using the
+ * getArgument() function. The macro or script is assumed to be in the
+ * ImageJ/macros folder if 'path' is not a full directory path.<br />
+ * Example 1: -macro analyze.ijm<br />
+ * Example 2: -macro script.js /Users/wayne/images/stack1<br />
+ * Example 2: -macro script.py '1.2 2.4 3.8'<br />
+ * </dd>
+ * <dt>-batch path [arg]</dt>
+ * <dd>Runs a macro or script (JavaScript, BeanShell or Python) in batch (no
+ * GUI) mode, passing it an optional argument. ImageJ exits when the macro
+ * finishes.</dd>
+ * <dt>-eval "macro code"</dt>
+ * <dd>Evaluates macro code<br />
+ * Example 1: -eval "print('Hello, world');"<br />
+ * Example 2: -eval "return getVersion();"<br />
+ * </dd>
+ * <dt>-run command</dt>
+ * <dd>Runs an ImageJ menu command<br />
+ * Example: -run "About ImageJ..."</dd>
+ * <dt>-ijpath path</dt>
+ * <dd>Specifies the path to the directory containing the plugins directory<br />
+ * Example: -ijpath /Applications/ImageJ<br />
+ * </dd>
+ * <dt>-port&lt;n&gt;</dt>
+ * <dd>Specifies the port ImageJ uses to determine if another instance is
+ * running<br />
+ * Example 1: -port1 (use default port address + 1)<br />
+ * Example 2: -port2 (use default port address + 2)<br />
+ * Example 3: -port0 (don't check for another instance)<br />
+ * </dd>
+ * <dt>-debug</dt>
+ * <dd>Runs ImageJ in debug mode</dd>
+ * <dt>-batch-no-exit</dt>
+ * <dd>Runs ImageJ in batch mode and disallows exiting the VM when done</dd>
+ * </dl>
+ * </pre>
+ * 
+ * @author Johannes Schindelin
+ */
+public abstract class LegacyCommandline extends AbstractConsoleArgument {
+
+	@Parameter
+	protected DefaultLegacyService legacyService;
+
+	protected IJ1Helper ij1Helper() {
+		return legacyService.getIJ1Helper();
+	}
+
+	/** Handles {@code "file-name"}. */
+	@Plugin(type = ConsoleArgument.class)
+	public static class Filename extends LegacyCommandline {
+
+		@Override
+		public boolean supports(final LinkedList<String> args) {
+			return !args.get(0).startsWith("-");
+		}
+
+		@Override
+		public void handle(LinkedList<String> args) {
+			if (!supports(args)) return;
+
+			final String path = args.removeFirst(); // "file-name"
+
+			ij1Helper().openImage(path);
+		}
+
+	}
+
+	/** Implements {@code -macro path [arg]}. */
+	@Plugin(type = ConsoleArgument.class)
+	public static class Macro extends LegacyCommandline {
+
+		@Override
+		public boolean supports(final LinkedList<String> args) {
+			return args.size() > 1 && "-macro".equals(args.get(0));
+		}
+
+		@Override
+		public void handle(LinkedList<String> args) {
+			if (!supports(args)) return;
+
+			args.removeFirst(); // -macro
+			final String command = args.removeFirst();
+			final String arg = args.isEmpty() ? "" : args.removeFirst();
+
+			ij1Helper().runMacroFile(command, arg);
+		}
+		
+	}
+
+	/** Implements {@code -batch path [arg]}. */
+	@Plugin(type = ConsoleArgument.class)
+	public static class Batch extends BatchNoExit {
+		@Override
+		public boolean supports(final LinkedList<String> args) {
+			return "-batch".equals(args.get(0));
+		}
+
+		@Override
+		public void handle(LinkedList<String> args) {
+			if (!supports(args)) return;
+			super.handle(args);
+			System.exit(0);
+		}
+	}
+
+	/** Implements {@code -eval "macro code"}. */
+	@Plugin(type = ConsoleArgument.class)
+	public static class Eval extends LegacyCommandline {
+
+		@Override
+		public boolean supports(final LinkedList<String> args) {
+			return args.size() > 1 && "-eval".equals(args.get(0));
+		}
+
+		@Override
+		public void handle(LinkedList<String> args) {
+			if (!supports(args)) return;
+
+			args.removeFirst(); // -eval
+			final String macro = args.removeFirst();
+
+			ij1Helper().runMacro(macro);
+		}
+	}
+
+	/** Implements {@code -run command}. */
+	@Plugin(type = ConsoleArgument.class)
+	public static class Run extends LegacyCommandline {
+
+		@Override
+		public boolean supports(final LinkedList<String> args) {
+			return args.size() > 1 && "-run".equals(args.get(0));
+		}
+
+		@Override
+		public void handle(LinkedList<String> args) {
+			if (!supports(args)) return;
+
+			args.removeFirst(); // -run
+			final String command = args.removeFirst();
+
+			ij1Helper().runMacro("run(\"" + quote(command) + "\", \"\");");
+		}
+
+		private String quote(final String value) {
+			String quoted = value.replaceAll("([\"\\\\])", "\\\\$1");
+			quoted = quoted.replaceAll("\f", "\\\\f").replaceAll("\n", "\\\\n");
+			quoted = quoted.replaceAll("\r", "\\\\r").replaceAll("\t", "\\\\t");
+			return quoted;
+		}
+	}
+
+	/** Implements {@code -ijpath path}. */
+	@Plugin(type = ConsoleArgument.class)
+	public static class IJPath extends LegacyCommandline {
+
+		@Override
+		public boolean supports(final LinkedList<String> args) {
+			return args.size() > 1 && "-ijpath".equals(args.get(0));
+		}
+
+		@Override
+		public void handle(LinkedList<String> args) {
+			if (!supports(args)) return;
+
+			args.removeFirst(); // -ijpath
+			final String ijPath = args.removeFirst();
+
+			legacyService.log().error("Skipping unsupported option -ijpath: " + ijPath);
+		}
+	}
+
+	/** Implements {@code -port&lt;n&gt;}. */
+	@Plugin(type = ConsoleArgument.class)
+	public static class Port extends LegacyCommandline {
+
+		@Override
+		public boolean supports(final LinkedList<String> args) {
+			return args.get(0).startsWith("-port");
+		}
+
+		@Override
+		public void handle(LinkedList<String> args) {
+			if (!supports(args)) return;
+
+			final String option = args.removeFirst();
+
+			legacyService.log().error("Skipping unsupported option " + option);
+		}
+	}
+
+	/** Implements {@code -debug}. */
+	@Plugin(type = ConsoleArgument.class)
+	public static class Debug extends LegacyCommandline {
+
+		@Override
+		public boolean supports(final LinkedList<String> args) {
+			return "-debug".equals(args.get(0));
+		}
+
+		@Override
+		public void handle(LinkedList<String> args) {
+			if (!supports(args)) return;
+
+			args.removeFirst(); // -debug
+
+			ij1Helper().setDebugMode(true);
+		}
+	}
+
+	/** Implements {@code -batch-no-exit}. */
+	@Plugin(type = ConsoleArgument.class)
+	public static class BatchNoExit extends LegacyCommandline {
+
+		@Override
+		public boolean supports(final LinkedList<String> args) {
+			return "-batch-no-exit".equals(args.get(0));
+		}
+
+		@Override
+		public void handle(LinkedList<String> args) {
+			if (!supports(args)) return;
+
+			args.removeFirst(); // -batch-no-exit
+
+			ij1Helper().setBatchMode(true);
+			if (args.size() > 1) {
+				final String path = args.removeFirst();
+				final String arg = args.isEmpty() ? "" : args.removeFirst();
+				ij1Helper().runMacroFile(path, arg);
+			}
+			legacyService.getContext().dispose();
+		}
+	}
+}
