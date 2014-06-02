@@ -32,6 +32,10 @@
 package net.imagej.legacy.plugin;
 
 import ij.ImagePlus;
+import io.scif.Format;
+import io.scif.Metadata;
+import io.scif.app.SCIFIOApp;
+import io.scif.img.SCIFIOImgPlus;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -51,6 +55,8 @@ import net.imagej.legacy.translate.ImageTranslator;
 import org.scijava.Cancelable;
 import org.scijava.Context;
 import org.scijava.Priority;
+import org.scijava.app.App;
+import org.scijava.app.AppService;
 import org.scijava.command.CommandInfo;
 import org.scijava.command.CommandService;
 import org.scijava.display.DisplayPostprocessor;
@@ -90,6 +96,7 @@ public class DefaultLegacyOpener implements LegacyOpener {
 		final ModuleService moduleService = c.getService(ModuleService.class);
 		final CommandService commandService = c.getService(CommandService.class);
 		final OptionsService optionsService = c.getService(OptionsService.class);
+		final AppService appService = c.getService(AppService.class);
 
 		// Check to see if SCIFIO has been disabled
 		Boolean useSCIFIO = optionsService.getOptions(ImageJ2Options.class).isUseSCIFIO();
@@ -135,7 +142,6 @@ public class DefaultLegacyOpener implements LegacyOpener {
 					final ImageDisplay imageDisplay =
 						displayService.getActiveDisplay(ImageDisplay.class);
 					imp = legacyService.getImageMap().lookupImagePlus(imageDisplay);
-					imp.setProperty("Info", "SCIFIO");
 					legacyService.getIJ1Helper().updateRecentMenu(
 						((Dataset) data).getImgPlus().getSource());
 				}
@@ -145,6 +151,30 @@ public class DefaultLegacyOpener implements LegacyOpener {
 					final ImageTranslator it = new DefaultImageTranslator(legacyService);
 					imp = it.createLegacyImage(d);
 				}
+				// Set information about how this dataset was opened.
+				String loadingInfo = "";
+				App app = appService.getApp(SCIFIOApp.NAME);
+				// Get the SCIFIO version
+				if (app != null) {
+					loadingInfo +=
+						"Opened with SCIFIO version: " + app.getVersion() + "\n";
+				}
+				// Get the SCIFIO format
+				if (((Dataset) data).getImgPlus() instanceof SCIFIOImgPlus) {
+					final SCIFIOImgPlus<?> scifioImp =
+						(SCIFIOImgPlus<?>) ((Dataset) data).getImgPlus();
+					final Metadata metadata = scifioImp.getMetadata();
+					//FIXME: convert to metadata.getFormatName with next SCIFIO release
+					Format format = null;
+					if (metadata != null) {
+						format = metadata.getFormat();
+					}
+					if (format != null) {
+						loadingInfo +=
+							"Used format plugin: " + format.getFormatName() + "\n";
+					}
+				}
+				imp.setProperty("Info", loadingInfo);
 				return imp;
 			}
 			return data;
