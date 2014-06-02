@@ -32,7 +32,6 @@
 package net.imagej.legacy.plugin;
 
 import ij.ImagePlus;
-import io.scif.Format;
 import io.scif.Metadata;
 import io.scif.app.SCIFIOApp;
 import io.scif.img.SCIFIOImgPlus;
@@ -165,13 +164,9 @@ public class DefaultLegacyOpener implements LegacyOpener {
 						(SCIFIOImgPlus<?>) ((Dataset) data).getImgPlus();
 					final Metadata metadata = scifioImp.getMetadata();
 					//FIXME: convert to metadata.getFormatName with next SCIFIO release
-					Format format = null;
 					if (metadata != null) {
-						format = metadata.getFormat();
-					}
-					if (format != null) {
 						loadingInfo +=
-							"Used format plugin: " + format.getFormatName() + "\n";
+							"Used format plugin: " + metadata.getFormatName() + "\n";
 					}
 				}
 				imp.setProperty("Info", loadingInfo);
