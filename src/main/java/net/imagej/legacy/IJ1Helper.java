@@ -79,6 +79,7 @@ import org.scijava.platform.event.AppOpenFilesEvent;
 import org.scijava.platform.event.AppPreferencesEvent;
 import org.scijava.platform.event.AppQuitEvent;
 import org.scijava.plugin.Parameter;
+import org.scijava.script.ScriptService;
 import org.scijava.util.ClassUtils;
 
 /**
@@ -188,6 +189,11 @@ public class IJ1Helper extends AbstractContextual {
 			// quit legacy ImageJ on the same thread
 			ij.run();
 		}
+	}
+
+	/** Add name aliases for ImageJ1 classes to the ScriptService. */
+	public void addAliases(final ScriptService scriptService) {
+		scriptService.addAlias(ImagePlus.class);
 	}
 
 	public boolean isVisible() {

@@ -74,6 +74,7 @@ import org.scijava.options.event.OptionsEvent;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 import org.scijava.plugin.PluginService;
+import org.scijava.script.ScriptService;
 import org.scijava.service.AbstractService;
 import org.scijava.service.Service;
 import org.scijava.ui.ApplicationFrame;
@@ -148,6 +149,9 @@ public final class DefaultLegacyService extends AbstractService implements
 
 	@Parameter
 	private ModuleService moduleService;
+
+	@Parameter
+	private ScriptService scriptService;
 
 	@Parameter
 	private StatusService statusService;
@@ -342,6 +346,7 @@ public final class DefaultLegacyService extends AbstractService implements
 		}
 
 		ij1Helper.initialize();
+		ij1Helper.addAliases(scriptService);
 
 		SwitchToModernMode.registerMenuItem();
 
