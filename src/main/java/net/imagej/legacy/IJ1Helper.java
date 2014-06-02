@@ -41,6 +41,7 @@ import ij.WindowManager;
 import ij.gui.ImageWindow;
 import ij.gui.Toolbar;
 import ij.io.Opener;
+import ij.macro.Interpreter;
 import ij.plugin.Commands;
 import ij.plugin.PlugIn;
 import ij.plugin.filter.PlugInFilter;
@@ -205,7 +206,15 @@ public class IJ1Helper extends AbstractContextual {
 		return ij.isVisible();
 	}
 
+	private boolean batchMode;
+
+	void setBatchMode(boolean batch) {
+		Interpreter.batchMode = batch;
+		batchMode = batch;
+	}
+
 	public void setVisible(boolean toggle) {
+		if (batchMode) return;
 		final ImageJ ij = IJ.getInstance();
 		if (ij != null) {
 			if (toggle) ij.pack();
@@ -648,8 +657,43 @@ public class IJ1Helper extends AbstractContextual {
 
 	}
 
-	public String runMacro(String macro) {
+	/**
+	 * Evaluates the specified macro.
+	 * 
+	 * @param macro the macro to evaluate
+	 * @return the return value
+	 */
+	public String runMacro(final String macro) {
 		return IJ.runMacro(macro);
 	}
 
+	/**
+	 * Evaluates the specified macro.
+	 * 
+	 * @param path the macro file to evaluate
+	 * @param arg the macro argument
+	 * @return the return value
+	 */
+	public String runMacroFile(final String path, final String arg) {
+		return IJ.runMacroFile(path, arg);
+	}
+
+	/**
+	 * Opens an image using ImageJ 1.x.
+	 * 
+	 * @param path the image file to open
+	 * @return the image
+	 */
+	public Object openImage(final String path) {
+		return IJ.openImage(path);
+	}
+
+	/**
+	 * Enables or disables ImageJ 1.x' debug mode.
+	 * 
+	 * @param debug whether to show debug messages or not
+	 */
+	public void setDebugMode(final boolean debug) {
+		IJ.debugMode = debug;
+	}
 }
