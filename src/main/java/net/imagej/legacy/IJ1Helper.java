@@ -113,6 +113,9 @@ public class IJ1Helper extends AbstractContextual {
 	public void initialize() {
 		// initialize legacy ImageJ application
 		final ImageJ ij1 = IJ.getInstance();
+		if (Menus.getCommands() == null) {
+			IJ.runPlugIn("ij.IJ.init", "");
+		}
 		if (ij1 != null) {
 			// make sure that the Event Dispatch Thread's class loader is set
 			SwingUtilities.invokeLater(new Runnable() {
