@@ -66,7 +66,6 @@ import org.scijava.ui.awt.AWTDropTargetEventDispatcher;
 import org.scijava.ui.awt.AWTInputEventDispatcher;
 import org.scijava.ui.awt.AWTWindowEventDispatcher;
 import org.scijava.ui.swing.SwingUI;
-import org.scijava.ui.swing.sdi.SwingSDIUI;
 import org.scijava.ui.swing.viewer.SwingDisplayWindow;
 import org.scijava.ui.viewer.DisplayViewer;
 import org.scijava.ui.viewer.DisplayWindow;
