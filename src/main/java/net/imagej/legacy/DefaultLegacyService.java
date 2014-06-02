@@ -53,6 +53,8 @@ import net.imagej.threshold.ThresholdService;
 import net.imagej.ui.viewer.image.ImageDisplayViewer;
 
 import org.scijava.Priority;
+import org.scijava.app.App;
+import org.scijava.app.AppService;
 import org.scijava.app.StatusService;
 import org.scijava.command.Command;
 import org.scijava.command.CommandInfo;
@@ -155,6 +157,9 @@ public final class DefaultLegacyService extends AbstractService implements
 
 	@Parameter
 	private StatusService statusService;
+
+	@Parameter(required = false)
+	private AppService appService;
 
 	private UIService uiService;
 
@@ -504,6 +509,11 @@ public final class DefaultLegacyService extends AbstractService implements
 			throw new UnsupportedOperationException(
 				"Cannot instantiate more than one DefaultLegacyService", instantiationStackTrace);
 		}
+	}
+
+	public App getApp() {
+		if (appService == null) return null;
+		return appService.getApp();
 	}
 
 	private OptionsChannels getChannels() {

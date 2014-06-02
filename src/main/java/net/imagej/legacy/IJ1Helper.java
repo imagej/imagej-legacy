@@ -240,7 +240,7 @@ public class IJ1Helper extends AbstractContextual {
 	}
 
 	public String getVersion() {
-		return IJ.getVersion();
+		return ImageJ.VERSION;
 	}
 
 	public boolean isMacintosh() {
