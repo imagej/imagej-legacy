@@ -94,8 +94,34 @@ public abstract class LegacyCommandline extends AbstractConsoleArgument {
 	@Parameter
 	protected DefaultLegacyService legacyService;
 
+	private static boolean batchMode, exitAtEnd;
+
 	protected IJ1Helper ij1Helper() {
 		return legacyService.getIJ1Helper();
+	}
+
+	protected void handleBatchOption(final LinkedList<String> args) {
+		if (batchMode || args.isEmpty()) return;
+		if (args.contains("-batch-no-exit")) {
+			exitAtEnd = false;
+		}
+		else if (args.contains("-batch")) {
+			exitAtEnd = true;
+		}
+		else {
+			return;
+		}
+		ij1Helper().setBatchMode(true);
+		batchMode = true;
+	}
+
+	protected void handleBatchExit(final LinkedList<String> args) {
+		if (!batchMode || !args.isEmpty()) return;
+
+		legacyService.getContext().dispose();
+		if (exitAtEnd) {
+			System.exit(0);
+		}
 	}
 
 	/** Handles {@code "file-name"}. */
@@ -113,7 +139,9 @@ public abstract class LegacyCommandline extends AbstractConsoleArgument {
 
 			final String path = args.removeFirst(); // "file-name"
 
+			handleBatchOption(args);
 			ij1Helper().openImage(path);
+			handleBatchExit(args);
 		}
 
 	}
@@ -135,24 +163,35 @@ public abstract class LegacyCommandline extends AbstractConsoleArgument {
 			final String command = args.removeFirst();
 			final String arg = args.isEmpty() ? "" : args.removeFirst();
 
+			handleBatchOption(args);
 			ij1Helper().runMacroFile(command, arg);
+			handleBatchExit(args);
 		}
 		
 	}
 
-	/** Implements {@code -batch path [arg]}. */
+	/** Implements {@code -batch path [arg]} and {@code -batch-no-exit path [arg]}. */
 	@Plugin(type = ConsoleArgument.class)
-	public static class Batch extends BatchNoExit {
+	public static class Batch extends LegacyCommandline {
 		@Override
 		public boolean supports(final LinkedList<String> args) {
-			return "-batch".equals(args.get(0));
+			return "-batch".equals(args.get(0)) ||
+				"-batch-no-exit".equals(args.get(0));
 		}
 
 		@Override
 		public void handle(LinkedList<String> args) {
 			if (!supports(args)) return;
-			super.handle(args);
-			System.exit(0);
+
+			args.removeFirst(); // -batch or -batch-no-exit
+
+			handleBatchOption(args);
+			if (args.size() > 1) {
+				final String path = args.removeFirst();
+				final String arg = args.isEmpty() ? "" : args.removeFirst();
+				ij1Helper().runMacroFile(path, arg);
+			}
+			handleBatchExit(args);
 		}
 	}
 
@@ -172,7 +211,9 @@ public abstract class LegacyCommandline extends AbstractConsoleArgument {
 			args.removeFirst(); // -eval
 			final String macro = args.removeFirst();
 
+			handleBatchOption(args);
 			ij1Helper().runMacro(macro);
+			handleBatchExit(args);
 		}
 	}
 
@@ -192,7 +233,9 @@ public abstract class LegacyCommandline extends AbstractConsoleArgument {
 			args.removeFirst(); // -run
 			final String command = args.removeFirst();
 
+			handleBatchOption(args);
 			ij1Helper().runMacro("run(\"" + quote(command) + "\", \"\");");
+			handleBatchExit(args);
 		}
 
 		private String quote(final String value) {
@@ -219,7 +262,9 @@ public abstract class LegacyCommandline extends AbstractConsoleArgument {
 			args.removeFirst(); // -ijpath
 			final String ijPath = args.removeFirst();
 
+			handleBatchOption(args);
 			legacyService.log().error("Skipping unsupported option -ijpath: " + ijPath);
+			handleBatchExit(args);
 		}
 	}
 
@@ -238,7 +283,9 @@ public abstract class LegacyCommandline extends AbstractConsoleArgument {
 
 			final String option = args.removeFirst();
 
+			handleBatchOption(args);
 			legacyService.log().error("Skipping unsupported option " + option);
+			handleBatchExit(args);
 		}
 	}
 
@@ -257,32 +304,10 @@ public abstract class LegacyCommandline extends AbstractConsoleArgument {
 
 			args.removeFirst(); // -debug
 
+			handleBatchOption(args);
 			ij1Helper().setDebugMode(true);
+			handleBatchExit(args);
 		}
 	}
 
-	/** Implements {@code -batch-no-exit}. */
-	@Plugin(type = ConsoleArgument.class)
-	public static class BatchNoExit extends LegacyCommandline {
-
-		@Override
-		public boolean supports(final LinkedList<String> args) {
-			return "-batch-no-exit".equals(args.get(0));
-		}
-
-		@Override
-		public void handle(LinkedList<String> args) {
-			if (!supports(args)) return;
-
-			args.removeFirst(); // -batch-no-exit
-
-			ij1Helper().setBatchMode(true);
-			if (args.size() > 1) {
-				final String path = args.removeFirst();
-				final String arg = args.isEmpty() ? "" : args.removeFirst();
-				ij1Helper().runMacroFile(path, arg);
-			}
-			legacyService.getContext().dispose();
-		}
-	}
 }
