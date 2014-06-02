@@ -53,6 +53,7 @@ import net.imagej.legacy.plugin.LegacyPostRefreshMenus;
 import net.imagej.patcher.LegacyHooks;
 
 import org.scijava.Context;
+import org.scijava.app.App;
 import org.scijava.log.LogService;
 import org.scijava.log.StderrLogService;
 import org.scijava.plugin.PluginInfo;
@@ -296,6 +297,18 @@ public class DefaultLegacyHooks extends LegacyHooks {
 	@Override
 	public String getAppName() {
 		return appConfig == null ? "ImageJ (legacy)" : appConfig.getAppName();
+	}
+
+	/**
+	 * Returns the application name for use with ImageJ 1.x.
+	 * 
+	 * @return the application name
+	 */
+	@Override
+	public String getAppVersion() {
+		final App app = legacyService.getApp();
+		if (app == null) return null;
+		return app.getVersion();
 	}
 
 	/**

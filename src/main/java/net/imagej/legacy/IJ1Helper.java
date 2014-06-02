@@ -264,7 +264,7 @@ public class IJ1Helper extends AbstractContextual {
 	}
 
 	public String getVersion() {
-		return IJ.getVersion();
+		return ImageJ.VERSION;
 	}
 
 	public boolean isMacintosh() {
@@ -471,6 +471,7 @@ public class IJ1Helper extends AbstractContextual {
 		} else {
 			eventDelegator = new LegacyEventDelegator();
 			eventDelegator.setContext(context);
+			IJ.showStatus("");
 		}
 	}
 
