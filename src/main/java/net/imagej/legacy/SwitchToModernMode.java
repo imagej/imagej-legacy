@@ -90,7 +90,7 @@ public class SwitchToModernMode implements PlugIn {
 		// inject Help>Switch to Modern Mode
 		@SuppressWarnings("unchecked")
 		final Hashtable<String, String> commands = Menus.getCommands();
-		if (!commands.containsKey(MENU_LABEL)) {
+		if (commands != null && !commands.containsKey(MENU_LABEL)) {
 			ActionListener ij1 = IJ.getInstance();
 			if (ij1 != null) {
 				final Menu helpMenu = Menus.getMenuBar().getHelpMenu();
