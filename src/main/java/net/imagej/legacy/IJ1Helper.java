@@ -41,6 +41,7 @@ import ij.WindowManager;
 import ij.gui.ImageWindow;
 import ij.gui.Toolbar;
 import ij.io.Opener;
+import ij.macro.Interpreter;
 import ij.plugin.Commands;
 import ij.plugin.PlugIn;
 import ij.plugin.filter.PlugInFilter;
@@ -54,6 +55,7 @@ import java.awt.MenuItem;
 import java.awt.image.ImageProducer;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -113,6 +115,9 @@ public class IJ1Helper extends AbstractContextual {
 	public void initialize() {
 		// initialize legacy ImageJ application
 		final ImageJ ij1 = IJ.getInstance();
+		if (Menus.getCommands() == null) {
+			IJ.runPlugIn("ij.IJ.init", "");
+		}
 		if (ij1 != null) {
 			// make sure that the Event Dispatch Thread's class loader is set
 			SwingUtilities.invokeLater(new Runnable() {
@@ -202,7 +207,26 @@ public class IJ1Helper extends AbstractContextual {
 		return ij.isVisible();
 	}
 
+	private boolean batchMode;
+
+	void setBatchMode(boolean batch) {
+		Interpreter.batchMode = batch;
+		batchMode = batch;
+	}
+
+	void invalidateInstance() {
+		try {
+			final Method cleanup = IJ.class.getDeclaredMethod("cleanup");
+			cleanup.setAccessible(true);
+			cleanup.invoke(null);
+		} catch (Throwable t) {
+			t.printStackTrace();
+			legacyService.log().error(t);
+		}
+	}
+
 	public void setVisible(boolean toggle) {
+		if (batchMode) return;
 		final ImageJ ij = IJ.getInstance();
 		if (ij != null) {
 			if (toggle) ij.pack();
@@ -645,8 +669,43 @@ public class IJ1Helper extends AbstractContextual {
 
 	}
 
-	public String runMacro(String macro) {
+	/**
+	 * Evaluates the specified macro.
+	 * 
+	 * @param macro the macro to evaluate
+	 * @return the return value
+	 */
+	public String runMacro(final String macro) {
 		return IJ.runMacro(macro);
 	}
 
+	/**
+	 * Evaluates the specified macro.
+	 * 
+	 * @param path the macro file to evaluate
+	 * @param arg the macro argument
+	 * @return the return value
+	 */
+	public String runMacroFile(final String path, final String arg) {
+		return IJ.runMacroFile(path, arg);
+	}
+
+	/**
+	 * Opens an image using ImageJ 1.x.
+	 * 
+	 * @param path the image file to open
+	 * @return the image
+	 */
+	public Object openImage(final String path) {
+		return IJ.openImage(path);
+	}
+
+	/**
+	 * Enables or disables ImageJ 1.x' debug mode.
+	 * 
+	 * @param debug whether to show debug messages or not
+	 */
+	public void setDebugMode(final boolean debug) {
+		IJ.debugMode = debug;
+	}
 }
