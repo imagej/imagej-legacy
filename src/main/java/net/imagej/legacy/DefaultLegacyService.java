@@ -328,7 +328,7 @@ public final class DefaultLegacyService extends AbstractService implements
 		optionsSynchronizer = new OptionsSynchronizer(optionsService);
 
 		try {
-			final ClassLoader loader = getClass().getClassLoader();
+			final ClassLoader loader = Thread.currentThread().getContextClassLoader(); //getClass().getClassLoader();
 			final boolean ij1Initialized = LegacyEnvironment.isImageJ1Initialized(loader);
 			if (!ij1Initialized) {
 				getLegacyEnvironment(loader).newImageJ1(true);
