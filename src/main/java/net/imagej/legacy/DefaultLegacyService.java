@@ -333,7 +333,7 @@ public final class DefaultLegacyService extends AbstractService implements
 		optionsSynchronizer = new OptionsSynchronizer(optionsService);
 
 		try {
-			final ClassLoader loader = Thread.currentThread().getContextClassLoader(); //getClass().getClassLoader();
+			final ClassLoader loader = Thread.currentThread().getContextClassLoader();
 			final boolean ij1Initialized = LegacyEnvironment.isImageJ1Initialized(loader);
 			if (!ij1Initialized) {
 				getLegacyEnvironment(loader).newImageJ1(true);
@@ -347,7 +347,8 @@ public final class DefaultLegacyService extends AbstractService implements
 			checkInstance();
 			instance = this;
 			instantiationStackTrace = new Throwable("Initialized here:");
-			LegacyInjector.installHooks(getClass().getClassLoader(), new DefaultLegacyHooks(this, ij1Helper));
+			final ClassLoader loader = Thread.currentThread().getContextClassLoader();
+			LegacyInjector.installHooks(loader, new DefaultLegacyHooks(this, ij1Helper));
 		}
 
 		ij1Helper.initialize();
@@ -397,7 +398,8 @@ public final class DefaultLegacyService extends AbstractService implements
 	public void dispose() {
 		ij1Helper.dispose();
 
-		LegacyInjector.installHooks(getClass().getClassLoader(), null);
+		final ClassLoader loader = Thread.currentThread().getContextClassLoader();
+		LegacyInjector.installHooks(loader, null);
 		synchronized(DefaultLegacyService.class) {
 			instance = null;
 			instantiationStackTrace = null;
