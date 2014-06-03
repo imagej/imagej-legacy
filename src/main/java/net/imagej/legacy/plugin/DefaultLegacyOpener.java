@@ -165,7 +165,7 @@ public class DefaultLegacyOpener implements LegacyOpener {
 				// Get the SCIFIO version
 				if (app != null) {
 					loadingInfo +=
-						"Opened with SCIFIO version: " + app.getVersion() + "\n";
+						"SCIFIO version: " + app.getVersion() + "\n";
 				}
 				// Get the SCIFIO format
 				if (((Dataset) data).getImgPlus() instanceof SCIFIOImgPlus) {
@@ -174,7 +174,7 @@ public class DefaultLegacyOpener implements LegacyOpener {
 					final Metadata metadata = scifioImp.getMetadata();
 					if (metadata != null) {
 						loadingInfo +=
-							"Used format plugin: " + metadata.getFormatName() + "\n";
+							"File format: " + metadata.getFormatName() + "\n";
 					}
 				}
 
