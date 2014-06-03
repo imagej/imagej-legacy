@@ -163,7 +163,6 @@ public class DefaultLegacyOpener implements LegacyOpener {
 					final SCIFIOImgPlus<?> scifioImp =
 						(SCIFIOImgPlus<?>) ((Dataset) data).getImgPlus();
 					final Metadata metadata = scifioImp.getMetadata();
-					//FIXME: convert to metadata.getFormatName with next SCIFIO release
 					if (metadata != null) {
 						loadingInfo +=
 							"Used format plugin: " + metadata.getFormatName() + "\n";
