@@ -33,6 +33,7 @@ package net.imagej.legacy.ui;
 
 import java.beans.PropertyChangeListener;
 import java.io.File;
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
 import javax.swing.JFileChooser;
@@ -259,19 +260,38 @@ public class LegacyUI extends AbstractUserInterface implements SwingUI {
 
 	@Override
 	public File chooseFile(final File file, final String style) {
-		final JFileChooser chooser = new JFileChooser(file);
-		if (FileWidget.DIRECTORY_STYLE.equals(style)) {
-			chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+		final File[] chosenFile = new File[1];
+
+		// Run on the EDT to avoid deadlocks, per ij.io.Opener
+		try {
+			threadService.invoke(new Runnable() {
+
+				@Override
+				public void run() {
+					final JFileChooser chooser = new JFileChooser(file);
+					if (FileWidget.DIRECTORY_STYLE.equals(style)) {
+						chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+					}
+					final int rval;
+					if (FileWidget.SAVE_STYLE.equals(style)) {
+						rval = chooser.showSaveDialog(getApplicationFrame().getComponent());
+					}
+					else { // default behavior
+						rval = chooser.showOpenDialog(getApplicationFrame().getComponent());
+					}
+					if (rval == JFileChooser.APPROVE_OPTION) {
+						chosenFile[0] = chooser.getSelectedFile();
+					}
+				}
+			});
 		}
-		final int rval;
-		if (FileWidget.SAVE_STYLE.equals(style)) {
-			rval = chooser.showSaveDialog(getApplicationFrame().getComponent());
+		catch (InterruptedException e) {
+			log.error(e);
 		}
-		else { // default behavior
-			rval = chooser.showOpenDialog(getApplicationFrame().getComponent());
+		catch (InvocationTargetException e) {
+			log.error(e);
 		}
-		if (rval != JFileChooser.APPROVE_OPTION) return null;
-		return chooser.getSelectedFile();
+		return chosenFile[0];
 	}
 
 	@Override
