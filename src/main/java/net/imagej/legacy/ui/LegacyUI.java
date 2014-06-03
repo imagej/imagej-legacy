@@ -159,13 +159,21 @@ public class LegacyUI extends AbstractUserInterface implements SwingUI {
 		// need DisplayWindows and extra processing that other viewers might..
 		if (LegacyDisplayViewer.class.isAssignableFrom(displayViewer.getClass())) {
 			final DisplayViewer<?> finalViewer = displayViewer;
-			threadService.queue(new Runnable() {
+			try {
+				threadService.invoke(new Runnable() {
 
-				@Override
-				public void run() {
-					finalViewer.view(null, display);
-				}
-			});
+					@Override
+					public void run() {
+						finalViewer.view(null, display);
+					}
+				});
+			}
+			catch (InterruptedException e) {
+				log.error(e);
+			}
+			catch (InvocationTargetException e) {
+				log.error(e);
+			}
 		}
 		else {
 			super.show(display);

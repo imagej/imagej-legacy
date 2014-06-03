@@ -36,11 +36,7 @@ import io.scif.Metadata;
 import io.scif.app.SCIFIOApp;
 import io.scif.img.SCIFIOImgPlus;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.io.IOException;
 import java.util.concurrent.Future;
 
 import net.imagej.Dataset;
@@ -58,16 +54,15 @@ import org.scijava.app.App;
 import org.scijava.app.AppService;
 import org.scijava.command.CommandInfo;
 import org.scijava.command.CommandService;
-import org.scijava.display.DisplayPostprocessor;
 import org.scijava.display.DisplayService;
+import org.scijava.io.IOPlugin;
+import org.scijava.io.IOService;
+import org.scijava.log.LogService;
 import org.scijava.module.Module;
 import org.scijava.module.ModuleService;
-import org.scijava.module.process.PostprocessorPlugin;
-import org.scijava.module.process.PreprocessorPlugin;
 import org.scijava.options.OptionsService;
 import org.scijava.plugin.Plugin;
-import org.scijava.plugin.PluginService;
-import org.scijava.plugins.commands.io.OpenFile;
+import org.scijava.service.Service;
 
 /**
  * The default {@link LegacyOpener} plugin.
@@ -82,71 +77,85 @@ import org.scijava.plugins.commands.io.OpenFile;
 @Plugin(type = LegacyOpener.class, priority = Priority.LOW_PRIORITY)
 public class DefaultLegacyOpener implements LegacyOpener {
 
+	private DefaultLegacyService legacyService;
+	private DisplayService displayService;
+	private ModuleService moduleService;
+	private CommandService commandService;
+	private OptionsService optionsService;
+	private AppService appService;
+	private IOService ioService;
+	private LogService logService;
+
 	@Override
-	public Object open(final String path, final int planeIndex,
+	public Object open(String path, final int planeIndex,
 		final boolean displayResult)
 	{
 		final Context c = IJ1Helper.getLegacyContext();
 		ImagePlus imp = null;
 
-		final PluginService pluginService = c.getService(PluginService.class);
-		final DefaultLegacyService legacyService = c.getService(DefaultLegacyService.class);
-		final DisplayService displayService = c.getService(DisplayService.class);
-		final ModuleService moduleService = c.getService(ModuleService.class);
-		final CommandService commandService = c.getService(CommandService.class);
-		final OptionsService optionsService = c.getService(OptionsService.class);
-		final AppService appService = c.getService(AppService.class);
+		legacyService = getCached(legacyService, DefaultLegacyService.class, c);
+		displayService = getCached(displayService, DisplayService.class, c);
+		moduleService = getCached(moduleService, ModuleService.class, c);
+		commandService = getCached(commandService, CommandService.class, c);
+		optionsService = getCached(optionsService, OptionsService.class, c);
+		appService = getCached(appService, AppService.class, c);
+		ioService = getCached(ioService, IOService.class, c);
+		logService = getCached(logService, LogService.class, c);
 
 		// Check to see if SCIFIO has been disabled
 		Boolean useSCIFIO = optionsService.getOptions(ImageJ2Options.class).isUseSCIFIO();
 		if (useSCIFIO == null || !useSCIFIO) return null;
 
-		final List<PostprocessorPlugin> postprocessors =
-			new ArrayList<PostprocessorPlugin>();
-		for (final PostprocessorPlugin pp : pluginService
-			.createInstancesOfType(PostprocessorPlugin.class))
-		{
-			// If we're not supposed to display the result, remove any
-			// DisplayPostprocessors
-			if (displayResult || !(pp instanceof DisplayPostprocessor)) {
-				postprocessors.add(pp);
+		if (path == null) {
+			final CommandInfo command = commandService.getCommand(GetPath.class);
+			final String[] selectedPath = new String[1];
+			final Future<Module> result =
+				moduleService.run(command, true, "path", selectedPath);
+			final Module module = moduleService.waitFor(result);
+			// Check if the module failed
+			if (module == null) return null;
+			// Check if the module was canceled
+			if (Cancelable.class.isAssignableFrom(module.getClass())) {
+				if (((Cancelable)module).isCanceled()) {
+					return Boolean.TRUE;
+				}
 			}
+
+			path = selectedPath[0];
 		}
 
-		// Run the OpenFile command to get our data
-		final CommandInfo command = commandService.getCommand(OpenFile.class);
-		final Map<String, Object> inputs = new HashMap<String, Object>();
-		if (path != null) inputs.put("inputFile", new File(path));
-		final Future<Module> result =
-			moduleService.run(command, pluginService
-				.createInstancesOfType(PreprocessorPlugin.class), postprocessors,
-				inputs);
-
-		final Module module = moduleService.waitFor(result);
-		if (module == null) return null;
-		if (Cancelable.class.isAssignableFrom(module.getClass())) {
-			if (((Cancelable)module).isCanceled()) {
-				return Boolean.TRUE;
+		Object data = null;
+		try {
+			final IOPlugin<?> opener = ioService.getOpener(path);
+			if (opener == null) {
+				logService.warn("No appropriate format found: " + path);
+				return null;
+			}
+			data = opener.open(path);
+			if (data == null) {
+				logService.warn("Opening was canceled.");
+				return null;
 			}
 		}
-
-		final Object data = module.getOutput("data");
+		catch (final IOException exc) {
+			logService.error(exc);
+		}
 
 		if (data != null) {
 			if (data instanceof Dataset) {
+				final Dataset d = (Dataset) data;
+
 				if (displayResult) {
-					// Image was displayed during the command execution, so we just get
-					// the
-					// ImageDisplay and lookup its ImagePlus
 					final ImageDisplay imageDisplay =
-						displayService.getActiveDisplay(ImageDisplay.class);
+						(ImageDisplay) displayService.createDisplay(d);
+
 					imp = legacyService.getImageMap().lookupImagePlus(imageDisplay);
+
 					legacyService.getIJ1Helper().updateRecentMenu(
 						((Dataset) data).getImgPlus().getSource());
 				}
 				else {
-					// Need to manually register the ImagePlus and return it
-					final Dataset d = (Dataset) data;
+					// Manually register the dataset, without creating a display
 					final ImageTranslator it = new DefaultImageTranslator(legacyService);
 					imp = it.createLegacyImage(d);
 				}
@@ -156,24 +165,33 @@ public class DefaultLegacyOpener implements LegacyOpener {
 				// Get the SCIFIO version
 				if (app != null) {
 					loadingInfo +=
-						"Opened with SCIFIO version: " + app.getVersion() + "\n";
+						"SCIFIO version: " + app.getVersion() + "\n";
 				}
 				// Get the SCIFIO format
 				if (((Dataset) data).getImgPlus() instanceof SCIFIOImgPlus) {
 					final SCIFIOImgPlus<?> scifioImp =
 						(SCIFIOImgPlus<?>) ((Dataset) data).getImgPlus();
 					final Metadata metadata = scifioImp.getMetadata();
-					//FIXME: convert to metadata.getFormatName with next SCIFIO release
 					if (metadata != null) {
 						loadingInfo +=
-							"Used format plugin: " + metadata.getFormatName() + "\n";
+							"File format: " + metadata.getFormatName() + "\n";
 					}
 				}
-				imp.setProperty("Info", loadingInfo);
-				return imp;
+
+				if (imp != null) {
+					imp.setProperty("Info", loadingInfo);
+					return imp;
+				}
 			}
 			return data;
 		}
 		return null;
+	}
+
+	// -- Helper methods --
+
+	private <T extends Service> T getCached(T service, Class<T> serviceClass, Context ctx) {
+		if (service != null) return service;
+		return ctx.getService(serviceClass);
 	}
 }
