@@ -452,6 +452,23 @@ public class DefaultLegacyHooks extends LegacyHooks {
 
 	/** @inherit */
 	@Override
+	public Object interceptDragAndDropFile(final File f) {
+		String path;
+		try {
+			path = f.getCanonicalPath();
+			for (final LegacyOpener opener : legacyOpeners) {
+				final Object result = opener.open(path, -1, true);
+				if (result != null) return result;
+			}
+		}
+		catch (IOException e) {
+			log.error(e);
+		}
+		return super.interceptDragAndDropFile(f);
+	}
+
+	/** @inherit */
+	@Override
 	public boolean interceptKeyPressed(final KeyEvent e) {
 		String accelerator = KeyStroke.getKeyStrokeForEvent(e).toString();
 		if (accelerator.startsWith("pressed ")) {
