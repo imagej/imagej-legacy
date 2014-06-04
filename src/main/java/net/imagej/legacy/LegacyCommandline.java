@@ -31,6 +31,7 @@
 package net.imagej.legacy;
 
 import java.util.LinkedList;
+import java.util.WeakHashMap;
 
 import org.scijava.console.AbstractConsoleArgument;
 import org.scijava.console.ConsoleArgument;
@@ -94,33 +95,42 @@ public abstract class LegacyCommandline extends AbstractConsoleArgument {
 	@Parameter
 	protected DefaultLegacyService legacyService;
 
-	private static boolean batchMode, exitAtEnd;
+	private static class Flag extends WeakHashMap<LegacyService, Boolean> {
+		public boolean isActive(final LegacyService service) {
+			return Boolean.TRUE.equals(get(service));
+		}
+	}
+
+	private static Flag batchMode = new Flag(), exitAtEnd = new Flag();
 
 	protected IJ1Helper ij1Helper() {
 		return legacyService.getIJ1Helper();
 	}
 
 	protected void handleBatchOption(final LinkedList<String> args) {
-		if (batchMode || args.isEmpty()) return;
+		if (args.isEmpty() || batchMode.get(legacyService) != null) return;
 		if (args.contains("-batch-no-exit")) {
-			exitAtEnd = false;
+			exitAtEnd.put(legacyService, false);
 		}
 		else if (args.contains("-batch")) {
-			exitAtEnd = true;
+			exitAtEnd.put(legacyService, true);
 		}
 		else {
+			batchMode.put(legacyService, false);
 			return;
 		}
 		ij1Helper().invalidateInstance();
 		ij1Helper().setBatchMode(true);
-		batchMode = true;
+		batchMode.put(legacyService, true);
 	}
 
 	protected void handleBatchExit(final LinkedList<String> args) {
-		if (!batchMode || !args.isEmpty()) return;
+		if (!args.isEmpty() || !batchMode.isActive(legacyService)) {
+			return;
+		}
 
 		legacyService.getContext().dispose();
-		if (exitAtEnd) {
+		if (exitAtEnd.isActive(legacyService)) {
 			System.exit(0);
 		}
 	}
