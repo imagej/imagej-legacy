@@ -39,7 +39,6 @@ import net.imagej.display.ImageDisplayService;
 import net.imglib2.img.Img;
 import net.imglib2.img.cell.AbstractCellImg;
 
-import org.scijava.AbstractContextual;
 import org.scijava.Context;
 import org.scijava.plugin.Parameter;
 
@@ -57,8 +56,7 @@ import org.scijava.plugin.Parameter;
  * 
  * @author Barry DeZonia
  */
-public class ColorImagePlusCreator extends AbstractContextual implements
-	ImagePlusCreator
+public class ColorImagePlusCreator extends AbstractImagePlusCreator
 {
 
 	// -- instance variables --
@@ -110,6 +108,8 @@ public class ColorImagePlusCreator extends AbstractContextual implements
 			pixelHarmonizer.updateLegacyImage(ds, imp);
 		}
 		metadataHarmonizer.updateLegacyImage(ds, imp);
+
+		populateCalibrationData(imp, ds);
 
 		if (display != null) {
 			positionHarmonizer.updateLegacyImage(display, imp);

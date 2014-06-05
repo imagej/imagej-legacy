@@ -53,7 +53,6 @@ import net.imglib2.type.numeric.integer.UnsignedByteType;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
 import net.imglib2.type.numeric.real.FloatType;
 
-import org.scijava.AbstractContextual;
 import org.scijava.Context;
 import org.scijava.log.LogService;
 import org.scijava.plugin.Parameter;
@@ -63,8 +62,7 @@ import org.scijava.plugin.Parameter;
  * 
  * @author Barry DeZonia
  */
-public class GrayImagePlusCreator extends AbstractContextual implements
-	ImagePlusCreator
+public class GrayImagePlusCreator extends AbstractImagePlusCreator
 {
 
 	// -- instance variables --
@@ -122,6 +120,8 @@ public class GrayImagePlusCreator extends AbstractContextual implements
 			pixelHarmonizer.updateLegacyImage(dataset, imp);
 		}
 		metadataHarmonizer.updateLegacyImage(dataset, imp);
+
+		populateCalibrationData(imp, dataset);
 
 		if (display != null) {
 			if (shouldBeComposite(display, dataset, imp)) {
@@ -190,6 +190,7 @@ public class GrayImagePlusCreator extends AbstractContextual implements
 		
 		return imp;
 	}
+
 
 	/**
 	 * Makes an {@link ImagePlus} from a {@link Dataset}. Data is exactly the same
