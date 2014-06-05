@@ -453,6 +453,7 @@ public class DefaultLegacyHooks extends LegacyHooks {
 	/** @inherit */
 	@Override
 	public Object interceptDragAndDropFile(final File f) {
+		if (f.getName().endsWith(".lut")) return null;
 		String path;
 		try {
 			path = f.getCanonicalPath();
