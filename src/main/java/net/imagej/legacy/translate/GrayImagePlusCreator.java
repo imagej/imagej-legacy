@@ -74,8 +74,7 @@ import org.scijava.plugin.Parameter;
  * 
  * @author Barry DeZonia
  */
-public class GrayImagePlusCreator extends AbstractImagePlusCreator
-{
+public class GrayImagePlusCreator extends AbstractImagePlusCreator {
 
 	// -- instance variables --
 
@@ -94,7 +93,7 @@ public class GrayImagePlusCreator extends AbstractImagePlusCreator
 
 	// -- public interface --
 
-	public GrayImagePlusCreator(Context context) {
+	public GrayImagePlusCreator(final Context context) {
 		setContext(context);
 		pixelHarmonizer = new GrayPixelHarmonizer();
 		colorTableHarmonizer = new ColorTableHarmonizer(imageDisplayService);
@@ -111,14 +110,16 @@ public class GrayImagePlusCreator extends AbstractImagePlusCreator
 	}
 
 	@Override
-	public ImagePlus createLegacyImage(Dataset ds) {
+	public ImagePlus createLegacyImage(final Dataset ds) {
 		return createLegacyImage(ds, null);
 	}
 
 	@Override
-	public ImagePlus createLegacyImage(Dataset dataset, ImageDisplay display) {
+	public ImagePlus createLegacyImage(final Dataset dataset,
+		final ImageDisplay display)
+	{
 		if (dataset == null) return null;
-		Img<?> img = dataset.getImgPlus().getImg();
+		final Img<?> img = dataset.getImgPlus().getImg();
 		ImagePlus imp;
 		if (AbstractCellImg.class.isAssignableFrom(img.getClass())) {
 			imp = makeImagePlus(dataset, createVirtualStack(dataset));
@@ -146,6 +147,7 @@ public class GrayImagePlusCreator extends AbstractImagePlusCreator
 
 		return imp;
 	}
+
 	// -- private interface --
 
 	/**
@@ -174,9 +176,9 @@ public class GrayImagePlusCreator extends AbstractImagePlusCreator
 
 		final ImageStack stack = new ImageStack(dimValues[0], dimValues[1]);
 
-		Object dummyPlane = makeDummyPlanes ?
-				planeMaker.makePlane(dimValues[0], dimValues[1]) : null;
-				
+		final Object dummyPlane =
+			makeDummyPlanes ? planeMaker.makePlane(dimValues[0], dimValues[1]) : null;
+
 		for (long t = 0; t < tCount; t++) {
 			for (long z = 0; z < zCount; z++) {
 				for (long c = 0; c < cCount; c++) {
@@ -194,10 +196,9 @@ public class GrayImagePlusCreator extends AbstractImagePlusCreator
 
 		final ImagePlus imp = makeImagePlus(ds, cCount, zCount, tCount, stack);
 		if (ds.getType() instanceof ShortType) markAsSigned16Bit(imp);
-		
+
 		return imp;
 	}
-
 
 	/**
 	 * Makes an {@link ImagePlus} from a {@link Dataset}. Data is exactly the same
@@ -227,12 +228,12 @@ public class GrayImagePlusCreator extends AbstractImagePlusCreator
 		return makeImagePlus(ds, getPlaneMaker(ds), false);
 	}
 
-	private boolean shouldBeComposite(ImageDisplay display, Dataset ds,
-		ImagePlus imp)
+	private boolean shouldBeComposite(final ImageDisplay display,
+		final Dataset ds, final ImagePlus imp)
 	{
 		final int channels = imp.getNChannels();
 		if (channels < 2 || channels > 7) return false;
-		DatasetView view = imageDisplayService.getActiveDatasetView(display);
+		final DatasetView view = imageDisplayService.getActiveDatasetView(display);
 		if (view != null && view.getColorMode() == ColorMode.COMPOSITE) return true;
 		if (ds.getCompositeChannelCount() == 1) return false;
 		return true;
@@ -255,11 +256,11 @@ public class GrayImagePlusCreator extends AbstractImagePlusCreator
 	 * Updates an {@link ImagePlus} so that legacy ImageJ treats it as a signed 16
 	 * bit image
 	 */
-	private void markAsSigned16Bit(ImagePlus imp) {
-		Calibration cal = imp.getCalibration();
+	private void markAsSigned16Bit(final ImagePlus imp) {
+		final Calibration cal = imp.getCalibration();
 		cal.setSigned16BitCalibration();
 	}
-	
+
 	/**
 	 * Finds the best {@link PlaneMaker} for a given {@link Dataset}. The best
 	 * PlaneMaker is the one that makes planes in the type that can best represent
@@ -331,8 +332,8 @@ public class GrayImagePlusCreator extends AbstractImagePlusCreator
 	private <T extends RealType<T>> ImageStack createVirtualStack(
 		final ImgPlus<T> imgPlus, final boolean isSigned)
 	{
-		RealType<?> type = imgPlus.firstElement();
-		int bitDepth = type.getBitsPerPixel();
+		final RealType<T> type = imgPlus.firstElement();
+		final int bitDepth = type.getBitsPerPixel();
 		// TODO : what about ARGB type's CellImgs? Note also that ARGB is not a
 		// RealType and thus our dataset can't support it directly.
 
@@ -344,7 +345,8 @@ public class GrayImagePlusCreator extends AbstractImagePlusCreator
 			return new ImageJVirtualStackUnsignedByte<T>(rai, new ByteConverter<T>());
 		}
 		else if (bitDepth <= 16 && !isSigned) {
-			return new ImageJVirtualStackUnsignedShort<T>(rai, new ShortConverter<T>());
+			return new ImageJVirtualStackUnsignedShort<T>(rai,
+				new ShortConverter<T>());
 		}
 		else { // other types translated as 32-bit float data
 			return new ImageJVirtualStackFloat<T>(rai, new FloatConverter<T>());
@@ -391,12 +393,12 @@ public class GrayImagePlusCreator extends AbstractImagePlusCreator
 		return Views.interval(new MixedTransformView< T >( rai, t ), min, max);
 	}
 
-	private class ByteConverter implements
-		Converter<RealType<?>, UnsignedByteType>
+	private class ByteConverter<S extends RealType<S>> implements
+		Converter<S, UnsignedByteType>
 	{
 
 		@Override
-		public void convert(RealType<?> input, UnsignedByteType output) {
+		public void convert(final S input, final UnsignedByteType output) {
 			double val = input.getRealDouble();
 			if (val < 0) val = 0;
 			else if (val > 255) val = 255;
@@ -405,12 +407,12 @@ public class GrayImagePlusCreator extends AbstractImagePlusCreator
 
 	}
 
-	private class ShortConverter implements
-		Converter<RealType<?>, UnsignedShortType>
+	private class ShortConverter<S extends RealType<S>> implements
+		Converter<S, UnsignedShortType>
 	{
 
 		@Override
-		public void convert(RealType<?> input, UnsignedShortType output) {
+		public void convert(final S input, final UnsignedShortType output) {
 			double val = input.getRealDouble();
 			if (val < 0) val = 0;
 			else if (val > 65535) val = 65535;
@@ -419,10 +421,12 @@ public class GrayImagePlusCreator extends AbstractImagePlusCreator
 
 	}
 
-	private class FloatConverter implements Converter<RealType<?>, FloatType> {
+	private class FloatConverter<S extends RealType<S>> implements
+		Converter<S, FloatType>
+	{
 
 		@Override
-		public void convert(RealType<?> input, FloatType output) {
+		public void convert(final S input, final FloatType output) {
 			double val = input.getRealDouble();
 			if (val < -Float.MAX_VALUE) val = -Float.MAX_VALUE;
 			else if (val > Float.MAX_VALUE) val = Float.MAX_VALUE;
