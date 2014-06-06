@@ -47,6 +47,7 @@ import net.imglib2.img.cell.AbstractCellImg;
 import net.imglib2.img.display.imagej.ImageJVirtualStackFloat;
 import net.imglib2.img.display.imagej.ImageJVirtualStackUnsignedByte;
 import net.imglib2.img.display.imagej.ImageJVirtualStackUnsignedShort;
+import net.imglib2.meta.ImgPlus;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.integer.ShortType;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
@@ -109,7 +110,7 @@ public class GrayImagePlusCreator extends AbstractImagePlusCreator
 		Img<?> img = dataset.getImgPlus().getImg();
 		ImagePlus imp;
 		if (AbstractCellImg.class.isAssignableFrom(img.getClass())) {
-			imp = cellImgCase(dataset);
+			imp = makeImagePlus(dataset, createVirtualStack(dataset));
 		}
 		else if (LegacyUtils.datasetIsIJ1Compatible(dataset)) {
 			imp = makeExactImagePlus(dataset);
@@ -311,26 +312,29 @@ public class GrayImagePlusCreator extends AbstractImagePlusCreator
 		}
 	}
 
-	@SuppressWarnings({ "rawtypes", "synthetic-access", "unchecked" })
-	private ImagePlus cellImgCase(Dataset ds) {
-		Img<? extends RealType<?>> img = ds.getImgPlus();
-		RealType<?> type = img.firstElement();
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	private ImageStack createVirtualStack(final Dataset ds) {
+		return createVirtualStack((ImgPlus) ds.getImgPlus(), ds.isSigned());
+	}
+
+	private <T extends RealType<T>> ImageStack createVirtualStack(
+		final ImgPlus<T> imgPlus, final boolean isSigned)
+	{
+		RealType<?> type = imgPlus.firstElement();
 		int bitDepth = type.getBitsPerPixel();
-		boolean isSigned = ds.isSigned();
 		ImageStack stack;
 		// TODO : what about ARGB type's CellImgs? Note also that ARGB is not a
 		// RealType and thus our dataset can't support it directly.
 		if (bitDepth <= 8 && !isSigned) {
-			stack = new ImageJVirtualStackUnsignedByte(img, new ByteConverter());
+			stack = new ImageJVirtualStackUnsignedByte(imgPlus, new ByteConverter());
 		}
 		else if (bitDepth <= 16 && !isSigned) {
-			stack = new ImageJVirtualStackUnsignedShort(img, new ShortConverter());
+			stack = new ImageJVirtualStackUnsignedShort(imgPlus, new ShortConverter());
 		}
 		else { // other types translated as 32-bit float data
-			stack = new ImageJVirtualStackFloat(img, new FloatConverter());
+			stack = new ImageJVirtualStackFloat(imgPlus, new FloatConverter());
 		}
-
-		return makeImagePlus(ds, stack);
+		return stack;
 	}
 
 	private class ByteConverter implements
