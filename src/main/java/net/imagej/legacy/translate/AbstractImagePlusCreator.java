@@ -33,6 +33,7 @@ package net.imagej.legacy.translate;
 
 import ij.ImagePlus;
 import ij.ImageStack;
+import ij.VirtualStack;
 import ij.io.FileInfo;
 import ij.measure.Calibration;
 
@@ -140,7 +141,9 @@ public abstract class AbstractImagePlusCreator extends AbstractContextual
 		// fileInfo.sliceLabels = null;
 		// fileInfo.info = "";
 		// fileInfo.inputStream = null;
-		// fileInfo.virtualStack = null;
+		if (stack instanceof VirtualStack) {
+			fileInfo.virtualStack = (VirtualStack) stack;
+		}
 		populateCalibrationData(imp, ds);
 		final Calibration calibration = imp.getCalibration();
 		if (calibration != null) {
