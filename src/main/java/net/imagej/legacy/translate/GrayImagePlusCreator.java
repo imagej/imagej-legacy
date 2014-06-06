@@ -35,11 +35,16 @@ import ij.CompositeImage;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.measure.Calibration;
+
+import java.util.Arrays;
+import java.util.List;
+
 import net.imagej.Dataset;
 import net.imagej.display.ColorMode;
 import net.imagej.display.DatasetView;
 import net.imagej.display.ImageDisplay;
 import net.imagej.display.ImageDisplayService;
+import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.converter.Converter;
 import net.imglib2.img.Img;
 import net.imglib2.img.basictypeaccess.PlanarAccess;
@@ -47,12 +52,18 @@ import net.imglib2.img.cell.AbstractCellImg;
 import net.imglib2.img.display.imagej.ImageJVirtualStackFloat;
 import net.imglib2.img.display.imagej.ImageJVirtualStackUnsignedByte;
 import net.imglib2.img.display.imagej.ImageJVirtualStackUnsignedShort;
+import net.imglib2.meta.Axes;
+import net.imglib2.meta.AxisType;
+import net.imglib2.meta.CalibratedAxis;
 import net.imglib2.meta.ImgPlus;
+import net.imglib2.transform.integer.MixedTransform;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.integer.ShortType;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
 import net.imglib2.type.numeric.real.FloatType;
+import net.imglib2.view.MixedTransformView;
+import net.imglib2.view.Views;
 
 import org.scijava.Context;
 import org.scijava.log.LogService;
@@ -322,19 +333,62 @@ public class GrayImagePlusCreator extends AbstractImagePlusCreator
 	{
 		RealType<?> type = imgPlus.firstElement();
 		int bitDepth = type.getBitsPerPixel();
-		ImageStack stack;
 		// TODO : what about ARGB type's CellImgs? Note also that ARGB is not a
 		// RealType and thus our dataset can't support it directly.
+
+		// ensure image being passed to imglib2-ij has XYCZT dimension order
+		RandomAccessibleInterval<T> rai = ensureXYCZT(imgPlus);
+
+		// finally, wrap the XYCZT image as an ImageJ virtual stack
 		if (bitDepth <= 8 && !isSigned) {
-			stack = new ImageJVirtualStackUnsignedByte(imgPlus, new ByteConverter());
+			return new ImageJVirtualStackUnsignedByte<T>(rai, new ByteConverter<T>());
 		}
 		else if (bitDepth <= 16 && !isSigned) {
-			stack = new ImageJVirtualStackUnsignedShort(imgPlus, new ShortConverter());
+			return new ImageJVirtualStackUnsignedShort<T>(rai, new ShortConverter<T>());
 		}
 		else { // other types translated as 32-bit float data
-			stack = new ImageJVirtualStackFloat(imgPlus, new FloatConverter());
+			return new ImageJVirtualStackFloat<T>(rai, new FloatConverter<T>());
 		}
-		return stack;
+	}
+
+	private static final List<AxisType> naturalOrder =
+			Arrays.asList(Axes.X, Axes.Y, Axes.CHANNEL, Axes.Z, Axes.TIME);
+
+	protected <T> RandomAccessibleInterval<T> ensureXYCZT(final ImgPlus<T> imgPlus) {
+		boolean inNaturalOrder = true;
+		final int[] axes = new int[5];
+		Arrays.fill(axes, -1);
+		final long[] min = new long[5], max = new long[5];
+		for (int d = 0; d < imgPlus.numDimensions(); d++) {
+			final CalibratedAxis axis = imgPlus.axis(d);
+			final int index = naturalOrder.indexOf(axis.type());
+			if (index < 0) {
+				// maybe warn instead?
+				throw new IllegalArgumentException("Unsupported axis type: " + axis.type());
+			}
+			axes[d] = index;
+			min[index] = imgPlus.min(d);
+			max[index] = imgPlus.max(d);
+			if (index != d) inNaturalOrder = false;
+		}
+
+		if (imgPlus.numDimensions() != 5) inNaturalOrder = false;
+		if (inNaturalOrder) return imgPlus;
+
+		RandomAccessibleInterval<T> rai = imgPlus;
+		// pad the image to at least 5D
+		for (int i = 0; i < 5; i++) {
+			if (axes[i] >= 0) continue;
+			axes[rai.numDimensions()] = i;
+			min[i] = 0;
+			max[i] = 0;
+			rai = Views.addDimension(rai, 0, 0);
+		}
+
+		// permute the axis order to XYCZT...
+		final MixedTransform t = new MixedTransform(rai.numDimensions(), 5);
+		t.setComponentMapping(axes);
+		return Views.interval(new MixedTransformView< T >( rai, t ), min, max);
 	}
 
 	private class ByteConverter implements
