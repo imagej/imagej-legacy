@@ -31,12 +31,20 @@
 
 package net.imagej.legacy.translate;
 
+import ij.CompositeImage;
 import ij.ImagePlus;
+import ij.ImageStack;
+import ij.VirtualStack;
+import ij.io.FileInfo;
 import ij.measure.Calibration;
+
+import java.io.File;
+
 import net.imagej.Dataset;
 import net.imglib2.meta.Axes;
 import net.imglib2.meta.ImgPlus;
 import net.imglib2.type.numeric.RealType;
+import net.imglib2.type.numeric.integer.UnsignedShortType;
 
 import org.scijava.AbstractContextual;
 
@@ -79,5 +87,91 @@ public abstract class AbstractImagePlusCreator extends AbstractContextual
 			calibration.frameInterval = imgPlus.averageScale(tIndex);
 			calibration.setTimeUnit(imgPlus.axis(tIndex).unit());
 		}
+	}
+
+	protected ImagePlus makeImagePlus(Dataset ds, ImageStack stack) {
+		final int[] dimIndices = new int[5];
+		final int[] dimValues = new int[5];
+		LegacyUtils.getImagePlusDims(ds, dimIndices, dimValues);
+		return makeImagePlus(ds, dimValues[2], dimValues[3], dimValues[4], stack);
+	}
+
+	protected ImagePlus makeImagePlus(final Dataset ds, final int c, final int z,
+		final int t, final ImageStack stack)
+	{
+		final ImagePlus imp = new ImagePlus(ds.getName(), stack);
+
+		imp.setDimensions(c, z, t);
+
+		imp.setOpenAsHyperStack(imp.getNDimensions() > 3);
+
+		final FileInfo fileInfo = new FileInfo();
+		final String source = ds.getSource();
+		final File file =
+			source == null || "".equals(source) ? null : new File(source);
+
+		// We could play games here, if needed.
+		fileInfo.fileFormat = FileInfo.UNKNOWN;
+		fileInfo.fileType = ds.isRGBMerged() ?
+			FileInfo.RGB : ds.getType() instanceof UnsignedShortType ?
+				FileInfo.GRAY16_UNSIGNED : FileInfo.GRAY8;
+		if (file.exists()) {
+			fileInfo.fileName = file.getName();
+			fileInfo.directory = file.getParent();
+		}
+		else {
+			fileInfo.url = source;
+		}
+		fileInfo.width = stack.getWidth();
+		fileInfo.height = stack.getHeight();
+		// fileInfo.offset = 0;
+		// fileInfo.nImages = 1;
+		// fileInfo.gapBetweenImages = 0;
+		// fileInfo.whiteIsZero = false;
+		// fileInfo.intelByteOrder = false;
+		// fileInfo.compression = FileInfo.COMPRESSION_NONE;
+		// fileInfo.stripOffsets = null;
+		// fileInfo.stripLengths = null;
+		// fileInfo.rowsPerStrip = 0;
+		// fileInfo.lutSize = 0;
+		// fileInfo.reds = null;
+		// fileInfo.greens = null;
+		// fileInfo.blues = null;
+		// fileInfo.pixels = null;
+		fileInfo.debugInfo = ds.toString();
+		// fileInfo.sliceLabels = null;
+		// fileInfo.info = "";
+		// fileInfo.inputStream = null;
+		if (stack instanceof VirtualStack) {
+			fileInfo.virtualStack = (VirtualStack) stack;
+		}
+		populateCalibrationData(imp, ds);
+		final Calibration calibration = imp.getCalibration();
+		if (calibration != null) {
+			fileInfo.pixelWidth = calibration.pixelWidth;
+			fileInfo.pixelHeight = calibration.pixelHeight;
+			fileInfo.pixelDepth = calibration.pixelDepth;
+			fileInfo.unit = calibration.getUnit();
+			fileInfo.calibrationFunction = calibration.getFunction();
+			fileInfo.coefficients = calibration.getCoefficients();
+			fileInfo.valueUnit = calibration.getValueUnit();
+			fileInfo.frameInterval = calibration.frameInterval;
+		}
+		// fileInfo.description = "";
+		// fileInfo.longOffset = 0;
+		// fileInfo.metaDataTypes = null;
+		// fileInfo.metaData = null;
+		// fileInfo.displayRanges = null;
+		// fileInfo.channelLuts = null;
+		// fileInfo.roi = null;
+		// fileInfo.overlay = null;
+		// fileInfo.samplesPerPixel = 1;
+		// fileInfo.openNextDir = null;
+		// fileInfo.openNextName = null;
+
+		imp.setFileInfo(fileInfo);
+
+		if ((c == 1 || z == 1) && t == 1) return imp;
+		return new CompositeImage(imp, CompositeImage.COMPOSITE);
 	}
 }

@@ -180,12 +180,7 @@ public class GrayImagePlusCreator extends AbstractImagePlusCreator
 			}
 		}
 
-		final ImagePlus imp = new ImagePlus(ds.getName(), stack);
-
-		imp.setDimensions(cCount, zCount, tCount);
-
-		imp.setOpenAsHyperStack(imp.getNDimensions() > 3);
-		
+		final ImagePlus imp = makeImagePlus(ds, cCount, zCount, tCount, stack);
 		if (ds.getType() instanceof ShortType) markAsSigned16Bit(imp);
 		
 		return imp;
@@ -206,20 +201,7 @@ public class GrayImagePlusCreator extends AbstractImagePlusCreator
 		final int[] dimValues = new int[5];
 		LegacyUtils.getImagePlusDims(ds, dimIndices, dimValues);
 		LegacyUtils.assertXYPlanesCorrectlyOriented(dimIndices);
-
-		final int c = dimValues[2];
-		final int z = dimValues[3];
-		final int t = dimValues[4];
-
-		final ImagePlus imp = makeImagePlus(ds, getPlaneMaker(ds), true);
-
-		imp.setDimensions(c, z, t);
-		
-		imp.setOpenAsHyperStack(imp.getNDimensions() > 3);
-
-		if (ds.getType() instanceof ShortType) markAsSigned16Bit(imp);
-
-		return imp;
+		return makeImagePlus(ds, getPlaneMaker(ds), true);
 	}
 
 	/**
@@ -230,8 +212,7 @@ public class GrayImagePlusCreator extends AbstractImagePlusCreator
 	 * are not assigned. Assumes it will never be sent a color Dataset.
 	 */
 	private ImagePlus makeNearestTypeGrayImagePlus(final Dataset ds) {
-		final PlaneMaker planeMaker = getPlaneMaker(ds);
-		return makeImagePlus(ds, planeMaker, false);
+		return makeImagePlus(ds, getPlaneMaker(ds), false);
 	}
 
 	private boolean shouldBeComposite(ImageDisplay display, Dataset ds,
@@ -348,21 +329,8 @@ public class GrayImagePlusCreator extends AbstractImagePlusCreator
 		else { // other types translated as 32-bit float data
 			stack = new ImageJVirtualStackFloat(img, new FloatConverter());
 		}
-		ImagePlus imp = new ImagePlus(ds.getName(), stack);
 
-		// TODO - is this right? what about 6d and up? encoded channels?
-		final int[] dimIndices = new int[5];
-		final int[] dimValues = new int[5];
-		LegacyUtils.getImagePlusDims(ds, dimIndices, dimValues);
-		final int cCount = dimValues[2];
-		final int zCount = dimValues[3];
-		final int tCount = dimValues[4];
-		imp.setDimensions(cCount, zCount, tCount);
-
-		// TODO - is this right?
-		imp.setOpenAsHyperStack(ds.numDimensions() > 3);
-
-		return imp;
+		return makeImagePlus(ds, stack);
 	}
 
 	private class ByteConverter implements

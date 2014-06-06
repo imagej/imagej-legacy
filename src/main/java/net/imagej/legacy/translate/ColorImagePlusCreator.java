@@ -145,32 +145,11 @@ public class ColorImagePlusCreator extends AbstractImagePlusCreator
 		for (int i = 0; i < c * z * t; i++)
 			stack.setPixels(new int[w * h], i + 1);
 
-		final ImagePlus imp = new ImagePlus(ds.getName(), stack);
-
-		imp.setDimensions(c, z, t);
-
-		imp.setOpenAsHyperStack(imp.getNDimensions() > 3);
-
-		return imp;
+		return makeImagePlus(ds, c, z, t, stack);
 	}
 
 	private ImagePlus cellImgCase(Dataset ds) {
-		ImageStack stack = new MergedRgbVirtualStack(ds);
-		ImagePlus imp = new ImagePlus(ds.getName(), stack);
-
-		// TODO - is this right? what about 6d and up? encoded channels?
-		final int[] dimIndices = new int[5];
-		final int[] dimValues = new int[5];
-		LegacyUtils.getImagePlusDims(ds, dimIndices, dimValues);
-		final int cCount = dimValues[2];
-		final int zCount = dimValues[3];
-		final int tCount = dimValues[4];
-		imp.setDimensions(cCount, zCount, tCount);
-
-		// TODO - is this right?
-		imp.setOpenAsHyperStack(ds.numDimensions() > 3);
-
-		return imp;
+		return makeImagePlus(ds, new MergedRgbVirtualStack(ds));
 	}
 
 }
