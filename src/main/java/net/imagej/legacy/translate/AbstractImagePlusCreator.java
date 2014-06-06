@@ -31,6 +31,7 @@
 
 package net.imagej.legacy.translate;
 
+import ij.CompositeImage;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.VirtualStack;
@@ -170,6 +171,7 @@ public abstract class AbstractImagePlusCreator extends AbstractContextual
 
 		imp.setFileInfo(fileInfo);
 
-		return imp;
+		if ((c == 1 || z == 1) && t == 1) return imp;
+		return new CompositeImage(imp, CompositeImage.COMPOSITE);
 	}
 }
