@@ -32,6 +32,7 @@
 package net.imagej.legacy.translate;
 
 import ij.ImagePlus;
+import ij.ImageStack;
 import ij.measure.Calibration;
 import net.imagej.Dataset;
 import net.imglib2.meta.Axes;
@@ -79,5 +80,24 @@ public abstract class AbstractImagePlusCreator extends AbstractContextual
 			calibration.frameInterval = imgPlus.averageScale(tIndex);
 			calibration.setTimeUnit(imgPlus.axis(tIndex).unit());
 		}
+	}
+
+	protected ImagePlus makeImagePlus(Dataset ds, ImageStack stack) {
+		final int[] dimIndices = new int[5];
+		final int[] dimValues = new int[5];
+		LegacyUtils.getImagePlusDims(ds, dimIndices, dimValues);
+		return makeImagePlus(ds, dimValues[2], dimValues[3], dimValues[4], stack);
+	}
+
+	protected ImagePlus makeImagePlus(final Dataset ds, final int c, final int z,
+		final int t, final ImageStack stack)
+	{
+		final ImagePlus imp = new ImagePlus(ds.getName(), stack);
+
+		imp.setDimensions(c, z, t);
+
+		imp.setOpenAsHyperStack(imp.getNDimensions() > 3);
+
+		return imp;
 	}
 }
