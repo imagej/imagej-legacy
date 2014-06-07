@@ -307,8 +307,9 @@ public class DefaultLegacyHooks extends LegacyHooks {
 	@Override
 	public String getAppVersion() {
 		final App app = legacyService.getApp();
-		if (app == null) return null;
-		return app.getVersion();
+		final String ij1Version = helper.getVersion();
+		if (app == null) return ij1Version;
+		return app.getVersion() + "/" + ij1Version;
 	}
 
 	/**
