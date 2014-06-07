@@ -63,7 +63,7 @@ public class ImageJ2Options extends OptionsPlugin
 	@Parameter(label = "Use SCIFIO when opening files")
 	private Boolean useSCIFIO = true;
 
-	@Parameter()
+	@Parameter
 	private DefaultLegacyService legacyService;
 
 	// -- Option accessors --
