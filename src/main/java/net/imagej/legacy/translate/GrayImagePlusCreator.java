@@ -35,11 +35,16 @@ import ij.CompositeImage;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.measure.Calibration;
+
+import java.util.Arrays;
+import java.util.List;
+
 import net.imagej.Dataset;
 import net.imagej.display.ColorMode;
 import net.imagej.display.DatasetView;
 import net.imagej.display.ImageDisplay;
 import net.imagej.display.ImageDisplayService;
+import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.converter.Converter;
 import net.imglib2.img.Img;
 import net.imglib2.img.basictypeaccess.PlanarAccess;
@@ -47,11 +52,18 @@ import net.imglib2.img.cell.AbstractCellImg;
 import net.imglib2.img.display.imagej.ImageJVirtualStackFloat;
 import net.imglib2.img.display.imagej.ImageJVirtualStackUnsignedByte;
 import net.imglib2.img.display.imagej.ImageJVirtualStackUnsignedShort;
+import net.imglib2.meta.Axes;
+import net.imglib2.meta.AxisType;
+import net.imglib2.meta.CalibratedAxis;
+import net.imglib2.meta.ImgPlus;
+import net.imglib2.transform.integer.MixedTransform;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.integer.ShortType;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
 import net.imglib2.type.numeric.real.FloatType;
+import net.imglib2.view.MixedTransformView;
+import net.imglib2.view.Views;
 
 import org.scijava.Context;
 import org.scijava.log.LogService;
@@ -62,8 +74,7 @@ import org.scijava.plugin.Parameter;
  * 
  * @author Barry DeZonia
  */
-public class GrayImagePlusCreator extends AbstractImagePlusCreator
-{
+public class GrayImagePlusCreator extends AbstractImagePlusCreator {
 
 	// -- instance variables --
 
@@ -82,7 +93,7 @@ public class GrayImagePlusCreator extends AbstractImagePlusCreator
 
 	// -- public interface --
 
-	public GrayImagePlusCreator(Context context) {
+	public GrayImagePlusCreator(final Context context) {
 		setContext(context);
 		pixelHarmonizer = new GrayPixelHarmonizer();
 		colorTableHarmonizer = new ColorTableHarmonizer(imageDisplayService);
@@ -99,17 +110,19 @@ public class GrayImagePlusCreator extends AbstractImagePlusCreator
 	}
 
 	@Override
-	public ImagePlus createLegacyImage(Dataset ds) {
+	public ImagePlus createLegacyImage(final Dataset ds) {
 		return createLegacyImage(ds, null);
 	}
 
 	@Override
-	public ImagePlus createLegacyImage(Dataset dataset, ImageDisplay display) {
+	public ImagePlus createLegacyImage(final Dataset dataset,
+		final ImageDisplay display)
+	{
 		if (dataset == null) return null;
-		Img<?> img = dataset.getImgPlus().getImg();
+		final Img<?> img = dataset.getImgPlus().getImg();
 		ImagePlus imp;
 		if (AbstractCellImg.class.isAssignableFrom(img.getClass())) {
-			imp = cellImgCase(dataset);
+			imp = makeImagePlus(dataset, createVirtualStack(dataset));
 		}
 		else if (LegacyUtils.datasetIsIJ1Compatible(dataset)) {
 			imp = makeExactImagePlus(dataset);
@@ -134,6 +147,7 @@ public class GrayImagePlusCreator extends AbstractImagePlusCreator
 
 		return imp;
 	}
+
 	// -- private interface --
 
 	/**
@@ -162,9 +176,9 @@ public class GrayImagePlusCreator extends AbstractImagePlusCreator
 
 		final ImageStack stack = new ImageStack(dimValues[0], dimValues[1]);
 
-		Object dummyPlane = makeDummyPlanes ?
-				planeMaker.makePlane(dimValues[0], dimValues[1]) : null;
-				
+		final Object dummyPlane =
+			makeDummyPlanes ? planeMaker.makePlane(dimValues[0], dimValues[1]) : null;
+
 		for (long t = 0; t < tCount; t++) {
 			for (long z = 0; z < zCount; z++) {
 				for (long c = 0; c < cCount; c++) {
@@ -182,10 +196,9 @@ public class GrayImagePlusCreator extends AbstractImagePlusCreator
 
 		final ImagePlus imp = makeImagePlus(ds, cCount, zCount, tCount, stack);
 		if (ds.getType() instanceof ShortType) markAsSigned16Bit(imp);
-		
+
 		return imp;
 	}
-
 
 	/**
 	 * Makes an {@link ImagePlus} from a {@link Dataset}. Data is exactly the same
@@ -215,12 +228,12 @@ public class GrayImagePlusCreator extends AbstractImagePlusCreator
 		return makeImagePlus(ds, getPlaneMaker(ds), false);
 	}
 
-	private boolean shouldBeComposite(ImageDisplay display, Dataset ds,
-		ImagePlus imp)
+	private boolean shouldBeComposite(final ImageDisplay display,
+		final Dataset ds, final ImagePlus imp)
 	{
 		final int channels = imp.getNChannels();
 		if (channels < 2 || channels > 7) return false;
-		DatasetView view = imageDisplayService.getActiveDatasetView(display);
+		final DatasetView view = imageDisplayService.getActiveDatasetView(display);
 		if (view != null && view.getColorMode() == ColorMode.COMPOSITE) return true;
 		if (ds.getCompositeChannelCount() == 1) return false;
 		return true;
@@ -243,11 +256,11 @@ public class GrayImagePlusCreator extends AbstractImagePlusCreator
 	 * Updates an {@link ImagePlus} so that legacy ImageJ treats it as a signed 16
 	 * bit image
 	 */
-	private void markAsSigned16Bit(ImagePlus imp) {
-		Calibration cal = imp.getCalibration();
+	private void markAsSigned16Bit(final ImagePlus imp) {
+		final Calibration cal = imp.getCalibration();
 		cal.setSigned16BitCalibration();
 	}
-	
+
 	/**
 	 * Finds the best {@link PlaneMaker} for a given {@link Dataset}. The best
 	 * PlaneMaker is the one that makes planes in the type that can best represent
@@ -311,34 +324,81 @@ public class GrayImagePlusCreator extends AbstractImagePlusCreator
 		}
 	}
 
-	@SuppressWarnings({ "rawtypes", "synthetic-access", "unchecked" })
-	private ImagePlus cellImgCase(Dataset ds) {
-		Img<? extends RealType<?>> img = ds.getImgPlus();
-		RealType<?> type = img.firstElement();
-		int bitDepth = type.getBitsPerPixel();
-		boolean isSigned = ds.isSigned();
-		ImageStack stack;
-		// TODO : what about ARGB type's CellImgs? Note also that ARGB is not a
-		// RealType and thus our dataset can't support it directly.
-		if (bitDepth <= 8 && !isSigned) {
-			stack = new ImageJVirtualStackUnsignedByte(img, new ByteConverter());
-		}
-		else if (bitDepth <= 16 && !isSigned) {
-			stack = new ImageJVirtualStackUnsignedShort(img, new ShortConverter());
-		}
-		else { // other types translated as 32-bit float data
-			stack = new ImageJVirtualStackFloat(img, new FloatConverter());
-		}
-
-		return makeImagePlus(ds, stack);
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	private ImageStack createVirtualStack(final Dataset ds) {
+		return createVirtualStack((ImgPlus) ds.getImgPlus(), ds.isSigned());
 	}
 
-	private class ByteConverter implements
-		Converter<RealType<?>, UnsignedByteType>
+	private <T extends RealType<T>> ImageStack createVirtualStack(
+		final ImgPlus<T> imgPlus, final boolean isSigned)
+	{
+		final RealType<T> type = imgPlus.firstElement();
+		final int bitDepth = type.getBitsPerPixel();
+		// TODO : what about ARGB type's CellImgs? Note also that ARGB is not a
+		// RealType and thus our dataset can't support it directly.
+
+		// ensure image being passed to imglib2-ij has XYCZT dimension order
+		RandomAccessibleInterval<T> rai = ensureXYCZT(imgPlus);
+
+		// finally, wrap the XYCZT image as an ImageJ virtual stack
+		if (bitDepth <= 8 && !isSigned) {
+			return new ImageJVirtualStackUnsignedByte<T>(rai, new ByteConverter<T>());
+		}
+		else if (bitDepth <= 16 && !isSigned) {
+			return new ImageJVirtualStackUnsignedShort<T>(rai,
+				new ShortConverter<T>());
+		}
+		else { // other types translated as 32-bit float data
+			return new ImageJVirtualStackFloat<T>(rai, new FloatConverter<T>());
+		}
+	}
+
+	private static final List<AxisType> naturalOrder =
+			Arrays.asList(Axes.X, Axes.Y, Axes.CHANNEL, Axes.Z, Axes.TIME);
+
+	protected <T> RandomAccessibleInterval<T> ensureXYCZT(final ImgPlus<T> imgPlus) {
+		boolean inNaturalOrder = true;
+		final int[] axes = new int[5];
+		Arrays.fill(axes, -1);
+		final long[] min = new long[5], max = new long[5];
+		for (int d = 0; d < imgPlus.numDimensions(); d++) {
+			final CalibratedAxis axis = imgPlus.axis(d);
+			final int index = naturalOrder.indexOf(axis.type());
+			if (index < 0) {
+				// maybe warn instead?
+				throw new IllegalArgumentException("Unsupported axis type: " + axis.type());
+			}
+			axes[d] = index;
+			min[index] = imgPlus.min(d);
+			max[index] = imgPlus.max(d);
+			if (index != d) inNaturalOrder = false;
+		}
+
+		if (imgPlus.numDimensions() != 5) inNaturalOrder = false;
+		if (inNaturalOrder) return imgPlus;
+
+		RandomAccessibleInterval<T> rai = imgPlus;
+		// pad the image to at least 5D
+		for (int i = 0; i < 5; i++) {
+			if (axes[i] >= 0) continue;
+			axes[rai.numDimensions()] = i;
+			min[i] = 0;
+			max[i] = 0;
+			rai = Views.addDimension(rai, 0, 0);
+		}
+
+		// permute the axis order to XYCZT...
+		final MixedTransform t = new MixedTransform(rai.numDimensions(), 5);
+		t.setComponentMapping(axes);
+		return Views.interval(new MixedTransformView< T >( rai, t ), min, max);
+	}
+
+	private class ByteConverter<S extends RealType<S>> implements
+		Converter<S, UnsignedByteType>
 	{
 
 		@Override
-		public void convert(RealType<?> input, UnsignedByteType output) {
+		public void convert(final S input, final UnsignedByteType output) {
 			double val = input.getRealDouble();
 			if (val < 0) val = 0;
 			else if (val > 255) val = 255;
@@ -347,12 +407,12 @@ public class GrayImagePlusCreator extends AbstractImagePlusCreator
 
 	}
 
-	private class ShortConverter implements
-		Converter<RealType<?>, UnsignedShortType>
+	private class ShortConverter<S extends RealType<S>> implements
+		Converter<S, UnsignedShortType>
 	{
 
 		@Override
-		public void convert(RealType<?> input, UnsignedShortType output) {
+		public void convert(final S input, final UnsignedShortType output) {
 			double val = input.getRealDouble();
 			if (val < 0) val = 0;
 			else if (val > 65535) val = 65535;
@@ -361,10 +421,12 @@ public class GrayImagePlusCreator extends AbstractImagePlusCreator
 
 	}
 
-	private class FloatConverter implements Converter<RealType<?>, FloatType> {
+	private class FloatConverter<S extends RealType<S>> implements
+		Converter<S, FloatType>
+	{
 
 		@Override
-		public void convert(RealType<?> input, FloatType output) {
+		public void convert(final S input, final FloatType output) {
 			double val = input.getRealDouble();
 			if (val < -Float.MAX_VALUE) val = -Float.MAX_VALUE;
 			else if (val > Float.MAX_VALUE) val = Float.MAX_VALUE;
