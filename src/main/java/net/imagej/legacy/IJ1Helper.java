@@ -319,8 +319,11 @@ public class IJ1Helper extends AbstractContextual {
 			menu.insert(item, 0);
 		}
 		// not found, so replace oldest
-		else if (index < 0){
-			menu.remove(menu.getItemCount() - 1);
+		else if (index < 0) {
+			int count = menu.getItemCount();
+			if (count >= Menus.MAX_OPEN_RECENT_ITEMS) {
+				menu.remove(count - 1);
+			}
 			menu.insert(path, 0);
 		}
 		// if index was 0, already at the head so do nothing
