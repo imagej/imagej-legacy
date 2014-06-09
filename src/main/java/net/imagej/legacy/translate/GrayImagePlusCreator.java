@@ -37,7 +37,9 @@ import ij.ImageStack;
 import ij.measure.Calibration;
 
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import net.imagej.Dataset;
 import net.imagej.display.ColorMode;
@@ -360,15 +362,17 @@ public class GrayImagePlusCreator extends AbstractImagePlusCreator {
 		boolean inNaturalOrder = true;
 		final int[] axes = new int[5];
 		Arrays.fill(axes, -1);
+		Set<Integer> matchedPositions = new HashSet<Integer>();
 		final long[] min = new long[5], max = new long[5];
 		for (int d = 0; d < imgPlus.numDimensions(); d++) {
 			final CalibratedAxis axis = imgPlus.axis(d);
 			final int index = naturalOrder.indexOf(axis.type());
 			if (index < 0) {
-				// maybe warn instead?
+				// Axis isn't present. maybe warn instead?
 				throw new IllegalArgumentException("Unsupported axis type: " + axis.type());
 			}
 			axes[d] = index;
+			matchedPositions.add(index);
 			min[index] = imgPlus.min(d);
 			max[index] = imgPlus.max(d);
 			if (index != d) inNaturalOrder = false;
@@ -380,7 +384,7 @@ public class GrayImagePlusCreator extends AbstractImagePlusCreator {
 		RandomAccessibleInterval<T> rai = imgPlus;
 		// pad the image to at least 5D
 		for (int i = 0; i < 5; i++) {
-			if (axes[i] >= 0) continue;
+			if (matchedPositions.contains(i)) continue;
 			axes[rai.numDimensions()] = i;
 			min[i] = 0;
 			max[i] = 0;
