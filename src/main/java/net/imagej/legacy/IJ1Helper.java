@@ -705,6 +705,16 @@ public class IJ1Helper extends AbstractContextual {
 	}
 
 	/**
+	 * Opens a path using ImageJ 1.x, bypassing the (javassisted) IJ utility
+	 * class.
+	 * 
+	 * @param path the image file to open
+	 */
+	public void openPathDirectly(final String path) {
+		new Opener().open(path);
+	}
+
+	/**
 	 * Enables or disables ImageJ 1.x' debug mode.
 	 * 
 	 * @param debug whether to show debug messages or not

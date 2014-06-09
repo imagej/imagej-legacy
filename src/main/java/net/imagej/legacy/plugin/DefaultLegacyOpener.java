@@ -129,12 +129,12 @@ public class DefaultLegacyOpener implements LegacyOpener {
 			final IOPlugin<?> opener = ioService.getOpener(path);
 			if (opener == null) {
 				logService.warn("No appropriate format found: " + path);
-				return null;
+				return path;
 			}
 			data = opener.open(path);
 			if (data == null) {
 				logService.warn("Opening was canceled.");
-				return null;
+				return path;
 			}
 		}
 		catch (final IOException exc) {
@@ -185,7 +185,7 @@ public class DefaultLegacyOpener implements LegacyOpener {
 			}
 			return data;
 		}
-		return null;
+		return path;
 	}
 
 	// -- Helper methods --

@@ -153,7 +153,13 @@ public class DefaultLegacyHooks extends LegacyHooks {
 			// intercept ij.plugins.Commands
 			if (helper.commandsName().equals(className)) {
 				if (arg.equals("open")) {
-					return interceptFileOpen(null);
+					final Object o = interceptFileOpen(null);
+					if (o != null) {
+						if (o instanceof String) {
+							legacyService.getIJ1Helper().openPathDirectly((String)o);
+						}
+						return o;
+					}
 				}
 			}
 		}
