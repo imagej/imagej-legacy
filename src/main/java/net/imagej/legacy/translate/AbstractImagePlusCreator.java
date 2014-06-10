@@ -171,7 +171,7 @@ public abstract class AbstractImagePlusCreator extends AbstractContextual
 
 		imp.setFileInfo(fileInfo);
 
-		if ((c == 1 || z == 1) && t == 1) return imp;
+		if (ds.isRGBMerged()) return imp;
 		return new CompositeImage(imp, CompositeImage.COMPOSITE);
 	}
 }

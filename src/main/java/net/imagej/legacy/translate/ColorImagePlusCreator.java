@@ -136,14 +136,20 @@ public class ColorImagePlusCreator extends AbstractImagePlusCreator
 		LegacyUtils.getImagePlusDims(ds, dimIndices, dimValues);
 		final int w = dimValues[0];
 		final int h = dimValues[1];
-		final int c = dimValues[2] / 3;
+		final int c = ds.isRGBMerged() ? dimValues[2] / 3 : dimValues[2];
 		final int z = dimValues[3];
 		final int t = dimValues[4];
 
 		final ImageStack stack = new ImageStack(w, h, c * z * t);
 
-		for (int i = 0; i < c * z * t; i++)
-			stack.setPixels(new int[w * h], i + 1);
+		for (int i = 0; i < c * z * t; i++) {
+			if (ds.isRGBMerged()) {
+				stack.setPixels(new int[w * h], i + 1);
+			}
+			else {
+				stack.setPixels(new byte[w * h], i + 1);
+			}
+		}
 
 		return makeImagePlus(ds, c, z, t, stack);
 	}

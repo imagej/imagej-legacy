@@ -175,17 +175,24 @@ public class ColorPixelHarmonizer implements DataHarmonizer {
 						for (int x = 0; x < xSize; x++) {
 							accessor.setPosition(x, xIndex);
 
-							accessor.setPosition(3 * c, cIndex);
-							final int rValue = ((int) accessor.get().getRealDouble()) & 0xff;
+							int intValue = 0;
+							if (ds.isRGBMerged()) {
+								accessor.setPosition(3 * c, cIndex);
+								final int rValue = ((int) accessor.get().getRealDouble()) & 0xff;
 
-							accessor.fwd(cIndex);
-							final int gValue = ((int) accessor.get().getRealDouble()) & 0xff;
+								accessor.fwd(cIndex);
+								final int gValue = ((int) accessor.get().getRealDouble()) & 0xff;
 
-							accessor.fwd(cIndex);
-							final int bValue = ((int) accessor.get().getRealDouble()) & 0xff;
+								accessor.fwd(cIndex);
+								final int bValue = ((int) accessor.get().getRealDouble()) & 0xff;
 
-							final int intValue =
-								(0xff << 24) | (rValue << 16) | (gValue << 8) | (bValue);
+								intValue =
+										(0xff << 24) | (rValue << 16) | (gValue << 8) | (bValue);
+							}
+							else {
+								accessor.setPosition(c, cIndex);
+								intValue = ((int)accessor.get().getRealDouble());
+							}
 
 							proc.set(x, y, intValue);
 						}

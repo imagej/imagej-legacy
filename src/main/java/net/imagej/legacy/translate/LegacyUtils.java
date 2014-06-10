@@ -229,14 +229,19 @@ public class LegacyUtils {
 	 * rgbMerged can only be true if channels == 3 and type = ubyte are also true.
 	 */
 	static boolean isColorCompatible(final Dataset ds) {
-		if (!ds.isRGBMerged()) return false;
-		if (!ds.isInteger()) return false;
-		if (ds.isSigned()) return false;
-		if (ds.getType().getBitsPerPixel() != 8) return false;
-		final int cIndex = ds.dimensionIndex(Axes.CHANNEL);
-		if (cIndex < 0) return false;
-		if (ds.getImgPlus().dimension(cIndex) % 3 != 0) return false;
-		return true;
+		final int compositeChannels = ds.getImgPlus().getCompositeChannelCount();
+
+		if (ds.isRGBMerged()) {
+			if (!ds.isInteger()) return false;
+			if (ds.isSigned()) return false;
+			if (ds.getType().getBitsPerPixel() != 8) return false;
+			if (compositeChannels < 1 || compositeChannels > 3) return false;
+			return true;
+		}
+
+		if (compositeChannels >= 2 && compositeChannels <= 7) return true;
+
+		return false;
 	}
 
 	/**
