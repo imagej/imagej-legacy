@@ -324,7 +324,7 @@ public class IJ1Helper extends AbstractContextual {
 			if (count >= Menus.MAX_OPEN_RECENT_ITEMS) {
 				menu.remove(count - 1);
 			}
-			menu.insert(path, 0);
+			Menus.addOpenRecentItem(path);
 		}
 		// if index was 0, already at the head so do nothing
 	}
