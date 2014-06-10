@@ -43,6 +43,7 @@ import org.scijava.log.LogService;
 import org.scijava.menu.MenuConstants;
 import org.scijava.options.OptionsPlugin;
 import org.scijava.platform.PlatformService;
+import org.scijava.plugin.Attr;
 import org.scijava.plugin.Menu;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
@@ -58,11 +59,11 @@ import org.scijava.widget.Button;
  * 
  * @author Mark Hiner
  */
-@Plugin(type = OptionsPlugin.class, visible = false,
+@Plugin(type = OptionsPlugin.class,
 	label = "ImageJ2 Options", menu = {
 		@Menu(label = MenuConstants.EDIT_LABEL, weight = MenuConstants.EDIT_WEIGHT,
 			mnemonic = MenuConstants.EDIT_MNEMONIC), @Menu(label = "Options"),
-		@Menu(label = "ImageJ2") })
+		@Menu(label = "ImageJ2") }, attrs = { @Attr(name = "legacy-only") })
 public class ImageJ2Options extends OptionsPlugin implements Interactive
 {
 
