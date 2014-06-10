@@ -120,7 +120,9 @@ public class DefaultImageTranslator extends AbstractContextual implements
 		final ImageDisplay display)
 	{
 		ImagePlus imp = null;
-		if (ds.isRGBMerged()) {
+		// Can only create an ImagePlus if we have 3 dimensions (XYC) as
+		// RGB stacks are not supported in IJ 1.x
+		if (ds.isRGBMerged() && ds.getImgPlus().numDimensions() <= 3) {
 			imp = colorImagePlusCreator.createLegacyImage(ds, display);
 		}
 		else {
