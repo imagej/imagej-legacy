@@ -508,6 +508,9 @@ public final class DefaultLegacyService extends AbstractService implements
 			if (info.getMenuPath().size() == 0 || info.is("no-legacy")) {
 				iter.remove();
 			}
+			else if (!info.getAnnotation().visible()) {
+				iter.remove();
+			}
 			else {
 				legacyCompatibleCommands.add(info.getDelegateClassName());
 			}
