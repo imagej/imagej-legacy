@@ -31,6 +31,7 @@
 
 package net.imagej.legacy;
 
+import org.scijava.command.Interactive;
 import org.scijava.menu.MenuConstants;
 import org.scijava.options.OptionsPlugin;
 import org.scijava.plugin.Menu;
@@ -48,7 +49,7 @@ import org.scijava.plugin.Plugin;
 		@Menu(label = MenuConstants.EDIT_LABEL, weight = MenuConstants.EDIT_WEIGHT,
 			mnemonic = MenuConstants.EDIT_MNEMONIC), @Menu(label = "Options"),
 		@Menu(label = "ImageJ2") })
-public class ImageJ2Options extends OptionsPlugin
+public class ImageJ2Options extends OptionsPlugin implements Interactive
 {
 
 	// Constants for field lookup
@@ -60,7 +61,7 @@ public class ImageJ2Options extends OptionsPlugin
 	/**
 	 * If true, SCIFIO will be used during {@code File > Open} IJ1 calls.
 	 */
-	@Parameter(label = "Use SCIFIO when opening files")
+	@Parameter(label = "Use SCIFIO when opening files", callback = "run")
 	private Boolean useSCIFIO = true;
 
 	@Parameter
