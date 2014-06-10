@@ -53,9 +53,6 @@ public interface LegacyService extends ImageJService {
 	/** Gets the LegacyImageMap associated with this LegacyService. */
 	LegacyImageMap getImageMap();
 
-	/** Gets the OptionsSynchronizer associated with this LegacyService. */
-	OptionsSynchronizer getOptionsSynchronizer();
-
 	/**
 	 * Runs a legacy command programmatically.
 	 * 
@@ -76,12 +73,6 @@ public interface LegacyService extends ImageJService {
 	 * if not.
 	 */
 	boolean isInitialized();
-
-	/**
-	 * Sets the foreground and background colors in ImageJ 1.x from the current
-	 * view using the current channel values.
-	 */
-	void syncColors();
 
 	/**
 	 * States whether we're running in legacy ImageJ 1.x mode.

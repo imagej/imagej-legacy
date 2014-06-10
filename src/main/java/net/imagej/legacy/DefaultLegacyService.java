@@ -169,9 +169,6 @@ public final class DefaultLegacyService extends AbstractService implements
 	/** Mapping between modern and legacy image data structures. */
 	private LegacyImageMap imageMap;
 
-	/** Method of synchronizing modern & legacy options. */
-	private OptionsSynchronizer optionsSynchronizer;
-
 	/** Keep references to ImageJ 1.x separate */
 	private IJ1Helper ij1Helper;
 
@@ -202,11 +199,6 @@ public final class DefaultLegacyService extends AbstractService implements
 	}
 
 	@Override
-	public OptionsSynchronizer getOptionsSynchronizer() {
-		return optionsSynchronizer;
-	}
-
-	@Override
 	public void
 		runLegacyCommand(final String ij1ClassName, final String argument)
 	{
@@ -234,16 +226,6 @@ public final class DefaultLegacyService extends AbstractService implements
 	@Override
 	public boolean isInitialized() {
 		return instance != null;
-	}
-
-	@Override
-	public void syncColors() {
-		final DatasetView view = imageDisplayService.getActiveDatasetView();
-		if (view == null) return;
-		final OptionsChannels channels = getChannels();
-		final ColorRGB fgColor = view.getColor(channels.getFgValues());
-		final ColorRGB bgColor = view.getColor(channels.getBgValues());
-		optionsSynchronizer.colorOptions(fgColor, bgColor);
 	}
 
 	@Override
@@ -312,10 +294,6 @@ public final class DefaultLegacyService extends AbstractService implements
 		// hide/show IJ1 main window
 		ij1Helper.setVisible(wantIJ1);
 
-		if (wantIJ1 && !initializing) {
-			optionsSynchronizer.updateLegacyImageJSettingsFromModernImageJ();
-		}
-
 		getImageMap().toggleLegacyMode(wantIJ1);
 	}
 
@@ -329,8 +307,6 @@ public final class DefaultLegacyService extends AbstractService implements
 	@Override
 	public void initialize() {
 		checkInstance();
-
-		optionsSynchronizer = new OptionsSynchronizer(optionsService);
 
 		try {
 			final ClassLoader loader = Thread.currentThread().getContextClassLoader();
@@ -416,11 +392,6 @@ public final class DefaultLegacyService extends AbstractService implements
 	protected void onEvent(final DisplayActivatedEvent event)
 	{
 		syncActiveImage();
-	}
-
-	@EventHandler
-	protected void onEvent(final OptionsEvent event) {
-		optionsSynchronizer.updateModernImageJSettingsFromLegacyImageJ();
 	}
 
 	@EventHandler
