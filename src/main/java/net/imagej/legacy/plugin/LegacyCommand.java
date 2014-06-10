@@ -197,9 +197,6 @@ public class LegacyCommand implements Command {
 			// set ImageJ1's active image
 			legacyService.syncActiveImage();
 
-			// set ImageJ1's colors
-			legacyService.syncColors();
-
 			try {
 				// execute the legacy plugin
 				IJ.runPlugIn(className, arg);
@@ -225,10 +222,6 @@ public class LegacyCommand implements Command {
 						if (!outputs.contains(disp)) disp.close();
 					}
 				}
-
-				// reflect any changes to globals in modern ImageJ options/prefs
-				legacyService.getOptionsSynchronizer()
-					.updateModernImageJSettingsFromLegacyImageJ();
 
 				// reportStackIssues("After IJ1 plugin run");
 			}

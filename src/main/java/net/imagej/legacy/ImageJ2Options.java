@@ -31,11 +31,26 @@
 
 package net.imagej.legacy;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+
+import org.scijava.app.AppService;
+import org.scijava.command.Interactive;
+import org.scijava.display.DisplayService;
+import org.scijava.log.LogService;
 import org.scijava.menu.MenuConstants;
 import org.scijava.options.OptionsPlugin;
+import org.scijava.platform.PlatformService;
 import org.scijava.plugin.Menu;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
+import org.scijava.text.TextService;
+import org.scijava.ui.DialogPrompt.MessageType;
+import org.scijava.ui.UIService;
+import org.scijava.welcome.WelcomeService;
+import org.scijava.widget.Button;
 
 /**
  * Allows the setting and persisting of options relevant to ImageJ2, in ImageJ1.
@@ -48,7 +63,7 @@ import org.scijava.plugin.Plugin;
 		@Menu(label = MenuConstants.EDIT_LABEL, weight = MenuConstants.EDIT_WEIGHT,
 			mnemonic = MenuConstants.EDIT_MNEMONIC), @Menu(label = "Options"),
 		@Menu(label = "ImageJ2") })
-public class ImageJ2Options extends OptionsPlugin
+public class ImageJ2Options extends OptionsPlugin implements Interactive
 {
 
 	// Constants for field lookup
@@ -60,15 +75,104 @@ public class ImageJ2Options extends OptionsPlugin
 	/**
 	 * If true, SCIFIO will be used during {@code File > Open} IJ1 calls.
 	 */
-	@Parameter(label = "Use SCIFIO when opening files")
+	@Parameter(label = "Use SCIFIO when opening files", callback = "run")
 	private Boolean useSCIFIO = true;
 
-	@Parameter()
+	@Parameter(label = "What is ImageJ2?", persist = false, callback = "help")
+	private Button help;
+
+	@Parameter
 	private DefaultLegacyService legacyService;
+
+	@Parameter(required = false)
+	private WelcomeService welcomeService;
+
+	@Parameter(required = false)
+	private AppService appService;
+
+	@Parameter(required = false)
+	private PlatformService platformService;
+
+	@Parameter(required = false)
+	private DisplayService displayService;
+
+	@Parameter(required = false)
+	private TextService textService;
+
+	@Parameter(required = false)
+	private UIService uiService;
+
+	@Parameter(required = false)
+	private LogService log;
+
+	private final static URL WELCOME_URL;
+
+	static {
+		URL url = null;
+		try {
+			url = new URL("https://github.com/imagej/imagej/blob/master/WELCOME.md#welcome-to-imagej2");
+		}
+		catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
+		WELCOME_URL = url;
+	}
 
 	// -- Option accessors --
 
 	public Boolean isUseSCIFIO() {
 		return useSCIFIO;
+	}
+
+	@SuppressWarnings("unused")
+	private void help() {
+		if (welcomeService != null) {
+			welcomeService.displayWelcome();
+			return;
+		}
+		if (appService != null && textService != null && displayService != null) {
+			final File baseDir = appService.getApp().getBaseDirectory();
+			final File welcomeFile = new File(baseDir, "WELCOME.md");
+			if (welcomeFile.exists()) try {
+				final String welcomeText = textService.asHTML(welcomeFile);
+				displayService.createDisplay(welcomeText);
+				return;
+			}
+			catch (final IOException e) {
+				if (log != null) {
+					log.error(e);
+				}
+				else {
+					e.printStackTrace();
+				}
+			}
+		}
+		// if local options fail, try the web browser
+		if (platformService != null && WELCOME_URL != null) {
+			try {
+				platformService.open(WELCOME_URL);
+				return;
+			}
+			catch (final IOException e) {
+				if (log != null) {
+					log.error(e);
+				}
+				else {
+					e.printStackTrace();
+				}
+			}
+		}
+		final String message =
+			"No appropriate service found to display the message";
+		if (uiService != null) {
+			uiService.showDialog(message, MessageType.ERROR_MESSAGE);
+			return;
+		}
+		if (log != null) {
+			log.error(message);
+		}
+		else {
+			System.err.println(message);
+		}
 	}
 }
