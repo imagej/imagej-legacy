@@ -70,6 +70,7 @@ public class ColorImagePlusCreator extends AbstractImagePlusCreator
 	private final MetadataHarmonizer metadataHarmonizer;
 	private final PositionHarmonizer positionHarmonizer;
 	private final NameHarmonizer nameHarmonizer;
+	private final ColorTableHarmonizer colorTableHarmonizer;
 
 	@Parameter
 	private ImageDisplayService imageDisplayService;
@@ -82,6 +83,9 @@ public class ColorImagePlusCreator extends AbstractImagePlusCreator
 		metadataHarmonizer = new MetadataHarmonizer();
 		positionHarmonizer = new PositionHarmonizer();
 		nameHarmonizer = new NameHarmonizer();
+		colorTableHarmonizer =
+			new ColorTableHarmonizer(context.getService(ImageDisplayService.class));
+
 	}
 	
 	/**
@@ -119,6 +123,7 @@ public class ColorImagePlusCreator extends AbstractImagePlusCreator
 		if (display != null) {
 			positionHarmonizer.updateLegacyImage(display, imp);
 			nameHarmonizer.updateLegacyImage(display, imp);
+			colorTableHarmonizer.updateLegacyImage(display, imp);
 		}
 
 		return imp;
