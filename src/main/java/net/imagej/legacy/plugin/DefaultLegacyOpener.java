@@ -42,13 +42,11 @@ import java.util.concurrent.Future;
 import net.imagej.Dataset;
 import net.imagej.display.ImageDisplay;
 import net.imagej.legacy.DefaultLegacyService;
-import net.imagej.legacy.IJ1Helper;
 import net.imagej.legacy.ImageJ2Options;
 import net.imagej.legacy.translate.DefaultImageTranslator;
 import net.imagej.legacy.translate.ImageTranslator;
 
 import org.scijava.Cancelable;
-import org.scijava.Context;
 import org.scijava.Priority;
 import org.scijava.app.App;
 import org.scijava.app.AppService;
@@ -61,8 +59,8 @@ import org.scijava.log.LogService;
 import org.scijava.module.Module;
 import org.scijava.module.ModuleService;
 import org.scijava.options.OptionsService;
+import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
-import org.scijava.service.Service;
 
 /**
  * The default {@link LegacyOpener} plugin.
@@ -77,30 +75,35 @@ import org.scijava.service.Service;
 @Plugin(type = LegacyOpener.class, priority = Priority.LOW_PRIORITY)
 public class DefaultLegacyOpener implements LegacyOpener {
 
+	@Parameter
 	private DefaultLegacyService legacyService;
+
+	@Parameter
 	private DisplayService displayService;
+
+	@Parameter
 	private ModuleService moduleService;
+
+	@Parameter
 	private CommandService commandService;
+
+	@Parameter
 	private OptionsService optionsService;
+
+	@Parameter
 	private AppService appService;
+
+	@Parameter
 	private IOService ioService;
+
+	@Parameter
 	private LogService logService;
 
 	@Override
 	public Object open(String path, final int planeIndex,
 		final boolean displayResult)
 	{
-		final Context c = IJ1Helper.getLegacyContext();
 		ImagePlus imp = null;
-
-		legacyService = getCached(legacyService, DefaultLegacyService.class, c);
-		displayService = getCached(displayService, DisplayService.class, c);
-		moduleService = getCached(moduleService, ModuleService.class, c);
-		commandService = getCached(commandService, CommandService.class, c);
-		optionsService = getCached(optionsService, OptionsService.class, c);
-		appService = getCached(appService, AppService.class, c);
-		ioService = getCached(ioService, IOService.class, c);
-		logService = getCached(logService, LogService.class, c);
 
 		// Check to see if SCIFIO has been disabled
 		Boolean useSCIFIO = optionsService.getOptions(ImageJ2Options.class).isUseSCIFIO();
@@ -186,12 +189,5 @@ public class DefaultLegacyOpener implements LegacyOpener {
 			return data;
 		}
 		return path;
-	}
-
-	// -- Helper methods --
-
-	private <T extends Service> T getCached(T service, Class<T> serviceClass, Context ctx) {
-		if (service != null) return service;
-		return ctx.getService(serviceClass);
 	}
 }
