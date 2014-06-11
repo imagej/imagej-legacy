@@ -40,7 +40,6 @@ import java.util.Map;
 import java.util.Set;
 
 import net.imagej.DatasetService;
-import net.imagej.display.DatasetView;
 import net.imagej.display.ImageDisplay;
 import net.imagej.display.ImageDisplayService;
 import net.imagej.display.OverlayService;
@@ -72,7 +71,6 @@ import org.scijava.menu.MenuService;
 import org.scijava.module.ModuleInfo;
 import org.scijava.module.ModuleService;
 import org.scijava.options.OptionsService;
-import org.scijava.options.event.OptionsEvent;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 import org.scijava.plugin.PluginService;
@@ -83,7 +81,6 @@ import org.scijava.ui.ApplicationFrame;
 import org.scijava.ui.UIService;
 import org.scijava.ui.UserInterface;
 import org.scijava.ui.viewer.DisplayWindow;
-import org.scijava.util.ColorRGB;
 import org.scijava.welcome.event.WelcomeEvent;
 
 /**
