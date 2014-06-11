@@ -46,12 +46,16 @@ import ij.plugin.Commands;
 import ij.plugin.PlugIn;
 import ij.plugin.filter.PlugInFilter;
 import ij.plugin.filter.PlugInFilterRunner;
+import ij.plugin.frame.PlugInDialog;
+import ij.plugin.frame.PlugInFrame;
+import ij.text.TextWindow;
 
 import java.awt.Component;
 import java.awt.Image;
 import java.awt.Menu;
 import java.awt.MenuBar;
 import java.awt.MenuItem;
+import java.awt.Window;
 import java.awt.image.ImageProducer;
 import java.io.File;
 import java.io.IOException;
@@ -177,9 +181,6 @@ public class IJ1Helper extends AbstractContextual {
 						imp.changes = false;
 						imp.close();
 					}
-
-					// close any remaining (non-image) windows
-					WindowManager.closeAllWindows();
 				}
 			};
 			if (SwingUtilities.isEventDispatchThread()) {
@@ -189,6 +190,46 @@ public class IJ1Helper extends AbstractContextual {
 			} catch (Exception e) {
 				// report & ignore
 				e.printStackTrace();
+			}
+
+			// We need to ensure all the non-image windows are closed in ImageJ 1.x.
+			// This is a non-trivial problem, as WindowManager#getNonImageWindows()
+			// will ONLY return Frames. However there are non-Frame, non-Image Windows
+			// that are critical to close: for example, the ContrastAdjuster spawns
+			// a polling thread to do its work, which will continue to run until the
+			// ContrastAdjuster is explicitly closed.
+			// As of v1.49b, getNonImageTitles is not restricted to Frames, so we must
+			// use titles to iterate through the available windows.
+			for (String title : WindowManager.getNonImageTitles()) {
+				// Titles are not unique in IJ1, but since we are iterating through all
+				// the available Windows, duplicates will each get handled eventually.
+				final Window win = WindowManager.getWindow(title);
+
+				// Copied from ij.plugin.Commands.close. These are subclasses of
+				// java.awt.Window that added close methods. These methods absolutely
+				// need to be called - the only reason this is working in ImageJ 1.x
+				// right now is that ImageJ.exitWhenQuitting is always true, as there
+				// is nothing setting it to false. So System.exit(0) is called and it
+				// doesn't matter that there may be unclosed windows or utility threads
+				// running.
+				// In ImageJ2 however we need to ensure these windows are properly shut
+				// down.
+				// Note that we can NOT set these windows as active and run the Commands
+				// plugin with argument "close", because the default behavior is to
+				// try closing the window as an Image. As we know these are not Images,
+				// that is never the right thing to do.
+				if (win instanceof PlugInFrame)
+					((PlugInFrame)win).close();
+				else if (win instanceof PlugInDialog)
+					((PlugInDialog)win).close();
+				else if (win instanceof TextWindow)
+					((TextWindow)win).close();
+
+				// Ensure the WindowManager has removed the current window and it has
+				// been disposed. This may cause double disposal, but as far as we know
+				// that is OK.
+				WindowManager.removeWindow(win);
+				win.dispose();
 			}
 
 			// quit legacy ImageJ on the same thread
