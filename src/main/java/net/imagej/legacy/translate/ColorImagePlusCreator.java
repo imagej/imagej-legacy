@@ -38,6 +38,11 @@ import net.imagej.display.ImageDisplay;
 import net.imagej.display.ImageDisplayService;
 import net.imglib2.img.Img;
 import net.imglib2.img.cell.AbstractCellImg;
+import net.imglib2.type.numeric.RealType;
+import net.imglib2.type.numeric.integer.GenericIntType;
+import net.imglib2.type.numeric.integer.LongType;
+import net.imglib2.type.numeric.real.DoubleType;
+import net.imglib2.type.numeric.real.FloatType;
 
 import org.scijava.Context;
 import org.scijava.plugin.Parameter;
@@ -147,7 +152,23 @@ public class ColorImagePlusCreator extends AbstractImagePlusCreator
 				stack.setPixels(new int[w * h], i + 1);
 			}
 			else {
-				stack.setPixels(new byte[w * h], i + 1);
+				final RealType<?> type = ds.getImgPlus().firstElement();
+				switch (type.getBitsPerPixel()) {
+					case 8: stack.setPixels(new byte[w * h], i + 1); break;
+					case 16: stack.setPixels(new short[w * h], i + 1); break;
+					case 32:
+						if (type instanceof GenericIntType) stack.setPixels(new int[w * h],
+							i + 1);
+						else if (type instanceof FloatType) stack.setPixels(
+							new float[w * h], i + 1);
+						break;
+					case 64:
+						if (type instanceof LongType) stack.setPixels(new long[w * h],
+							i + 1);
+						else if (type instanceof DoubleType) stack.setPixels(
+							new double[w * h], i + 1);
+						break;
+				}
 			}
 		}
 
