@@ -315,7 +315,7 @@ public class IJ1Helper extends AbstractContextual {
 		}
 		// Move to most recent
 		if (index > 0) {
-			MenuItem item = menu.getItem(index);
+			final MenuItem item = menu.getItem(index);
 			menu.remove(index);
 			menu.insert(item, 0);
 		}
@@ -325,7 +325,10 @@ public class IJ1Helper extends AbstractContextual {
 			if (count >= Menus.MAX_OPEN_RECENT_ITEMS) {
 				menu.remove(count - 1);
 			}
-			Menus.addOpenRecentItem(path);
+			final MenuItem item = new MenuItem(path);
+			final ImageJ instance = IJ.getInstance();
+			if (instance != null) item.addActionListener(instance);
+			menu.insert(item, 0);
 		}
 		// if index was 0, already at the head so do nothing
 	}
