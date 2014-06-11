@@ -166,6 +166,16 @@ public class IJ1Helper extends AbstractContextual {
 				t.printStackTrace();
 			}
 		}
+
+		// FIXME: handle window location via LegacyUI
+		// This is necessary because the ImageJ 1.x window will not set its location
+		// if created with mode NO_SHOW, which is exactly how it is created right
+		// now by the legacy layer. This is a work-around by ensuring the preferred
+		// (e.g. saved and loaded) location is current at the time the IJ1Helper
+		// is initialized. Ideally we would like to handle positioning via
+		// the LegacyUI though, so that we can restore positions on secondary
+		// monitors and such.
+		getIJ().setLocation(getIJ().getPreferredLocation());
 	}
 
 	public void dispose() {
