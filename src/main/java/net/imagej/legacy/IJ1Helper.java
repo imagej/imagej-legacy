@@ -304,6 +304,7 @@ public class IJ1Helper extends AbstractContextual {
 
 	public void updateRecentMenu(final String path) {
 		Menu menu = Menus.getOpenRecentMenu();
+		if (menu == null) return;
 		int n = menu.getItemCount();
 		int index = -1;
 		for (int i=0; i<n; i++) {
