@@ -31,7 +31,6 @@
 
 package net.imagej.legacy.ui;
 
-import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
@@ -104,7 +103,6 @@ public class LegacyUI extends AbstractUserInterface implements SwingUI {
 	private EventService eventService;
 
 	private IJ1Helper ij1Helper;
-	private Desktop desktop;
 	private LegacyApplicationFrame applicationFrame;
 	private ToolBar toolBar;
 
@@ -187,26 +185,8 @@ public class LegacyUI extends AbstractUserInterface implements SwingUI {
 	}
 
 	@Override
-	public synchronized Desktop getDesktop() {
-		if (desktop != null) return desktop;
-		desktop = new Desktop() {
-
-			@Override
-			public void setArrangement(final Arrangement newValue) {}
-
-			@Override
-			public Arrangement getArrangement() {
-				return null;
-			}
-
-			@Override
-			public void addPropertyChangeListener(final PropertyChangeListener l) {}
-
-			@Override
-			public void removePropertyChangeListener(final PropertyChangeListener l) {}
-
-		};
-		return desktop;
+	public Desktop getDesktop() {
+		return null;
 	}
 
 	@Override
