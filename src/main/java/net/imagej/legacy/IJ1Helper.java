@@ -777,4 +777,9 @@ public class IJ1Helper extends AbstractContextual {
 	public void setDebugMode(final boolean debug) {
 		IJ.debugMode = debug;
 	}
+
+	public void handleException(Throwable e) {
+		IJ.handleException(e);;
+		
+	}
 }

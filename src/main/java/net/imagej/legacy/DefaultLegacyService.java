@@ -528,4 +528,10 @@ public final class DefaultLegacyService extends AbstractService implements
 		if (uiService == null) uiService = getContext().getService(UIService.class);
 		return uiService;
 	}
+
+	@Override
+	public void handleException(Throwable e) {
+		log.error(e);
+		ij1Helper.handleException(e);
+	}
 }

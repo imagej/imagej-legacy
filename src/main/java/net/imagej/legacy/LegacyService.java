@@ -31,6 +31,8 @@
 
 package net.imagej.legacy;
 
+import java.lang.reflect.InvocationTargetException;
+
 import net.imagej.ImageJService;
 import net.imagej.display.ImageDisplay;
 
@@ -91,5 +93,7 @@ public interface LegacyService extends ImageJService {
 
 	/** Gets the version of ImageJ 1.x being used. */
 	String getLegacyVersion();
+
+	void handleException(Throwable e);
 
 }

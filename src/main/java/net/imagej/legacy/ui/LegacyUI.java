@@ -169,10 +169,10 @@ public class LegacyUI extends AbstractUserInterface implements SwingUI {
 				});
 			}
 			catch (InterruptedException e) {
-				log.error(e);
+				legacyService.handleException(e);
 			}
 			catch (InvocationTargetException e) {
-				log.error(e);
+				legacyService.handleException(e);
 			}
 		}
 		else {
@@ -294,10 +294,10 @@ public class LegacyUI extends AbstractUserInterface implements SwingUI {
 			});
 		}
 		catch (InterruptedException e) {
-			log.error(e);
+			legacyService.handleException(e);
 		}
 		catch (InvocationTargetException e) {
-			log.error(e);
+			legacyService.handleException(e);
 		}
 		return chosenFile[0];
 	}
