@@ -168,6 +168,9 @@ public class ColorPixelHarmonizer implements DataHarmonizer {
 				if (zIndex >= 0) accessor.setPosition(z, zIndex);
 				for (int c = 0; c < cSize; c++) {
 					final ImageProcessor proc = stack.getProcessor(imagejPlaneNumber++);
+					if (!ds.isRGBMerged()) {
+						accessor.setPosition(c, cIndex);
+					}
 					// TEMP HACK THAT FIXES VIRT STACK PROB BUT SLOW
 					// imp.setPosition(planeNum - 1);
 					for (int y = 0; y < ySize; y++) {
@@ -190,7 +193,6 @@ public class ColorPixelHarmonizer implements DataHarmonizer {
 										(0xff << 24) | (rValue << 16) | (gValue << 8) | (bValue);
 							}
 							else {
-								accessor.setPosition(c, cIndex);
 								intValue = ((int)accessor.get().getRealDouble());
 							}
 
