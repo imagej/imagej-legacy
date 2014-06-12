@@ -59,7 +59,6 @@ import org.scijava.AbstractContextual;
 import org.scijava.display.event.DisplayDeletedEvent;
 import org.scijava.event.EventHandler;
 import org.scijava.plugin.Parameter;
-import org.scijava.ui.UIService;
 import org.scijava.ui.viewer.DisplayWindow;
 
 /**
