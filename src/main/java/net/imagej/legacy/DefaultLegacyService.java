@@ -169,6 +169,7 @@ public final class DefaultLegacyService extends AbstractService implements
 	/** Keep references to ImageJ 1.x separate */
 	private IJ1Helper ij1Helper;
 
+	// FIXME: See https://github.com/imagej/imagej-legacy/issues/53
 	public IJ1Helper getIJ1Helper() {
 		return ij1Helper;
 	}
