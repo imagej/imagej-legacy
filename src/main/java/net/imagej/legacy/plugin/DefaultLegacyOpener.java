@@ -179,6 +179,10 @@ public class DefaultLegacyOpener implements LegacyOpener {
 				}
 
 				if (imp != null) {
+					final String existingInfo = (String) imp.getProperty("Info");
+					if (existingInfo != null) {
+						loadingInfo += existingInfo;
+					}
 					imp.setProperty("Info", loadingInfo);
 					return imp;
 				}

@@ -37,8 +37,15 @@ import ij.ImageStack;
 import ij.VirtualStack;
 import ij.io.FileInfo;
 import ij.measure.Calibration;
+import io.scif.ImageMetadata;
+import io.scif.MetaTable;
+import io.scif.Metadata;
+import io.scif.img.SCIFIOImgPlus;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import net.imagej.Dataset;
 import net.imglib2.meta.Axes;
@@ -99,7 +106,7 @@ public abstract class AbstractImagePlusCreator extends AbstractContextual
 	protected ImagePlus makeImagePlus(final Dataset ds, final int c, final int z,
 		final int t, final ImageStack stack)
 	{
-		final ImagePlus imp = new ImagePlus(ds.getName(), stack);
+		ImagePlus imp = new ImagePlus(ds.getName(), stack);
 
 		imp.setDimensions(c, z, t);
 
@@ -171,7 +178,74 @@ public abstract class AbstractImagePlusCreator extends AbstractContextual
 
 		imp.setFileInfo(fileInfo);
 
-		if (ds.isRGBMerged()) return imp;
-		return new CompositeImage(imp, CompositeImage.COMPOSITE);
+		if (!ds.isRGBMerged()) {
+			imp = new CompositeImage(imp, CompositeImage.COMPOSITE);
+		}
+
+		fillInfo(imp, ds.getImgPlus());
+
+		return imp;
+	}
+
+	private void fillInfo(final ImagePlus imp,
+		final ImgPlus<? extends RealType<?>> imgPlus)
+	{
+		if (imgPlus instanceof SCIFIOImgPlus) {
+			final SCIFIOImgPlus<?> scifioImgPlus = (SCIFIOImgPlus<?>)imgPlus;
+
+			final Metadata meta = scifioImgPlus.getMetadata();
+			if (meta != null) {
+				fillImageInfo(imp, meta);
+
+				addInfo(imp, "--- Global Metadata ---");
+				fillInfo(imp, meta.getTable());
+
+				addInfo(imp, "--- Image Metadata ---");
+				for (final ImageMetadata iMeta : meta.getAll()) {
+					fillInfo(imp, iMeta.getTable());
+				}
+			}
+		}
+	}
+
+	private void fillImageInfo(final ImagePlus imp, final Metadata meta) {
+		addInfo(imp, "--- Dataset Information ---");
+		addInfo(imp, "BitsPerPixel = " + meta.get(0).getBitsPerPixel());
+		addInfo(imp, "PixelType = " + meta.get(0).getPixelType());
+		addInfo(imp, "Dataset name = " + meta.getDatasetName());
+
+		for (int i=0; i<meta.getImageCount(); i++) {
+			addInfo(imp, "Image " + i + " Information");
+			String dimensionOrder = "";
+			String dimensionLengths = "";
+			for (int j=0; j<meta.get(i).getAxes().size(); j++) {
+				dimensionOrder += meta.get(i).getAxis(i).type().getLabel();
+				dimensionLengths += meta.get(i).getAxisLength(i);
+
+				if (j < meta.get(i).getAxes().size() - 1) {
+					dimensionOrder += ",";
+					dimensionLengths += ",";
+				}
+			}
+			addInfo(imp, "Dimension order = " + dimensionOrder);
+			addInfo(imp, "Dimension lengths = " + dimensionLengths);
+		}
+	}
+
+	private void addInfo(final ImagePlus imp, String newInfo) {
+		final String info = (String) imp.getProperty("Info");
+		if (info != null) newInfo = info + newInfo;
+		imp.setProperty("Info", newInfo + "\n");
+	}
+
+	private void fillInfo(final ImagePlus imp, final MetaTable table) {
+		String info = (String) imp.getProperty("Info");
+		if (info == null) info = "";
+		List<String> keySet = new ArrayList<String>(table.keySet());
+		Collections.sort(keySet);
+		for (final String key : keySet) {
+			info += key + " = " + table.get(key) + "\n";
+		}
+		imp.setProperty("Info", info);
 	}
 }
