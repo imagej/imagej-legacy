@@ -93,23 +93,28 @@ public class LegacyUtils {
 	}
 
 	/**
-	 * Returns the number of channels required in legacy ImageJ to represent all
+	 * Returns the number of planes needed in legacy ImageJ to represent all
 	 * the axes of a modern ImageJ Dataset. Incompatible modern axes are encoded
-	 * as extra channels in the legacy ImageJ image.
+	 * as extra planes in the legacy ImageJ image.
 	 */
-	static long ij1ChannelCount(Dataset ds) {
-		long cCount = 1;
+	static long ij1PlaneCount(Dataset ds, final AxisType whiteList) {
+		long planeCount = 1;
 		int axisIndex = 0;
 		for (int i = 0; i < ds.numDimensions(); i++) {
 			AxisType axisType = ds.axis(i).type();
 			final long axisSize = ds.dimension(axisIndex++);
-			if (axisType == Axes.X) continue;
-			if (axisType == Axes.Y) continue;
-			if (axisType == Axes.Z) continue;
-			if (axisType == Axes.TIME) continue;
-			cCount *= axisSize;
+			// we want to skip the X,Y,C,Z,T axes, unless that axis is the white list.
+			// this will cause planeCount to be the product of the whiteList axis and
+			// all other axes
+			if (axisType == whiteList) {} // DON'T continue
+			else if (axisType == Axes.X) continue;
+			else if (axisType == Axes.Y) continue;
+			else if (axisType == Axes.CHANNEL) continue;
+			else if (axisType == Axes.Z) continue;
+			else if (axisType == Axes.TIME) continue;
+			planeCount *= axisSize;
 		}
-		return cCount;
+		return planeCount;
 	}
 
 	/**
@@ -122,16 +127,15 @@ public class LegacyUtils {
 		final int xIndex = ds.dimensionIndex(Axes.X);
 		final int yIndex = ds.dimensionIndex(Axes.Y);
 		final int zIndex = ds.dimensionIndex(Axes.Z);
-		final int tIndex = ds.dimensionIndex(Axes.TIME);
+		final int cIndex = ds.dimensionIndex(Axes.CHANNEL);
 
 		final long[] dims = IntervalUtils.getDims(ds);
 
 		final long xCount = xIndex < 0 ? 1 : dims[xIndex];
 		final long yCount = yIndex < 0 ? 1 : dims[yIndex];
 		final long zCount = zIndex < 0 ? 1 : dims[zIndex];
-		final long tCount = tIndex < 0 ? 1 : dims[tIndex];
-
-		final long cCount = LegacyUtils.ij1ChannelCount(ds);
+		final long tCount = ij1PlaneCount(ds, Axes.TIME);
+		final long cCount = cIndex < 0 ? 1 : dims[cIndex];
 		final long ij1ChannelCount = ds.isRGBMerged() ? (cCount / 3) : cCount;
 
 		// check width exists
@@ -263,8 +267,8 @@ public class LegacyUtils {
 		final long xCount = xIndex < 0 ? 1 : dataset.dimension(xIndex);
 		final long yCount = yIndex < 0 ? 1 : dataset.dimension(yIndex);
 		final long zCount = zIndex < 0 ? 1 : dataset.dimension(zIndex);
-		final long tCount = tIndex < 0 ? 1 : dataset.dimension(tIndex);
-		final long cCount = ij1ChannelCount(dataset);
+		final long tCount = ij1PlaneCount(dataset, Axes.TIME);
+		final long cCount = cIndex < 0 ? 1 : dataset.dimension(cIndex);
 
 		// NB - cIndex tells what dimension is channel in Dataset. For a
 		// Dataset that encodes other axes as channels this info is not so

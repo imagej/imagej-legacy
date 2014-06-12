@@ -325,11 +325,13 @@ public class Harmonizer extends AbstractContextual {
 		final int yIndex = ds.dimensionIndex(Axes.Y);
 		final int zIndex = ds.dimensionIndex(Axes.Z);
 		final int tIndex = ds.dimensionIndex(Axes.TIME);
+		final int cIndex = ds.dimensionIndex(Axes.CHANNEL);
 
 		final long x = (xIndex < 0) ? 1 : ds.dimension(xIndex);
 		final long y = (yIndex < 0) ? 1 : ds.dimension(yIndex);
 		final long z = (zIndex < 0) ? 1 : ds.dimension(zIndex);
-		final long t = (tIndex < 0) ? 1 : ds.dimension(tIndex);
+		final long t = LegacyUtils.ij1PlaneCount(ds, Axes.TIME);
+		final long c = (tIndex < 0) ? 1 : ds.dimension(cIndex);
 
 		if (x != imp.getWidth()) return false;
 		if (y != imp.getHeight()) return false;
@@ -337,13 +339,9 @@ public class Harmonizer extends AbstractContextual {
 		if (t != imp.getNFrames()) return false;
 		// channel case a little different
 		if (imp.getType() == ImagePlus.COLOR_RGB) {
-			final int cIndex = ds.dimensionIndex(Axes.CHANNEL);
-			if (cIndex < 0) return false;
-			final long c = ds.dimension(cIndex);
-			if (c != imp.getNChannels() * 3) return false;
+			if (cIndex < 0 || c != imp.getNChannels() * 3) return false;
 		}
 		else { // not color data
-			final long c = LegacyUtils.ij1ChannelCount(ds);
 			if (c != imp.getNChannels()) return false;
 		}
 
