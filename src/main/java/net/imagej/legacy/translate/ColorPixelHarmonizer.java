@@ -34,6 +34,7 @@ package net.imagej.legacy.translate;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.process.ImageProcessor;
+import io.scif.util.FormatTools;
 import net.imagej.Dataset;
 import net.imglib2.RandomAccess;
 import net.imglib2.meta.Axes;
@@ -151,19 +152,24 @@ public class ColorPixelHarmonizer implements DataHarmonizer {
 		final int yIndex = ds.dimensionIndex(Axes.Y);
 		final int cIndex = ds.dimensionIndex(Axes.CHANNEL);
 		final int zIndex = ds.dimensionIndex(Axes.Z);
-		final int tIndex = ds.dimensionIndex(Axes.TIME);
 		final int xSize = imp.getWidth();
 		final int ySize = imp.getHeight();
 		final int cSize = imp.getNChannels();
 		final int zSize = imp.getNSlices();
 		final int tSize = imp.getNFrames();
+		int tIndex = Math.max(cIndex, zIndex) + 1;
+		if (tIndex == 1) tIndex = yIndex + 1;
 		final ImageStack stack = imp.getStack();
 		int imagejPlaneNumber = 1;
 		final RandomAccess<? extends RealType<?>> accessor =
 			ds.getImgPlus().randomAccess();
 		int slice = imp.getCurrentSlice();
+		final long[] tPos = new long[ds.numDimensions() - tIndex];
+		for (int i = tIndex; i<ds.numDimensions(); i++) {
+			tPos[i - tIndex] = ds.dimension(i);
+		}
 		for (int t = 0; t < tSize; t++) {
-			if (tIndex >= 0) accessor.setPosition(t, tIndex);
+			updatePosition(accessor, tPos, t, tIndex);
 			for (int z = 0; z < zSize; z++) {
 				if (zIndex >= 0) accessor.setPosition(z, zIndex);
 				for (int c = 0; c < cSize; c++) {
@@ -208,4 +214,18 @@ public class ColorPixelHarmonizer implements DataHarmonizer {
 		stack.getProcessor(slice);
 	}
 
+	/**
+	 * Sets the positions of the given accessor, from [start, start +
+	 * lengths.length], by converting the given index to a position, using the
+	 * given lengths array to convert from raster to position.
+	 */
+	private void updatePosition(RandomAccess<? extends RealType<?>> accessor,
+		long[] lengths, int index, int start)
+	{
+		long[] values = FormatTools.rasterToPosition(lengths, index);
+		for (int i=0; i<lengths.length; i++) {
+			int dim = i + start;
+			accessor.setPosition(values[i], dim);
+		}
+	}
 }

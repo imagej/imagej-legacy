@@ -34,6 +34,7 @@ package net.imagej.legacy.translate;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.process.ImageProcessor;
+import io.scif.util.FormatTools;
 import net.imagej.Dataset;
 import net.imglib2.RandomAccess;
 import net.imglib2.meta.Axes;
@@ -167,26 +168,30 @@ public class GrayPixelHarmonizer implements DataHarmonizer {
 		final RandomAccess<? extends RealType<?>> accessor =
 			ds.getImgPlus().randomAccess();
 		final long[] dims = IntervalUtils.getDims(ds);
-		final AxisType[] axes = SpaceUtils.getAxisTypes(ds);
 		final int xIndex = ds.dimensionIndex(Axes.X);
 		final int yIndex = ds.dimensionIndex(Axes.Y);
 		final int zIndex = ds.dimensionIndex(Axes.Z);
-		final int tIndex = ds.dimensionIndex(Axes.TIME);
+		final int cIndex = ds.dimensionIndex(Axes.CHANNEL);
 		final int xSize = imp.getWidth();
 		final int ySize = imp.getHeight();
 		final int zSize = imp.getNSlices();
 		final int tSize = imp.getNFrames();
 		final int cSize = imp.getNChannels();
+		int tIndex = Math.max(yIndex, zIndex) + 1;
 		final ImageStack stack = imp.getStack();
 		int planeNum = 1;
 		final long[] pos = new long[dims.length];
 		int slice = imp.getCurrentSlice();
+		final long[] tPos = new long[ds.numDimensions() - tIndex];
+		for (int i = tIndex; i<ds.numDimensions(); i++) {
+			tPos[i - tIndex] = ds.dimension(i);
+		}
 		for (int t = 0; t < tSize; t++) {
-			if (tIndex >= 0) pos[tIndex] = t;
+			updatePosition(pos, tPos, t, tIndex);
 			for (int z = 0; z < zSize; z++) {
 				if (zIndex >= 0) pos[zIndex] = z;
 				for (int c = 0; c < cSize; c++) {
-					LegacyUtils.fillChannelIndices(dims, axes, c, pos);
+					if (cIndex >= 0) pos[cIndex] = c;
 					final ImageProcessor proc = stack.getProcessor(planeNum++);
 					// TEMP HACK THAT FIXES VIRT STACK PROB BUT SLOW
 					// imp.setPosition(planeNum - 1);
@@ -208,6 +213,19 @@ public class GrayPixelHarmonizer implements DataHarmonizer {
 		// changed the current plane's pixels for virtual stacks. So reset pixels
 		// to correct plane's values
 		stack.getProcessor(slice);
+	}
+
+	/**
+	 * Sets the positions of the given dims array, from [start, start +
+	 * lengths.length], by converting the given index to a position, using the
+	 * given lengths array to convert from raster to position.
+	 */
+	private void updatePosition(long[] dims, long[] tPos, int index, int start) {
+		long[] values = FormatTools.rasterToPosition(tPos, index);
+		for (int i=0; i<tPos.length; i++) {
+			int pos = i + start;
+			dims[pos] = values[i];
+		}
 	}
 
 }
