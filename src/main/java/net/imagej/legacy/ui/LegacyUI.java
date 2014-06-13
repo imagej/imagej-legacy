@@ -31,6 +31,9 @@
 
 package net.imagej.legacy.ui;
 
+import ij.io.OpenDialog;
+import ij.io.SaveDialog;
+
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
@@ -69,6 +72,7 @@ import org.scijava.ui.swing.SwingUI;
 import org.scijava.ui.swing.viewer.SwingDisplayWindow;
 import org.scijava.ui.viewer.DisplayViewer;
 import org.scijava.ui.viewer.DisplayWindow;
+import org.scijava.util.FileUtils;
 import org.scijava.widget.FileWidget;
 
 /**
@@ -257,19 +261,37 @@ public class LegacyUI extends AbstractUserInterface implements SwingUI {
 
 				@Override
 				public void run() {
-					final JFileChooser chooser = new JFileChooser(file);
 					if (FileWidget.DIRECTORY_STYLE.equals(style)) {
+						// ImageJ1 does not provide a directory chooser, so we use a
+						// Swing JFileChooser in "DIRECTORIES_ONLY" mode.
+						final JFileChooser chooser = new JFileChooser(file);
 						chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+						final int rval =
+							chooser.showOpenDialog(getApplicationFrame().getComponent());
+						if (rval == JFileChooser.APPROVE_OPTION) {
+							chosenFile[0] = chooser.getSelectedFile();
+						}
 					}
-					final int rval;
-					if (FileWidget.SAVE_STYLE.equals(style)) {
-						rval = chooser.showSaveDialog(getApplicationFrame().getComponent());
+					else if (FileWidget.SAVE_STYLE.equals(style)) {
+						// Use ImageJ1's SaveDialog.
+						final String defaultName = file.getName();
+						final String extension = FileUtils.getExtension(file);
+						final SaveDialog saveDialog =
+							new SaveDialog("Save", defaultName, extension);
+						final String directory = saveDialog.getDirectory();
+						final String fileName = saveDialog.getFileName();
+						if (directory != null && fileName != null) {
+							chosenFile[0] = new File(directory, fileName);
+						}
 					}
-					else { // default behavior
-						rval = chooser.showOpenDialog(getApplicationFrame().getComponent());
-					}
-					if (rval == JFileChooser.APPROVE_OPTION) {
-						chosenFile[0] = chooser.getSelectedFile();
+					else { // FileWidget.OPEN_STYLE / default behavior
+						// Use ImageJ1's OpenDialog.
+						final OpenDialog openDialog = new OpenDialog("Open");
+						final String directory = openDialog.getDirectory();
+						final String fileName = openDialog.getFileName();
+						if (directory != null && fileName != null) {
+							chosenFile[0] = new File(directory, fileName);
+						}
 					}
 				}
 			});
