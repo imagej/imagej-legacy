@@ -174,7 +174,7 @@ public class ColorPixelHarmonizer implements DataHarmonizer {
 				if (zIndex >= 0) accessor.setPosition(z, zIndex);
 				for (int c = 0; c < cSize; c++) {
 					final ImageProcessor proc = stack.getProcessor(imagejPlaneNumber++);
-					if (!ds.isRGBMerged()) {
+					if (!ds.isRGBMerged() && cIndex >= 0) {
 						accessor.setPosition(c, cIndex);
 					}
 					// TEMP HACK THAT FIXES VIRT STACK PROB BUT SLOW
