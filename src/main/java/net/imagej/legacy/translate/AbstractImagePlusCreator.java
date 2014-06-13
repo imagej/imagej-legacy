@@ -124,7 +124,7 @@ public abstract class AbstractImagePlusCreator extends AbstractContextual
 				FileInfo.GRAY16_UNSIGNED : FileInfo.GRAY8;
 		if (file.exists()) {
 			fileInfo.fileName = file.getName();
-			fileInfo.directory = file.getParent();
+			fileInfo.directory = file.getParent() + File.separator;
 		}
 		else {
 			fileInfo.url = source;
