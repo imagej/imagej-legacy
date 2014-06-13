@@ -454,6 +454,7 @@ public final class DefaultLegacyService extends AbstractService implements
 		final LegacyEnvironment ij1 = new LegacyEnvironment(loader, headless);
 		ij1.disableInitializer();
 		ij1.noPluginClassLoader();
+		ij1.suppressIJ1ScriptDiscovery();
 		ij1.applyPatches();
 		return ij1;
 	}
