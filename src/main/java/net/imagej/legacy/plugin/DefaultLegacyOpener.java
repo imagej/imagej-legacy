@@ -44,6 +44,7 @@ import net.imagej.display.ImageDisplay;
 import net.imagej.legacy.DefaultLegacyService;
 import net.imagej.legacy.IJ1Helper;
 import net.imagej.legacy.ImageJ2Options;
+import net.imagej.legacy.LegacyImageMap;
 import net.imagej.legacy.translate.DefaultImageTranslator;
 import net.imagej.legacy.translate.ImageTranslator;
 
@@ -149,7 +150,13 @@ public class DefaultLegacyOpener implements LegacyOpener {
 					final ImageDisplay imageDisplay =
 						(ImageDisplay) displayService.createDisplay(d);
 
-					imp = legacyService.getImageMap().lookupImagePlus(imageDisplay);
+					final LegacyImageMap imageMap = legacyService.getImageMap();
+					imp = imageMap.lookupImagePlus(imageDisplay);
+					if (imp == null) {
+						// we're in headless mode
+						imp = imageMap.registerDisplay(imageDisplay);
+						imp.show();
+					}
 
 					legacyService.getIJ1Helper().updateRecentMenu(
 						((Dataset) data).getImgPlus().getSource());
