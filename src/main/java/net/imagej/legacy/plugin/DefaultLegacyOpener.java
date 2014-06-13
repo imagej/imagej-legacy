@@ -138,7 +138,7 @@ public class DefaultLegacyOpener implements LegacyOpener {
 			}
 		}
 		catch (final IOException exc) {
-			logService.error(exc);
+			legacyService.handleException(exc);
 		}
 
 		if (data != null) {
