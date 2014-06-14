@@ -78,6 +78,7 @@ public class SwitchToModernTest {
 			ij1.disableIJ1PluginDirs();
 			ij1.disableInitializer();
 			ij1.noPluginClassLoader();
+			ij1.suppressIJ1ScriptDiscovery();
 			ij1.runMacro("call(\"ij.IJ.redirectErrorMessages\");", "");
 			ij1.run("Switch to Modern Mode", "");
 		} finally {

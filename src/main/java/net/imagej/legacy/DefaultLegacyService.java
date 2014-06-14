@@ -32,12 +32,10 @@
 package net.imagej.legacy;
 
 import java.awt.GraphicsEnvironment;
+import java.io.File;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
+import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Set;
 
 import net.imagej.DatasetService;
 import net.imagej.display.ImageDisplay;
@@ -45,12 +43,13 @@ import net.imagej.display.ImageDisplayService;
 import net.imagej.display.OverlayService;
 import net.imagej.legacy.plugin.LegacyCommand;
 import net.imagej.legacy.ui.LegacyUI;
-import net.imagej.options.OptionsChannels;
 import net.imagej.patcher.LegacyEnvironment;
 import net.imagej.patcher.LegacyInjector;
 import net.imagej.threshold.ThresholdService;
+import net.imagej.ui.swing.script.TextEditor;
 import net.imagej.ui.viewer.image.ImageDisplayViewer;
 
+import org.scijava.MenuPath;
 import org.scijava.Priority;
 import org.scijava.app.App;
 import org.scijava.app.AppService;
@@ -74,6 +73,7 @@ import org.scijava.options.OptionsService;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 import org.scijava.plugin.PluginService;
+import org.scijava.script.ScriptInfo;
 import org.scijava.script.ScriptService;
 import org.scijava.service.AbstractService;
 import org.scijava.service.Service;
@@ -176,7 +176,7 @@ public final class DefaultLegacyService extends AbstractService implements
 
 	private ThreadLocal<Boolean> isProcessingEvents = new ThreadLocal<Boolean>();
 
-	private Set<String> legacyCompatibleCommands = new HashSet<String>();
+	private Map<String, ModuleInfo> legacyCompatible = new HashMap<String, ModuleInfo>();
 
 	// -- LegacyService methods --
 
@@ -207,11 +207,23 @@ public final class DefaultLegacyService extends AbstractService implements
 		commandService.run(LegacyCommand.class, true, inputMap);
 	}
 
-	public Object runLegacyCompatibleCommand(final String commandClass) {
-		if (!legacyCompatibleCommands.contains(commandClass)) {
-			return null;
+	public Object runLegacyCompatibleCommand(final String key) {
+		final ModuleInfo info = legacyCompatible.get(key);
+		if (info == null) return null;
+		if (info instanceof CommandInfo) {
+			return commandService.run((CommandInfo) info, true);
 		}
-		return commandService.run(commandClass, true, new Object[0]);
+		if (info instanceof ScriptInfo) {
+			if (ij1Helper.shiftKeyDown()) {
+				final ScriptInfo script = (ScriptInfo) info;
+				final TextEditor editor = new TextEditor(getContext());
+				editor.open(new File(script.getPath()));
+				editor.setVisible(true);
+				return editor;
+			}
+			return scriptService.run((ScriptInfo) info, true);
+		}
+		throw new IllegalArgumentException("Unhandled info for '" + key + "': " + info);
 	}
 
 	@Override
@@ -330,7 +342,13 @@ public final class DefaultLegacyService extends AbstractService implements
 
 		SwitchToModernMode.registerMenuItem();
 
-		addNonLegacyCommandsToMenu();
+		final File topLevel = appService.getApp().getBaseDirectory();
+		final File plugins = new File(topLevel, "plugins");
+		if (plugins.exists()) {
+			final File scripts = new File(plugins, "Scripts");
+			if (scripts.exists()) scriptService.addScriptDirectory(scripts);
+			scriptService.addScriptDirectory(plugins, new MenuPath("Plugins"));
+		}
 	}
 
 	// -- Package protected events processing methods --
@@ -454,6 +472,7 @@ public final class DefaultLegacyService extends AbstractService implements
 		final LegacyEnvironment ij1 = new LegacyEnvironment(loader, headless);
 		ij1.disableInitializer();
 		ij1.noPluginClassLoader();
+		ij1.suppressIJ1ScriptDiscovery();
 		ij1.applyPatches();
 		return ij1;
 	}
@@ -487,33 +506,38 @@ public final class DefaultLegacyService extends AbstractService implements
 		return appService.getApp();
 	}
 
-	private OptionsChannels getChannels() {
-		return optionsService.getOptions(OptionsChannels.class);
-	}
-
 	// -- Menu population --
 
 	/**
 	 * Adds all legacy compatible commands to the ImageJ1 menus. The nested menu
 	 * structure of each command is preserved.
+	 * <p>
+	 * This is not part of the public API. DO-NOT-USE!
+	 * </p>
 	 */
-	private void addNonLegacyCommandsToMenu() {
-		List<CommandInfo> commands =
-			commandService.getCommandsOfType(Command.class);
-		legacyCompatibleCommands = new HashSet<String>();
-		for (final Iterator<CommandInfo> iter = commands.iterator(); iter.hasNext(); ) {
-			final CommandInfo info = iter.next();
+	public Map<String, ModuleInfo> getScriptsAndNonLegacyCommands() {
+		final Map<String, ModuleInfo> modules = new LinkedHashMap<String, ModuleInfo>();
+		legacyCompatible.clear();
+		for (final CommandInfo info : commandService.getCommandsOfType(Command.class)) {
 			if (info.getMenuPath().size() == 0 || info.is("no-legacy")) {
-				iter.remove();
+				continue;
 			}
 			else if (!info.getAnnotation().visible()) {
-				iter.remove();
+				continue;
 			}
-			else {
-				legacyCompatibleCommands.add(info.getDelegateClassName());
-			}
+			final String key = "Command:" + info.getDelegateClassName();
+			legacyCompatible.put(key, info);
+			modules.put(key, info);
 		}
-		ij1Helper.addMenuItems(commands);
+		for (final ScriptInfo info : scriptService.getScripts()) {
+			if (info.getMenuPath().size() == 0) {
+				continue;
+			}
+			final String key = "Script:" + info.getPath();
+			legacyCompatible.put(key, info);
+			modules.put(key, info);
+		}
+		return modules;
 	}
 
 	boolean handleShortcut(final String accelerator) {
