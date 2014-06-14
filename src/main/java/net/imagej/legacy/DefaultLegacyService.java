@@ -46,6 +46,7 @@ import net.imagej.legacy.ui.LegacyUI;
 import net.imagej.patcher.LegacyEnvironment;
 import net.imagej.patcher.LegacyInjector;
 import net.imagej.threshold.ThresholdService;
+import net.imagej.ui.swing.script.TextEditor;
 import net.imagej.ui.viewer.image.ImageDisplayViewer;
 
 import org.scijava.MenuPath;
@@ -213,6 +214,13 @@ public final class DefaultLegacyService extends AbstractService implements
 			return commandService.run((CommandInfo) info, true);
 		}
 		if (info instanceof ScriptInfo) {
+			if (ij1Helper.shiftKeyDown()) {
+				final ScriptInfo script = (ScriptInfo) info;
+				final TextEditor editor = new TextEditor(getContext());
+				editor.open(new File(script.getPath()));
+				editor.setVisible(true);
+				return editor;
+			}
 			return scriptService.run((ScriptInfo) info, true);
 		}
 		throw new IllegalArgumentException("Unhandled info for '" + key + "': " + info);
