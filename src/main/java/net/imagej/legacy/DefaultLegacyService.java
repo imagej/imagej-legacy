@@ -33,11 +33,8 @@ package net.imagej.legacy;
 
 import java.awt.GraphicsEnvironment;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
+import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Set;
 
 import net.imagej.DatasetService;
 import net.imagej.display.ImageDisplay;
@@ -175,7 +172,7 @@ public final class DefaultLegacyService extends AbstractService implements
 
 	private ThreadLocal<Boolean> isProcessingEvents = new ThreadLocal<Boolean>();
 
-	private Set<String> legacyCompatibleCommands = new HashSet<String>();
+	private Map<String, ModuleInfo> legacyCompatible = new HashMap<String, ModuleInfo>();
 
 	// -- LegacyService methods --
 
@@ -206,11 +203,13 @@ public final class DefaultLegacyService extends AbstractService implements
 		commandService.run(LegacyCommand.class, true, inputMap);
 	}
 
-	public Object runLegacyCompatibleCommand(final String commandClass) {
-		if (!legacyCompatibleCommands.contains(commandClass)) {
-			return null;
+	public Object runLegacyCompatibleCommand(final String key) {
+		final ModuleInfo info = legacyCompatible.get(key);
+		if (info == null) return null;
+		if (info instanceof CommandInfo) {
+			return commandService.run((CommandInfo) info, true);
 		}
-		return commandService.run(commandClass, true, new Object[0]);
+		throw new IllegalArgumentException("Unhandled info for '" + key + "': " + info);
 	}
 
 	@Override
@@ -494,22 +493,20 @@ public final class DefaultLegacyService extends AbstractService implements
 	 * structure of each command is preserved.
 	 */
 	private void addNonLegacyCommandsToMenu() {
-		List<CommandInfo> commands =
-			commandService.getCommandsOfType(Command.class);
-		legacyCompatibleCommands = new HashSet<String>();
-		for (final Iterator<CommandInfo> iter = commands.iterator(); iter.hasNext(); ) {
-			final CommandInfo info = iter.next();
+		final Map<String, ModuleInfo> modules = new LinkedHashMap<String, ModuleInfo>();
+		legacyCompatible.clear();
+		for (final CommandInfo info : commandService.getCommandsOfType(Command.class)) {
 			if (info.getMenuPath().size() == 0 || info.is("no-legacy")) {
-				iter.remove();
+				continue;
 			}
 			else if (!info.getAnnotation().visible()) {
-				iter.remove();
+				continue;
 			}
-			else {
-				legacyCompatibleCommands.add(info.getDelegateClassName());
-			}
+			final String key = "Command:" + info.getDelegateClassName();
+			legacyCompatible.put(key, info);
+			modules.put(key, info);
 		}
-		ij1Helper.addMenuItems(commands);
+		ij1Helper.addMenuItems(modules);
 	}
 
 	boolean handleShortcut(final String accelerator) {

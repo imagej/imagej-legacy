@@ -62,11 +62,11 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.swing.SwingUtilities;
 
@@ -77,9 +77,9 @@ import org.scijava.AbstractContextual;
 import org.scijava.Context;
 import org.scijava.MenuEntry;
 import org.scijava.MenuPath;
-import org.scijava.command.CommandInfo;
 import org.scijava.event.EventHandler;
 import org.scijava.log.LogService;
+import org.scijava.module.ModuleInfo;
 import org.scijava.platform.event.AppAboutEvent;
 import org.scijava.platform.event.AppOpenFilesEvent;
 import org.scijava.platform.event.AppPreferencesEvent;
@@ -568,12 +568,14 @@ public class IJ1Helper extends AbstractContextual {
 	/**
 	 * Adds all of the provided commands to the ImageJ1 menu structure.
 	 */
-	public void addMenuItems(Collection<CommandInfo> commands) {
+	public void addMenuItems(Map<String, ModuleInfo> modules) {
 		@SuppressWarnings("unchecked")
 		final Hashtable<String, String> ij1Commands = Menus.getCommands();
 		final ImageJ ij1 = getIJ();
 		final IJ1MenuWrapper wrapper = ij1 == null ? null : new IJ1MenuWrapper(ij1);
-		for (final CommandInfo info : commands) {
+		for (final Entry<String, ModuleInfo> entry : modules.entrySet()) {
+			final String key = entry.getKey();
+			final ModuleInfo info = entry.getValue();
 			final MenuEntry leaf = info.getMenuPath().getLeaf();
 			if (leaf == null) continue;
 			final MenuPath path = info.getMenuPath();
@@ -595,7 +597,7 @@ public class IJ1Helper extends AbstractContextual {
 			catch (final Throwable t) {
 				legacyService.log().error(t);
 			}
-			ij1Commands.put(name, info.getDelegateClassName());
+			ij1Commands.put(name, key);
 		}
 	}
 
