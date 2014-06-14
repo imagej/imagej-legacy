@@ -70,6 +70,7 @@ import org.scijava.options.OptionsService;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 import org.scijava.plugin.PluginService;
+import org.scijava.script.ScriptInfo;
 import org.scijava.script.ScriptService;
 import org.scijava.service.AbstractService;
 import org.scijava.service.Service;
@@ -208,6 +209,9 @@ public final class DefaultLegacyService extends AbstractService implements
 		if (info == null) return null;
 		if (info instanceof CommandInfo) {
 			return commandService.run((CommandInfo) info, true);
+		}
+		if (info instanceof ScriptInfo) {
+			return scriptService.run((ScriptInfo) info, true);
 		}
 		throw new IllegalArgumentException("Unhandled info for '" + key + "': " + info);
 	}
@@ -493,7 +497,7 @@ public final class DefaultLegacyService extends AbstractService implements
 	 * This is not part of the public API. DO-NOT-USE!
 	 * </p>
 	 */
-	public Map<String, ModuleInfo> getNonLegacyCommands() {
+	public Map<String, ModuleInfo> getScriptsAndNonLegacyCommands() {
 		final Map<String, ModuleInfo> modules = new LinkedHashMap<String, ModuleInfo>();
 		legacyCompatible.clear();
 		for (final CommandInfo info : commandService.getCommandsOfType(Command.class)) {
@@ -504,6 +508,14 @@ public final class DefaultLegacyService extends AbstractService implements
 				continue;
 			}
 			final String key = "Command:" + info.getDelegateClassName();
+			legacyCompatible.put(key, info);
+			modules.put(key, info);
+		}
+		for (final ScriptInfo info : scriptService.getScripts()) {
+			if (info.getMenuPath().size() == 0) {
+				continue;
+			}
+			final String key = "Script:" + info.getPath();
 			legacyCompatible.put(key, info);
 			modules.put(key, info);
 		}

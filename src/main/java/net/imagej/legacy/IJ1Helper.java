@@ -568,12 +568,12 @@ public class IJ1Helper extends AbstractContextual {
 	private boolean menuInitialized;
 
 	/**
-	 * Adds legacy-compatible commands to the ImageJ1 menu structure.
+	 * Adds legacy-compatible scripts and commands to the ImageJ1 menu structure.
 	 */
 	public synchronized void addMenuItems() {
 		if (menuInitialized) return;
 		final Map<String, ModuleInfo> modules =
-			legacyService.getNonLegacyCommands();
+			legacyService.getScriptsAndNonLegacyCommands();
 		@SuppressWarnings("unchecked")
 		final Hashtable<String, String> ij1Commands = Menus.getCommands();
 		final ImageJ ij1 = getIJ();
