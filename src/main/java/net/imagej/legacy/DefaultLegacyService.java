@@ -327,8 +327,6 @@ public final class DefaultLegacyService extends AbstractService implements
 		ij1Helper.addAliases(scriptService);
 
 		SwitchToModernMode.registerMenuItem();
-
-		addNonLegacyCommandsToMenu();
 	}
 
 	// -- Package protected events processing methods --
@@ -491,8 +489,11 @@ public final class DefaultLegacyService extends AbstractService implements
 	/**
 	 * Adds all legacy compatible commands to the ImageJ1 menus. The nested menu
 	 * structure of each command is preserved.
+	 * <p>
+	 * This is not part of the public API. DO-NOT-USE!
+	 * </p>
 	 */
-	private void addNonLegacyCommandsToMenu() {
+	public Map<String, ModuleInfo> getNonLegacyCommands() {
 		final Map<String, ModuleInfo> modules = new LinkedHashMap<String, ModuleInfo>();
 		legacyCompatible.clear();
 		for (final CommandInfo info : commandService.getCommandsOfType(Command.class)) {
@@ -506,7 +507,7 @@ public final class DefaultLegacyService extends AbstractService implements
 			legacyCompatible.put(key, info);
 			modules.put(key, info);
 		}
-		ij1Helper.addMenuItems(modules);
+		return modules;
 	}
 
 	boolean handleShortcut(final String accelerator) {

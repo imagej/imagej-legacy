@@ -565,10 +565,15 @@ public class IJ1Helper extends AbstractContextual {
 		throw new RuntimeException("TODO: construct class loader");
 	}
 
+	private boolean menuInitialized;
+
 	/**
-	 * Adds all of the provided commands to the ImageJ1 menu structure.
+	 * Adds legacy-compatible commands to the ImageJ1 menu structure.
 	 */
-	public void addMenuItems(Map<String, ModuleInfo> modules) {
+	public synchronized void addMenuItems() {
+		if (menuInitialized) return;
+		final Map<String, ModuleInfo> modules =
+			legacyService.getNonLegacyCommands();
 		@SuppressWarnings("unchecked")
 		final Hashtable<String, String> ij1Commands = Menus.getCommands();
 		final ImageJ ij1 = getIJ();
@@ -599,6 +604,7 @@ public class IJ1Helper extends AbstractContextual {
 			}
 			ij1Commands.put(name, key);
 		}
+		menuInitialized = true;
 	}
 
 	/**
