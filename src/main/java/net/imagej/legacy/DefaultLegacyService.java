@@ -45,7 +45,6 @@ import net.imagej.display.ImageDisplayService;
 import net.imagej.display.OverlayService;
 import net.imagej.legacy.plugin.LegacyCommand;
 import net.imagej.legacy.ui.LegacyUI;
-import net.imagej.options.OptionsChannels;
 import net.imagej.patcher.LegacyEnvironment;
 import net.imagej.patcher.LegacyInjector;
 import net.imagej.threshold.ThresholdService;
@@ -486,10 +485,6 @@ public final class DefaultLegacyService extends AbstractService implements
 	public App getApp() {
 		if (appService == null) return null;
 		return appService.getApp();
-	}
-
-	private OptionsChannels getChannels() {
-		return optionsService.getOptions(OptionsChannels.class);
 	}
 
 	// -- Menu population --
