@@ -32,6 +32,7 @@
 package net.imagej.legacy;
 
 import java.awt.GraphicsEnvironment;
+import java.io.File;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -47,6 +48,7 @@ import net.imagej.patcher.LegacyInjector;
 import net.imagej.threshold.ThresholdService;
 import net.imagej.ui.viewer.image.ImageDisplayViewer;
 
+import org.scijava.MenuPath;
 import org.scijava.Priority;
 import org.scijava.app.App;
 import org.scijava.app.AppService;
@@ -331,6 +333,14 @@ public final class DefaultLegacyService extends AbstractService implements
 		ij1Helper.addAliases(scriptService);
 
 		SwitchToModernMode.registerMenuItem();
+
+		final File topLevel = appService.getApp().getBaseDirectory();
+		final File plugins = new File(topLevel, "plugins");
+		if (plugins.exists()) {
+			final File scripts = new File(plugins, "Scripts");
+			if (scripts.exists()) scriptService.addScriptDirectory(scripts);
+			scriptService.addScriptDirectory(plugins, new MenuPath("Plugins"));
+		}
 	}
 
 	// -- Package protected events processing methods --
