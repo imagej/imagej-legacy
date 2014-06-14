@@ -795,4 +795,13 @@ public class IJ1Helper extends AbstractContextual {
 		IJ.handleException(e);;
 		
 	}
+
+	/**
+	 * Ask ImageJ 1.x whether it thinks whether the Shift key is held down.
+	 * 
+	 * @return whether the Shift key is considered <i>down</i>
+	 */
+	public boolean shiftKeyDown() {
+		return IJ.shiftKeyDown();
+	}
 }
