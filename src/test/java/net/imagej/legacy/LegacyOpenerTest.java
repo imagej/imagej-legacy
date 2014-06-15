@@ -37,6 +37,8 @@ import static org.junit.Assume.assumeTrue;
 
 import java.net.URL;
 
+import net.imagej.patcher.LegacyInjector;
+
 import org.junit.Test;
 import org.scijava.Context;
 import org.scijava.script.ScriptModule;
@@ -48,6 +50,11 @@ import org.scijava.script.ScriptService;
  * @author Johannes Schindelin
  */
 public class LegacyOpenerTest {
+
+	static {
+		LegacyInjector.preinit();
+	}
+
 	/**
 	 * This regression test is based on a macro provided by Paul van Schayck.
 	 * 
