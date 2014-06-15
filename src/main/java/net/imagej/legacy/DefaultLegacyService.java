@@ -269,7 +269,7 @@ public final class DefaultLegacyService extends AbstractService implements
 					final ApplicationFrame frame = ui.getApplicationFrame();
 					ApplicationFrame modernFrame = modern.getApplicationFrame();
 					if (!wantIJ1 && modernFrame == null) {
-						modern.show();
+						if (ij1Helper.isVisible()) modern.show();
 						modernFrame = modern.getApplicationFrame();
 					}
 					if (frame == null || modernFrame == null) {
