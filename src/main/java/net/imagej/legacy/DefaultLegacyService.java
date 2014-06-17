@@ -349,6 +349,8 @@ public final class DefaultLegacyService extends AbstractService implements
 			if (scripts.exists()) scriptService.addScriptDirectory(scripts);
 			scriptService.addScriptDirectory(plugins, new MenuPath("Plugins"));
 		}
+
+		ij1Helper.addMenuItems();
 	}
 
 	// -- Package protected events processing methods --

@@ -130,7 +130,6 @@ public class LegacyUI extends AbstractUserInterface implements SwingUI {
 	@Override
 	public void show() {
 		if (ij1Helper() != null) {
-			ij1Helper.addMenuItems();
 			ij1Helper.setVisible(true);
 		}
 	}
