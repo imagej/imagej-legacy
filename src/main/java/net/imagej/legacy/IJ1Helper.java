@@ -822,4 +822,22 @@ public class IJ1Helper extends AbstractContextual {
 	public boolean shiftKeyDown() {
 		return IJ.shiftKeyDown();
 	}
+
+	/**
+	 * Delegates to ImageJ 1.x' {@link Macro#getOptions()} function.
+	 * 
+	 * @return the macro options, or null
+	 */
+	public Object getOptions() {
+		return Macro.getOptions();
+	}
+
+	/**
+	 * Delegates to ImageJ 1.x' {@link Macro#setOptions(String)} function.
+	 * 
+	 * @param options the macro options, or null to reset
+	 */
+	public void setOptions(final String options) {
+		Macro.setOptions(options);
+	}
 }
