@@ -37,7 +37,6 @@ import ij.WindowManager;
 import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
-import java.io.Writer;
 import java.util.HashMap;
 import java.util.Map.Entry;
 
