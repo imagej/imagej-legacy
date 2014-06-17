@@ -51,7 +51,7 @@ import org.scijava.script.ScriptLanguage;
 @Plugin(type = ScriptLanguage.class)
 public class IJ1MacroLanguage extends AbstractScriptLanguage {
 
-	@Parameter
+	@Parameter(required = false)
 	private DefaultLegacyService legacyService;
 
 	@Override
@@ -66,7 +66,19 @@ public class IJ1MacroLanguage extends AbstractScriptLanguage {
 
 	@Override
 	public ScriptEngine getScriptEngine() {
-		return new IJ1MacroEngine(legacyService.getIJ1Helper());
+		return new IJ1MacroEngine(legacyService().getIJ1Helper());
+	}
+
+	private DefaultLegacyService legacyService() {
+		if (legacyService != null) return legacyService;
+		synchronized (this) {
+			if (legacyService != null) return legacyService;
+			legacyService = getContext().getService(DefaultLegacyService.class);
+			if (legacyService == null) {
+				throw new RuntimeException("No legacy service available!");
+			}
+			return legacyService;
+		}
 	}
 
 }
