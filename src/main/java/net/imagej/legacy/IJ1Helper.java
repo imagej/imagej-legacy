@@ -743,7 +743,16 @@ public class IJ1Helper extends AbstractContextual {
 	 * @return the return value
 	 */
 	public String runMacro(final String macro) {
-		return IJ.runMacro(macro);
+		final Thread thread = Thread.currentThread();
+		final String name = thread.getName();
+		try {
+			// to make getOptions() work
+			if (!name.startsWith("Run$_")) thread.setName("Run$_" + name);
+			return IJ.runMacro(macro);
+		}
+		finally {
+			thread.setName(name);
+		}
 	}
 
 	/**
@@ -754,7 +763,16 @@ public class IJ1Helper extends AbstractContextual {
 	 * @return the return value
 	 */
 	public String runMacroFile(final String path, final String arg) {
-		return IJ.runMacroFile(path, arg);
+		final Thread thread = Thread.currentThread();
+		final String name = thread.getName();
+		try {
+			// to make getOptions() work
+			if (!name.startsWith("Run$_")) thread.setName("Run$_" + name);
+			return IJ.runMacroFile(path, arg);
+		}
+		finally {
+			thread.setName(name);
+		}
 	}
 
 	/**
@@ -803,5 +821,23 @@ public class IJ1Helper extends AbstractContextual {
 	 */
 	public boolean shiftKeyDown() {
 		return IJ.shiftKeyDown();
+	}
+
+	/**
+	 * Delegates to ImageJ 1.x' {@link Macro#getOptions()} function.
+	 * 
+	 * @return the macro options, or null
+	 */
+	public Object getOptions() {
+		return Macro.getOptions();
+	}
+
+	/**
+	 * Delegates to ImageJ 1.x' {@link Macro#setOptions(String)} function.
+	 * 
+	 * @param options the macro options, or null to reset
+	 */
+	public void setOptions(final String options) {
+		Macro.setOptions(options);
 	}
 }

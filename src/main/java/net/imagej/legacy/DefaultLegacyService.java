@@ -210,8 +210,12 @@ public final class DefaultLegacyService extends AbstractService implements
 	public Object runLegacyCompatibleCommand(final String key) {
 		final ModuleInfo info = legacyCompatible.get(key);
 		if (info == null) return null;
-		if (info instanceof CommandInfo) {
-			return commandService.run((CommandInfo) info, true);
+		if (info instanceof CommandInfo) try {
+			return commandService.run((CommandInfo) info, true).get();
+		}
+		catch (Exception e) {
+			if (e instanceof RuntimeException) throw (RuntimeException) e;
+			throw new RuntimeException(e);
 		}
 		if (info instanceof ScriptInfo) {
 			if (ij1Helper.shiftKeyDown()) {
@@ -221,7 +225,14 @@ public final class DefaultLegacyService extends AbstractService implements
 				editor.setVisible(true);
 				return editor;
 			}
-			return scriptService.run((ScriptInfo) info, true);
+			try {
+				return scriptService.run((ScriptInfo) info, true,
+					".macroOptions", ij1Helper.getOptions()).get();
+			}
+			catch (Exception e) {
+				if (e instanceof RuntimeException) throw (RuntimeException) e;
+				throw new RuntimeException(e);
+			}
 		}
 		throw new IllegalArgumentException("Unhandled info for '" + key + "': " + info);
 	}
@@ -349,6 +360,8 @@ public final class DefaultLegacyService extends AbstractService implements
 			if (scripts.exists()) scriptService.addScriptDirectory(scripts);
 			scriptService.addScriptDirectory(plugins, new MenuPath("Plugins"));
 		}
+
+		ij1Helper.addMenuItems();
 	}
 
 	// -- Package protected events processing methods --
