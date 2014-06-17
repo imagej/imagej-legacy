@@ -743,7 +743,16 @@ public class IJ1Helper extends AbstractContextual {
 	 * @return the return value
 	 */
 	public String runMacro(final String macro) {
-		return IJ.runMacro(macro);
+		final Thread thread = Thread.currentThread();
+		final String name = thread.getName();
+		try {
+			// to make getOptions() work
+			if (!name.startsWith("Run$_")) thread.setName("Run$_" + name);
+			return IJ.runMacro(macro);
+		}
+		finally {
+			thread.setName(name);
+		}
 	}
 
 	/**
@@ -754,7 +763,16 @@ public class IJ1Helper extends AbstractContextual {
 	 * @return the return value
 	 */
 	public String runMacroFile(final String path, final String arg) {
-		return IJ.runMacroFile(path, arg);
+		final Thread thread = Thread.currentThread();
+		final String name = thread.getName();
+		try {
+			// to make getOptions() work
+			if (!name.startsWith("Run$_")) thread.setName("Run$_" + name);
+			return IJ.runMacroFile(path, arg);
+		}
+		finally {
+			thread.setName(name);
+		}
 	}
 
 	/**
