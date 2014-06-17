@@ -113,7 +113,15 @@ public class IJ1MacroEngine extends AbstractScriptEngine {
 			}
 		}
 
-		final String result = ij1Helper.runMacro(pre.toString() + macro + post.toString());
+		final String macroOptions = (String) module.getInput(".macroOptions");
+		ij1Helper.setOptions(macroOptions);
+		final String result;
+		try {
+			result = ij1Helper.runMacro(pre.toString() + macro + post.toString());
+		}
+		finally {
+			ij1Helper.setOptions(null);
+		}
 		if (module != null) {
 			if (noResult.equals(get("result"))) put("result", null);
 			// No need to convert the outputs except for ImagePlus instances;

@@ -226,7 +226,8 @@ public final class DefaultLegacyService extends AbstractService implements
 				return editor;
 			}
 			try {
-				return scriptService.run((ScriptInfo) info, true).get();
+				return scriptService.run((ScriptInfo) info, true,
+					".macroOptions", ij1Helper.getOptions()).get();
 			}
 			catch (Exception e) {
 				if (e instanceof RuntimeException) throw (RuntimeException) e;
