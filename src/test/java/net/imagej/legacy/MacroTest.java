@@ -98,6 +98,55 @@ public class MacroTest {
 		}
 	}
 
+	/**
+	 * Tests that bare .java plugins can see the correct macro options.
+	 * <p>
+	 * This is essentially a shrunk-down version of the problem described
+	 * by Aryeh Weiss in
+	 * http://fiji.sc/bugzilla/show_bug.cgi?id=787
+	 * </p>
+	 */
+	@Test
+	public void testBarePluginFromMacro() throws Exception {
+		final String imagejDirKey = "imagej.dir";
+		final String imagejDir = System.getProperty(imagejDirKey);
+
+		final File tmp = createTemporaryDirectory("bare-");
+		final File barePlugin = new File(tmp, "plugins/Set_Property_Test.java");
+		assertTrue(barePlugin.getParentFile().mkdirs());
+		writeFile(barePlugin,
+			"import ij.IJ;",
+			"import ij.gui.GenericDialog;",
+			"import ij.plugin.PlugIn;",
+			"",
+			"public class Set_Property_Test implements PlugIn {",
+			"  public void run(final String arg) {",
+			"    final GenericDialog gd = new GenericDialog(\"Hello, World!\");",
+			"    gd.addStringField(\"dir\", \"\");",
+			"    gd.showDialog();",
+			"    if (gd.wasCanceled()) return;",
+			"    System.setProperty(\"" + imagejDirKey + "\", gd.getNextString());",
+			"  }",
+			"}");
+		try {
+			System.setProperty(imagejDirKey, tmp.getPath());
+			final Context context = new Context();
+			// Prevent the test class from loading the ij.IJ class
+			new Runnable() {
+				@Override
+				public void run() {
+					ij.IJ.run("Set Property Test", "dir=c:\\hello\\world");
+				}
+			}.run();
+			context.dispose();
+			assertEquals("c:\\hello\\world", System.getProperty(imagejDirKey));
+		}
+		finally {
+			if (imagejDir == null) System.clearProperty(imagejDirKey);
+			else System.setProperty(imagejDirKey, imagejDir);
+		}
+	}
+
 	private String readFile(final File file) throws IOException {
 		final ByteArrayOutputStream out = new ByteArrayOutputStream((int) file.length());
 		final FileInputStream in = new FileInputStream(file);
@@ -110,5 +159,14 @@ public class MacroTest {
 		in.close();
 		out.close();
 		return new String(out.toString("UTF-8"));
+	}
+
+	private void writeFile(final File file, final String... lines) throws IOException {
+		final FileWriter writer = new FileWriter(file);
+		for (final String line : lines) {
+			writer.write(line);
+			writer.write("\n");
+		}
+		writer.close();
 	}
 }
