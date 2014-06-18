@@ -41,6 +41,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.swing.KeyStroke;
@@ -59,6 +60,7 @@ import org.scijava.log.StderrLogService;
 import org.scijava.plugin.PluginInfo;
 import org.scijava.plugin.PluginService;
 import org.scijava.plugin.SciJavaPlugin;
+import org.scijava.thread.ThreadService;
 import org.scijava.util.ListUtils;
 
 /**
@@ -484,5 +486,39 @@ public class DefaultLegacyHooks extends LegacyHooks {
 		}
 		return legacyService.handleShortcut(accelerator) ||
 				(!e.isControlDown() && legacyService.handleShortcut("control " + accelerator));
+	}
+
+	@Override
+	public Iterable<Thread> getThreadAncestors() {
+		final ThreadService threadService = context.getService(ThreadService.class);
+		if (threadService == null) return null;
+		final Thread current = Thread.currentThread();
+		return new Iterable<Thread>() {
+
+			@Override
+			public Iterator<Thread> iterator() {
+				return new Iterator<Thread>() {
+					private Thread thread = threadService.getParent(current);
+
+					@Override
+					public boolean hasNext() {
+						return thread != null;
+					}
+
+					@Override
+					public Thread next() {
+						final Thread next = thread;
+						thread = threadService.getParent(thread);
+						return next;
+					}
+
+					@Override
+					public void remove() {
+						throw new UnsupportedOperationException();
+					}
+				};
+			}
+
+		};
 	}
 }
