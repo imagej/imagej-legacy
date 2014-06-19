@@ -219,8 +219,8 @@ public abstract class AbstractImagePlusCreator extends AbstractContextual
 			String dimensionOrder = "";
 			String dimensionLengths = "";
 			for (int j=0; j<meta.get(i).getAxes().size(); j++) {
-				dimensionOrder += meta.get(i).getAxis(i).type().getLabel();
-				dimensionLengths += meta.get(i).getAxisLength(i);
+				dimensionOrder += meta.get(i).getAxis(j).type().getLabel();
+				dimensionLengths += meta.get(i).getAxisLength(j);
 
 				if (j < meta.get(i).getAxes().size() - 1) {
 					dimensionOrder += ",";
