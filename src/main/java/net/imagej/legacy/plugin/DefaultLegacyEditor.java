@@ -87,14 +87,12 @@ public class DefaultLegacyEditor implements LegacyEditor {
 		}
 	}
 
-	/** @inherit */
 	@Override
 	public boolean open(final File file) {
 		editor().open(file);
 		return true;
 	}
 
-	/** @inherit */
 	@Override
 	public boolean create(final String title, final String content) {
 		editor().createNewDocument(title, content);

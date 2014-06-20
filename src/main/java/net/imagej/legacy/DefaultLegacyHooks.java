@@ -81,19 +81,16 @@ public class DefaultLegacyHooks extends LegacyHooks {
 		this.helper = helper;
 	}
 
-	/** @inherit */
 	@Override
 	public boolean isLegacyMode() {
 		return legacyService.isLegacyMode();
 	}
 
-	/** @inherit */
 	@Override
 	public Object getContext() {
 		return legacyService.getContext();
 	}
 
-	/** @inherit */
 	@Override
 	public boolean quit() {
 		dispose();
@@ -106,7 +103,6 @@ public class DefaultLegacyHooks extends LegacyHooks {
 	private List<LegacyPostRefreshMenus> afterRefreshMenus;
 	private List<LegacyOpener> legacyOpeners;
 
-	/** inherit */
 	@Override
 	public synchronized void installed() {
 		context = legacyService.getContext();
@@ -135,14 +131,12 @@ public class DefaultLegacyHooks extends LegacyHooks {
 		return info == null ? null : pluginService.createInstance(info);
 	}
 
-	/** @inherit */
 	@Override
 	public void dispose() {
 		IJ1Helper.subscribeEvents(null);
 		// TODO: if there are still things open, we should object.
 	}
 
-	/** @inherit */
 	@Override
 	public Object interceptRunPlugIn(String className, String arg) {
 		if (LegacyService.class.getName().equals(className))
@@ -174,7 +168,6 @@ public class DefaultLegacyHooks extends LegacyHooks {
 	/** Resolution to use when converting double progress to int ratio. */
 	private static final int PROGRESS_GRANULARITY = 1000;
 
-	/** @inherit */
 	@Override
 	public void showProgress(double progress) {
 		final int currentIndex = (int) (PROGRESS_GRANULARITY * progress);
@@ -182,7 +175,6 @@ public class DefaultLegacyHooks extends LegacyHooks {
 		showProgress(currentIndex, finalIndex);
 	}
 
-	/** @inherit */
 	@Override
 	public void showProgress(int currentIndex, int finalIndex) {
 		// if we are already processing events on this thread, then we know that
@@ -194,7 +186,6 @@ public class DefaultLegacyHooks extends LegacyHooks {
 		}
 	}
 
-	/** @inherit */
 	@Override
 	public void showStatus(final String status) {
 		if (!isInitialized() || isLegacyMode()) {
@@ -209,7 +200,6 @@ public class DefaultLegacyHooks extends LegacyHooks {
 		}
 	}
 
-	/** @inherit */
 	@Override
 	public void registerImage(final Object o) {
 		final ImagePlus image = (ImagePlus) o;
@@ -227,7 +217,6 @@ public class DefaultLegacyHooks extends LegacyHooks {
 		}
 	}
 
-	/** @inherit */
 	@Override
 	public void unregisterImage(final Object o) {
 		final ImagePlus image = (ImagePlus) o;
@@ -250,13 +239,11 @@ public class DefaultLegacyHooks extends LegacyHooks {
 		// end alternate
 	}
 
-	/** @inherit */
 	@Override
 	public void debug(String string) {
 		legacyService.log().debug(string);
 	}
 
-	/** @inherit */
 	@Override
 	public void error(Throwable t) {
 		legacyService.log().error(t);
@@ -269,7 +256,6 @@ public class DefaultLegacyHooks extends LegacyHooks {
 	// if the ij.log.file property is set, log every message to the file pointed to
 	private BufferedWriter logFileWriter;
 
-	/** @inherit */
 	@Override
 	public void log(String message) {
 		if (message != null) {
@@ -330,7 +316,6 @@ public class DefaultLegacyHooks extends LegacyHooks {
 		return appConfig == null ? getClass().getResource("/icons/imagej-256.png") : appConfig.getIconURL();
 	}
 
-	/** @inherit */
 	@Override
 	public void runAfterRefreshMenus() {
 		if (afterRefreshMenus != null) {
@@ -417,7 +402,6 @@ public class DefaultLegacyHooks extends LegacyHooks {
 		return false;
 	}
 
-	/** @inherit */
 	@Override
 	public Object interceptOpen(final String path, final int planeIndex,
 		final boolean display)
@@ -429,7 +413,6 @@ public class DefaultLegacyHooks extends LegacyHooks {
 		return null;
 	}	
 
-	/** @inherit */
 	@Override
 	public Object interceptFileOpen(final String path) {
 		for (final LegacyOpener opener : legacyOpeners) {
@@ -439,7 +422,6 @@ public class DefaultLegacyHooks extends LegacyHooks {
 		return super.interceptFileOpen(path);
 	}
 
-	/** @inherit */
 	@Override
 	public Object interceptOpenImage(final String path, final int planeIndex) {
 		for (final LegacyOpener opener : legacyOpeners) {
@@ -449,7 +431,6 @@ public class DefaultLegacyHooks extends LegacyHooks {
 		return super.interceptFileOpen(path);
 	}
 
-	/** @inherit */
 	@Override
 	public Object interceptOpenRecent(final String path) {
 		for (final LegacyOpener opener : legacyOpeners) {
@@ -459,7 +440,6 @@ public class DefaultLegacyHooks extends LegacyHooks {
 		return super.interceptFileOpen(path);
 	}
 
-	/** @inherit */
 	@Override
 	public Object interceptDragAndDropFile(final File f) {
 		if (f.getName().endsWith(".lut")) return null;
@@ -477,7 +457,6 @@ public class DefaultLegacyHooks extends LegacyHooks {
 		return super.interceptDragAndDropFile(f);
 	}
 
-	/** @inherit */
 	@Override
 	public boolean interceptKeyPressed(final KeyEvent e) {
 		String accelerator = KeyStroke.getKeyStrokeForEvent(e).toString();
