@@ -64,10 +64,12 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import javax.swing.SwingUtilities;
 
@@ -658,6 +660,7 @@ public class IJ1Helper extends AbstractContextual {
 		final ImageJ ij1;
 		final MenuBar menuBar = Menus.getMenuBar();
 		final Map<String, Menu> structure = new HashMap<String, Menu>();
+		final Set<Menu> separators = new HashSet<Menu>();
 
 		private IJ1MenuWrapper(final ImageJ ij1) {
 			this.ij1 = ij1;
@@ -690,6 +693,10 @@ public class IJ1Helper extends AbstractContextual {
 						return item;
 					}
 				}
+			}
+			if (!separators.contains(menu)) {
+				if (menu.getItemCount() > 0) menu.addSeparator();
+				separators.add(menu);
 			}
 			// Otherwise, we are creating a new item
 			final MenuItem item = new MenuItem(label);
@@ -766,6 +773,10 @@ public class IJ1Helper extends AbstractContextual {
 					//TODO consider mangling the IJ2 menu name instead...
 					throw new IllegalArgumentException("Not a menu: " + currentLabel);
 				}
+			}
+			if (!separators.contains(parent)) {
+				if (parent.getItemCount() > 0) parent.addSeparator();
+				separators.add(parent);
 			}
 			// An existing entry in the parent menu was not found, so we need to
 			// create a new entry.
