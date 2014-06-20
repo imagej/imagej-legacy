@@ -79,6 +79,7 @@ public class DefaultLegacyEditor implements LegacyEditor {
 		return editor;
 	}
 
+	/** @param event */
 	@EventHandler
 	private synchronized void onEvent(final AppQuitEvent event) {
 		if (editor != null) {

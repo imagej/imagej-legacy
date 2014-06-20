@@ -415,15 +415,17 @@ public final class DefaultLegacyService extends AbstractService implements
 	/**
 	 * Keeps the active legacy {@link ij.ImagePlus} in sync with the active modern
 	 * {@link ImageDisplay}.
+	 * 
+	 * @param event
 	 */
 	@EventHandler
-	protected void onEvent(final DisplayActivatedEvent event)
+	private void onEvent(final DisplayActivatedEvent event)
 	{
 		syncActiveImage();
 	}
 
 	@EventHandler
-	protected void onEvent(final KyPressedEvent event) {
+	private void onEvent(final KyPressedEvent event) {
 		final KeyCode code = event.getCode();
 		if (code == KeyCode.SPACE) ij1Helper.setKeyDown(KeyCode.SPACE.getCode());
 		if (code == KeyCode.ALT) ij1Helper.setKeyDown(KeyCode.ALT.getCode());
@@ -435,7 +437,7 @@ public final class DefaultLegacyService extends AbstractService implements
 	}
 
 	@EventHandler
-	protected void onEvent(final KyReleasedEvent event) {
+	private void onEvent(final KyReleasedEvent event) {
 		final KeyCode code = event.getCode();
 		if (code == KeyCode.SPACE) ij1Helper.setKeyUp(KeyCode.SPACE.getCode());
 		if (code == KeyCode.ALT) ij1Helper.setKeyUp(KeyCode.ALT.getCode());
@@ -446,8 +448,9 @@ public final class DefaultLegacyService extends AbstractService implements
 		}
 	}
 
+	/** @param event */
 	@EventHandler
-	protected void onEvent(final WelcomeEvent event) {
+	private void onEvent(final WelcomeEvent event) {
 		commandService.run(ImageJ2Options.class, true);
 	}
 

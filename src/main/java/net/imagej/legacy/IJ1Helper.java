@@ -475,6 +475,7 @@ public class IJ1Helper extends AbstractContextual {
 
 		// -- MacAdapter re-implementations --
 
+		/** @param event */
 		@EventHandler
 		private void onEvent(final AppAboutEvent event)
 		{
@@ -483,6 +484,7 @@ public class IJ1Helper extends AbstractContextual {
 			}
 		}
 
+		/** @param event */
 		@EventHandler
 		private void onEvent(final AppOpenFilesEvent event) {
 			if (isLegacyMode()) {
@@ -493,6 +495,7 @@ public class IJ1Helper extends AbstractContextual {
 			}
 		}
 
+		/** @param event */
 		@EventHandler
 		private void onEvent(final AppQuitEvent event) {
 			if (isLegacyMode()) {
@@ -500,6 +503,7 @@ public class IJ1Helper extends AbstractContextual {
 			}
 		}
 
+		/** @param event */
 		@EventHandler
 		private void onEvent(final AppPreferencesEvent event)
 		{
