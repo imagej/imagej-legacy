@@ -540,7 +540,7 @@ public final class DefaultLegacyService extends AbstractService implements
 			else if (!info.getAnnotation().visible()) {
 				continue;
 			}
-			final String key = "Command:" + info.getDelegateClassName();
+			final String key = info.getIdentifier();
 			legacyCompatible.put(key, info);
 			modules.put(key, info);
 		}
@@ -550,7 +550,7 @@ public final class DefaultLegacyService extends AbstractService implements
 			}
 			final String path = info.getPath();
 			if (!new File(path).getName().contains("_")) continue;
-			final String key = "Script:" + path;
+			final String key = info.getIdentifier();
 			legacyCompatible.put(key, info);
 			modules.put(key, info);
 		}
