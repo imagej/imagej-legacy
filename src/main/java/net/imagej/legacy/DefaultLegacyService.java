@@ -546,7 +546,9 @@ public final class DefaultLegacyService extends AbstractService implements
 			if (info.getMenuPath().size() == 0) {
 				continue;
 			}
-			final String key = "Script:" + info.getPath();
+			final String path = info.getPath();
+			if (!new File(path).getName().contains("_")) continue;
+			final String key = "Script:" + path;
 			legacyCompatible.put(key, info);
 			modules.put(key, info);
 		}
