@@ -62,11 +62,14 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import javax.swing.SwingUtilities;
 
@@ -475,6 +478,7 @@ public class IJ1Helper extends AbstractContextual {
 
 		// -- MacAdapter re-implementations --
 
+		/** @param event */
 		@EventHandler
 		private void onEvent(final AppAboutEvent event)
 		{
@@ -483,6 +487,7 @@ public class IJ1Helper extends AbstractContextual {
 			}
 		}
 
+		/** @param event */
 		@EventHandler
 		private void onEvent(final AppOpenFilesEvent event) {
 			if (isLegacyMode()) {
@@ -493,6 +498,7 @@ public class IJ1Helper extends AbstractContextual {
 			}
 		}
 
+		/** @param event */
 		@EventHandler
 		private void onEvent(final AppQuitEvent event) {
 			if (isLegacyMode()) {
@@ -500,6 +506,7 @@ public class IJ1Helper extends AbstractContextual {
 			}
 		}
 
+		/** @param event */
 		@EventHandler
 		private void onEvent(final AppPreferencesEvent event)
 		{
@@ -578,6 +585,32 @@ public class IJ1Helper extends AbstractContextual {
 		final Hashtable<String, String> ij1Commands = Menus.getCommands();
 		final ImageJ ij1 = getIJ();
 		final IJ1MenuWrapper wrapper = ij1 == null ? null : new IJ1MenuWrapper(ij1);
+		class Item implements Comparable<Item> {
+			private double weight;
+			private MenuPath path;
+			private String name, identifier;
+			private ModuleInfo info;
+
+			@Override
+			public int compareTo(Item o) {
+				if (weight != o.weight) return Double.compare(weight, o.weight);
+				return compare(path, o.path);
+			}
+
+			public int compare(final MenuPath a, final MenuPath b) {
+				int i = 0;
+				while (i < a.size() && i < b.size()) {
+					final MenuEntry a2 = a.get(i), b2 = b.get(i);
+					int diff = Double.compare(a.get(i).getWeight(), b.get(i).getWeight());
+					if (diff != 0) return diff;
+					diff = a2.getName().compareTo(b2.getName());
+					if (diff != 0) return diff;
+					i++;
+				}
+				return 0;
+			}
+		}
+		final List<Item> items = new ArrayList<Item>();
 		for (final Entry<String, ModuleInfo> entry : modules.entrySet()) {
 			final String key = entry.getKey();
 			final ModuleInfo info = entry.getValue();
@@ -585,24 +618,35 @@ public class IJ1Helper extends AbstractContextual {
 			if (leaf == null) continue;
 			final MenuPath path = info.getMenuPath();
 			final String name = leaf.getName();
-			if (ij1Commands.containsKey(name)) {
-				legacyService.log().info("Overriding " + name
-					+ "; class: " + info.getDelegateClassName()
-					+ "; jar: " + ClassUtils.getLocation(info.getDelegateClassName()));
+			final Item item = new Item();
+			item.weight = leaf.getWeight();
+			item.path = path;
+			item.name = name;
+			item.identifier = key;
+			item.info = info;
+			items.add(item);
+		}
+		// sort by menu weight, then alphabetically
+		Collections.sort(items);
+		for (final Item item : items) {
+			if (ij1Commands.containsKey(item.name)) {
+				legacyService.log().info("Overriding " + item.name
+					+ "; identifier: " + item.identifier
+					+ "; jar: " + ClassUtils.getLocation(item.info.getDelegateClassName()));
 				if (wrapper != null) try {
-					wrapper.create(path, true);
+					wrapper.create(item.path, true);
 				}
 				catch (final Throwable t) {
 					legacyService.log().error(t);
 				}
 			}
 			else if (wrapper != null) try {
-				wrapper.create(path, false);
+				wrapper.create(item.path, false);
 			}
 			catch (final Throwable t) {
 				legacyService.log().error(t);
 			}
-			ij1Commands.put(name, key);
+			ij1Commands.put(item.name, item.identifier);
 		}
 		menuInitialized = true;
 	}
@@ -616,6 +660,7 @@ public class IJ1Helper extends AbstractContextual {
 		final ImageJ ij1;
 		final MenuBar menuBar = Menus.getMenuBar();
 		final Map<String, Menu> structure = new HashMap<String, Menu>();
+		final Set<Menu> separators = new HashSet<Menu>();
 
 		private IJ1MenuWrapper(final ImageJ ij1) {
 			this.ij1 = ij1;
@@ -648,6 +693,10 @@ public class IJ1Helper extends AbstractContextual {
 						return item;
 					}
 				}
+			}
+			if (!separators.contains(menu)) {
+				if (menu.getItemCount() > 0) menu.addSeparator();
+				separators.add(menu);
 			}
 			// Otherwise, we are creating a new item
 			final MenuItem item = new MenuItem(label);
@@ -724,6 +773,10 @@ public class IJ1Helper extends AbstractContextual {
 					//TODO consider mangling the IJ2 menu name instead...
 					throw new IllegalArgumentException("Not a menu: " + currentLabel);
 				}
+			}
+			if (!separators.contains(parent)) {
+				if (parent.getItemCount() > 0) parent.addSeparator();
+				separators.add(parent);
 			}
 			// An existing entry in the parent menu was not found, so we need to
 			// create a new entry.

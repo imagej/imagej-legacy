@@ -348,8 +348,9 @@ public class LegacyImageMap extends AbstractContextual {
 	}
 	*/
 
+	/** @param event */
 	@EventHandler
-	protected void onEvent(final DisplayDeletedEvent event) {
+	private void onEvent(final DisplayDeletedEvent event) {
 
 		/* OLD COMMENT : no longer relevant except for testing purposes
 		// Need to make sure:
