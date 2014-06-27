@@ -41,8 +41,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import javax.swing.KeyStroke;
 
@@ -472,6 +474,8 @@ public class DefaultLegacyHooks extends LegacyHooks {
 		final ThreadService threadService = context.getService(ThreadService.class);
 		if (threadService == null) return null;
 		final Thread current = Thread.currentThread();
+		final Set<Thread> seen = new HashSet<Thread>();
+		seen.add(current);
 		return new Iterable<Thread>() {
 
 			@Override
@@ -488,6 +492,12 @@ public class DefaultLegacyHooks extends LegacyHooks {
 					public Thread next() {
 						final Thread next = thread;
 						thread = threadService.getParent(thread);
+						if (seen.contains(thread)) {
+							thread = null;
+						}
+						else {
+							seen.add(thread);
+						}
 						return next;
 					}
 
