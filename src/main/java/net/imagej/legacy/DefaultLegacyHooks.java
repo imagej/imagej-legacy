@@ -98,10 +98,52 @@ public class DefaultLegacyHooks extends LegacyHooks {
 		return false;
 	}
 
-	private LegacyEditor editor;
-	private LegacyAppConfiguration appConfig;
-	private List<LegacyPostRefreshMenus> afterRefreshMenus;
-	private List<LegacyOpener> legacyOpeners;
+	// TODO: move to SciJava common?
+	private abstract static class AbstractLazySingleton<T> {
+		private T instance;
+
+		public T get() {
+			if (instance != null) return instance;
+			synchronized (this) {
+				if (instance != null) return instance;
+				instance = create();
+				return instance;
+			}
+		}
+
+		protected abstract T create();
+	}
+
+	// TODO: move to SciJava common?
+	private class LazySingleton<T extends SciJavaPlugin> extends AbstractLazySingleton<T> {
+		private final Class<T> type;
+
+		public LazySingleton(Class<T> type) {
+			this.type = type;
+		}
+
+		public T create() {
+			return createInstanceOfType(type);
+		}
+	}
+
+	// TODO: move to SciJava common?
+	private class LazySingletonList<T extends SciJavaPlugin> extends AbstractLazySingleton<List<T>> {
+		private final Class<T> type;
+
+		public LazySingletonList(Class<T> type) {
+			this.type = type;
+		}
+
+		public List<T> create() {
+			return pluginService.createInstancesOfType(type);
+		}
+	}
+
+	private final AbstractLazySingleton<LegacyEditor> editor = new LazySingleton<LegacyEditor>(LegacyEditor.class);
+	private final AbstractLazySingleton<LegacyAppConfiguration> appConfig = new LazySingleton<LegacyAppConfiguration>(LegacyAppConfiguration.class);
+	private final AbstractLazySingleton<List<LegacyPostRefreshMenus>> afterRefreshMenus = new LazySingletonList<LegacyPostRefreshMenus>(LegacyPostRefreshMenus.class);
+	private final AbstractLazySingleton<List<LegacyOpener>> legacyOpeners = new LazySingletonList<LegacyOpener>(LegacyOpener.class);
 
 	@Override
 	public synchronized void installed() {
@@ -110,18 +152,6 @@ public class DefaultLegacyHooks extends LegacyHooks {
 		pluginService = context.getService(PluginService.class);
 		log = context.getService(LogService.class);
 		if (log == null) log = new StderrLogService();
-
-		editor = createInstanceOfType(LegacyEditor.class);
-		appConfig = createInstanceOfType(LegacyAppConfiguration.class);
-		// TODO: inject context automatically?
-		afterRefreshMenus = pluginService.createInstancesOfType(LegacyPostRefreshMenus.class);
-		for (final LegacyPostRefreshMenus o : afterRefreshMenus) {
-			context.inject(o);
-		}
-		legacyOpeners = pluginService.createInstancesOfType(LegacyOpener.class);
-		for (final LegacyOpener o : legacyOpeners) {
-			context.inject(o);
-		}
 	}
 
 	// TODO: move to scijava-common?
@@ -290,7 +320,7 @@ public class DefaultLegacyHooks extends LegacyHooks {
 	 */
 	@Override
 	public String getAppName() {
-		return appConfig == null ? "ImageJ (legacy)" : appConfig.getAppName();
+		return appConfig.get() == null ? "ImageJ (legacy)" : appConfig.get().getAppName();
 	}
 
 	/**
@@ -313,15 +343,13 @@ public class DefaultLegacyHooks extends LegacyHooks {
 	 */
 	@Override
 	public URL getIconURL() {
-		return appConfig == null ? getClass().getResource("/icons/imagej-256.png") : appConfig.getIconURL();
+		return appConfig.get() == null ? getClass().getResource("/icons/imagej-256.png") : appConfig.get().getIconURL();
 	}
 
 	@Override
 	public void runAfterRefreshMenus() {
-		if (afterRefreshMenus != null) {
-			for (final Runnable run : afterRefreshMenus) {
-				run.run();
-			}
+		for (final Runnable run : afterRefreshMenus.get()) {
+			run.run();
 		}
 	}
 
@@ -333,7 +361,7 @@ public class DefaultLegacyHooks extends LegacyHooks {
 	 */
 	@Override
 	public boolean openInEditor(final String path) {
-		if (editor == null) return false;
+		if (editor.get() == null) return false;
 		if (path.indexOf("://") > 0) return false;
 		// if it has no extension, do not open it in the legacy editor
 		if (!path.matches(".*\\.[0-9A-Za-z]{1,4}")) return false;
@@ -341,7 +369,7 @@ public class DefaultLegacyHooks extends LegacyHooks {
 		final File file = new File(path);
 		if (!file.exists()) return false;
 		if (isBinaryFile(file)) return false;
-		return editor.open(file);
+		return editor.get().open(file);
 	}
 
 	/**
@@ -353,8 +381,8 @@ public class DefaultLegacyHooks extends LegacyHooks {
 	 */
 	@Override
 	public boolean createInEditor(final String title, final String content) {
-		if (editor == null) return false;
-		return editor.create(title, content);
+		if (editor.get() == null) return false;
+		return editor.get().create(title, content);
 	}
 
 	/**
@@ -406,7 +434,7 @@ public class DefaultLegacyHooks extends LegacyHooks {
 	public Object interceptOpen(final String path, final int planeIndex,
 		final boolean display)
 	{
-		for (final LegacyOpener opener : legacyOpeners) {
+		for (final LegacyOpener opener : legacyOpeners.get()) {
 			final Object result = opener.open(path, planeIndex, display);
 			if (result != null) return result;
 		}
@@ -415,7 +443,7 @@ public class DefaultLegacyHooks extends LegacyHooks {
 
 	@Override
 	public Object interceptFileOpen(final String path) {
-		for (final LegacyOpener opener : legacyOpeners) {
+		for (final LegacyOpener opener : legacyOpeners.get()) {
 			final Object result = opener.open(path, -1, true);
 			if (result != null) return result;
 		}
@@ -424,7 +452,7 @@ public class DefaultLegacyHooks extends LegacyHooks {
 
 	@Override
 	public Object interceptOpenImage(final String path, final int planeIndex) {
-		for (final LegacyOpener opener : legacyOpeners) {
+		for (final LegacyOpener opener : legacyOpeners.get()) {
 			final Object result = opener.open(path, planeIndex, false);
 			if (result != null) return result;
 		}
@@ -433,7 +461,7 @@ public class DefaultLegacyHooks extends LegacyHooks {
 
 	@Override
 	public Object interceptOpenRecent(final String path) {
-		for (final LegacyOpener opener : legacyOpeners) {
+		for (final LegacyOpener opener : legacyOpeners.get()) {
 			final Object result = opener.open(path, -1, true);
 			if (result != null) return result;
 		}
@@ -446,7 +474,7 @@ public class DefaultLegacyHooks extends LegacyHooks {
 		String path;
 		try {
 			path = f.getCanonicalPath();
-			for (final LegacyOpener opener : legacyOpeners) {
+			for (final LegacyOpener opener : legacyOpeners.get()) {
 				final Object result = opener.open(path, -1, true);
 				if (result != null) return result;
 			}
