@@ -863,7 +863,7 @@ public class IJ1Helper extends AbstractContextual {
 	 * @param e the exception to handle
 	 */
 	public void handleException(Throwable e) {
-		IJ.handleException(e);;
+		IJ.handleException(e);
 		
 	}
 
