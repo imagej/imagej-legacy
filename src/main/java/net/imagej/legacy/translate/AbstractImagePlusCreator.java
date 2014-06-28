@@ -122,7 +122,7 @@ public abstract class AbstractImagePlusCreator extends AbstractContextual
 		fileInfo.fileType = ds.isRGBMerged() ?
 			FileInfo.RGB : ds.getType() instanceof UnsignedShortType ?
 				FileInfo.GRAY16_UNSIGNED : FileInfo.GRAY8;
-		if (file.exists()) {
+		if (file != null && file.exists()) {
 			fileInfo.fileName = file.getName();
 			fileInfo.directory = file.getParent() + File.separator;
 		}
