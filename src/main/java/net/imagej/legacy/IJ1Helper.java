@@ -113,6 +113,9 @@ public class IJ1Helper extends AbstractContextual {
 	@Parameter
 	private LogService log;
 
+	/** Whether we are in the process of forcibly shutting down ImageJ1. */
+	private boolean disposing;
+
 	public IJ1Helper(final DefaultLegacyService legacyService) {
 		setContext(legacyService.getContext());
 		this.legacyService = legacyService;
@@ -191,12 +194,20 @@ public class IJ1Helper extends AbstractContextual {
 		if (ij == null) return; // no ImageJ1 to dispose
 		if (ij.quitting()) return; // ImageJ1 is already on its way out
 
+		disposing = true;
+
 		closeImageWindows();
 		disposeNonImageWindows();
 
 		// quit legacy ImageJ on the same thread
 		ij.exitWhenQuitting(false); // do *not* quit the JVM!
 		ij.run();
+		disposing = false;
+	}
+
+	/** Whether we are in the process of forcibly shutting down ImageJ1. */
+	public boolean isDisposing() {
+		return disposing;
 	}
 
 	/** Add name aliases for ImageJ1 classes to the ScriptService. */
