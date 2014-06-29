@@ -519,4 +519,24 @@ public class DefaultLegacyHooks extends LegacyHooks {
 		return true;
 	}
 
+	@Override
+	public boolean disposing() {
+		// NB: At this point, ImageJ1 is in the process of shutting down from
+		// within its ij.ImageJ#run() method, which is typically, but not always,
+		// called on a separate thread by ij.ImageJ#quit(). The question is: did
+		// the shutdown originate from an IJ1 code path, or a SciJava one?
+		if (legacyService.getIJ1Helper().isDisposing()) {
+			// NB: ImageJ1 is in the process of a hard shutdown via an API call on
+			// the SciJava level. It was probably either LegacyService#dispose() or
+			// LegacyUI#dispose(), either of which triggers IJ1Helper#dispose().
+			// In that case, we need do nothing else.
+		}
+		else {
+			// NB: ImageJ1 is in the process of a soft shutdown via an API call to
+			// ij.ImageJ#quit(). In this case, we must dispose the SciJava context too.
+			legacyService.getContext().dispose();
+		}
+		return true;
+	}
+
 }
