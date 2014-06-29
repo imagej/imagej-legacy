@@ -33,7 +33,9 @@ package net.imagej.legacy;
 
 import ij.ImagePlus;
 
+import java.awt.Window;
 import java.awt.event.KeyEvent;
+import java.awt.event.WindowEvent;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
@@ -493,4 +495,28 @@ public class DefaultLegacyHooks extends LegacyHooks {
 
 		};
 	}
+
+	@Override
+	public boolean interceptCloseAllWindows() {
+		final Window[] windows = Window.getWindows();
+		// NB: Loop over the windows in reverse order, so that
+		// child windows are disposed before their parents.
+		for (int w = windows.length - 1; w >= 0; w--) {
+			final Window win = windows[w];
+			if (win.isVisible()) {
+				// give user a chance to cancel the closing of this visible window
+				win.dispatchEvent(new WindowEvent(win, WindowEvent.WINDOW_CLOSING));
+			}
+			if (win.isVisible() && win.getWindowListeners().length > 0) {
+				// NB: We assume the user canceled closing of the window; abort quit.
+				// However, there are situations where this heuristic may fail.
+				// If this logic blocks the shutdown of ImageJ1, we will need to
+				// investigate and improve the heuristic on a case by case basis.
+				return false;
+			}
+			win.dispose();
+		}
+		return true;
+	}
+
 }
