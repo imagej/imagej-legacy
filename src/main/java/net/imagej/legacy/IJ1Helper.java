@@ -107,7 +107,7 @@ import org.scijava.util.ClassUtils;
  */
 public class IJ1Helper extends AbstractContextual {
 
-	/** A reference to the legacy service, just in case we need it */
+	/** A reference to the legacy service, just in case we need it. */
 	private final DefaultLegacyService legacyService;
 
 	@Parameter
