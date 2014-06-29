@@ -91,13 +91,6 @@ public class DefaultLegacyHooks extends LegacyHooks {
 		return legacyService.getContext();
 	}
 
-	@Override
-	public boolean quit() {
-		dispose();
-		legacyService.getContext().dispose();
-		return false;
-	}
-
 	private LegacyEditor editor;
 	private LegacyAppConfiguration appConfig;
 	private List<LegacyPostRefreshMenus> afterRefreshMenus;
