@@ -78,6 +78,10 @@ public class DefaultLegacyHooks extends LegacyHooks {
 	private LogService log;
 	private IJ1Helper helper;
 
+	public DefaultLegacyHooks(final DefaultLegacyService legacyService) {
+		this(legacyService, legacyService.getIJ1Helper());
+	}
+
 	public DefaultLegacyHooks(DefaultLegacyService legacyService, IJ1Helper helper) {
 		this.legacyService = legacyService;
 		this.helper = helper;
