@@ -33,7 +33,9 @@ package net.imagej.legacy;
 
 import ij.ImagePlus;
 
+import java.awt.Window;
 import java.awt.event.KeyEvent;
+import java.awt.event.WindowEvent;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
@@ -78,6 +80,10 @@ public class DefaultLegacyHooks extends LegacyHooks {
 	private LogService log;
 	private IJ1Helper helper;
 
+	public DefaultLegacyHooks(final DefaultLegacyService legacyService) {
+		this(legacyService, legacyService.getIJ1Helper());
+	}
+
 	public DefaultLegacyHooks(DefaultLegacyService legacyService, IJ1Helper helper) {
 		this.legacyService = legacyService;
 		this.helper = helper;
@@ -91,13 +97,6 @@ public class DefaultLegacyHooks extends LegacyHooks {
 	@Override
 	public Object getContext() {
 		return legacyService.getContext();
-	}
-
-	@Override
-	public boolean quit() {
-		dispose();
-		legacyService.getContext().dispose();
-		return false;
 	}
 
 	private LegacyEditor editor;
@@ -510,4 +509,48 @@ public class DefaultLegacyHooks extends LegacyHooks {
 
 		};
 	}
+
+	@Override
+	public boolean interceptCloseAllWindows() {
+		final Window[] windows = Window.getWindows();
+		// NB: Loop over the windows in reverse order, so that
+		// child windows are disposed before their parents.
+		for (int w = windows.length - 1; w >= 0; w--) {
+			final Window win = windows[w];
+			if (win.isVisible()) {
+				// give user a chance to cancel the closing of this visible window
+				win.dispatchEvent(new WindowEvent(win, WindowEvent.WINDOW_CLOSING));
+			}
+			if (win.isVisible() && win.getWindowListeners().length > 0) {
+				// NB: We assume the user canceled closing of the window; abort quit.
+				// However, there are situations where this heuristic may fail.
+				// If this logic blocks the shutdown of ImageJ1, we will need to
+				// investigate and improve the heuristic on a case by case basis.
+				return false;
+			}
+			win.dispose();
+		}
+		return true;
+	}
+
+	@Override
+	public boolean disposing() {
+		// NB: At this point, ImageJ1 is in the process of shutting down from
+		// within its ij.ImageJ#run() method, which is typically, but not always,
+		// called on a separate thread by ij.ImageJ#quit(). The question is: did
+		// the shutdown originate from an IJ1 code path, or a SciJava one?
+		if (legacyService.getIJ1Helper().isDisposing()) {
+			// NB: ImageJ1 is in the process of a hard shutdown via an API call on
+			// the SciJava level. It was probably either LegacyService#dispose() or
+			// LegacyUI#dispose(), either of which triggers IJ1Helper#dispose().
+			// In that case, we need do nothing else.
+		}
+		else {
+			// NB: ImageJ1 is in the process of a soft shutdown via an API call to
+			// ij.ImageJ#quit(). In this case, we must dispose the SciJava context too.
+			legacyService.getContext().dispose();
+		}
+		return true;
+	}
+
 }

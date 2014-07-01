@@ -46,11 +46,10 @@ import ij.plugin.Commands;
 import ij.plugin.PlugIn;
 import ij.plugin.filter.PlugInFilter;
 import ij.plugin.filter.PlugInFilterRunner;
-import ij.plugin.frame.PlugInDialog;
-import ij.plugin.frame.PlugInFrame;
-import ij.text.TextWindow;
 
 import java.awt.Component;
+import java.awt.EventQueue;
+import java.awt.Frame;
 import java.awt.Image;
 import java.awt.Menu;
 import java.awt.MenuBar;
@@ -108,11 +107,14 @@ import org.scijava.util.ClassUtils;
  */
 public class IJ1Helper extends AbstractContextual {
 
-	/** A reference to the legacy service, just in case we need it */
+	/** A reference to the legacy service, just in case we need it. */
 	private final DefaultLegacyService legacyService;
 
 	@Parameter
 	private LogService log;
+
+	/** Whether we are in the process of forcibly shutting down ImageJ1. */
+	private boolean disposing;
 
 	public IJ1Helper(final DefaultLegacyService legacyService) {
 		setContext(legacyService.getContext());
@@ -181,73 +183,31 @@ public class IJ1Helper extends AbstractContextual {
 		}
 	}
 
-	public void dispose() {
+	/**
+	 * Forcibly shuts down ImageJ1, with no user interaction or opportunity to
+	 * cancel. If ImageJ1 is not currently initialized, or if ImageJ1 is already
+	 * in the process of quitting (i.e., {@link ij.ImageJ#quitting()} returns
+	 * {@code true}), then this method does nothing.
+	 */
+	public synchronized void dispose() {
 		final ImageJ ij = IJ.getInstance();
-		if (ij != null) {
-			Runnable run = new Runnable() {
-				@Override
-				public void run() {
-					// close out all image windows, without dialog prompts
-					while (true) {
-						final ImagePlus imp = WindowManager.getCurrentImage();
-						if (imp == null) break;
-						imp.changes = false;
-						imp.close();
-					}
-				}
-			};
-			if (SwingUtilities.isEventDispatchThread()) {
-				run.run();
-			} else try {
-				SwingUtilities.invokeAndWait(run);
-			} catch (Exception e) {
-				// report & ignore
-				e.printStackTrace();
-			}
+		if (ij == null) return; // no ImageJ1 to dispose
+		if (ij.quitting()) return; // ImageJ1 is already on its way out
 
-			// We need to ensure all the non-image windows are closed in ImageJ 1.x.
-			// This is a non-trivial problem, as WindowManager#getNonImageWindows()
-			// will ONLY return Frames. However there are non-Frame, non-Image Windows
-			// that are critical to close: for example, the ContrastAdjuster spawns
-			// a polling thread to do its work, which will continue to run until the
-			// ContrastAdjuster is explicitly closed.
-			// As of v1.49b, getNonImageTitles is not restricted to Frames, so we must
-			// use titles to iterate through the available windows.
-			for (String title : WindowManager.getNonImageTitles()) {
-				// Titles are not unique in IJ1, but since we are iterating through all
-				// the available Windows, duplicates will each get handled eventually.
-				final Window win = WindowManager.getWindow(title);
+		disposing = true;
 
-				// Copied from ij.plugin.Commands.close. These are subclasses of
-				// java.awt.Window that added close methods. These methods absolutely
-				// need to be called - the only reason this is working in ImageJ 1.x
-				// right now is that ImageJ.exitWhenQuitting is always true, as there
-				// is nothing setting it to false. So System.exit(0) is called and it
-				// doesn't matter that there may be unclosed windows or utility threads
-				// running.
-				// In ImageJ2 however we need to ensure these windows are properly shut
-				// down.
-				// Note that we can NOT set these windows as active and run the Commands
-				// plugin with argument "close", because the default behavior is to
-				// try closing the window as an Image. As we know these are not Images,
-				// that is never the right thing to do.
-				if (win instanceof PlugInFrame)
-					((PlugInFrame)win).close();
-				else if (win instanceof PlugInDialog)
-					((PlugInDialog)win).close();
-				else if (win instanceof TextWindow)
-					((TextWindow)win).close();
+		closeImageWindows();
+		disposeNonImageWindows();
 
-				// Ensure the WindowManager has removed the current window and it has
-				// been disposed. This may cause double disposal, but as far as we know
-				// that is OK.
-				WindowManager.removeWindow(win);
-				win.dispose();
-			}
+		// quit legacy ImageJ on the same thread
+		ij.exitWhenQuitting(false); // do *not* quit the JVM!
+		ij.run();
+		disposing = false;
+	}
 
-			// quit legacy ImageJ on the same thread
-			ij.run();
-		}
+	/** Whether we are in the process of forcibly shutting down ImageJ1. */
+	public boolean isDisposing() {
+		return disposing;
 	}
 
 	/** Add name aliases for ImageJ1 classes to the ScriptService. */
@@ -863,7 +823,7 @@ public class IJ1Helper extends AbstractContextual {
 	 * @param e the exception to handle
 	 */
 	public void handleException(Throwable e) {
-		IJ.handleException(e);;
+		IJ.handleException(e);
 		
 	}
 
@@ -893,4 +853,77 @@ public class IJ1Helper extends AbstractContextual {
 	public void setOptions(final String options) {
 		Macro.setOptions(options);
 	}
+
+	// -- Helper methods --
+
+	/** Closes all image windows on the event dispatch thread. */
+	private void closeImageWindows() {
+		// TODO: Consider using ThreadService#invoke to simplify this logic.
+		final Runnable run = new Runnable() {
+			@Override
+			public void run() {
+				// close out all image windows, without dialog prompts
+				while (true) {
+					final ImagePlus imp = WindowManager.getCurrentImage();
+					if (imp == null) break;
+					imp.changes = false;
+					imp.close();
+				}
+			}
+		};
+		if (EventQueue.isDispatchThread()) {
+			run.run();
+		}
+		else {
+			try {
+				EventQueue.invokeAndWait(run);
+			}
+			catch (final Exception e) {
+				// report & ignore
+				log.error(e);
+			}
+		}
+	}
+
+	private void disposeNonImageWindows() {
+		disposeNonImageFrames();
+		disposeOtherNonImageWindows();
+	}
+
+	/**
+	 * Disposes all the non-image window frames, as given by
+	 * {@link WindowManager#getNonImageWindows()}.
+	 */
+	private void disposeNonImageFrames() {
+		for (Frame frame : WindowManager.getNonImageWindows()) {
+			frame.dispose();
+		}
+	}
+
+	/**
+	 * Ensures <em>all</em> the non-image windows are closed.
+	 * <p>
+	 * This is a non-trivial problem, as
+	 * {@link WindowManager#getNonImageWindows()} <em>only</em> returns
+	 * {@link Frame}s. However there are non-image, non-{@link Frame} windows that
+	 * are critical to close: for example, the
+	 * {@link ij.plugin.frame.ContrastAdjuster} spawns a polling thread to do its
+	 * work, which will continue to run until the {@code ContrastAdjuster} is
+	 * explicitly closed.
+	 * </p>
+	 */
+	private void disposeOtherNonImageWindows() {
+		// NB: As of v1.49b, getNonImageTitles is not restricted to Frames,
+		// so we can use it to iterate through the available windows.
+		for (String title : WindowManager.getNonImageTitles()) {
+			final Window window = WindowManager.getWindow(title);
+			// NB: We can NOT set these windows as active and run the Commands
+			// plugin with argument "close", because the default behavior is to
+			// try closing the window as an Image. As we know these are not Images,
+			// that is never the right thing to do.
+			WindowManager.removeWindow(window);
+			window.dispose();
+		}
+	}
+
 }
