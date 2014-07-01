@@ -32,6 +32,9 @@
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
+
+import java.awt.GraphicsEnvironment;
+
 import ij.IJ;
 import net.imagej.legacy.DefaultLegacyHooks;
 import net.imagej.legacy.DefaultLegacyService;
@@ -59,6 +62,11 @@ public class SystemExitIT {
 	}
 
 	public void testSystemExit() throws Exception {
+		if (GraphicsEnvironment.isHeadless()) {
+			System.err.println("Cannot run this test in headless mode; Skipping!");
+			return;
+		}
+
 		final Context context = new Context(LegacyService.class, UIService.class);
 
 		// verify that ImageJ1 is active
