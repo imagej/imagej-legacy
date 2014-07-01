@@ -58,9 +58,14 @@ public class ShutdownTest {
 	}
 
 	private Context context;
+	private ClassLoader originalLoader;
 
 	@Before
 	public void setUp() {
+		// NB: Save a reference to the context class loader _before_ the test.
+		// This will help avoid class loaders bleeding from one test to another.
+		originalLoader = Thread.currentThread().getContextClassLoader();
+
 		context = new Context(LegacyService.class, UIService.class);
 	}
 
@@ -68,6 +73,10 @@ public class ShutdownTest {
 	public void tearDown() {
 		context.dispose();
 		context = null;
+
+		// NB: Restore the _original_ context class loader, from before the test.
+		// This avoids class loaders bleeding from one test to another.
+		Thread.currentThread().setContextClassLoader(originalLoader);
 	}
 
 	/** Tests {@link ij.ImageJ#quit()}. */
