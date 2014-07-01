@@ -31,9 +31,13 @@
 
 package net.imagej.legacy;
 
+import static org.junit.Assume.assumeTrue;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
+
+import java.awt.GraphicsEnvironment;
+
 import ij.IJ;
 import net.imagej.legacy.ui.LegacyUI;
 import net.imagej.patcher.LegacyInjector;
@@ -62,6 +66,8 @@ public class ShutdownTest {
 
 	@Before
 	public void setUp() {
+		assumeTrue(!GraphicsEnvironment.isHeadless());
+
 		// NB: Save a reference to the context class loader _before_ the test.
 		// This will help avoid class loaders bleeding from one test to another.
 		originalLoader = Thread.currentThread().getContextClassLoader();
@@ -71,6 +77,8 @@ public class ShutdownTest {
 
 	@After
 	public void tearDown() {
+		if (GraphicsEnvironment.isHeadless()) return;
+
 		context.dispose();
 		context = null;
 
