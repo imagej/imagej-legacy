@@ -179,7 +179,15 @@ public abstract class AbstractImagePlusCreator extends AbstractContextual
 		imp.setFileInfo(fileInfo);
 
 		if (!ds.isRGBMerged()) {
-			imp = new CompositeImage(imp, CompositeImage.COMPOSITE);
+			/*
+			 * ImageJ 1.x will use a StackWindow *only* if there is more than one channel.
+			 * So unfortunately, we cannot consistently return a composite image here. We
+			 * have to continue to deliver different data types that require specific case
+			 * logic in any handler.
+			 */
+			if (imp.getStackSize() > 1) {
+				imp = new CompositeImage(imp, CompositeImage.COMPOSITE);
+			}
 		}
 
 		fillInfo(imp, ds.getImgPlus());
