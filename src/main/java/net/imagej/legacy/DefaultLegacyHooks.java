@@ -517,6 +517,10 @@ public class DefaultLegacyHooks extends LegacyHooks {
 		// child windows are disposed before their parents.
 		for (int w = windows.length - 1; w >= 0; w--) {
 			final Window win = windows[w];
+			// Skip the ImageJ 1.x main window
+			if (win == legacyService.getIJ1Helper().getIJ()) {
+				continue;
+			}
 			if (win.isVisible()) {
 				// give user a chance to cancel the closing of this visible window
 				win.dispatchEvent(new WindowEvent(win, WindowEvent.WINDOW_CLOSING));
