@@ -45,7 +45,7 @@ import org.scijava.script.ScriptModule;
 import org.scijava.script.ScriptService;
 
 /**
- * Verifies that the batch mode opening works.
+ * Verifies that opening image works as expected.
  * 
  * @author Johannes Schindelin
  */
@@ -80,6 +80,38 @@ public class LegacyOpenerTest {
 		final Integer nResults = (Integer) module.getOutput("nResults");
 		assertNotNull(nResults);
 		assertEquals(10, (int) nResults);
+		context.dispose();
+	}
+
+	/**
+	 * This regression test is based on a bug report by Bob Dougherty.
+	 * <p>
+	 * The original bug report can be found <a
+	 * href="http://thread.gmane.org/gmane.comp.java.imagej/33423/focus=33443"
+	 * >here</a>.
+	 * </p>
+	 * 
+	 * @throws Exception
+	 */
+	@Test
+	public void testSliceLabels() throws Exception {
+		final URL url = getClass().getResource("/with-slice-label.tif");
+		assertNotNull(url);
+		assumeTrue("file".equals(url.getProtocol()));
+
+		final String path = url.getPath();
+		final String macro = "// @OUTPUT String label\n"
+				+ "open('" + path + "');\n"
+				+ "if (nImages() != 1) exit('Oh no!');\n"
+				+ "label = getMetadata('Label');\n";
+
+		final Context context = new Context();
+		final ScriptService script = context.getService(ScriptService.class);
+		assertNotNull(script);
+		final ScriptModule module = script.run("bobs-macro.ijm", macro, true).get();
+		final String label = (String) module.getOutput("label");
+		assertNotNull(label);
+		assertEquals("Hello, World!", label);
 		context.dispose();
 	}
 }
