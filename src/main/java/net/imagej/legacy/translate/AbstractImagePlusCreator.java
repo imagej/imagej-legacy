@@ -46,6 +46,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import net.imagej.Dataset;
 import net.imglib2.meta.Axes;
@@ -176,6 +177,20 @@ public abstract class AbstractImagePlusCreator extends AbstractContextual
 		// fileInfo.openNextDir = null;
 		// fileInfo.openNextName = null;
 
+		fileInfo.sliceLabels = getSliceLabels(ds);
+		if (fileInfo.sliceLabels != null) {
+			if (imp.getStackSize() < 2) {
+				if (fileInfo.sliceLabels.length > 0) {
+					imp.setProperty("Label", fileInfo.sliceLabels[0]);
+				}
+			}
+			else {
+				for (int i = 0; i < fileInfo.sliceLabels.length && i < stack.getSize(); i++) {
+					stack.setSliceLabel(fileInfo.sliceLabels[i], i + 1);
+				}
+			}
+System.err.println(1);
+		}
 		imp.setFileInfo(fileInfo);
 
 		if (!ds.isRGBMerged()) {
@@ -193,6 +208,18 @@ public abstract class AbstractImagePlusCreator extends AbstractContextual
 		fillInfo(imp, ds.getImgPlus());
 
 		return imp;
+	}
+
+	private String[] getSliceLabels(final Dataset ds) {
+		final Map<String, Object> properties = ds.getImgPlus().getProperties();
+		if (properties == null) return null;
+		final Object metadata = properties.get("scifio.metadata.image");
+		if (metadata == null || !(metadata instanceof ImageMetadata)) return null;
+		final MetaTable table = ((ImageMetadata) metadata).getTable();
+		if (table == null) return null;
+		final Object sliceLabels = table.get("SliceLabels");
+		return sliceLabels != null && sliceLabels instanceof String[]
+			? (String[]) sliceLabels : null;
 	}
 
 	private void fillInfo(final ImagePlus imp,
