@@ -32,6 +32,7 @@
 package net.imagej.legacy;
 
 import ij.ImagePlus;
+import ij.gui.ImageWindow;
 
 import java.awt.Window;
 import java.awt.event.KeyEvent;
@@ -560,7 +561,13 @@ public class DefaultLegacyHooks extends LegacyHooks {
 	// -- Helper methods --
 
 	private boolean isOpenWindow(final Window window) {
-		return window.isVisible();
+		return window.isVisible() && !isClosedImageWindow(window);
+	}
+
+	private boolean isClosedImageWindow(final Window window) {
+		if (!(window instanceof ImageWindow)) return false;
+		final ImageWindow imageWindow = (ImageWindow) window;
+		return imageWindow.isClosed();
 	}
 
 }
