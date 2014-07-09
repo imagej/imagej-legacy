@@ -521,11 +521,11 @@ public class DefaultLegacyHooks extends LegacyHooks {
 			if (win == legacyService.getIJ1Helper().getIJ()) {
 				continue;
 			}
-			if (win.isVisible()) {
+			if (isOpenWindow(win)) {
 				// give user a chance to cancel the closing of this visible window
 				win.dispatchEvent(new WindowEvent(win, WindowEvent.WINDOW_CLOSING));
 			}
-			if (win.isVisible() && win.getWindowListeners().length > 0) {
+			if (isOpenWindow(win) && win.getWindowListeners().length > 0) {
 				// NB: We assume the user canceled closing of the window; abort quit.
 				// However, there are situations where this heuristic may fail.
 				// If this logic blocks the shutdown of ImageJ1, we will need to
@@ -555,6 +555,12 @@ public class DefaultLegacyHooks extends LegacyHooks {
 			legacyService.getContext().dispose();
 		}
 		return true;
+	}
+
+	// -- Helper methods --
+
+	private boolean isOpenWindow(final Window window) {
+		return window.isVisible();
 	}
 
 }
