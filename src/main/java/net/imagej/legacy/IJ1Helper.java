@@ -128,6 +128,19 @@ public class IJ1Helper extends AbstractContextual {
 			IJ.runPlugIn("ij.IJ.init", "");
 		}
 		if (ij1 != null) {
+			// NB: *Always* call System.exit(0) when quitting:
+			// - In the case of batch mode, the JVM needs to terminate at the
+			//   conclusion of the macro/script, regardless of the actions performed
+			//   by that macro/script.
+			// - In the case of GUI mode, the JVM needs to terminate when the user
+			//   quits the program because ImageJ1 has many plugins which do not
+			//   properly clean up their resources. This is a vicious cycle:
+			//   ImageJ1's main method sets exitWhenQuitting to true, which has
+			//   historically masked the problems with these plugins. So we have
+			//   little choice but to continue this tradition, at least with the
+			//   legacy ImageJ1 user interface.
+			ij1.exitWhenQuitting(true);
+
 			// make sure that the Event Dispatch Thread's class loader is set
 			SwingUtilities.invokeLater(new Runnable() {
 
