@@ -32,17 +32,16 @@
 package net.imagej.legacy;
 
 import ij.ImagePlus;
-import ij.gui.ImageWindow;
 
 import java.awt.Window;
 import java.awt.event.KeyEvent;
-import java.awt.event.WindowEvent;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -66,6 +65,7 @@ import org.scijava.plugin.PluginInfo;
 import org.scijava.plugin.PluginService;
 import org.scijava.plugin.SciJavaPlugin;
 import org.scijava.thread.ThreadService;
+import org.scijava.ui.CloseConfirmable;
 import org.scijava.util.ListUtils;
 
 /**
@@ -514,27 +514,64 @@ public class DefaultLegacyHooks extends LegacyHooks {
 	@Override
 	public boolean interceptCloseAllWindows() {
 		final Window[] windows = Window.getWindows();
-		// NB: Loop over the windows in reverse order, so that
-		// child windows are disposed before their parents.
-		for (int w = windows.length - 1; w >= 0; w--) {
+		boolean continueClose = true;
+		final List<Window> confirmableWindows = new ArrayList<Window>();
+		final List<Window> unconfirmableWindows = new ArrayList<Window>();
+
+		// For each Window, we split them into confirmable or unconfirmable based
+		// on whether or not they implement CloseConfirmable. As CloseAllWindows
+		// is synchronized on the WindowManager and disposal typically calls
+		// WindowManager.removeWindow (also synchronized), disposal is expected
+		// to block the EDT while we're still executing CloseAllWindows. As the
+		// EDT is necessary to display confirmation dialogs we can not request
+		// close confirmation while disposal is in progress without deadlocking.
+		// Thus we process and temporarily hide CloseConfirmable windows, then
+		// queue up a mass disposal when user input is no longer required.
+		// NB: this likely creates a race condition of disposal with System.exit
+		// being called by ImageJ 1.x's quitting routine. Thus disposal should
+		// never be required to execute before shutting down the JVM. When such
+		// behavior is required, the appropriate window should just implement
+		// CloseConfirmable.
+		for (int w = windows.length - 1; w >= 0 && continueClose; w--) {
 			final Window win = windows[w];
+
 			// Skip the ImageJ 1.x main window
 			if (win == legacyService.getIJ1Helper().getIJ()) {
 				continue;
 			}
-			if (isOpenWindow(win)) {
-				// give user a chance to cancel the closing of this visible window
-				win.dispatchEvent(new WindowEvent(win, WindowEvent.WINDOW_CLOSING));
+
+			if (CloseConfirmable.class.isAssignableFrom(win.getClass())) {
+				// Any CloseConfirmable window will have its confirmClose method
+				// called.
+				// If this operation was not canceled, we hide the window until it can
+				// be disposed safely later.
+				continueClose = ((CloseConfirmable) win).confirmClose();
+				if (continueClose) {
+					confirmableWindows.add(win);
+					win.setVisible(false);
+				}
 			}
-			if (isOpenWindow(win) && win.getWindowListeners().length > 0) {
-				// NB: We assume the user canceled closing of the window; abort quit.
-				// However, there are situations where this heuristic may fail.
-				// If this logic blocks the shutdown of ImageJ1, we will need to
-				// investigate and improve the heuristic on a case by case basis.
-				return false;
+			else {
+				// Nothing to do for these windows. Just add them to a list to be
+				// disposed later, as long as no CloseConfirmable windows are
+				// canceled.
+				unconfirmableWindows.add(win);
 			}
-			win.dispose();
 		}
+
+		// We always want to dispose any CloseConfirmable windows that were
+		// successfully added to this list (and thus were not canceled) as
+		// these windows were expected to be closed.
+		disposeWindows(confirmableWindows);
+
+		// If the close process was canceled, we do not queue disposal for the
+		// unconfirmable windows.
+		if (!continueClose) return false;
+
+		// Dispose remaining windows and return true to indicate the close
+		// operation should continue.
+		disposeWindows(unconfirmableWindows);
+
 		return true;
 	}
 
@@ -558,16 +595,20 @@ public class DefaultLegacyHooks extends LegacyHooks {
 		return true;
 	}
 
-	// -- Helper methods --
-
-	private boolean isOpenWindow(final Window window) {
-		return window.isVisible() && !isClosedImageWindow(window);
+	/**
+	 * Helper method to {@link Window#dispose()} all {@code Windows} in a given
+	 * list.
+	 */
+	private void disposeWindows(final List<Window> toDispose) {
+		// Queue the disposal to avoid deadlocks
+		final ThreadService threadService = context.getService(ThreadService.class);
+		threadService.queue(new Runnable() {
+			@Override
+			public void run() {
+				for (final Window win : toDispose) {
+					win.dispose();
+				}
+			}
+		});
 	}
-
-	private boolean isClosedImageWindow(final Window window) {
-		if (!(window instanceof ImageWindow)) return false;
-		final ImageWindow imageWindow = (ImageWindow) window;
-		return imageWindow.isClosed();
-	}
-
 }
