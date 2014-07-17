@@ -74,12 +74,17 @@ public class LegacyOpenerTest {
 				+ "run('Analyze Particles...', 'size=20-Infinity circularity=0.40-1.00');\n";
 
 		final Context context = new Context();
-		final ScriptService script = context.getService(ScriptService.class);
-		assertNotNull(script);
-		final ScriptModule module = script.run("pauls-macro.ijm", macro, true).get();
-		final Integer nResults = (Integer) module.getOutput("nResults");
-		assertNotNull(nResults);
-		assertEquals(10, (int) nResults);
-		context.dispose();
+		try {
+			final ScriptService script = context.getService(ScriptService.class);
+			assertNotNull(script);
+			final ScriptModule module =
+				script.run("pauls-macro.ijm", macro, true).get();
+			final Integer nResults = (Integer) module.getOutput("nResults");
+			assertNotNull(nResults);
+			assertEquals(10, (int) nResults);
+		}
+		finally {
+			context.dispose();
+		}
 	}
 }
