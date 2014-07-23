@@ -33,7 +33,6 @@ package net.imagej.legacy.plugin;
 
 import ij.ImagePlus;
 import ij.process.ByteProcessor;
-import net.imagej.legacy.LegacyOutputTracker;
 
 import org.scijava.command.Command;
 import org.scijava.log.LogService;
@@ -65,33 +64,9 @@ public class MixedWorldCommand implements Command {
 		if (imp.getBitDepth() != 8) error("bit depth wrong");
 		if (!imp.getTitle().equals(title)) error("title wrong");
 		imp.show();
-		if (LegacyOutputTracker.containsOutput(imp)) {
-			error("output imp is in output list");
-		}
-		if (LegacyOutputTracker.containsClosed(imp)) {
-			error("output imp is in closed list");
-		}
 		imp.repaintWindow();
-		if (LegacyOutputTracker.containsOutput(imp)) {
-			error("output imp is in output list");
-		}
-		if (LegacyOutputTracker.containsClosed(imp)) {
-			error("output imp is in closed list");
-		}
 		imp.hide();
-		if (LegacyOutputTracker.containsOutput(imp)) {
-			error("output imp is in output list");
-		}
-		if (LegacyOutputTracker.containsClosed(imp)) {
-			error("output imp is in closed list");
-		}
 		imp.close();
-		if (LegacyOutputTracker.containsOutput(imp)) {
-			error("output imp is in output list");
-		}
-		if (LegacyOutputTracker.containsClosed(imp)) {
-			error("output imp is in closed list");
-		}
 		if (ok) log.info("terminated successfully!");
 	}
 

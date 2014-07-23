@@ -45,7 +45,6 @@ import net.imagej.Dataset;
 import net.imagej.display.ImageDisplay;
 import net.imagej.display.ImageDisplayService;
 import net.imagej.legacy.LegacyImageMap;
-import net.imagej.legacy.LegacyOutputTracker;
 import net.imagej.legacy.LegacyService;
 import net.imagej.legacy.translate.DefaultImageTranslator;
 import net.imagej.legacy.translate.Harmonizer;
@@ -167,7 +166,7 @@ public class LegacyCommand implements Command {
 		// threads in its group.
 
 		public LegacyCommandThread() {
-			super(new LegacyThreadGroup(legacyService), THREAD_NAME);
+			super(THREAD_NAME);
 			this.group = getThreadGroup();
 			this.map = legacyService.getImageMap();
 			final ImageTranslator imageTranslator =
@@ -190,10 +189,6 @@ public class LegacyCommand implements Command {
 
 			// reportStackIssues("Before IJ1 plugin run");
 
-			// must happen after updateImagePlusesFromDisplays()
-			LegacyOutputTracker.clearOutputs();
-			LegacyOutputTracker.clearClosed();
-
 			// set ImageJ1's active image
 			legacyService.syncActiveImage();
 
@@ -214,15 +209,6 @@ public class LegacyCommand implements Command {
 				// sync modern displays to match existing legacy images
 				outputs = updateDisplaysFromImagePluses();
 
-				// close any displays that IJ1 wants closed
-				for (final ImagePlus imp : LegacyOutputTracker.getClosed()) {
-					final ImageDisplay disp = map.lookupDisplay(imp);
-					if (disp != null) {
-						// only close displays that have not been changed
-						if (!outputs.contains(disp)) disp.close();
-					}
-				}
-
 				// reportStackIssues("After IJ1 plugin run");
 			}
 			catch (final Exception e) {
@@ -237,8 +223,6 @@ public class LegacyCommand implements Command {
 			finally {
 				// clean up - basically avoid dangling refs to large objects
 				harmonizer.resetTypeTracking();
-				LegacyOutputTracker.clearOutputs();
-				LegacyOutputTracker.clearClosed();
 			}
 
 			rtHarmonizer.setModernImageJResultsTable();
@@ -361,11 +345,7 @@ public class LegacyCommand implements Command {
 			// We cannot use the "changes" flag here because ImageJ 1.x might have
 			// consumed it already.
 
-			final ImagePlus[] imps = LegacyOutputTracker.getOutputs();
 			final ImagePlus currImp = WindowManager.getCurrentImage();
-
-			// see method below
-			finishInProgressPastes(currImp, imps);
 
 			// the IJ1 plugin may not have any outputs but just changes current
 			// ImagePlus make sure we catch any changes via harmonization
@@ -381,34 +361,8 @@ public class LegacyCommand implements Command {
 				}
 			}
 
-			// also harmonize any outputs
-
-			for (final ImagePlus imp : imps) {
-				if (imp.getStack().getSize() == 0) { // totally emptied by plugin
-					// TODO - do we need to delete display or is it already done?
-				}
-				else { // image plus is not totally empty
-					ImageDisplay display = map.lookupDisplay(imp);
-					if (display == null) {
-						if (imp.getWindow() != null) {
-							display = map.registerLegacyImage(imp);
-						}
-						else {
-							continue;
-						}
-					}
-					else {
-						if (imp == currImp) {
-							// we harmonized this earlier
-						}
-						else harmonizer.updateDisplay(display, imp);
-					}
-					displays.add(display);
-				}
-			}
-
 			return displays;
-		}
+	}
 
 		// SAVE - useful
 		/*
@@ -432,30 +386,6 @@ public class LegacyCommand implements Command {
 			}
 		}
 		*/
-
-		// Finishes any in progress paste() operations. Done before harmonization.
-		// In legacy ImageJ the paste operations are usually handled by
-		// ImageCanvas::paint(). In modern ImageJ that method is never called. It
-		// would be nice to hook something that calls paint() via the legacy
-		// injector but that may raise additional problems. This is a simple fix.
-
-		private void finishInProgressPastes(final ImagePlus currImp,
-			final ImagePlus[] outputList)
-		{
-			endPaste(currImp);
-			for (final ImagePlus imp : outputList) { // potentially empty list
-				if (imp == currImp) continue;
-				endPaste(imp);
-			}
-		}
-
-		private void endPaste(final ImagePlus imp) {
-			if (imp == null) return;
-			final Roi roi = imp.getRoi();
-			if (roi == null) return;
-			if (roi.getPasteMode() == Roi.NOT_PASTING) return;
-			roi.endPaste();
-		}
 
 		/* save for debugging if null pixel array exception ever reported
 		 * 

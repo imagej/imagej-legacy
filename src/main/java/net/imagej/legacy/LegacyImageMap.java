@@ -58,6 +58,7 @@ import net.imagej.ui.viewer.image.ImageDisplayViewer;
 import org.scijava.AbstractContextual;
 import org.scijava.display.event.DisplayDeletedEvent;
 import org.scijava.event.EventHandler;
+import org.scijava.object.ObjectService;
 import org.scijava.plugin.Parameter;
 import org.scijava.ui.viewer.DisplayWindow;
 
@@ -131,6 +132,9 @@ public class LegacyImageMap extends AbstractContextual {
 
 	@Parameter
 	private ImageDisplayService imageDisplayService;
+
+	@Parameter
+	private ObjectService objectService;
 
 
 	// -- Constructor --
@@ -215,7 +219,7 @@ public class LegacyImageMap extends AbstractContextual {
 				final ImageWindow window = imp.getWindow();
 				final ImageDisplay display = displayTable.get(imp);
 				if (window == null || window.isClosed()) {
-					unregisterLegacyImage(imp);
+					unregisterLegacyImage(imp, false);
 					display.close();
 				} else {
 					harmonizer.updateDisplay(display, imp);
@@ -253,22 +257,21 @@ public class LegacyImageMap extends AbstractContextual {
 			addMapping(display, imp);
 		}
 
-		// record resultant ImagePlus as a legacy command output
-		LegacyOutputTracker.addOutput(imp);
-
 		return display;
 	}
 
 	/** Removes the mapping associated with the given {@link ImageDisplay}. */
-	public void unregisterDisplay(final ImageDisplay display) {
+	public void unregisterDisplay(final ImageDisplay display, final boolean closeImagePlus) {
 		final ImagePlus imp = lookupImagePlus(display);
-		removeMapping(display, imp);
+		removeMapping(display, imp, closeImagePlus);
+		if (display != null) objectService.removeObject(display);
 	}
 
 	/** Removes the mapping associated with the given {@link ImagePlus}. */
-	public void unregisterLegacyImage(final ImagePlus imp) {
+	public void unregisterLegacyImage(final ImagePlus imp, final boolean closeImagePlus) {
 		final ImageDisplay display = lookupDisplay(imp);
-		removeMapping(display, imp);
+		removeMapping(display, imp, closeImagePlus);
+		if (display != null) objectService.removeObject(display);
 	}
 
 	/**
@@ -321,16 +324,17 @@ public class LegacyImageMap extends AbstractContextual {
 		displayTable.put(imp, display);
 	}
 
-	private void removeMapping(final ImageDisplay display, final ImagePlus imp) {
+	private void removeMapping(final ImageDisplay display, final ImagePlus imp, boolean closeImagePlus) {
 		// System.out.println("REMOVE MAPPING "+display+" to "+imp+
 		// " isComposite()="+imp.isComposite());
 
 		if (display != null) {
 			imagePlusTable.remove(display);
 		}
+
 		if (imp != null) {
 			displayTable.remove(imp);
-			LegacyUtils.deleteImagePlus(imp);
+			if (closeImagePlus) LegacyUtils.deleteImagePlus(imp);
 		}
 	}
 
@@ -361,7 +365,9 @@ public class LegacyImageMap extends AbstractContextual {
 		// - That modern IJ does not think legacy IJ initiated the ij1.close()
 		 */
 		if (event.getObject() instanceof ImageDisplay) {
-			unregisterDisplay((ImageDisplay) event.getObject());
+			final ImageDisplay display = (ImageDisplay) event.getObject();
+			unregisterDisplay(display, false);
+			objectService.removeObject(display);
 		}
 	}
 

@@ -209,7 +209,6 @@ public class DefaultLegacyHooks extends LegacyHooks {
 		if (!image.isProcessor()) return;
 		if (image.getWindow() == null) return;
 		if (!isLegacyMode()) {
-			if (!Utils.isLegacyThread(Thread.currentThread())) return;
 			legacyService.log().debug("register legacy image: " + image);
 		}
 		try {
@@ -224,13 +223,11 @@ public class DefaultLegacyHooks extends LegacyHooks {
 		final ImagePlus image = (ImagePlus) o;
 		if (isLegacyMode()) return;
 		if (image == null) return;
-		if (!Utils.isLegacyThread(Thread.currentThread())) return;
 		legacyService.log().debug("ImagePlus.hide(): " + image);
-		LegacyOutputTracker.removeOutput(image);
 		try {
 			ImageDisplay disp = legacyService.getImageMap().lookupDisplay(image);
 			if (disp == null) {
-				legacyService.getImageMap().unregisterLegacyImage(image);
+				legacyService.getImageMap().unregisterLegacyImage(image, false);
 			}
 			else {
 				disp.close();
