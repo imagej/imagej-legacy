@@ -87,4 +87,37 @@ public class LegacyOpenerTest {
 			context.dispose();
 		}
 	}
+
+	/**
+	 * Verifies that the suffix (-1, -2, etc when a newly opened file would a have non-unique name) is reset after closing images.
+	 * 
+	 * @throws Exception
+	 */
+	@Test
+	public void testSuffix() throws Exception {
+		final URL url = getClass().getResource("/icons/imagej-256.png");
+		assertNotNull(url);
+		assumeTrue("file".equals(url.getProtocol()));
+		final String path = url.getPath();
+		final String macro = "// @OUTPUT String title\n"
+				+ "open('" + path + "');\n"
+				+ "if (nImages() != 1) exit('Oh no!');\n"
+				+ "close();\n"
+				+ "open('" + path + "');\n"
+				+ "title = getTitle();\n";
+
+		final Context context = new Context();
+		try {
+			final ScriptService script = context.getService(ScriptService.class);
+			assertNotNull(script);
+			final ScriptModule module =
+				script.run("test.ijm", macro, true).get();
+			final String title = (String) module.getOutput("title");
+			assertNotNull(title);
+			assertEquals("imagej-256.png", title);
+		}
+		finally {
+			context.dispose();
+		}
+	}
 }
