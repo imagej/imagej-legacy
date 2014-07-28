@@ -116,15 +116,8 @@ public class DefaultLegacyHooks extends LegacyHooks {
 
 		editor = createInstanceOfType(LegacyEditor.class);
 		appConfig = createInstanceOfType(LegacyAppConfiguration.class);
-		// TODO: inject context automatically?
 		afterRefreshMenus = pluginService.createInstancesOfType(LegacyPostRefreshMenus.class);
-		for (final LegacyPostRefreshMenus o : afterRefreshMenus) {
-			context.inject(o);
-		}
 		legacyOpeners = pluginService.createInstancesOfType(LegacyOpener.class);
-		for (final LegacyOpener o : legacyOpeners) {
-			context.inject(o);
-		}
 	}
 
 	// TODO: move to scijava-common?
