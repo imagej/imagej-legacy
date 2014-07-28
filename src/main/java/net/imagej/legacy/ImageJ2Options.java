@@ -67,10 +67,6 @@ import org.scijava.widget.Button;
 public class ImageJ2Options extends OptionsPlugin implements Interactive
 {
 
-	// Constants for field lookup
-
-	public static final String USE_SCIFIO = "useSCIFIO";
-
 	// Fields
 
 	/**
