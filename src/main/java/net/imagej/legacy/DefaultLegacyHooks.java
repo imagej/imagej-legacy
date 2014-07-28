@@ -8,13 +8,13 @@
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright notice,
  *    this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
  *    and/or other materials provided with the distribution.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -38,8 +38,12 @@ import java.awt.event.KeyEvent;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
@@ -70,21 +74,24 @@ import org.scijava.usage.UsageService;
 import org.scijava.util.ListUtils;
 
 /**
- * The {@link LegacyHooks} encapsulating an active {@link LegacyService} for use within the patched ImageJ 1.x.
- * 
+ * The {@link LegacyHooks} encapsulating an active {@link LegacyService} for use
+ * within the patched ImageJ 1.x.
+ *
  * @author Johannes Schindelin
  */
 public class DefaultLegacyHooks extends LegacyHooks {
 
-	private DefaultLegacyService legacyService;
+	private final DefaultLegacyService legacyService;
 	private LogService log;
-	private IJ1Helper helper;
+	private final IJ1Helper helper;
 
 	public DefaultLegacyHooks(final DefaultLegacyService legacyService) {
 		this(legacyService, legacyService.getIJ1Helper());
 	}
 
-	public DefaultLegacyHooks(DefaultLegacyService legacyService, IJ1Helper helper) {
+	public DefaultLegacyHooks(final DefaultLegacyService legacyService,
+		final IJ1Helper helper)
+	{
 		this.legacyService = legacyService;
 		this.helper = helper;
 	}
@@ -116,15 +123,19 @@ public class DefaultLegacyHooks extends LegacyHooks {
 		appConfig = createInstanceOfType(LegacyAppConfiguration.class);
 
 		final PluginService pluginService = pluginService();
-		afterRefreshMenus = pluginService.createInstancesOfType(LegacyPostRefreshMenus.class);
+		afterRefreshMenus =
+			pluginService.createInstancesOfType(LegacyPostRefreshMenus.class);
 		legacyOpeners = pluginService.createInstancesOfType(LegacyOpener.class);
 	}
 
 	// TODO: move to scijava-common?
-	private<PT extends SciJavaPlugin> PT createInstanceOfType(final Class<PT> type) {
+	private <PT extends SciJavaPlugin> PT createInstanceOfType(
+		final Class<PT> type)
+	{
 		final PluginService pluginService = pluginService();
 		if (pluginService == null) return null;
-		PluginInfo<PT> info = ListUtils.first(pluginService.getPluginsOfType(type));
+		final PluginInfo<PT> info =
+			ListUtils.first(pluginService.getPluginsOfType(type));
 		return info == null ? null : pluginService.createInstance(info);
 	}
 
@@ -135,11 +146,11 @@ public class DefaultLegacyHooks extends LegacyHooks {
 	}
 
 	@Override
-	public Object interceptRunPlugIn(String className, String arg) {
-		if (LegacyService.class.getName().equals(className))
-			return legacyService;
-		if (Context.class.getName().equals(className))
+	public Object interceptRunPlugIn(final String className, final String arg) {
+		if (LegacyService.class.getName().equals(className)) return legacyService;
+		if (Context.class.getName().equals(className)) {
 			return legacyService == null ? null : legacyService.getContext();
+		}
 
 		// Intercept IJ1 commands
 		if (helper != null) {
@@ -149,14 +160,15 @@ public class DefaultLegacyHooks extends LegacyHooks {
 					final Object o = interceptFileOpen(null);
 					if (o != null) {
 						if (o instanceof String) {
-							legacyService.getIJ1Helper().openPathDirectly((String)o);
+							legacyService.getIJ1Helper().openPathDirectly((String) o);
 						}
 						return o;
 					}
 				}
 			}
 		}
-		final Object legacyCompatibleCommand = legacyService.runLegacyCompatibleCommand(className);
+		final Object legacyCompatibleCommand =
+			legacyService.runLegacyCompatibleCommand(className);
 		if (legacyCompatibleCommand != null) return legacyCompatibleCommand;
 
 		// NB: Arguments indicate an IJ1 plugin. Report it to the usage service.
@@ -174,14 +186,14 @@ public class DefaultLegacyHooks extends LegacyHooks {
 	private static final int PROGRESS_GRANULARITY = 1000;
 
 	@Override
-	public void showProgress(double progress) {
+	public void showProgress(final double progress) {
 		final int currentIndex = (int) (PROGRESS_GRANULARITY * progress);
 		final int finalIndex = PROGRESS_GRANULARITY;
 		showProgress(currentIndex, finalIndex);
 	}
 
 	@Override
-	public void showProgress(int currentIndex, int finalIndex) {
+	public void showProgress(final int currentIndex, final int finalIndex) {
 		// if we are already processing events on this thread, then we know that
 		// the LegacyStatusBar has already called its setProgress mode. So we do
 		// not want to re-trigger a showProgress method, otherwise we can end up
@@ -196,11 +208,12 @@ public class DefaultLegacyHooks extends LegacyHooks {
 		if (!isInitialized() || isLegacyMode()) {
 			return;
 		}
-		boolean processing = legacyService.setProcessingEvents(true);
+		final boolean processing = legacyService.setProcessingEvents(true);
 		if (processing) return; // already sent
 		try {
 			legacyService.status().showStatus(status);
-		} finally {
+		}
+		finally {
 			legacyService.setProcessingEvents(processing);
 		}
 	}
@@ -217,7 +230,8 @@ public class DefaultLegacyHooks extends LegacyHooks {
 		}
 		try {
 			legacyService.getImageMap().registerLegacyImage(image);
-		} catch (UnsupportedOperationException e) {
+		}
+		catch (final UnsupportedOperationException e) {
 			// ignore: the dummy legacy service does not have an image map
 		}
 	}
@@ -231,26 +245,28 @@ public class DefaultLegacyHooks extends LegacyHooks {
 		legacyService.log().debug("ImagePlus.hide(): " + image);
 		LegacyOutputTracker.removeOutput(image);
 		try {
-			ImageDisplay disp = legacyService.getImageMap().lookupDisplay(image);
+			final ImageDisplay disp =
+				legacyService.getImageMap().lookupDisplay(image);
 			if (disp == null) {
 				legacyService.getImageMap().unregisterLegacyImage(image);
 			}
 			else {
 				disp.close();
 			}
-		} catch (UnsupportedOperationException e) {
+		}
+		catch (final UnsupportedOperationException e) {
 			// ignore: the dummy legacy service does not have an image map
 		}
 		// end alternate
 	}
 
 	@Override
-	public void debug(String string) {
+	public void debug(final String string) {
 		legacyService.log().debug(string);
 	}
 
 	@Override
-	public void error(Throwable t) {
+	public void error(final Throwable t) {
 		legacyService.log().error(t);
 	}
 
@@ -258,28 +274,26 @@ public class DefaultLegacyHooks extends LegacyHooks {
 		return legacyService.isInitialized();
 	}
 
-	// if the ij.log.file property is set, log every message to the file pointed to
+	/** If the ij.log.file property is set, logs every message to this file. */
 	private BufferedWriter logFileWriter;
 
 	@Override
-	public void log(String message) {
+	public void log(final String message) {
 		if (message != null) {
-			String logFilePath = System.getProperty("ij.log.file");
+			final String logFilePath = System.getProperty("ij.log.file");
 			if (logFilePath != null) {
 				try {
 					if (logFileWriter == null) {
-						java.io.OutputStream out = new java.io.FileOutputStream(
-								logFilePath, true);
-						java.io.Writer writer = new java.io.OutputStreamWriter(
-								out, "UTF-8");
+						final OutputStream out = new FileOutputStream(logFilePath, true);
+						final Writer writer = new OutputStreamWriter(out, "UTF-8");
 						logFileWriter = new java.io.BufferedWriter(writer);
 						logFileWriter.write("Started new log on " + new Date() + "\n");
 					}
 					logFileWriter.write(message);
-					if (!message.endsWith("\n"))
-						logFileWriter.newLine();
+					if (!message.endsWith("\n")) logFileWriter.newLine();
 					logFileWriter.flush();
-				} catch (Throwable t) {
+				}
+				catch (final Throwable t) {
 					t.printStackTrace();
 					System.getProperties().remove("ij.log.file");
 					logFileWriter = null;
@@ -290,7 +304,7 @@ public class DefaultLegacyHooks extends LegacyHooks {
 
 	/**
 	 * Returns the application name for use with ImageJ 1.x.
-	 * 
+	 *
 	 * @return the application name
 	 */
 	@Override
@@ -300,7 +314,7 @@ public class DefaultLegacyHooks extends LegacyHooks {
 
 	/**
 	 * Returns the application name for use with ImageJ 1.x.
-	 * 
+	 *
 	 * @return the application name
 	 */
 	@Override
@@ -313,12 +327,13 @@ public class DefaultLegacyHooks extends LegacyHooks {
 
 	/**
 	 * Returns the icon for use with ImageJ 1.x.
-	 * 
+	 *
 	 * @return the application name
 	 */
 	@Override
 	public URL getIconURL() {
-		return appConfig == null ? getClass().getResource("/icons/imagej-256.png") : appConfig.getIconURL();
+		return appConfig == null ? getClass().getResource("/icons/imagej-256.png")
+			: appConfig.getIconURL();
 	}
 
 	@Override
@@ -332,7 +347,7 @@ public class DefaultLegacyHooks extends LegacyHooks {
 
 	/**
 	 * Opens the given path in the registered legacy editor, if any.
-	 * 
+	 *
 	 * @param path the path of the file to open
 	 * @return whether the file was opened successfully
 	 */
@@ -351,7 +366,7 @@ public class DefaultLegacyHooks extends LegacyHooks {
 
 	/**
 	 * Creates the given file in the registered legacy editor, if any.
-	 * 
+	 *
 	 * @param title the title of the file to create
 	 * @param content the text of the file to be created
 	 * @return whether the fule was opened successfully
@@ -364,20 +379,21 @@ public class DefaultLegacyHooks extends LegacyHooks {
 
 	/**
 	 * Determines whether a file is binary or text.
-	 * 
-	 * This just checks for a NUL in the first 1024 bytes.
-	 * Not the best test, but a pragmatic one.
-	 * 
+	 * <p>
+	 * This just checks for a NUL in the first 1024 bytes. Not the best test, but
+	 * a pragmatic one.
+	 * </p>
+	 *
 	 * @param file the file to test
 	 * @return whether it is binary
 	 */
 	private static boolean isBinaryFile(final File file) {
 		try {
-			InputStream in = new FileInputStream(file);
-			byte[] buffer = new byte[1024];
+			final InputStream in = new FileInputStream(file);
+			final byte[] buffer = new byte[1024];
 			int offset = 0;
 			while (offset < buffer.length) {
-				int count = in.read(buffer, offset, buffer.length - offset);
+				final int count = in.read(buffer, offset, buffer.length - offset);
 				if (count < 0) break;
 				offset += count;
 			}
@@ -387,18 +403,18 @@ public class DefaultLegacyHooks extends LegacyHooks {
 					return true;
 				}
 			}
-		} catch (IOException e) {
 		}
+		catch (final IOException e) {}
 		return false;
 	}
 
 	/**
 	 * Determines whether the current stack trace contains the specified string.
-	 * 
+	 *
 	 * @param needle the text to find
 	 * @return whether the stack trace contains the text
 	 */
-	private static boolean stackTraceContains(String needle) {
+	private static boolean stackTraceContains(final String needle) {
 		final StackTraceElement[] trace = Thread.currentThread().getStackTrace();
 		// exclude elements up to, and including, the caller
 		for (int i = 3; i < trace.length; i++) {
@@ -416,7 +432,7 @@ public class DefaultLegacyHooks extends LegacyHooks {
 			if (result != null) return result;
 		}
 		return null;
-	}	
+	}
 
 	@Override
 	public Object interceptFileOpen(final String path) {
@@ -456,7 +472,7 @@ public class DefaultLegacyHooks extends LegacyHooks {
 				if (result != null) return result;
 			}
 		}
-		catch (IOException e) {
+		catch (final IOException e) {
 			log.error(e);
 		}
 		return super.interceptDragAndDropFile(f);
@@ -469,7 +485,8 @@ public class DefaultLegacyHooks extends LegacyHooks {
 			accelerator = accelerator.substring("pressed ".length());
 		}
 		return legacyService.handleShortcut(accelerator) ||
-				(!e.isControlDown() && legacyService.handleShortcut("control " + accelerator));
+			(!e.isControlDown() && legacyService.handleShortcut("control " +
+				accelerator));
 	}
 
 	@Override
@@ -484,6 +501,7 @@ public class DefaultLegacyHooks extends LegacyHooks {
 			@Override
 			public Iterator<Thread> iterator() {
 				return new Iterator<Thread>() {
+
 					private Thread thread = threadService.getParent(current);
 
 					@Override
@@ -592,7 +610,8 @@ public class DefaultLegacyHooks extends LegacyHooks {
 		}
 		else {
 			// NB: ImageJ1 is in the process of a soft shutdown via an API call to
-			// ij.ImageJ#quit(). In this case, we must dispose the SciJava context too.
+			// ij.ImageJ#quit().
+			// In this case, we must dispose the SciJava context too.
 			legacyService.getContext().dispose();
 		}
 		return true;
@@ -605,6 +624,7 @@ public class DefaultLegacyHooks extends LegacyHooks {
 	private void disposeWindows(final List<Window> toDispose) {
 		// Queue the disposal to avoid deadlocks
 		threadService().queue(new Runnable() {
+
 			@Override
 			public void run() {
 				for (final Window win : toDispose) {
