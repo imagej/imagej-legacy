@@ -82,7 +82,7 @@ public class ImageJ2Options extends OptionsPlugin implements Interactive
 			+ "(SCientific Image Format Input and Output), which provides truly "
 			+ "extensible support for reading and writing image file formats.",
 		callback = "run")
-	private Boolean useSCIFIO = true;
+	private boolean useSCIFIO = true;
 
 	@Parameter(label = "What is ImageJ2?", persist = false, callback = "help")
 	private Button help;
@@ -126,7 +126,7 @@ public class ImageJ2Options extends OptionsPlugin implements Interactive
 
 	// -- Option accessors --
 
-	public Boolean isUseSCIFIO() {
+	public boolean isUseSCIFIO() {
 		return useSCIFIO;
 	}
 
