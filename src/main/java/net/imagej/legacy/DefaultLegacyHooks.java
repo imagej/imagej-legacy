@@ -81,9 +81,20 @@ import org.scijava.util.ListUtils;
  */
 public class DefaultLegacyHooks extends LegacyHooks {
 
+	/** Resolution to use when converting double progress to int ratio. */
+	private static final int PROGRESS_GRANULARITY = 1000;
+
 	private final DefaultLegacyService legacyService;
-	private LogService log;
 	private final IJ1Helper helper;
+
+	private LogService log;
+	private LegacyEditor editor;
+	private LegacyAppConfiguration appConfig;
+	private List<LegacyPostRefreshMenus> afterRefreshMenus;
+	private List<LegacyOpener> legacyOpeners;
+
+	/** If the ij.log.file property is set, logs every message to this file. */
+	private BufferedWriter logFileWriter;
 
 	public DefaultLegacyHooks(final DefaultLegacyService legacyService) {
 		this(legacyService, legacyService.getIJ1Helper());
@@ -106,11 +117,6 @@ public class DefaultLegacyHooks extends LegacyHooks {
 		return legacyService.getContext();
 	}
 
-	private LegacyEditor editor;
-	private LegacyAppConfiguration appConfig;
-	private List<LegacyPostRefreshMenus> afterRefreshMenus;
-	private List<LegacyOpener> legacyOpeners;
-
 	@Override
 	public synchronized void installed() {
 		final Context context = legacyService.getContext();
@@ -126,17 +132,6 @@ public class DefaultLegacyHooks extends LegacyHooks {
 		afterRefreshMenus =
 			pluginService.createInstancesOfType(LegacyPostRefreshMenus.class);
 		legacyOpeners = pluginService.createInstancesOfType(LegacyOpener.class);
-	}
-
-	// TODO: move to scijava-common?
-	private <PT extends SciJavaPlugin> PT createInstanceOfType(
-		final Class<PT> type)
-	{
-		final PluginService pluginService = pluginService();
-		if (pluginService == null) return null;
-		final PluginInfo<PT> info =
-			ListUtils.first(pluginService.getPluginsOfType(type));
-		return info == null ? null : pluginService.createInstance(info);
 	}
 
 	@Override
@@ -181,9 +176,6 @@ public class DefaultLegacyHooks extends LegacyHooks {
 
 		return null;
 	}
-
-	/** Resolution to use when converting double progress to int ratio. */
-	private static final int PROGRESS_GRANULARITY = 1000;
 
 	@Override
 	public void showProgress(final double progress) {
@@ -269,13 +261,6 @@ public class DefaultLegacyHooks extends LegacyHooks {
 	public void error(final Throwable t) {
 		legacyService.log().error(t);
 	}
-
-	private boolean isInitialized() {
-		return legacyService.isInitialized();
-	}
-
-	/** If the ij.log.file property is set, logs every message to this file. */
-	private BufferedWriter logFileWriter;
 
 	@Override
 	public void log(final String message) {
@@ -375,52 +360,6 @@ public class DefaultLegacyHooks extends LegacyHooks {
 	public boolean createInEditor(final String title, final String content) {
 		if (editor == null) return false;
 		return editor.create(title, content);
-	}
-
-	/**
-	 * Determines whether a file is binary or text.
-	 * <p>
-	 * This just checks for a NUL in the first 1024 bytes. Not the best test, but
-	 * a pragmatic one.
-	 * </p>
-	 *
-	 * @param file the file to test
-	 * @return whether it is binary
-	 */
-	private static boolean isBinaryFile(final File file) {
-		try {
-			final InputStream in = new FileInputStream(file);
-			final byte[] buffer = new byte[1024];
-			int offset = 0;
-			while (offset < buffer.length) {
-				final int count = in.read(buffer, offset, buffer.length - offset);
-				if (count < 0) break;
-				offset += count;
-			}
-			in.close();
-			while (offset > 0) {
-				if (buffer[--offset] == 0) {
-					return true;
-				}
-			}
-		}
-		catch (final IOException e) {}
-		return false;
-	}
-
-	/**
-	 * Determines whether the current stack trace contains the specified string.
-	 *
-	 * @param needle the text to find
-	 * @return whether the stack trace contains the text
-	 */
-	private static boolean stackTraceContains(final String needle) {
-		final StackTraceElement[] trace = Thread.currentThread().getStackTrace();
-		// exclude elements up to, and including, the caller
-		for (int i = 3; i < trace.length; i++) {
-			if (trace[i].toString().contains(needle)) return true;
-		}
-		return false;
 	}
 
 	@Override
@@ -615,6 +554,69 @@ public class DefaultLegacyHooks extends LegacyHooks {
 			legacyService.getContext().dispose();
 		}
 		return true;
+	}
+
+	// -- Helper methods --
+
+	/**
+	 * Determines whether a file is binary or text.
+	 * <p>
+	 * This just checks for a NUL in the first 1024 bytes. Not the best test, but
+	 * a pragmatic one.
+	 * </p>
+	 *
+	 * @param file the file to test
+	 * @return whether it is binary
+	 */
+	private static boolean isBinaryFile(final File file) {
+		try {
+			final InputStream in = new FileInputStream(file);
+			final byte[] buffer = new byte[1024];
+			int offset = 0;
+			while (offset < buffer.length) {
+				final int count = in.read(buffer, offset, buffer.length - offset);
+				if (count < 0) break;
+				offset += count;
+			}
+			in.close();
+			while (offset > 0) {
+				if (buffer[--offset] == 0) {
+					return true;
+				}
+			}
+		}
+		catch (final IOException e) {}
+		return false;
+	}
+
+	/**
+	 * Determines whether the current stack trace contains the specified string.
+	 *
+	 * @param needle the text to find
+	 * @return whether the stack trace contains the text
+	 */
+	private static boolean stackTraceContains(final String needle) {
+		final StackTraceElement[] trace = Thread.currentThread().getStackTrace();
+		// exclude elements up to, and including, the caller
+		for (int i = 3; i < trace.length; i++) {
+			if (trace[i].toString().contains(needle)) return true;
+		}
+		return false;
+	}
+
+	private boolean isInitialized() {
+		return legacyService.isInitialized();
+	}
+
+	// TODO: move to scijava-common?
+	private <PT extends SciJavaPlugin> PT createInstanceOfType(
+		final Class<PT> type)
+	{
+		final PluginService pluginService = pluginService();
+		if (pluginService == null) return null;
+		final PluginInfo<PT> info =
+			ListUtils.first(pluginService.getPluginsOfType(type));
+		return info == null ? null : pluginService.createInstance(info);
 	}
 
 	/**
