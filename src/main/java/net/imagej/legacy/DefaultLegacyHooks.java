@@ -66,6 +66,7 @@ import org.scijava.plugin.PluginService;
 import org.scijava.plugin.SciJavaPlugin;
 import org.scijava.thread.ThreadService;
 import org.scijava.ui.CloseConfirmable;
+import org.scijava.usage.UsageService;
 import org.scijava.util.ListUtils;
 
 /**
@@ -163,6 +164,15 @@ public class DefaultLegacyHooks extends LegacyHooks {
 		}
 		final Object legacyCompatibleCommand = legacyService.runLegacyCompatibleCommand(className);
 		if (legacyCompatibleCommand != null) return legacyCompatibleCommand;
+
+		// NB: Arguments indicate an IJ1 plugin. Report it to the usage service.
+		final UsageService usageService =
+			legacyService.getContext().getService(UsageService.class);
+		if (usageService != null) {
+			final LegacyPlugInInfo info =
+				new LegacyPlugInInfo(className, arg, helper.getClassLoader());
+			usageService.increment(info);
+		}
 
 		return null;
 	}
