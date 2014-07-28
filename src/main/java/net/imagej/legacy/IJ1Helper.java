@@ -317,6 +317,10 @@ public class IJ1Helper extends AbstractContextual {
 		return null;
 	}
 
+	public ClassLoader getClassLoader() {
+		return IJ.getClassLoader();
+	}
+
 	public void showMessage(String title, String message) {
 		IJ.showMessage(title, message);
 	}
