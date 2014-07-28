@@ -77,8 +77,6 @@ import org.scijava.util.ListUtils;
 public class DefaultLegacyHooks extends LegacyHooks {
 
 	private DefaultLegacyService legacyService;
-	private Context context;
-	private PluginService pluginService;
 	private LogService log;
 	private IJ1Helper helper;
 
@@ -108,20 +106,23 @@ public class DefaultLegacyHooks extends LegacyHooks {
 
 	@Override
 	public synchronized void installed() {
-		context = legacyService.getContext();
+		final Context context = legacyService.getContext();
 		IJ1Helper.subscribeEvents(context);
-		pluginService = context.getService(PluginService.class);
+
 		log = context.getService(LogService.class);
 		if (log == null) log = new StderrLogService();
 
 		editor = createInstanceOfType(LegacyEditor.class);
 		appConfig = createInstanceOfType(LegacyAppConfiguration.class);
+
+		final PluginService pluginService = pluginService();
 		afterRefreshMenus = pluginService.createInstancesOfType(LegacyPostRefreshMenus.class);
 		legacyOpeners = pluginService.createInstancesOfType(LegacyOpener.class);
 	}
 
 	// TODO: move to scijava-common?
 	private<PT extends SciJavaPlugin> PT createInstanceOfType(final Class<PT> type) {
+		final PluginService pluginService = pluginService();
 		if (pluginService == null) return null;
 		PluginInfo<PT> info = ListUtils.first(pluginService.getPluginsOfType(type));
 		return info == null ? null : pluginService.createInstance(info);
@@ -159,8 +160,7 @@ public class DefaultLegacyHooks extends LegacyHooks {
 		if (legacyCompatibleCommand != null) return legacyCompatibleCommand;
 
 		// NB: Arguments indicate an IJ1 plugin. Report it to the usage service.
-		final UsageService usageService =
-			legacyService.getContext().getService(UsageService.class);
+		final UsageService usageService = usageService();
 		if (usageService != null) {
 			final LegacyPlugInInfo info =
 				new LegacyPlugInInfo(className, arg, helper.getClassLoader());
@@ -474,7 +474,7 @@ public class DefaultLegacyHooks extends LegacyHooks {
 
 	@Override
 	public Iterable<Thread> getThreadAncestors() {
-		final ThreadService threadService = context.getService(ThreadService.class);
+		final ThreadService threadService = threadService();
 		if (threadService == null) return null;
 		final Thread current = Thread.currentThread();
 		final Set<Thread> seen = new HashSet<Thread>();
@@ -604,8 +604,7 @@ public class DefaultLegacyHooks extends LegacyHooks {
 	 */
 	private void disposeWindows(final List<Window> toDispose) {
 		// Queue the disposal to avoid deadlocks
-		final ThreadService threadService = context.getService(ThreadService.class);
-		threadService.queue(new Runnable() {
+		threadService().queue(new Runnable() {
 			@Override
 			public void run() {
 				for (final Window win : toDispose) {
@@ -614,4 +613,17 @@ public class DefaultLegacyHooks extends LegacyHooks {
 			}
 		});
 	}
+
+	private ThreadService threadService() {
+		return legacyService.getContext().getService(ThreadService.class);
+	}
+
+	private PluginService pluginService() {
+		return legacyService.getContext().getService(PluginService.class);
+	}
+
+	private UsageService usageService() {
+		return legacyService.getContext().getService(UsageService.class);
+	}
+
 }
