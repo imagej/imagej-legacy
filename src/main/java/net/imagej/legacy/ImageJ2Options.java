@@ -76,7 +76,12 @@ public class ImageJ2Options extends OptionsPlugin implements Interactive
 	/**
 	 * If true, SCIFIO will be used during {@code File > Open} IJ1 calls.
 	 */
-	@Parameter(label = "Use SCIFIO when opening files", callback = "run")
+	@Parameter(label = "Use SCIFIO when opening files",
+		description = "Whether to use ImageJ2's file I/O mechanism when opening "
+			+ "files. Image files will be opened using the SCIFIO library "
+			+ "(SCientific Image Format Input and Output), which provides truly "
+			+ "extensible support for reading and writing image file formats.",
+		callback = "run")
 	private Boolean useSCIFIO = true;
 
 	@Parameter(label = "What is ImageJ2?", persist = false, callback = "help")
