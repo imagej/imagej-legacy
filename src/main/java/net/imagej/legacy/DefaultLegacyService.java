@@ -8,13 +8,13 @@
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright notice,
  *    this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
  *    and/or other materials provided with the distribution.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -96,10 +96,10 @@ import org.scijava.welcome.event.WelcomeEvent;
  * </p>
  * <p>
  * In this fashion, when a legacy command is executed on a {@link ImageDisplay},
- * the service transparently translates it into an {@link ij.ImagePlus}, and vice
- * versa, enabling backward compatibility with legacy commands.
+ * the service transparently translates it into an {@link ij.ImagePlus}, and
+ * vice versa, enabling backward compatibility with legacy commands.
  * </p>
- * 
+ *
  * @author Barry DeZonia
  * @author Curtis Rueden
  * @author Johannes Schindelin
@@ -109,6 +109,7 @@ import org.scijava.welcome.event.WelcomeEvent;
 public final class DefaultLegacyService extends AbstractService implements
 	LegacyService
 {
+
 	static {
 		LegacyInjector.preinit();
 	}
@@ -174,9 +175,11 @@ public final class DefaultLegacyService extends AbstractService implements
 		return ij1Helper;
 	}
 
-	private ThreadLocal<Boolean> isProcessingEvents = new ThreadLocal<Boolean>();
+	private final ThreadLocal<Boolean> isProcessingEvents =
+		new ThreadLocal<Boolean>();
 
-	private Map<String, ModuleInfo> legacyCompatible = new HashMap<String, ModuleInfo>();
+	private final Map<String, ModuleInfo> legacyCompatible =
+		new HashMap<String, ModuleInfo>();
 
 	// -- LegacyService methods --
 
@@ -213,7 +216,7 @@ public final class DefaultLegacyService extends AbstractService implements
 		if (info instanceof CommandInfo) try {
 			return commandService.run((CommandInfo) info, true).get();
 		}
-		catch (Exception e) {
+		catch (final Exception e) {
 			if (e instanceof RuntimeException) throw (RuntimeException) e;
 			throw new RuntimeException(e);
 		}
@@ -228,12 +231,13 @@ public final class DefaultLegacyService extends AbstractService implements
 			try {
 				return scriptService.run((ScriptInfo) info, true).get();
 			}
-			catch (Exception e) {
+			catch (final Exception e) {
 				if (e instanceof RuntimeException) throw (RuntimeException) e;
 				throw new RuntimeException(e);
 			}
 		}
-		throw new IllegalArgumentException("Unhandled info for '" + key + "': " + info);
+		throw new IllegalArgumentException("Unhandled info for '" + key + "': " +
+			info);
 	}
 
 	@Override
@@ -258,7 +262,9 @@ public final class DefaultLegacyService extends AbstractService implements
 		toggleLegacyMode(wantIJ1, false);
 	}
 
-	public synchronized void toggleLegacyMode(final boolean wantIJ1, final boolean initializing) {
+	public synchronized void toggleLegacyMode(final boolean wantIJ1,
+		final boolean initializing)
+	{
 		// TODO: hide/show Brightness/Contrast, Color Picker, Command Launcher, etc
 
 		if (!initializing) {
@@ -283,17 +289,20 @@ public final class DefaultLegacyService extends AbstractService implements
 						modernFrame = modern.getApplicationFrame();
 					}
 					if (frame == null || modernFrame == null) {
-						log.error("Application frame missing: " + frame + " / " + modernFrame);
+						log.error("Application frame missing: " + frame + " / " +
+							modernFrame);
 						return;
 					}
 					frame.setVisible(wantIJ1);
 					modernFrame.setVisible(!wantIJ1);
-				} else {
+				}
+				else {
 					final ApplicationFrame appFrame =
 						ui == null ? null : ui.getApplicationFrame();
 					if (appFrame == null) {
 						if (ui != null && !wantIJ1) uiService.showUI();
-					} else {
+					}
+					else {
 						appFrame.setVisible(!wantIJ1);
 					}
 				}
@@ -330,12 +339,14 @@ public final class DefaultLegacyService extends AbstractService implements
 
 		try {
 			final ClassLoader loader = Thread.currentThread().getContextClassLoader();
-			final boolean ij1Initialized = LegacyEnvironment.isImageJ1Initialized(loader);
+			final boolean ij1Initialized =
+				LegacyEnvironment.isImageJ1Initialized(loader);
 			if (!ij1Initialized) {
 				getLegacyEnvironment(loader).newImageJ1(true);
 			}
 			ij1Helper = new IJ1Helper(this);
-		} catch (final Throwable t) {
+		}
+		catch (final Throwable t) {
 			throw new RuntimeException("Failed to instantiate IJ1.", t);
 		}
 
@@ -344,7 +355,8 @@ public final class DefaultLegacyService extends AbstractService implements
 			instance = this;
 			instantiationStackTrace = new Throwable("Initialized here:");
 			final ClassLoader loader = Thread.currentThread().getContextClassLoader();
-			LegacyInjector.installHooks(loader, new DefaultLegacyHooks(this, ij1Helper));
+			LegacyInjector.installHooks(loader, new DefaultLegacyHooks(this,
+				ij1Helper));
 		}
 
 		ij1Helper.initialize();
@@ -376,8 +388,8 @@ public final class DefaultLegacyService extends AbstractService implements
 	 *
 	 * @return the old processing value
 	 */
-	public boolean setProcessingEvents(boolean processing) {
-		boolean result = isProcessingEvents();
+	public boolean setProcessingEvents(final boolean processing) {
+		final boolean result = isProcessingEvents();
 		if (result != processing) {
 			isProcessingEvents.set(processing);
 		}
@@ -387,12 +399,12 @@ public final class DefaultLegacyService extends AbstractService implements
 	/**
 	 * {@link ThreadLocal} check to see if components are in the middle of
 	 * processing events.
-	 * 
+	 *
 	 * @return True iff this thread is already processing events through the
 	 *         {@code DefaultLegacyService}.
 	 */
 	public boolean isProcessingEvents() {
-		Boolean result = isProcessingEvents.get();
+		final Boolean result = isProcessingEvents.get();
 		return result == Boolean.TRUE;
 	}
 
@@ -404,7 +416,7 @@ public final class DefaultLegacyService extends AbstractService implements
 
 		final ClassLoader loader = Thread.currentThread().getContextClassLoader();
 		LegacyInjector.installHooks(loader, null);
-		synchronized(DefaultLegacyService.class) {
+		synchronized (DefaultLegacyService.class) {
 			instance = null;
 			instantiationStackTrace = null;
 		}
@@ -415,12 +427,11 @@ public final class DefaultLegacyService extends AbstractService implements
 	/**
 	 * Keeps the active legacy {@link ij.ImagePlus} in sync with the active modern
 	 * {@link ImageDisplay}.
-	 * 
+	 *
 	 * @param event
 	 */
 	@EventHandler
-	private void onEvent(final DisplayActivatedEvent event)
-	{
+	private void onEvent(final DisplayActivatedEvent event) {
 		syncActiveImage();
 	}
 
@@ -430,7 +441,8 @@ public final class DefaultLegacyService extends AbstractService implements
 		if (code == KeyCode.SPACE) ij1Helper.setKeyDown(KeyCode.SPACE.getCode());
 		if (code == KeyCode.ALT) ij1Helper.setKeyDown(KeyCode.ALT.getCode());
 		if (code == KeyCode.SHIFT) ij1Helper.setKeyDown(KeyCode.SHIFT.getCode());
-		if (code == KeyCode.CONTROL) ij1Helper.setKeyDown(KeyCode.CONTROL.getCode());
+		if (code == KeyCode.CONTROL) ij1Helper
+			.setKeyDown(KeyCode.CONTROL.getCode());
 		if (ij1Helper.isMacintosh() && code == KeyCode.META) {
 			ij1Helper.setKeyDown(KeyCode.CONTROL.getCode());
 		}
@@ -467,14 +479,15 @@ public final class DefaultLegacyService extends AbstractService implements
 	 * not necessarily get initialized. So we provide this method just to force
 	 * class initialization (and thereby the LegacyInjector to patch ImageJ 1.x).
 	 * </p>
-	 * 
+	 *
 	 * @deprecated use {@link LegacyInjector#preinit()} instead
 	 */
 	@Deprecated
 	public static void preinit() {
 		try {
 			getLegacyEnvironment(Thread.currentThread().getContextClassLoader());
-		} catch (Throwable t) {
+		}
+		catch (final Throwable t) {
 			t.printStackTrace();
 		}
 	}
@@ -498,7 +511,7 @@ public final class DefaultLegacyService extends AbstractService implements
 	 * Returns the legacy service associated with the ImageJ 1.x instance in the
 	 * current class loader. This method is invoked by the javassisted methods of
 	 * ImageJ 1.x.
-	 * 
+	 *
 	 * @return the legacy service
 	 */
 	public static DefaultLegacyService getInstance() {
@@ -512,7 +525,8 @@ public final class DefaultLegacyService extends AbstractService implements
 	private void checkInstance() {
 		if (instance != null) {
 			throw new UnsupportedOperationException(
-				"Cannot instantiate more than one DefaultLegacyService", instantiationStackTrace);
+				"Cannot instantiate more than one DefaultLegacyService",
+				instantiationStackTrace);
 		}
 	}
 
@@ -531,9 +545,12 @@ public final class DefaultLegacyService extends AbstractService implements
 	 * </p>
 	 */
 	public Map<String, ModuleInfo> getScriptsAndNonLegacyCommands() {
-		final Map<String, ModuleInfo> modules = new LinkedHashMap<String, ModuleInfo>();
+		final Map<String, ModuleInfo> modules =
+			new LinkedHashMap<String, ModuleInfo>();
 		legacyCompatible.clear();
-		for (final CommandInfo info : commandService.getCommandsOfType(Command.class)) {
+		for (final CommandInfo info : commandService
+			.getCommandsOfType(Command.class))
+		{
 			if (info.getMenuPath().size() == 0 || info.is("no-legacy")) {
 				continue;
 			}
@@ -572,7 +589,7 @@ public final class DefaultLegacyService extends AbstractService implements
 	}
 
 	@Override
-	public void handleException(Throwable e) {
+	public void handleException(final Throwable e) {
 		log.error(e);
 		ij1Helper.handleException(e);
 	}
