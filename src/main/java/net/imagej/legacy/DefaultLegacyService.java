@@ -36,6 +36,7 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.concurrent.Future;
 
 import net.imagej.DatasetService;
 import net.imagej.display.ImageDisplay;
@@ -49,6 +50,7 @@ import net.imagej.threshold.ThresholdService;
 import net.imagej.ui.swing.script.TextEditor;
 import net.imagej.ui.viewer.image.ImageDisplayViewer;
 
+import org.scijava.Identifiable;
 import org.scijava.MenuPath;
 import org.scijava.Priority;
 import org.scijava.app.App;
@@ -111,6 +113,11 @@ public final class DefaultLegacyService extends AbstractService implements
 {
 
 	static {
+		// NB: Prime ImageJ 1.x for patching.
+		// This will only work if this class does _not_ need to load any ij.*
+		// classes for it itself to be loaded. I.e.: this class must have_no_
+		// references to ij.* classes in its API (supertypes, fields, method
+		// arguments and method return types).
 		LegacyInjector.preinit();
 	}
 
@@ -161,13 +168,22 @@ public final class DefaultLegacyService extends AbstractService implements
 
 	private UIService uiService;
 
+	/**
+	 * Static reference to the one and only active {@link LegacyService}. The JVM
+	 * can only have one instance of ImageJ 1.x, and hence one LegacyService,
+	 * active at a time.
+	 */
 	private static DefaultLegacyService instance;
+
 	private static Throwable instantiationStackTrace;
 
 	/** Mapping between modern and legacy image data structures. */
 	private LegacyImageMap imageMap;
 
-	/** Keep references to ImageJ 1.x separate */
+	/**
+	 * A buffer object which keeps all references to ImageJ 1.x separated from
+	 * this class.
+	 */
 	private IJ1Helper ij1Helper;
 
 	// FIXME: See https://github.com/imagej/imagej-legacy/issues/53
@@ -178,6 +194,12 @@ public final class DefaultLegacyService extends AbstractService implements
 	private final ThreadLocal<Boolean> isProcessingEvents =
 		new ThreadLocal<Boolean>();
 
+	/**
+	 * Map of ImageJ2 {@link Command}s which are compatible with the legacy user
+	 * interface. A command is considered compatible if it is not tagged with the
+	 * {@code "no-legacy"} key in its {@link Parameter#attrs()} list. The map is
+	 * keyed on identifier; see the {@link Identifiable} interface.
+	 */
 	private final Map<String, ModuleInfo> legacyCompatible =
 		new HashMap<String, ModuleInfo>();
 
@@ -210,6 +232,16 @@ public final class DefaultLegacyService extends AbstractService implements
 		commandService.run(LegacyCommand.class, true, inputMap);
 	}
 
+	/**
+	 * Runs the legacy compatible command with the given identifier.
+	 *
+	 * @param key The identifier of the command to execute.
+	 * @return The {@link Future} of the command execution; or if the identifier
+	 *         describes a script and the shift key is down, then the
+	 *         {@link TextEditor} of the new Script Editor window which was
+	 *         opened.
+	 * @see Identifiable
+	 */
 	public Object runLegacyCompatibleCommand(final String key) {
 		final ModuleInfo info = legacyCompatible.get(key);
 		if (info == null) return null;
