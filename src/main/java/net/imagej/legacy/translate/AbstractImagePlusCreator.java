@@ -217,6 +217,8 @@ System.err.println(1);
 		if (metadata == null || !(metadata instanceof ImageMetadata)) return null;
 		final MetaTable table = ((ImageMetadata) metadata).getTable();
 		if (table == null) return null;
+		// HACK - temporary until SCIFIO metadata API supports per-plane
+		// metadata.
 		final Object sliceLabels = table.get("SliceLabels");
 		return sliceLabels != null && sliceLabels instanceof String[]
 			? (String[]) sliceLabels : null;
