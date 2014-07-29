@@ -71,7 +71,8 @@ public class LegacyOpenerTest {
 				+ "if (nImages() != 1) exit('Oh no!');\n"
 				+ "run('8-bit');"
 				+ "setThreshold(150,255);"
-				+ "run('Analyze Particles...', 'size=20-Infinity circularity=0.40-1.00');\n";
+				+ "run('Analyze Particles...', 'size=20-Infinity circularity=0.40-1.00');\n"
+				+ "close();";
 
 		final Context context = new Context();
 		try {
@@ -108,15 +109,20 @@ public class LegacyOpenerTest {
 		final String macro = "// @OUTPUT String label\n"
 				+ "open('" + path + "');\n"
 				+ "if (nImages() != 1) exit('Oh no!');\n"
-				+ "label = getMetadata('Label');\n";
+				+ "label = getMetadata('Label');\n"
+				+ "close();";
 
 		final Context context = new Context();
-		final ScriptService script = context.getService(ScriptService.class);
-		assertNotNull(script);
-		final ScriptModule module = script.run("bobs-macro.ijm", macro, true).get();
-		final String label = (String) module.getOutput("label");
-		assertNotNull(label);
-		assertEquals("Hello, World!", label);
-		context.dispose();
+		try {
+			final ScriptService script = context.getService(ScriptService.class);
+			assertNotNull(script);
+			final ScriptModule module = script.run("bobs-macro.ijm", macro, true).get();
+			final String label = (String) module.getOutput("label");
+			assertNotNull(label);
+			assertEquals("Hello, World!", label);
+		}
+		finally {
+			context.dispose();
+		}
 	}
 }
