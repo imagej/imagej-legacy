@@ -8,13 +8,13 @@
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright notice,
  *    this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
  *    and/or other materials provided with the distribution.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -38,8 +38,12 @@ import java.awt.event.KeyEvent;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
@@ -66,26 +70,39 @@ import org.scijava.plugin.PluginService;
 import org.scijava.plugin.SciJavaPlugin;
 import org.scijava.thread.ThreadService;
 import org.scijava.ui.CloseConfirmable;
+import org.scijava.usage.UsageService;
 import org.scijava.util.ListUtils;
 
 /**
- * The {@link LegacyHooks} encapsulating an active {@link LegacyService} for use within the patched ImageJ 1.x.
- * 
+ * The {@link LegacyHooks} encapsulating an active {@link LegacyService} for use
+ * within the patched ImageJ 1.x.
+ *
  * @author Johannes Schindelin
  */
 public class DefaultLegacyHooks extends LegacyHooks {
 
-	private DefaultLegacyService legacyService;
-	private Context context;
-	private PluginService pluginService;
+	/** Resolution to use when converting double progress to int ratio. */
+	private static final int PROGRESS_GRANULARITY = 1000;
+
+	private final DefaultLegacyService legacyService;
+	private final IJ1Helper helper;
+
 	private LogService log;
-	private IJ1Helper helper;
+	private LegacyEditor editor;
+	private LegacyAppConfiguration appConfig;
+	private List<LegacyPostRefreshMenus> afterRefreshMenus;
+	private List<LegacyOpener> legacyOpeners;
+
+	/** If the ij.log.file property is set, logs every message to this file. */
+	private BufferedWriter logFileWriter;
 
 	public DefaultLegacyHooks(final DefaultLegacyService legacyService) {
 		this(legacyService, legacyService.getIJ1Helper());
 	}
 
-	public DefaultLegacyHooks(DefaultLegacyService legacyService, IJ1Helper helper) {
+	public DefaultLegacyHooks(final DefaultLegacyService legacyService,
+		final IJ1Helper helper)
+	{
 		this.legacyService = legacyService;
 		this.helper = helper;
 	}
@@ -100,37 +117,21 @@ public class DefaultLegacyHooks extends LegacyHooks {
 		return legacyService.getContext();
 	}
 
-	private LegacyEditor editor;
-	private LegacyAppConfiguration appConfig;
-	private List<LegacyPostRefreshMenus> afterRefreshMenus;
-	private List<LegacyOpener> legacyOpeners;
-
 	@Override
 	public synchronized void installed() {
-		context = legacyService.getContext();
+		final Context context = legacyService.getContext();
 		IJ1Helper.subscribeEvents(context);
-		pluginService = context.getService(PluginService.class);
+
 		log = context.getService(LogService.class);
 		if (log == null) log = new StderrLogService();
 
 		editor = createInstanceOfType(LegacyEditor.class);
 		appConfig = createInstanceOfType(LegacyAppConfiguration.class);
-		// TODO: inject context automatically?
-		afterRefreshMenus = pluginService.createInstancesOfType(LegacyPostRefreshMenus.class);
-		for (final LegacyPostRefreshMenus o : afterRefreshMenus) {
-			context.inject(o);
-		}
-		legacyOpeners = pluginService.createInstancesOfType(LegacyOpener.class);
-		for (final LegacyOpener o : legacyOpeners) {
-			context.inject(o);
-		}
-	}
 
-	// TODO: move to scijava-common?
-	private<PT extends SciJavaPlugin> PT createInstanceOfType(final Class<PT> type) {
-		if (pluginService == null) return null;
-		PluginInfo<PT> info = ListUtils.first(pluginService.getPluginsOfType(type));
-		return info == null ? null : pluginService.createInstance(info);
+		final PluginService pluginService = pluginService();
+		afterRefreshMenus =
+			pluginService.createInstancesOfType(LegacyPostRefreshMenus.class);
+		legacyOpeners = pluginService.createInstancesOfType(LegacyOpener.class);
 	}
 
 	@Override
@@ -140,11 +141,11 @@ public class DefaultLegacyHooks extends LegacyHooks {
 	}
 
 	@Override
-	public Object interceptRunPlugIn(String className, String arg) {
-		if (LegacyService.class.getName().equals(className))
-			return legacyService;
-		if (Context.class.getName().equals(className))
+	public Object interceptRunPlugIn(final String className, final String arg) {
+		if (LegacyService.class.getName().equals(className)) return legacyService;
+		if (Context.class.getName().equals(className)) {
 			return legacyService == null ? null : legacyService.getContext();
+		}
 
 		// Intercept IJ1 commands
 		if (helper != null) {
@@ -154,31 +155,37 @@ public class DefaultLegacyHooks extends LegacyHooks {
 					final Object o = interceptFileOpen(null);
 					if (o != null) {
 						if (o instanceof String) {
-							legacyService.getIJ1Helper().openPathDirectly((String)o);
+							legacyService.getIJ1Helper().openPathDirectly((String) o);
 						}
 						return o;
 					}
 				}
 			}
 		}
-		final Object legacyCompatibleCommand = legacyService.runLegacyCompatibleCommand(className);
+		final Object legacyCompatibleCommand =
+			legacyService.runLegacyCompatibleCommand(className);
 		if (legacyCompatibleCommand != null) return legacyCompatibleCommand;
+
+		// NB: Arguments indicate an IJ1 plugin. Report it to the usage service.
+		final UsageService usageService = usageService();
+		if (usageService != null) {
+			final LegacyPlugInInfo info =
+				new LegacyPlugInInfo(className, arg, helper.getClassLoader());
+			usageService.increment(info);
+		}
 
 		return null;
 	}
 
-	/** Resolution to use when converting double progress to int ratio. */
-	private static final int PROGRESS_GRANULARITY = 1000;
-
 	@Override
-	public void showProgress(double progress) {
+	public void showProgress(final double progress) {
 		final int currentIndex = (int) (PROGRESS_GRANULARITY * progress);
 		final int finalIndex = PROGRESS_GRANULARITY;
 		showProgress(currentIndex, finalIndex);
 	}
 
 	@Override
-	public void showProgress(int currentIndex, int finalIndex) {
+	public void showProgress(final int currentIndex, final int finalIndex) {
 		// if we are already processing events on this thread, then we know that
 		// the LegacyStatusBar has already called its setProgress mode. So we do
 		// not want to re-trigger a showProgress method, otherwise we can end up
@@ -193,11 +200,12 @@ public class DefaultLegacyHooks extends LegacyHooks {
 		if (!isInitialized() || isLegacyMode()) {
 			return;
 		}
-		boolean processing = legacyService.setProcessingEvents(true);
+		final boolean processing = legacyService.setProcessingEvents(true);
 		if (processing) return; // already sent
 		try {
 			legacyService.status().showStatus(status);
-		} finally {
+		}
+		finally {
 			legacyService.setProcessingEvents(processing);
 		}
 	}
@@ -214,7 +222,8 @@ public class DefaultLegacyHooks extends LegacyHooks {
 		}
 		try {
 			legacyService.getImageMap().registerLegacyImage(image);
-		} catch (UnsupportedOperationException e) {
+		}
+		catch (final UnsupportedOperationException e) {
 			// ignore: the dummy legacy service does not have an image map
 		}
 	}
@@ -228,55 +237,48 @@ public class DefaultLegacyHooks extends LegacyHooks {
 		legacyService.log().debug("ImagePlus.hide(): " + image);
 		LegacyOutputTracker.removeOutput(image);
 		try {
-			ImageDisplay disp = legacyService.getImageMap().lookupDisplay(image);
+			final ImageDisplay disp =
+				legacyService.getImageMap().lookupDisplay(image);
 			if (disp == null) {
 				legacyService.getImageMap().unregisterLegacyImage(image);
 			}
 			else {
 				disp.close();
 			}
-		} catch (UnsupportedOperationException e) {
+		}
+		catch (final UnsupportedOperationException e) {
 			// ignore: the dummy legacy service does not have an image map
 		}
 		// end alternate
 	}
 
 	@Override
-	public void debug(String string) {
+	public void debug(final String string) {
 		legacyService.log().debug(string);
 	}
 
 	@Override
-	public void error(Throwable t) {
+	public void error(final Throwable t) {
 		legacyService.log().error(t);
 	}
 
-	private boolean isInitialized() {
-		return legacyService.isInitialized();
-	}
-
-	// if the ij.log.file property is set, log every message to the file pointed to
-	private BufferedWriter logFileWriter;
-
 	@Override
-	public void log(String message) {
+	public void log(final String message) {
 		if (message != null) {
-			String logFilePath = System.getProperty("ij.log.file");
+			final String logFilePath = System.getProperty("ij.log.file");
 			if (logFilePath != null) {
 				try {
 					if (logFileWriter == null) {
-						java.io.OutputStream out = new java.io.FileOutputStream(
-								logFilePath, true);
-						java.io.Writer writer = new java.io.OutputStreamWriter(
-								out, "UTF-8");
+						final OutputStream out = new FileOutputStream(logFilePath, true);
+						final Writer writer = new OutputStreamWriter(out, "UTF-8");
 						logFileWriter = new java.io.BufferedWriter(writer);
 						logFileWriter.write("Started new log on " + new Date() + "\n");
 					}
 					logFileWriter.write(message);
-					if (!message.endsWith("\n"))
-						logFileWriter.newLine();
+					if (!message.endsWith("\n")) logFileWriter.newLine();
 					logFileWriter.flush();
-				} catch (Throwable t) {
+				}
+				catch (final Throwable t) {
 					t.printStackTrace();
 					System.getProperties().remove("ij.log.file");
 					logFileWriter = null;
@@ -287,7 +289,7 @@ public class DefaultLegacyHooks extends LegacyHooks {
 
 	/**
 	 * Returns the application name for use with ImageJ 1.x.
-	 * 
+	 *
 	 * @return the application name
 	 */
 	@Override
@@ -297,7 +299,7 @@ public class DefaultLegacyHooks extends LegacyHooks {
 
 	/**
 	 * Returns the application name for use with ImageJ 1.x.
-	 * 
+	 *
 	 * @return the application name
 	 */
 	@Override
@@ -310,12 +312,13 @@ public class DefaultLegacyHooks extends LegacyHooks {
 
 	/**
 	 * Returns the icon for use with ImageJ 1.x.
-	 * 
+	 *
 	 * @return the application name
 	 */
 	@Override
 	public URL getIconURL() {
-		return appConfig == null ? getClass().getResource("/icons/imagej-256.png") : appConfig.getIconURL();
+		return appConfig == null ? getClass().getResource("/icons/imagej-256.png")
+			: appConfig.getIconURL();
 	}
 
 	@Override
@@ -329,7 +332,7 @@ public class DefaultLegacyHooks extends LegacyHooks {
 
 	/**
 	 * Opens the given path in the registered legacy editor, if any.
-	 * 
+	 *
 	 * @param path the path of the file to open
 	 * @return whether the file was opened successfully
 	 */
@@ -348,7 +351,7 @@ public class DefaultLegacyHooks extends LegacyHooks {
 
 	/**
 	 * Creates the given file in the registered legacy editor, if any.
-	 * 
+	 *
 	 * @param title the title of the file to create
 	 * @param content the text of the file to be created
 	 * @return whether the fule was opened successfully
@@ -357,51 +360,6 @@ public class DefaultLegacyHooks extends LegacyHooks {
 	public boolean createInEditor(final String title, final String content) {
 		if (editor == null) return false;
 		return editor.create(title, content);
-	}
-
-	/**
-	 * Determines whether a file is binary or text.
-	 * 
-	 * This just checks for a NUL in the first 1024 bytes.
-	 * Not the best test, but a pragmatic one.
-	 * 
-	 * @param file the file to test
-	 * @return whether it is binary
-	 */
-	private static boolean isBinaryFile(final File file) {
-		try {
-			InputStream in = new FileInputStream(file);
-			byte[] buffer = new byte[1024];
-			int offset = 0;
-			while (offset < buffer.length) {
-				int count = in.read(buffer, offset, buffer.length - offset);
-				if (count < 0) break;
-				offset += count;
-			}
-			in.close();
-			while (offset > 0) {
-				if (buffer[--offset] == 0) {
-					return true;
-				}
-			}
-		} catch (IOException e) {
-		}
-		return false;
-	}
-
-	/**
-	 * Determines whether the current stack trace contains the specified string.
-	 * 
-	 * @param needle the text to find
-	 * @return whether the stack trace contains the text
-	 */
-	private static boolean stackTraceContains(String needle) {
-		final StackTraceElement[] trace = Thread.currentThread().getStackTrace();
-		// exclude elements up to, and including, the caller
-		for (int i = 3; i < trace.length; i++) {
-			if (trace[i].toString().contains(needle)) return true;
-		}
-		return false;
 	}
 
 	@Override
@@ -413,7 +371,7 @@ public class DefaultLegacyHooks extends LegacyHooks {
 			if (result != null) return result;
 		}
 		return null;
-	}	
+	}
 
 	@Override
 	public Object interceptFileOpen(final String path) {
@@ -453,7 +411,7 @@ public class DefaultLegacyHooks extends LegacyHooks {
 				if (result != null) return result;
 			}
 		}
-		catch (IOException e) {
+		catch (final IOException e) {
 			log.error(e);
 		}
 		return super.interceptDragAndDropFile(f);
@@ -466,12 +424,13 @@ public class DefaultLegacyHooks extends LegacyHooks {
 			accelerator = accelerator.substring("pressed ".length());
 		}
 		return legacyService.handleShortcut(accelerator) ||
-				(!e.isControlDown() && legacyService.handleShortcut("control " + accelerator));
+			(!e.isControlDown() && legacyService.handleShortcut("control " +
+				accelerator));
 	}
 
 	@Override
 	public Iterable<Thread> getThreadAncestors() {
-		final ThreadService threadService = context.getService(ThreadService.class);
+		final ThreadService threadService = threadService();
 		if (threadService == null) return null;
 		final Thread current = Thread.currentThread();
 		final Set<Thread> seen = new HashSet<Thread>();
@@ -481,6 +440,7 @@ public class DefaultLegacyHooks extends LegacyHooks {
 			@Override
 			public Iterator<Thread> iterator() {
 				return new Iterator<Thread>() {
+
 					private Thread thread = threadService.getParent(current);
 
 					@Override
@@ -589,10 +549,74 @@ public class DefaultLegacyHooks extends LegacyHooks {
 		}
 		else {
 			// NB: ImageJ1 is in the process of a soft shutdown via an API call to
-			// ij.ImageJ#quit(). In this case, we must dispose the SciJava context too.
+			// ij.ImageJ#quit().
+			// In this case, we must dispose the SciJava context too.
 			legacyService.getContext().dispose();
 		}
 		return true;
+	}
+
+	// -- Helper methods --
+
+	/**
+	 * Determines whether a file is binary or text.
+	 * <p>
+	 * This just checks for a NUL in the first 1024 bytes. Not the best test, but
+	 * a pragmatic one.
+	 * </p>
+	 *
+	 * @param file the file to test
+	 * @return whether it is binary
+	 */
+	private static boolean isBinaryFile(final File file) {
+		try {
+			final InputStream in = new FileInputStream(file);
+			final byte[] buffer = new byte[1024];
+			int offset = 0;
+			while (offset < buffer.length) {
+				final int count = in.read(buffer, offset, buffer.length - offset);
+				if (count < 0) break;
+				offset += count;
+			}
+			in.close();
+			while (offset > 0) {
+				if (buffer[--offset] == 0) {
+					return true;
+				}
+			}
+		}
+		catch (final IOException e) {}
+		return false;
+	}
+
+	/**
+	 * Determines whether the current stack trace contains the specified string.
+	 *
+	 * @param needle the text to find
+	 * @return whether the stack trace contains the text
+	 */
+	private static boolean stackTraceContains(final String needle) {
+		final StackTraceElement[] trace = Thread.currentThread().getStackTrace();
+		// exclude elements up to, and including, the caller
+		for (int i = 3; i < trace.length; i++) {
+			if (trace[i].toString().contains(needle)) return true;
+		}
+		return false;
+	}
+
+	private boolean isInitialized() {
+		return legacyService.isInitialized();
+	}
+
+	// TODO: move to scijava-common?
+	private <PT extends SciJavaPlugin> PT createInstanceOfType(
+		final Class<PT> type)
+	{
+		final PluginService pluginService = pluginService();
+		if (pluginService == null) return null;
+		final PluginInfo<PT> info =
+			ListUtils.first(pluginService.getPluginsOfType(type));
+		return info == null ? null : pluginService.createInstance(info);
 	}
 
 	/**
@@ -601,8 +625,8 @@ public class DefaultLegacyHooks extends LegacyHooks {
 	 */
 	private void disposeWindows(final List<Window> toDispose) {
 		// Queue the disposal to avoid deadlocks
-		final ThreadService threadService = context.getService(ThreadService.class);
-		threadService.queue(new Runnable() {
+		threadService().queue(new Runnable() {
+
 			@Override
 			public void run() {
 				for (final Window win : toDispose) {
@@ -611,4 +635,17 @@ public class DefaultLegacyHooks extends LegacyHooks {
 			}
 		});
 	}
+
+	private ThreadService threadService() {
+		return legacyService.getContext().getService(ThreadService.class);
+	}
+
+	private PluginService pluginService() {
+		return legacyService.getContext().getService(PluginService.class);
+	}
+
+	private UsageService usageService() {
+		return legacyService.getContext().getService(UsageService.class);
+	}
+
 }

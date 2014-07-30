@@ -31,8 +31,6 @@
 
 package net.imagej.legacy;
 
-import java.lang.reflect.InvocationTargetException;
-
 import net.imagej.ImageJService;
 import net.imagej.display.ImageDisplay;
 

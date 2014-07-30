@@ -104,8 +104,9 @@ public class DefaultLegacyOpener implements LegacyOpener {
 		logService = getCached(logService, LogService.class, c);
 
 		// Check to see if SCIFIO has been disabled
-		Boolean useSCIFIO = optionsService.getOptions(ImageJ2Options.class).isUseSCIFIO();
-		if (useSCIFIO == null || !useSCIFIO) return null;
+		final boolean newStyleIO =
+			optionsService.getOptions(ImageJ2Options.class).isNewStyleIO();
+		if (!newStyleIO) return null;
 
 		if (path == null) {
 			final CommandInfo command = commandService.getCommand(GetPath.class);
