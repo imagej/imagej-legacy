@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>net.imagej</groupId>
 		<artifactId>pom-imagej</artifactId>
-		<version>2.38</version>
+		<version>2.39</version>
 		<relativePath />
 	</parent>
 
@@ -31,10 +31,6 @@
 		<system>Jenkins</system>
 		<url>http://jenkins.imagej.net/job/ImageJ-legacy/</url>
 	</ciManagement>
-
-	<properties>
-		<scijava-common.version>2.28.0</scijava-common.version>
-	</properties>
 
 	<repositories>
 		<repository>
