@@ -37,11 +37,9 @@ import ij.gui.Roi;
 
 import java.lang.ref.WeakReference;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
+import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 import net.imagej.Dataset;
@@ -103,20 +101,37 @@ public class LegacyImageMap extends AbstractContextual {
 	// -- Fields --
 
 	/**
-	 * Table of {@link ImagePlus} objects corresponding to {@link ImageDisplay}s.
+	 * Table of shadowing {@link ImagePlus} objects corresponding to
+	 * {@link ImageDisplay}s created in modern mode. This table should not be used
+	 * to track {@code ImagePlus} instances created in legacy mode - instead, use
+	 * {@link #legacyImagePlusTable}.
 	 */
 	private final Map<ImageDisplay, ImagePlus> imagePlusTable;
 
 	/**
-	 * Table of {@link ImageDisplay} objects corresponding to {@link ImagePlus}es.
+	 * Table of {@link ImageDisplay} objects created in modern mode corresponding
+	 * to shadowing {@link ImagePlus}es. This table should not be used to track
+	 * {@code ImagePlus} instances created in legacy mode - instead, use
+	 * {@link #legacyDisplayTable}.
 	 */
 	private final Map<ImagePlus, ImageDisplay> displayTable;
 
 	/**
-	 * The list of ImagePlus instances accumulated during the legacy mode.
+	 * A mapping of {@link ImagePlus} instances created in legacy mode to
+	 * shadowing {@link ImageDisplay} instances. Uses a {@link WeakHashMap} so any
+	 * {@code ImageDisplays} are disposed when the {@code ImagePlus} key is
+	 * garbage collected - but maintains hard references to the
+	 * {@code ImageDisplay}s otherwise.
 	 */
-	private Set<WeakReference<ImagePlus>> legacyModeImages =
-			new HashSet<WeakReference<ImagePlus>>();
+	private final Map<ImagePlus, ImageDisplay> legacyDisplayTable =
+		new WeakHashMap<ImagePlus, ImageDisplay>();
+
+	/**
+	 * Legacy mode mapping of {@link ImageDisplay}s to {@link ImagePlus}es. Uses
+	 * {@link WeakReference}s for both keys and values.
+	 */
+	private final Map<ImageDisplay, WeakReference<ImagePlus>> legacyImagePlusTable =
+		new WeakHashMap<ImageDisplay, WeakReference<ImagePlus>>();
 
 	/**
 	 * The {@link ImageTranslator} to use when creating {@link ImagePlus} and
@@ -151,6 +166,7 @@ public class LegacyImageMap extends AbstractContextual {
 	 */
 	public ImageDisplay lookupDisplay(final ImagePlus imp) {
 		if (imp == null) return null;
+		if (legacyService.isLegacyMode()) return legacyDisplayTable.get(imp);
 		return displayTable.get(imp);
 	}
 
@@ -160,6 +176,11 @@ public class LegacyImageMap extends AbstractContextual {
 	 */
 	public ImagePlus lookupImagePlus(final ImageDisplay display) {
 		if (display == null) return null;
+		if (legacyService.isLegacyMode()) {
+			final WeakReference<ImagePlus> weakReference =
+				legacyImagePlusTable.get(display);
+			return weakReference == null ? null : weakReference.get();
+		}
 		return imagePlusTable.get(display);
 	}
 
@@ -172,65 +193,23 @@ public class LegacyImageMap extends AbstractContextual {
 	 *         {@link ImageTranslator}.
 	 */
 	public ImagePlus registerDisplay(final ImageDisplay display) {
+		return registerDisplay(display, legacyService.isLegacyMode());
+	}
+
+	/**
+	 * As {@link #registerDisplay(ImageDisplay)} but mappings will go in legacy
+	 * maps if {@code createLegacyMappings} is true.
+	 */
+	public ImagePlus registerDisplay(final ImageDisplay display,
+		final boolean createLegacyMappings)
+	{
 		ImagePlus imp = lookupImagePlus(display);
 		if (imp == null) {
 			// mapping does not exist; mirror display to image window
 			imp = imageTranslator.createLegacyImage(display);
-			addMapping(display, imp);
+			addMapping(display, imp, createLegacyMappings);
 		}
 		return imp;
-	}
-
-	public synchronized void toggleLegacyMode(boolean toggle) {
-		final Harmonizer harmonizer =
-			new Harmonizer(legacyService.getContext(), imageTranslator);
-		if (toggle) {
-			// make sure that all ImageDisplays have a corresponding ImagePlus
-			final List<ImageDisplay> imageDisplays =
-					imageDisplayService.getImageDisplays();
-			// TODO: this is almost exactly what LegacyCommand does, so it is
-			// pretty obvious that it is misplaced in there.
-			for (final ImageDisplay display : imageDisplays) {
-				ImagePlus imp = lookupImagePlus(display);
-				if (imp == null) {
-					final Dataset ds = imageDisplayService.getActiveDataset(display);
-					if (LegacyUtils.dimensionsIJ1Compatible(ds)) {
-						imp = registerDisplay(display);
-						final ImageDisplayViewer viewer =
-								(ImageDisplayViewer) legacyService.uiService().getDisplayViewer(display);
-						if (viewer != null) {
-							final DisplayWindow window = viewer.getWindow();
-							if (window != null) window.showDisplay(!toggle);
-						}
-					}
-				}
-				else {
-					imp.unlock();
-				}
-				harmonizer.updateLegacyImage(display, imp);
-				harmonizer.registerType(imp);
-			}
-		} else {
-			for (ImagePlus imp : displayTable.keySet()) {
-				final ImageWindow window = imp.getWindow();
-				final ImageDisplay display = displayTable.get(imp);
-				if (window == null || window.isClosed()) {
-					unregisterLegacyImage(imp);
-					display.close();
-				} else {
-					harmonizer.updateDisplay(display, imp);
-				}
-			}
-			for (final WeakReference<ImagePlus> ref : legacyModeImages) {
-				final ImagePlus imp = ref.get();
-				if (imp == null) continue;
-				final ImageWindow window = imp.getWindow();
-				if (window != null && !window.isClosed()) {
-					registerLegacyImage(imp);
-				}
-			}
-		}
-		legacyModeImages.clear();
 	}
 
 	/**
@@ -242,21 +221,75 @@ public class LegacyImageMap extends AbstractContextual {
 	 *         {@link ImageTranslator}.
 	 */
 	public ImageDisplay registerLegacyImage(final ImagePlus imp) {
-		if (legacyService.isLegacyMode()) {
-			legacyModeImages.add(new WeakReference<ImagePlus>(imp));
-			return null;
-		}
 		ImageDisplay display = lookupDisplay(imp);
 		if (display == null) {
 			// mapping does not exist; mirror legacy image to display
 			display = imageTranslator.createDisplay(imp);
+			//FIXME ensure display is registered in displayService..
 			addMapping(display, imp);
 		}
-
+	
 		// record resultant ImagePlus as a legacy command output
 		LegacyOutputTracker.addOutput(imp);
-
+	
 		return display;
+	}
+
+	public synchronized void toggleLegacyMode(boolean enteringLegacyMode) {
+		final Harmonizer harmonizer =
+			new Harmonizer(legacyService.getContext(), imageTranslator);
+		if (enteringLegacyMode) {
+			// migrate from the ImagePlusTable and DisplayTable to legacy versions.
+			final List<ImageDisplay> imageDisplays =
+					imageDisplayService.getImageDisplays();
+			// TODO: this is almost exactly what LegacyCommand does, so it is
+			// pretty obvious that it is misplaced in there.
+			for (final ImageDisplay display : imageDisplays) {
+				ImagePlus imp = lookupImagePlus(display);
+				if (imp == null) {
+					final Dataset ds = imageDisplayService.getActiveDataset(display);
+					if (LegacyUtils.dimensionsIJ1Compatible(ds)) {
+						// Ensure the mappings are registered in the legacy maps
+						imp = registerDisplay(display, true);
+						final ImageDisplayViewer viewer =
+								(ImageDisplayViewer) legacyService.uiService().getDisplayViewer(display);
+						if (viewer != null) {
+							final DisplayWindow window = viewer.getWindow();
+							if (window != null) window.showDisplay(!enteringLegacyMode);
+						}
+					}
+				}
+				else {
+					imp.unlock();
+				}
+				harmonizer.updateLegacyImage(display, imp);
+				harmonizer.registerType(imp);
+			}
+			imagePlusTable.clear();
+			displayTable.clear();
+		}
+		else {
+			// migrate from legacyImagePlusTable and legacyDisplayTable to modern
+			// versions.
+			for (final ImagePlus imp : legacyDisplayTable.keySet()) {
+				final ImageWindow window = imp.getWindow();
+				final ImageDisplay display = legacyDisplayTable.get(imp);
+				if (window == null || window.isClosed()) {
+					// This ImagePlus was closed, so we can remove it from our mappings
+					unregisterLegacyImage(imp);
+					display.close();
+				}
+				else {
+					// transfer mappings to modern maps with hard references
+					displayTable.put(imp, display);
+					imagePlusTable.put(display, imp);
+					// Update the display
+					harmonizer.updateDisplay(display, imp);
+				}
+			}
+			legacyDisplayTable.clear();
+			legacyImagePlusTable.clear();
+		}
 	}
 
 	/** Removes the mapping associated with the given {@link ImageDisplay}. */
@@ -278,6 +311,9 @@ public class LegacyImageMap extends AbstractContextual {
 	 *         {@link ImagePlus} instances.
 	 */
 	public Collection<ImageDisplay> getImageDisplays() {
+		if (legacyService.isLegacyMode()) {
+			return legacyDisplayTable.values();
+		}
 		return imagePlusTable.keySet();
 	}
 
@@ -288,18 +324,30 @@ public class LegacyImageMap extends AbstractContextual {
 	 *         {@link ImageDisplay} instances.
 	 */
 	public Collection<ImagePlus> getImagePlusInstances() {
-		Collection<ImagePlus> result = new HashSet<ImagePlus>();
-		result.addAll(displayTable.keySet());
-		for (final WeakReference<ImagePlus> ref : legacyModeImages) {
-			final ImagePlus imp = ref.get();
-			if (imp != null) result.add(imp);
+		if (legacyService.isLegacyMode()) {
+			return legacyDisplayTable.keySet();
 		}
-		return result;
+		return displayTable.keySet();
 	}
 
 	// -- Helper methods --
 
+	/**
+	 * Creates a mapping between a given {@link ImageDisplay} and
+	 * {@link ImagePlus}.
+	 */
 	private void addMapping(final ImageDisplay display, final ImagePlus imp) {
+		addMapping(display, imp, legacyService.isLegacyMode());
+	}
+
+	/**
+	 * Creates a mapping between a given {@link ImageDisplay} and
+	 * {@link ImagePlus}. If {@code createLegacyMappings} is true, the mappings
+	 * will be added to the leagcy mode maps.
+	 */
+	private void addMapping(final ImageDisplay display, final ImagePlus imp,
+		final boolean createLegacyMappings)
+	{
 		// System.out.println("CREATE MAPPING "+display+" to "+imp+
 		// " isComposite()="+imp.isComposite());
 
@@ -310,26 +358,34 @@ public class LegacyImageMap extends AbstractContextual {
 		// all current mappings and remove them before inserting new ones. This
 		// ensures that a ImageDisplay is only linked with one ImagePlus or
 		// CompositeImage.
-		imagePlusTable.remove(display);
-		for (final Entry<ImagePlus, ImageDisplay> entry : displayTable.entrySet())
-		{
-			if (entry.getValue() == display) {
-				displayTable.remove(entry.getKey());
-			}
+		if (createLegacyMappings) {
+			final ImageDisplay toRemove = legacyDisplayTable.remove(imp);
+			if (toRemove != null) legacyImagePlusTable.remove(toRemove);
+			legacyDisplayTable.put(imp, display);
+			legacyImagePlusTable.put(display, new WeakReference<ImagePlus>(imp));
 		}
-		imagePlusTable.put(display, imp);
-		displayTable.put(imp, display);
+		else {
+			final ImagePlus toRemove = imagePlusTable.remove(display);
+			if (toRemove != null) displayTable.remove(toRemove);
+			imagePlusTable.put(display, imp);
+			displayTable.put(imp, display);
+		}
 	}
 
+	/**
+	 * Removes the mappings created by {@link #addMapping(ImageDisplay, ImagePlus)}.
+	 */
 	private void removeMapping(final ImageDisplay display, final ImagePlus imp) {
 		// System.out.println("REMOVE MAPPING "+display+" to "+imp+
 		// " isComposite()="+imp.isComposite());
 
 		if (display != null) {
 			imagePlusTable.remove(display);
+			legacyImagePlusTable.remove(display);
 		}
 		if (imp != null) {
 			displayTable.remove(imp);
+			legacyDisplayTable.remove(imp);
 			LegacyUtils.deleteImagePlus(imp);
 		}
 	}
@@ -365,4 +421,5 @@ public class LegacyImageMap extends AbstractContextual {
 		}
 	}
 
+	//TODO clean legacyImagePlus table
 }
