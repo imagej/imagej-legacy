@@ -41,8 +41,7 @@ import org.scijava.ui.viewer.DisplayViewer;
 import org.scijava.ui.viewer.text.TextDisplayViewer;
 
 /**
- * ImageJ1 implementation of a {@link TextDisplayViewer}. Passes text outputs to
- * ImageJ1 as messages.
+ * ImageJ1 implementation of a {@link TextDisplayViewer}.
  * 
  * @author Mark Hiner
  */
