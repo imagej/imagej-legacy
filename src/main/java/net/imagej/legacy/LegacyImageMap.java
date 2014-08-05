@@ -42,6 +42,7 @@ import java.util.Map;
 import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
+import net.imagej.Data;
 import net.imagej.Dataset;
 import net.imagej.display.ImageDisplay;
 import net.imagej.display.ImageDisplayService;
@@ -83,6 +84,11 @@ import org.scijava.ui.viewer.DisplayWindow;
  * @author Barry DeZonia
  */
 public class LegacyImageMap extends AbstractContextual {
+
+	/**
+	 * Key for storing {@link ImagePlus} instances in a {@link Dataset}'s map.
+	 */
+	public static final String IMP_KEY = "ij1-image-plus";
 
 	static {
 		/*
@@ -134,6 +140,12 @@ public class LegacyImageMap extends AbstractContextual {
 		new WeakHashMap<ImageDisplay, WeakReference<ImagePlus>>();
 
 	/**
+	 * Effectively a {@code WeakHashSet} for tracking known {@link ImagePlus}es.
+	 */
+	private final Map<ImagePlus, Object> imagePluses =
+		new WeakHashMap<ImagePlus, Object>();
+
+	/**
 	 * The {@link ImageTranslator} to use when creating {@link ImagePlus} and
 	 * {@link ImageDisplay} objects corresponding to one another.
 	 */
@@ -146,7 +158,6 @@ public class LegacyImageMap extends AbstractContextual {
 
 	@Parameter
 	private ImageDisplayService imageDisplayService;
-
 
 	// -- Constructor --
 
@@ -222,15 +233,18 @@ public class LegacyImageMap extends AbstractContextual {
 	 */
 	public ImageDisplay registerLegacyImage(final ImagePlus imp) {
 		ImageDisplay display = lookupDisplay(imp);
-		if (display == null) {
+		// It is possible that this method can get hit multiple times from the
+		// display that is being created by the imageTranslator. Thus we want to
+		// avoid an infinite loop.
+		if (display == null && !imagePluses.containsKey(imp)) {
+			imagePluses.put(imp, null);
 			// mapping does not exist; mirror legacy image to display
 			display = imageTranslator.createDisplay(imp);
-			//FIXME ensure display is registered in displayService..
 			addMapping(display, imp);
-		}
 	
-		// record resultant ImagePlus as a legacy command output
-		LegacyOutputTracker.addOutput(imp);
+			// record resultant ImagePlus as a legacy command output
+			LegacyOutputTracker.addOutput(imp);
+		}
 	
 		return display;
 	}
@@ -294,14 +308,30 @@ public class LegacyImageMap extends AbstractContextual {
 
 	/** Removes the mapping associated with the given {@link ImageDisplay}. */
 	public void unregisterDisplay(final ImageDisplay display) {
-		final ImagePlus imp = lookupImagePlus(display);
-		removeMapping(display, imp);
+		unregisterDisplay(display, false);
 	}
 
 	/** Removes the mapping associated with the given {@link ImagePlus}. */
 	public void unregisterLegacyImage(final ImagePlus imp) {
+		unregisterLegacyImage(imp, true);
+	}
+
+	/**
+	 * As {@link #unregisterDisplay(ImageDisplay)}, with an optional toggle to
+	 * delete the associated {@link ImagePlus}.
+	 */
+	public void unregisterDisplay(final ImageDisplay display, final boolean deleteImp) {
+		final ImagePlus imp = lookupImagePlus(display);
+		removeMapping(display, imp, deleteImp);
+	}
+
+	/**
+	 * As {@link #unregisterLegacyImage(ImagePlus)}, with an optional toggle to
+	 * delete the given {@link ImagePlus}.
+	 */
+	public void unregisterLegacyImage(final ImagePlus imp, final boolean deleteImp) {
 		final ImageDisplay display = lookupDisplay(imp);
-		removeMapping(display, imp);
+		removeMapping(display, imp, deleteImp);
 	}
 
 	/**
@@ -370,12 +400,27 @@ public class LegacyImageMap extends AbstractContextual {
 			imagePlusTable.put(display, imp);
 			displayTable.put(imp, display);
 		}
+
+		clearImagePlusKey(display);
+	}
+
+	/**
+	 * Removes the {@link #IMP_KEY} entry from the {@link Dataset} attached to
+	 * the given {@link ImageDisplay} - if any.
+	 */
+	private void clearImagePlusKey(final ImageDisplay display) {
+		Data data = display.getActiveView().getData();
+		if (Dataset.class.isAssignableFrom(data.getClass())) {
+			((Dataset)data).getProperties().remove(IMP_KEY);
+		}
 	}
 
 	/**
 	 * Removes the mappings created by {@link #addMapping(ImageDisplay, ImagePlus)}.
 	 */
-	private void removeMapping(final ImageDisplay display, final ImagePlus imp) {
+	private void removeMapping(final ImageDisplay display, final ImagePlus imp,
+		final boolean deleteImp)
+	{
 		// System.out.println("REMOVE MAPPING "+display+" to "+imp+
 		// " isComposite()="+imp.isComposite());
 
@@ -386,7 +431,8 @@ public class LegacyImageMap extends AbstractContextual {
 		if (imp != null) {
 			displayTable.remove(imp);
 			legacyDisplayTable.remove(imp);
-			LegacyUtils.deleteImagePlus(imp);
+			imagePluses.remove(imp);
+			if (deleteImp) LegacyUtils.deleteImagePlus(imp);
 		}
 	}
 
@@ -420,6 +466,4 @@ public class LegacyImageMap extends AbstractContextual {
 			unregisterDisplay((ImageDisplay) event.getObject());
 		}
 	}
-
-	//TODO clean legacyImagePlus table
 }

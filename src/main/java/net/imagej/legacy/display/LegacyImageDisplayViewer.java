@@ -90,6 +90,24 @@ public class LegacyImageDisplayViewer extends AbstractImageDisplayViewer
 			return;
 		}
 
+
+		// Need to tell the IJ2 framework what the "active" display is. This allows
+		// other consumers to look up the corresponding ImagePlus using the
+		// active display.
+		displayService.setActiveDisplay(imageDisplay);
+
+		Data data = imageDisplay.getActiveView().getData();
+		if (Dataset.class.isAssignableFrom(data.getClass())) {
+			// check if there is already an ImagePlus that we will
+			// associate with this display - even if it hasn't been
+			// mapped yet (because the display is still being created!)
+			imagePlus =
+				(ImagePlus) ((Dataset) data).getProperties().get(
+					LegacyImageMap.IMP_KEY);
+		}
+
+		if (imagePlus != null) return;
+
 		// If there is already a mapping for this display, just get its ImagePlus.
 		imagePlus = limp.lookupImagePlus(imageDisplay);
 
@@ -101,11 +119,6 @@ public class LegacyImageDisplayViewer extends AbstractImageDisplayViewer
 
 		// Display the ImagePlus via the IJ1 framework.
 		imagePlus.show();
-
-		// Need to tell the IJ2 framework what the "active" display is. This allows
-		// other consumers to look up the corresponding ImagePlus using the
-		// active display.
-		displayService.setActiveDisplay(imageDisplay);
 	}
 
 	@Override

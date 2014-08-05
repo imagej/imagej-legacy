@@ -36,6 +36,7 @@ import net.imagej.Dataset;
 import net.imagej.DatasetService;
 import net.imagej.display.ImageDisplay;
 import net.imagej.display.ImageDisplayService;
+import net.imagej.legacy.LegacyImageMap;
 import net.imglib2.meta.AxisType;
 
 import org.scijava.AbstractContextual;
@@ -100,6 +101,7 @@ public class ColorDisplayCreator extends AbstractContextual implements
 		final AxisType[] preferredOrder)
 	{
 		final Dataset ds = makeColorDataset(imp, preferredOrder);
+		ds.getProperties().put(LegacyImageMap.IMP_KEY, imp);
 		pixelHarmonizer.updateDataset(ds, imp);
 		metadataHarmonizer.updateDataset(ds, imp);
 		compositeHarmonizer.updateDataset(ds, imp);
