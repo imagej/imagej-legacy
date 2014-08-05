@@ -166,6 +166,7 @@ public class DefaultLegacyOpener implements LegacyOpener {
 					// Manually register the dataset, without creating a display
 					final ImageTranslator it = new DefaultImageTranslator(legacyService);
 					imp = it.createLegacyImage(d);
+					legacyService.getImageMap().registerLegacyImage(imp);
 				}
 				// Set information about how this dataset was opened.
 				String loadingInfo = "";

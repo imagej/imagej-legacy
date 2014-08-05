@@ -41,6 +41,7 @@ import java.util.Map;
 import net.imagej.Dataset;
 import net.imagej.display.ImageDisplay;
 import net.imagej.display.ImageDisplayService;
+import net.imagej.legacy.LegacyService;
 import net.imglib2.meta.Axes;
 import net.imglib2.meta.ImgPlus;
 import net.imglib2.meta.SpaceUtils;
@@ -79,6 +80,9 @@ public class Harmonizer extends AbstractContextual {
 
 	@Parameter
 	private LogService log;
+
+	@Parameter
+	private LegacyService legacyService;
 
 	// -- constructor --
 
@@ -358,7 +362,7 @@ public class Harmonizer extends AbstractContextual {
 	private void rebuildImagePlusData(final ImageDisplay display,
 		final ImagePlus imp)
 	{
-		final ImagePlus newImp = imageTranslator.createLegacyImage(display);
+		final ImagePlus newImp = legacyService.getImageMap().registerDisplay(display);
 		imp.setStack(newImp.getStack());
 		final int c = newImp.getNChannels();
 		final int z = newImp.getNSlices();

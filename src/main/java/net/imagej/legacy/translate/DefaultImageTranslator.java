@@ -128,8 +128,6 @@ public class DefaultImageTranslator extends AbstractContextual implements
 			imp = grayImagePlusCreator.createLegacyImage(ds, display);
 		}
 
-		legacyService.getImageMap().registerLegacyImage(imp);
-
 		return imp;
 	}
 
