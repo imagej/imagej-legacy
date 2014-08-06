@@ -43,7 +43,6 @@ import net.imglib2.meta.Axes;
 import net.imglib2.meta.AxisType;
 import net.imglib2.type.numeric.RealType;
 
-import org.scijava.AbstractContextual;
 import org.scijava.Context;
 import org.scijava.display.DisplayService;
 import org.scijava.log.LogService;
@@ -55,8 +54,7 @@ import org.scijava.plugin.Parameter;
  * 
  * @author Barry DeZonia
  */
-public class GrayDisplayCreator extends AbstractContextual implements
-	DisplayCreator
+public class GrayDisplayCreator extends AbstractDisplayCreator
 {
 
 	// -- instance variables --
@@ -101,17 +99,30 @@ public class GrayDisplayCreator extends AbstractContextual implements
 		nameHarmonizer = new NameHarmonizer();
 	}
 
-	// -- public interface --
+	// -- AbstractDisplayCreator methods --
 
 	@Override
-	public ImageDisplay createDisplay(final ImagePlus imp) {
-		return createDisplay(imp, LegacyUtils.getPreferredAxisOrder());
+	protected Dataset makeDataset(ImagePlus imp, AxisType[] preferredOrder) {
+		Dataset ds;
+		if (imp.getType() == ImagePlus.COLOR_RGB) {
+			ds = makeGrayDatasetFromColorImp(imp, preferredOrder);
+		}
+		else if (preferredOrder[0] == Axes.X && preferredOrder[1] == Axes.Y &&
+			!imp.getCalibration().isSigned16Bit() &&
+			!(imp.getStack() instanceof VirtualStack))
+		{
+			ds = makeExactDataset(imp, preferredOrder);
+			planeHarmonizer.updateDataset(ds, imp);
+		}
+		else {
+			ds = makeGrayDatasetFromGrayImp(imp, preferredOrder);
+			pixelHarmonizer.updateDataset(ds, imp);
+		}
+		return ds;
 	}
 
 	@Override
-	public ImageDisplay createDisplay(final ImagePlus imp,
-		final AxisType[] preferredOrder)
-	{
+	protected ImageDisplay makeDisplay(ImagePlus imp, AxisType[] preferredOrder) {
 		if (imp.getType() == ImagePlus.COLOR_RGB) {
 			return colorCase(imp, preferredOrder);
 		}
@@ -123,7 +134,7 @@ public class GrayDisplayCreator extends AbstractContextual implements
 	private ImageDisplay colorCase(final ImagePlus imp,
 		final AxisType[] preferredOrder)
 	{
-		final Dataset ds = makeGrayDatasetFromColorImp(imp, preferredOrder);
+		final Dataset ds = getDataset(imp, preferredOrder);
 		setDatasetGrayDataFromColorImp(ds, imp);
 		metadataHarmonizer.updateDataset(ds, imp);
 		compositeHarmonizer.updateDataset(ds, imp);
@@ -145,19 +156,7 @@ public class GrayDisplayCreator extends AbstractContextual implements
 	private ImageDisplay grayCase(final ImagePlus imp,
 		final AxisType[] preferredOrder)
 	{
-		Dataset ds;
-		if (preferredOrder[0] == Axes.X &&
-				preferredOrder[1] == Axes.Y &&
-			!imp.getCalibration().isSigned16Bit() &&
-			!(imp.getStack() instanceof VirtualStack))
-		{
-			ds = makeExactDataset(imp, preferredOrder);
-			planeHarmonizer.updateDataset(ds, imp);
-		}
-		else {
-			ds = makeGrayDatasetFromGrayImp(imp, preferredOrder);
-			pixelHarmonizer.updateDataset(ds, imp);
-		}
+		Dataset ds = getDataset(imp, preferredOrder);
 		metadataHarmonizer.updateDataset(ds, imp);
 		compositeHarmonizer.updateDataset(ds, imp);
 
@@ -346,4 +345,5 @@ public class GrayDisplayCreator extends AbstractContextual implements
 	private boolean isFloating(final ImagePlus imp) {
 		return isGray32PixelType(imp);
 	}
+
 }

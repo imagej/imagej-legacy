@@ -36,10 +36,8 @@ import net.imagej.Dataset;
 import net.imagej.DatasetService;
 import net.imagej.display.ImageDisplay;
 import net.imagej.display.ImageDisplayService;
-import net.imagej.legacy.LegacyImageMap;
 import net.imglib2.meta.AxisType;
 
-import org.scijava.AbstractContextual;
 import org.scijava.Context;
 import org.scijava.display.DisplayService;
 import org.scijava.plugin.Parameter;
@@ -49,8 +47,7 @@ import org.scijava.plugin.Parameter;
  * 
  * @author Barry DeZonia
  */
-public class ColorDisplayCreator extends AbstractContextual implements
-	DisplayCreator
+public class ColorDisplayCreator extends AbstractDisplayCreator
 {
 
 	// -- instance variables --
@@ -89,19 +86,13 @@ public class ColorDisplayCreator extends AbstractContextual implements
 		nameHarmonizer = new NameHarmonizer();
 	}
 
-	// -- public interface --
+	// -- AbstractDisplayCreator methods --
 
 	@Override
-	public ImageDisplay createDisplay(final ImagePlus imp) {
-		return createDisplay(imp, LegacyUtils.getPreferredAxisOrder());
-	}
-
-	@Override
-	public ImageDisplay createDisplay(final ImagePlus imp,
+	protected ImageDisplay makeDisplay(final ImagePlus imp,
 		final AxisType[] preferredOrder)
 	{
-		final Dataset ds = makeColorDataset(imp, preferredOrder);
-		ds.getProperties().put(LegacyImageMap.IMP_KEY, imp);
+		final Dataset ds = getDataset(imp, preferredOrder);
 		pixelHarmonizer.updateDataset(ds, imp);
 		metadataHarmonizer.updateDataset(ds, imp);
 		compositeHarmonizer.updateDataset(ds, imp);
@@ -121,8 +112,6 @@ public class ColorDisplayCreator extends AbstractContextual implements
 		return display;
 	}
 
-	// -- private interface --
-
 	/**
 	 * Makes a color {@link Dataset} from an {@link ImagePlus}. Color Datasets
 	 * have isRgbMerged() true, channels == 3, and bitsperPixel == 8. Does not
@@ -130,7 +119,8 @@ public class ColorDisplayCreator extends AbstractContextual implements
 	 * methods. Does not set metadata of Dataset. Throws exceptions if input
 	 * ImagePlus is not single channel RGB.
 	 */
-	private Dataset makeColorDataset(final ImagePlus imp,
+	@Override
+	protected Dataset makeDataset(final ImagePlus imp,
 		final AxisType[] preferredOrder)
 	{
 		final int x = imp.getWidth();
