@@ -58,6 +58,7 @@ import java.awt.Window;
 import java.awt.image.ImageProducer;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.ArrayList;
@@ -293,7 +294,26 @@ public class IJ1Helper extends AbstractContextual {
 
 	/** Gets the version of ImageJ 1.x. */
 	public String getVersion() {
-		return ImageJ.VERSION;
+		// NB: We cannot hardcode a reference to ImageJ.VERSION. Java often inlines
+		// string constants at compile time. This means that if a different version
+		// of ImageJ 1.x is used at runtime, this method could return an incorrect
+		// value. Calling IJ.getVersion() would be more reliable, except that we
+		// override its behavior to return LegacyHooks#getAppVersion(). So instead,
+		// we resort to referencing the ImageJ#VERSION constant via reflection.
+		try {
+			final Field field = ImageJ.class.getField("VERSION");
+			if (field != null) {
+				final Object version = field.get(null);
+				if (version != null) return version.toString();
+			}
+		}
+		catch (NoSuchFieldException exc) {
+			log.error(exc);
+		}
+		catch (IllegalAccessException exc) {
+			log.error(exc);
+		}
+		return "Unknown";
 	}
 
 	public boolean isMacintosh() {
