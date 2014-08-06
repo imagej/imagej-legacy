@@ -293,9 +293,9 @@ public class DefaultLegacyHooks extends LegacyHooks {
 	}
 
 	/**
-	 * Returns the application name for use with ImageJ 1.x.
+	 * Returns the application version to display in the ImageJ 1.x status bar.
 	 *
-	 * @return the application name
+	 * @return the application version
 	 */
 	@Override
 	public String getAppVersion() {
