@@ -294,7 +294,7 @@ public class DefaultLegacyHooks extends LegacyHooks {
 	 */
 	@Override
 	public String getAppName() {
-		return appConfig == null ? "ImageJ (legacy)" : appConfig.getAppName();
+		return appConfig == null ? "ImageJ" : appConfig.getAppName();
 	}
 
 	/**
