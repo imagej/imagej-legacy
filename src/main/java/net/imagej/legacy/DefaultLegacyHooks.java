@@ -230,7 +230,7 @@ public class DefaultLegacyHooks extends LegacyHooks {
 		final ImagePlus image = (ImagePlus) o;
 		if (image == null) return;
 		LegacyOutputTracker.removeOutput(image);
-		legacyService.log().debug("ImagePlus.hide(): " + image);
+		legacyService.log().debug("unregister legacy image: " + image);
 		try {
 			final ImageDisplay disp =
 				legacyService.getImageMap().lookupDisplay(image);
