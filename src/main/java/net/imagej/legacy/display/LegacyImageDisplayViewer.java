@@ -77,9 +77,8 @@ public class LegacyImageDisplayViewer extends AbstractImageDisplayViewer
 	public void view(final DisplayWindow w, final Display<?> d) {
 		final LegacyImageMap limp = legacyService.getImageMap();
 		ImageDisplay imageDisplay = null;
-		ImagePlus imagePlus = null;
 
-		// We can only handle ImageDisplays right now
+		// we can only handle ImageDisplays right now
 		if (d instanceof ImageDisplay) {
 			imageDisplay = (ImageDisplay) d;
 		}
@@ -90,22 +89,30 @@ public class LegacyImageDisplayViewer extends AbstractImageDisplayViewer
 			return;
 		}
 
-		// If there is already a mapping for this display, just get its ImagePlus.
-		imagePlus = limp.lookupImagePlus(imageDisplay);
 
-		// Otherwise, we register the display, which triggers wrapping in an
-		// ImagePlus
-		if (imagePlus == null) {
-			imagePlus = limp.registerDisplay(imageDisplay);
-		}
-
-		// Display the ImagePlus via the IJ1 framework.
-		imagePlus.show();
-
-		// Need to tell the IJ2 framework what the "active" display is. This allows
-		// other consumers to look up the corresponding ImagePlus using the
+		// NB: Need to tell the IJ2 framework what the "active" display is. This
+		// allows other consumers to look up the corresponding ImagePlus using the
 		// active display.
 		displayService.setActiveDisplay(imageDisplay);
+
+		Data data = imageDisplay.getActiveView().getData();
+		if (Dataset.class.isAssignableFrom(data.getClass())) {
+			// NB: Check if there is already an ImagePlus that we will
+			// associate with this display - even if it hasn't been
+			// mapped yet (because the display is still being created!).
+			final Dataset dataset = (Dataset) data;
+			if (dataset.getProperties().containsKey(LegacyImageMap.IMP_KEY)) return;
+		}
+
+		// if there is already a mapping for this display, just get its ImagePlus
+		final ImagePlus existing = limp.lookupImagePlus(imageDisplay);
+
+		// if none: register the display, which triggers wrapping in an ImagePlus
+		final ImagePlus imagePlus =
+			existing != null ? existing : limp.registerDisplay(imageDisplay);
+
+		// display the ImagePlus via the IJ1 framework
+		imagePlus.show();
 	}
 
 	@Override

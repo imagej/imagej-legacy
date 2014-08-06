@@ -52,8 +52,21 @@ import org.scijava.Context;
 public class SwitchToModernMode implements PlugIn {
 	public final static String MENU_LABEL = "Switch to Modern Mode";
 
+	private static boolean firstTime = true;
+
 	@Override
 	public void run(String arg) {
+		if (firstTime) {
+			final boolean proceed =
+					IJ.showMessageWithCancel("Warning", ""
+							+ "This command switches to the ImageJ2 user interface,\n"
+							+ "which is still experimental. There are known issues\n"
+							+ "when switching back and forth between modes.\n\n"
+							+ "Are you sure you wish to proceed?");
+			if (!proceed) return;
+			firstTime = false;
+		}
+
 		try {
 			final ClassLoader classLoader = IJ.getClassLoader();
 			Thread.currentThread().setContextClassLoader(classLoader);

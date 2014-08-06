@@ -216,10 +216,7 @@ public class DefaultLegacyHooks extends LegacyHooks {
 		if (image == null) return;
 		if (!image.isProcessor()) return;
 		if (image.getWindow() == null) return;
-		if (!isLegacyMode()) {
-			if (!Utils.isLegacyThread(Thread.currentThread())) return;
-			legacyService.log().debug("register legacy image: " + image);
-		}
+		legacyService.log().debug("register legacy image: " + image);
 		try {
 			legacyService.getImageMap().registerLegacyImage(image);
 		}
@@ -231,16 +228,14 @@ public class DefaultLegacyHooks extends LegacyHooks {
 	@Override
 	public void unregisterImage(final Object o) {
 		final ImagePlus image = (ImagePlus) o;
-		if (isLegacyMode()) return;
 		if (image == null) return;
-		if (!Utils.isLegacyThread(Thread.currentThread())) return;
-		legacyService.log().debug("ImagePlus.hide(): " + image);
 		LegacyOutputTracker.removeOutput(image);
+		legacyService.log().debug("unregister legacy image: " + image);
 		try {
 			final ImageDisplay disp =
 				legacyService.getImageMap().lookupDisplay(image);
 			if (disp == null) {
-				legacyService.getImageMap().unregisterLegacyImage(image);
+				legacyService.getImageMap().unregisterLegacyImage(image, true);
 			}
 			else {
 				disp.close();
