@@ -291,6 +291,7 @@ public class IJ1Helper extends AbstractContextual {
 		return IJ.getInstance() != null;
 	}
 
+	/** Gets the version of ImageJ 1.x. */
 	public String getVersion() {
 		return ImageJ.VERSION;
 	}
