@@ -82,6 +82,7 @@ import org.scijava.MenuPath;
 import org.scijava.event.EventHandler;
 import org.scijava.log.LogService;
 import org.scijava.module.ModuleInfo;
+import org.scijava.platform.AppEventService;
 import org.scijava.platform.event.AppAboutEvent;
 import org.scijava.platform.event.AppOpenFilesEvent;
 import org.scijava.platform.event.AppPreferencesEvent;
@@ -435,7 +436,7 @@ public class IJ1Helper extends AbstractContextual {
 	}
 
 	/**
-	 * Replacement for ImageJ 1.x' MacAdapter.
+	 * Partial replacement for ImageJ 1.x's MacAdapter.
 	 * <p>
 	 * ImageJ 1.x has a MacAdapter plugin that intercepts MacOSX-specific events
 	 * and handles them. The way it does it is deprecated now, however, and
@@ -446,6 +447,13 @@ public class IJ1Helper extends AbstractContextual {
 	 * This class implements the same functionality as the MacAdapter, but in a
 	 * way that is compatible with ImageJ 2's platform service.
 	 * </p>
+	 * <p>
+	 * Note that the {@link AppAboutEvent}, {@link AppPreferencesEvent} and
+	 * {@link AppQuitEvent} are handled separately, by the
+	 * {@link LegacyAppEventService}. See also {@link IJ1Helper#appAbout},
+	 * {@link IJ1Helper#appPrefs} and {@link IJ1Helper#appQuit}.
+	 * </p>
+	 * 
 	 * @author Johannes Schindelin
 	 */
 	private static class LegacyEventDelegator extends AbstractContextual {
@@ -457,38 +465,12 @@ public class IJ1Helper extends AbstractContextual {
 
 		/** @param event */
 		@EventHandler
-		private void onEvent(final AppAboutEvent event)
-		{
-			if (isLegacyMode()) {
-				IJ.run("About ImageJ...");
-			}
-		}
-
-		/** @param event */
-		@EventHandler
 		private void onEvent(final AppOpenFilesEvent event) {
 			if (isLegacyMode()) {
 				final List<File> files = new ArrayList<File>(event.getFiles());
 				for (final File file : files) {
 					new Opener().openAndAddToRecent(file.getAbsolutePath());
 				}
-			}
-		}
-
-		/** @param event */
-		@EventHandler
-		private void onEvent(final AppQuitEvent event) {
-			if (isLegacyMode()) {
-				new Executer("Quit", null); // works with the CommandListener
-			}
-		}
-
-		/** @param event */
-		@EventHandler
-		private void onEvent(final AppPreferencesEvent event)
-		{
-			if (isLegacyMode()) {
-				IJ.error("The ImageJ preferences are in the Edit>Options menu.");
 			}
 		}
 
@@ -869,6 +851,58 @@ public class IJ1Helper extends AbstractContextual {
 	 */
 	public void setOptions(final String options) {
 		Macro.setOptions(options);
+	}
+
+	/**
+	 * Handles shutdown of ImageJ in an intelligent way.
+	 * <p>
+	 * When the ImageJ 1.x UI is active, it behaves the same as ImageJ 1.x usually
+	 * does: invokes the "Quit" command using an {@link Executer}. Otherwise, it
+	 * falls back to calling the given {@link AppEventService#quit()} method.
+	 * </p>
+	 * 
+	 * @param fallback
+	 */
+	public void appQuit(final AppEventService fallback) {
+		if (legacyService.isLegacyMode()) {
+			new Executer("Quit", null); // works with the CommandListener
+		}
+		else if (fallback != null) fallback.quit();
+	}
+
+	/**
+	 * Displays the About ImageJ dialog in an intelligent way.
+	 * <p>
+	 * If a non-null {@link AppEventService} is given, we use it, since it will
+	 * probably do something nicer than ImageJ 1.x's About image (e.g.: ImageJ2
+	 * has its own About image with more information and rotating images). Or if
+	 * there is no {@link AppEventService} given, then it falls back to the usual
+	 * ImageJ 1.x About dialog as long as the ImageJ 1.x UI is active.
+	 * </p>
+	 */
+	public void appAbout(final AppEventService preferred) {
+		// NB: Use the preferred (hopefully ImageJ2) AppEventService by default.
+		// If there is none such, we fall back to ImageJ 1.x's behavior.
+		if (preferred != null) preferred.about();
+		else if (legacyService.isLegacyMode()) {
+			IJ.run("About ImageJ...");
+		}
+	}
+
+	/**
+	 * Handles display of the ImageJ preferences in an intelligent way.
+	 * <p>
+	 * When the ImageJ 1.x UI is active, it behaves the same as ImageJ 1.x usually
+	 * does: displays an error dialog instructing the user to look in the Edit
+	 * &gt; Options menu. Otherwise, it falls back to calling the given
+	 * {@link AppEventService#prefs()} method.
+	 * </p>
+	 */
+	public void appPrefs(final AppEventService fallback) {
+		if (legacyService.isLegacyMode()) {
+			IJ.error("The ImageJ preferences are in the Edit>Options menu.");
+		}
+		else if (fallback != null) fallback.prefs();
 	}
 
 	// -- Helper methods --
