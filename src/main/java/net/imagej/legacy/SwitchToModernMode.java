@@ -32,6 +32,7 @@
 package net.imagej.legacy;
 
 import ij.IJ;
+import ij.ImageJ;
 import ij.Menus;
 import ij.plugin.PlugIn;
 
@@ -55,8 +56,9 @@ public class SwitchToModernMode implements PlugIn {
 	private static boolean firstTime = true;
 
 	@Override
-	public void run(String arg) {
-		if (firstTime) {
+	public void run(final String arg) {
+		final ImageJ ij = IJ.getInstance();
+		if (firstTime && ij != null && ij.isVisible()) {
 			final boolean proceed =
 					IJ.showMessageWithCancel("Warning", ""
 							+ "This command switches to the ImageJ2 user interface,\n"
