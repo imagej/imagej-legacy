@@ -249,7 +249,7 @@ public class IJ1Helper extends AbstractContextual {
 			cleanup.invoke(null);
 		} catch (Throwable t) {
 			t.printStackTrace();
-			legacyService.log().error(t);
+			log.error(t);
 		}
 	}
 
@@ -589,21 +589,21 @@ public class IJ1Helper extends AbstractContextual {
 		Collections.sort(items);
 		for (final Item item : items) {
 			if (ij1Commands.containsKey(item.name)) {
-				legacyService.log().info("Overriding " + item.name
+				log.info("Overriding " + item.name
 					+ "; identifier: " + item.identifier
 					+ "; jar: " + ClassUtils.getLocation(item.info.getDelegateClassName()));
 				if (wrapper != null) try {
 					wrapper.create(item.path, true);
 				}
 				catch (final Throwable t) {
-					legacyService.log().error(t);
+					log.error(t);
 				}
 			}
 			else if (wrapper != null) try {
 				wrapper.create(item.path, false);
 			}
 			catch (final Throwable t) {
-				legacyService.log().error(t);
+				log.error(t);
 			}
 			ij1Commands.put(item.name, item.identifier);
 		}
