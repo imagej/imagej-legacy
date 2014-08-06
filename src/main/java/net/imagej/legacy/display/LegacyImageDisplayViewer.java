@@ -77,9 +77,8 @@ public class LegacyImageDisplayViewer extends AbstractImageDisplayViewer
 	public void view(final DisplayWindow w, final Display<?> d) {
 		final LegacyImageMap limp = legacyService.getImageMap();
 		ImageDisplay imageDisplay = null;
-		ImagePlus imagePlus = null;
 
-		// We can only handle ImageDisplays right now
+		// we can only handle ImageDisplays right now
 		if (d instanceof ImageDisplay) {
 			imageDisplay = (ImageDisplay) d;
 		}
@@ -91,33 +90,28 @@ public class LegacyImageDisplayViewer extends AbstractImageDisplayViewer
 		}
 
 
-		// Need to tell the IJ2 framework what the "active" display is. This allows
-		// other consumers to look up the corresponding ImagePlus using the
+		// NB: Need to tell the IJ2 framework what the "active" display is. This
+		// allows other consumers to look up the corresponding ImagePlus using the
 		// active display.
 		displayService.setActiveDisplay(imageDisplay);
 
 		Data data = imageDisplay.getActiveView().getData();
 		if (Dataset.class.isAssignableFrom(data.getClass())) {
-			// check if there is already an ImagePlus that we will
+			// NB: Check if there is already an ImagePlus that we will
 			// associate with this display - even if it hasn't been
-			// mapped yet (because the display is still being created!)
-			imagePlus =
-				(ImagePlus) ((Dataset) data).getProperties().get(
-					LegacyImageMap.IMP_KEY);
+			// mapped yet (because the display is still being created!).
+			final Dataset dataset = (Dataset) data;
+			if (dataset.getProperties().containsKey(LegacyImageMap.IMP_KEY)) return;
 		}
 
-		if (imagePlus != null) return;
+		// if there is already a mapping for this display, just get its ImagePlus
+		final ImagePlus existing = limp.lookupImagePlus(imageDisplay);
 
-		// If there is already a mapping for this display, just get its ImagePlus.
-		imagePlus = limp.lookupImagePlus(imageDisplay);
+		// if none: register the display, which triggers wrapping in an ImagePlus
+		final ImagePlus imagePlus =
+			existing != null ? existing : limp.registerDisplay(imageDisplay);
 
-		// Otherwise, we register the display, which triggers wrapping in an
-		// ImagePlus
-		if (imagePlus == null) {
-			imagePlus = limp.registerDisplay(imageDisplay);
-		}
-
-		// Display the ImagePlus via the IJ1 framework.
+		// display the ImagePlus via the IJ1 framework
 		imagePlus.show();
 	}
 
