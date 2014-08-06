@@ -83,6 +83,8 @@ import org.scijava.ui.ApplicationFrame;
 import org.scijava.ui.UIService;
 import org.scijava.ui.UserInterface;
 import org.scijava.ui.viewer.DisplayWindow;
+import org.scijava.util.Manifest;
+import org.scijava.util.POM;
 import org.scijava.welcome.event.WelcomeEvent;
 
 /**
@@ -361,6 +363,37 @@ public final class DefaultLegacyService extends AbstractService implements
 	@Override
 	public String getLegacyVersion() {
 		return ij1Helper.getVersion();
+	}
+
+	/**
+	 * Gets the combined version of ImageJ2/ImageJ1, with a slash separator.
+	 * <p>
+	 * This is the string that gets displayed in the ImageJ status bar.
+	 * </p>
+	 */
+	@Override
+	public String getCombinedVersion() {
+		String version = "Unknown";
+		if (appService != null) {
+			final App app = appService.getApp();
+			if (app != null) {
+				final POM pom = app.getPOM();
+				if (pom != null) version = pom.getVersion();
+				else {
+					// no Maven POM; try the manifest instead
+					final Manifest manifest = app.getManifest();
+					if (manifest != null) {
+						final String implVersion = manifest.getImplementationVersion();
+						if (implVersion != null) version = implVersion;
+						else {
+							final String specVersion = manifest.getImplementationVersion();
+							if (specVersion != null) version = specVersion;
+						}
+					}
+				}
+			}
+		}
+		return version + "/" + getLegacyVersion();
 	}
 
 	// -- Service methods --

@@ -92,6 +92,14 @@ public interface LegacyService extends ImageJService {
 	/** Gets the version of ImageJ 1.x being used. */
 	String getLegacyVersion();
 
+	/**
+	 * Gets the combined version of ImageJ2/ImageJ1, with a slash separator.
+	 * <p>
+	 * This is the string that gets displayed in the ImageJ status bar.
+	 * </p>
+	 */
+	String getCombinedVersion();
+
 	void handleException(Throwable e);
 
 }
