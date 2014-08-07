@@ -83,6 +83,7 @@ import org.scijava.ui.ApplicationFrame;
 import org.scijava.ui.UIService;
 import org.scijava.ui.UserInterface;
 import org.scijava.ui.viewer.DisplayWindow;
+import org.scijava.util.AppUtils;
 import org.scijava.util.Manifest;
 import org.scijava.util.POM;
 import org.scijava.welcome.event.WelcomeEvent;
@@ -429,7 +430,13 @@ public final class DefaultLegacyService extends AbstractService implements
 
 		SwitchToModernMode.registerMenuItem();
 
-		final File topLevel = appService.getApp().getBaseDirectory();
+		// NB: We cannot call appService.getApp().getBaseDirectory(), because
+		// that prevents the net.imagej.app.ToplevelImageJApp from getting its
+		// LegacyService parameter injected properly.
+		// So we get the app directory in a much more unsafe way...
+		final File topLevel =
+			AppUtils.getBaseDirectory("imagej.dir", getClass(), null);
+
 		final File plugins = new File(topLevel, "plugins");
 		if (plugins.exists()) {
 			final File scripts = new File(plugins, "Scripts");

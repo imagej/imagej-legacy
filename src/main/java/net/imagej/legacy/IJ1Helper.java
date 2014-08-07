@@ -516,7 +516,6 @@ public class IJ1Helper extends AbstractContextual {
 		} else {
 			eventDelegator = new LegacyEventDelegator();
 			eventDelegator.setContext(context);
-			IJ.showStatus("");
 		}
 	}
 
