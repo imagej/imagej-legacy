@@ -60,11 +60,6 @@ public class IJ1MacroLanguage extends AbstractScriptLanguage {
 	}
 
 	@Override
-	public String getLanguageName() {
-		return "IJ1 Macro";
-	}
-
-	@Override
 	public ScriptEngine getScriptEngine() {
 		return new IJ1MacroEngine(legacyService().getIJ1Helper());
 	}
