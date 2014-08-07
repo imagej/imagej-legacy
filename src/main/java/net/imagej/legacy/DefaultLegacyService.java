@@ -288,7 +288,7 @@ public final class DefaultLegacyService extends AbstractService implements
 
 	@Override
 	public boolean isLegacyMode() {
-		return ij1Helper != null && ij1Helper.isVisible();
+		return ij1Helper != null && ij1Helper.getIJ() != null;
 	}
 
 	@Override
