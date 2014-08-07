@@ -81,9 +81,6 @@ import org.scijava.util.ListUtils;
  */
 public class DefaultLegacyHooks extends LegacyHooks {
 
-	/** Resolution to use when converting double progress to int ratio. */
-	private static final int PROGRESS_GRANULARITY = 1000;
-
 	private final DefaultLegacyService legacyService;
 	private final IJ1Helper helper;
 
@@ -175,39 +172,6 @@ public class DefaultLegacyHooks extends LegacyHooks {
 		}
 
 		return null;
-	}
-
-	@Override
-	public void showProgress(final double progress) {
-		final int currentIndex = (int) (PROGRESS_GRANULARITY * progress);
-		final int finalIndex = PROGRESS_GRANULARITY;
-		showProgress(currentIndex, finalIndex);
-	}
-
-	@Override
-	public void showProgress(final int currentIndex, final int finalIndex) {
-		// if we are already processing events on this thread, then we know that
-		// the LegacyStatusBar has already called its setProgress mode. So we do
-		// not want to re-trigger a showProgress method, otherwise we can end up
-		// with an infinite loop.
-		if (!isLegacyMode() && !legacyService.isProcessingEvents()) {
-			legacyService.status().showProgress(currentIndex, finalIndex);
-		}
-	}
-
-	@Override
-	public void showStatus(final String status) {
-		if (!isInitialized() || isLegacyMode()) {
-			return;
-		}
-		final boolean processing = legacyService.setProcessingEvents(true);
-		if (processing) return; // already sent
-		try {
-			legacyService.status().showStatus(status);
-		}
-		finally {
-			legacyService.setProcessingEvents(processing);
-		}
 	}
 
 	@Override
@@ -594,10 +558,6 @@ public class DefaultLegacyHooks extends LegacyHooks {
 			if (trace[i].toString().contains(needle)) return true;
 		}
 		return false;
-	}
-
-	private boolean isInitialized() {
-		return legacyService.isInitialized();
 	}
 
 	// TODO: move to scijava-common?
