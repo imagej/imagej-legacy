@@ -32,6 +32,7 @@
 package net.imagej.legacy;
 
 import ij.ImagePlus;
+import ij.WindowManager;
 import ij.gui.ImageWindow;
 import ij.gui.Roi;
 
@@ -433,6 +434,10 @@ public class LegacyImageMap extends AbstractContextual {
 			legacyDisplayTable.remove(imp);
 			imagePluses.remove(imp);
 			if (deleteImp) LegacyUtils.deleteImagePlus(imp);
+			else {
+				final ImagePlus currImagePlus = WindowManager.getCurrentImage();
+				if (imp == currImagePlus) WindowManager.setTempCurrentImage(null);
+			}
 		}
 	}
 
