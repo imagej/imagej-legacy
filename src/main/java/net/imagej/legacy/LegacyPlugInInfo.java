@@ -61,7 +61,7 @@ public class LegacyPlugInInfo extends AbstractUIDetails implements
 		catch (final ClassNotFoundException exc) {
 			throw new IllegalArgumentException(exc);
 		}
-		id = "legacy:" + className + (isWhitelisted(className) ? "?" + arg : "");
+		id = "legacy:" + className + (appendArg(className, arg) ? "?" + arg : "");
 	}
 
 	// -- Identifiable methods --
@@ -90,14 +90,22 @@ public class LegacyPlugInInfo extends AbstractUIDetails implements
 	// -- Helper methods --
 
 	/**
-	 * Legacy commands whose {@code arg} parameter are known not to contain any
-	 * user-specific details such as file paths. The classic example is {code
-	 * ij.plugin.Commands}, which passes the subcommand to execute as its
-	 * {@code arg} parameter. We want to record such subcommands when feasible,
-	 * but not at the expense of user privacy.
+	 * Whether to append the {@code arg} parameter to the identifier.
+	 * <p>
+	 * Some legacy commands use the {@code arg} parameter as a subcommand to
+	 * execute, and are known not to contain any user-specific details such as
+	 * file paths. The most classic example is {code ij.plugin.Commands}. We want
+	 * to record such subcommands when feasible, but not at the expense of user
+	 * privacy.
+	 * </p>
 	 */
-	private boolean isWhitelisted(final String className) {
+	private boolean appendArg(final String className, final String arg) {
+		if (arg == null || arg.isEmpty()) return false; // no need
+		if (className.equals("ij.plugin.Animator")) return true;
 		if (className.equals("ij.plugin.Commands")) return true;
+		if (className.equals("ij.plugin.Converter")) return true;
+		if (className.equals("ij.plugin.StackEditor")) return true;
+		if (className.startsWith("ij.plugin.filter.")) return true;
 		return false;
 	}
 
