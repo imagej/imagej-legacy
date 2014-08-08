@@ -61,7 +61,7 @@ public class LegacyPlugInInfo extends AbstractUIDetails implements
 		catch (final ClassNotFoundException exc) {
 			throw new IllegalArgumentException(exc);
 		}
-		id = "legacy:" + className + "?" + arg;
+		id = "legacy:" + className + (isWhitelisted(className) ? "?" + arg : "");
 	}
 
 	// -- Identifiable methods --
@@ -85,6 +85,20 @@ public class LegacyPlugInInfo extends AbstractUIDetails implements
 	public String getVersion() {
 		final Manifest m = Manifest.getManifest(clazz);
 		return m == null ? null : m.getImplementationVersion();
+	}
+
+	// -- Helper methods --
+
+	/**
+	 * Legacy commands whose {@code arg} parameter are known not to contain any
+	 * user-specific details such as file paths. The classic example is {code
+	 * ij.plugin.Commands}, which passes the subcommand to execute as its
+	 * {@code arg} parameter. We want to record such subcommands when feasible,
+	 * but not at the expense of user privacy.
+	 */
+	private boolean isWhitelisted(final String className) {
+		if (className.equals("ij.plugin.Commands")) return true;
+		return false;
 	}
 
 }
