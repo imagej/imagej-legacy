@@ -165,10 +165,17 @@ public class DefaultLegacyHooks extends LegacyHooks {
 
 		// NB: Arguments indicate an IJ1 plugin. Report it to the usage service.
 		final UsageService usageService = usageService();
-		if (usageService != null) {
+		if (usageService != null) try {
 			final LegacyPlugInInfo info =
 				new LegacyPlugInInfo(className, arg, helper.getClassLoader());
 			usageService.increment(info);
+		}
+		catch (final NoClassDefFoundError e) {
+			// There is a logic in ImageJ 1.x allowing to run bare .class plugins
+			// even if they are in subdirectories of the plugins/ directory. This
+			// requires some hackery to work, thanks to the ImageJ 1.x patcher.
+			// But that hackery has not run here, so the class cannot be loaded.
+			// So, ignore such plugin classes when gathering usage statistics.
 		}
 
 		return null;
