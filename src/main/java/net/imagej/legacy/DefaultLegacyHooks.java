@@ -70,7 +70,6 @@ import org.scijava.plugin.PluginService;
 import org.scijava.plugin.SciJavaPlugin;
 import org.scijava.thread.ThreadService;
 import org.scijava.ui.CloseConfirmable;
-import org.scijava.usage.UsageService;
 import org.scijava.util.ListUtils;
 
 /**
@@ -162,21 +161,6 @@ public class DefaultLegacyHooks extends LegacyHooks {
 		final Object legacyCompatibleCommand =
 			legacyService.runLegacyCompatibleCommand(className);
 		if (legacyCompatibleCommand != null) return legacyCompatibleCommand;
-
-		// NB: Arguments indicate an IJ1 plugin. Report it to the usage service.
-		final UsageService usageService = usageService();
-		if (usageService != null) try {
-			final LegacyPlugInInfo info =
-				new LegacyPlugInInfo(className, arg, helper.getClassLoader());
-			usageService.increment(info);
-		}
-		catch (final NoClassDefFoundError e) {
-			// There is a logic in ImageJ 1.x allowing to run bare .class plugins
-			// even if they are in subdirectories of the plugins/ directory. This
-			// requires some hackery to work, thanks to the ImageJ 1.x patcher.
-			// But that hackery has not run here, so the class cannot be loaded.
-			// So, ignore such plugin classes when gathering usage statistics.
-		}
 
 		return null;
 	}
@@ -601,10 +585,6 @@ public class DefaultLegacyHooks extends LegacyHooks {
 
 	private PluginService pluginService() {
 		return legacyService.getContext().getService(PluginService.class);
-	}
-
-	private UsageService usageService() {
-		return legacyService.getContext().getService(UsageService.class);
 	}
 
 }
