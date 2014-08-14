@@ -33,10 +33,11 @@ package net.imagej.legacy;
 
 import org.scijava.app.AbstractApp;
 import org.scijava.app.App;
+import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 
 /**
- * Application metadata about ImageJ 1.x.
+ * Application metadata and operations for ImageJ 1.x.
  * 
  * @author Curtis Rueden
  * @see org.scijava.app.AppService
@@ -46,6 +47,9 @@ public class LegacyImageJApp extends AbstractApp {
 
 	public static final String NAME = "ImageJ1";
 
+	@Parameter
+	private DefaultLegacyService legacyService;
+
 	@Override
 	public String getGroupId() {
 		return "net.imagej";
@@ -54,6 +58,28 @@ public class LegacyImageJApp extends AbstractApp {
 	@Override
 	public String getArtifactId() {
 		return "ij";
+	}
+
+	@Override
+	public String getVersion() {
+		return legacyService.getLegacyVersion();
+	}
+
+	// -- AppEventService methods --
+
+	@Override
+	public void about() {
+		legacyService.getIJ1Helper().appAbout();
+	}
+
+	@Override
+	public void prefs() {
+		legacyService.getIJ1Helper().appPrefs();
+	}
+
+	@Override
+	public void quit() {
+		legacyService.getIJ1Helper().appQuit();
 	}
 
 }

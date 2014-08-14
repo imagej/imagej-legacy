@@ -83,7 +83,6 @@ import org.scijava.MenuPath;
 import org.scijava.event.EventHandler;
 import org.scijava.log.LogService;
 import org.scijava.module.ModuleInfo;
-import org.scijava.platform.AppEventService;
 import org.scijava.platform.event.AppAboutEvent;
 import org.scijava.platform.event.AppOpenFilesEvent;
 import org.scijava.platform.event.AppPreferencesEvent;
@@ -873,56 +872,25 @@ public class IJ1Helper extends AbstractContextual {
 		Macro.setOptions(options);
 	}
 
-	/**
-	 * Handles shutdown of ImageJ in an intelligent way.
-	 * <p>
-	 * When the ImageJ 1.x UI is active, it behaves the same as ImageJ 1.x usually
-	 * does: invokes the "Quit" command using an {@link Executer}. Otherwise, it
-	 * falls back to calling the given {@link AppEventService#quit()} method.
-	 * </p>
-	 * 
-	 * @param fallback
-	 */
-	public void appQuit(final AppEventService fallback) {
+	/** Handles shutdown of ImageJ 1.x. */
+	public void appQuit() {
 		if (legacyService.isLegacyMode()) {
 			new Executer("Quit", null); // works with the CommandListener
 		}
-		else if (fallback != null) fallback.quit();
 	}
 
-	/**
-	 * Displays the About ImageJ dialog in an intelligent way.
-	 * <p>
-	 * If a non-null {@link AppEventService} is given, we use it, since it will
-	 * probably do something nicer than ImageJ 1.x's About image (e.g.: ImageJ2
-	 * has its own About image with more information and rotating images). Or if
-	 * there is no {@link AppEventService} given, then it falls back to the usual
-	 * ImageJ 1.x About dialog as long as the ImageJ 1.x UI is active.
-	 * </p>
-	 */
-	public void appAbout(final AppEventService preferred) {
-		// NB: Use the preferred (hopefully ImageJ2) AppEventService by default.
-		// If there is none such, we fall back to ImageJ 1.x's behavior.
-		if (preferred != null) preferred.about();
-		else if (legacyService.isLegacyMode()) {
+	/** Displays the About ImageJ 1.x dialog. */
+	public void appAbout() {
+		if (legacyService.isLegacyMode()) {
 			IJ.run("About ImageJ...");
 		}
 	}
 
-	/**
-	 * Handles display of the ImageJ preferences in an intelligent way.
-	 * <p>
-	 * When the ImageJ 1.x UI is active, it behaves the same as ImageJ 1.x usually
-	 * does: displays an error dialog instructing the user to look in the Edit
-	 * &gt; Options menu. Otherwise, it falls back to calling the given
-	 * {@link AppEventService#prefs()} method.
-	 * </p>
-	 */
-	public void appPrefs(final AppEventService fallback) {
+	/** Handles display of the ImageJ 1.x preferences. */
+	public void appPrefs() {
 		if (legacyService.isLegacyMode()) {
 			IJ.error("The ImageJ preferences are in the Edit>Options menu.");
 		}
-		else if (fallback != null) fallback.prefs();
 	}
 
 	// -- Helper methods --
