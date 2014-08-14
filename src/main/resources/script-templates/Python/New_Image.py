@@ -1,4 +1,5 @@
 # Create a new blank image and store in the variable 'image'
+from ij.gui import NewImage
 title = 'Image title'
 width = 512
 height = 512

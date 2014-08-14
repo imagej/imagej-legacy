@@ -1,7 +1,6 @@
 # Loop over all slices of a stack.
-# The variable 'image' must refer to an image containing a stack.
-# You can get the current dispayed image by
-# image = WindowManager.getCurrentImage()
+from ij import IJ
+image = IJ.getImage()
 stack = image.getStack() # get the stack within the ImagePlus
 n_slices = stack.getSize() # get the number of slices
 for index in range(1, n_slices+1):

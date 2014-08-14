@@ -1,10 +1,12 @@
 # Set current image properties. WARNING!! There is no check that what you enter is correct
+from ij import IJ
+from ij.measure import Calibration
 # Set dimensions
 n_channels  = 1
 n_slices  = 1    # Z slices
 n_frames  = 1    # time frames
 # Get current image
-image = WindowManager.getCurrentImage()
+image = IJ.getImage()
 # Check that we have correct dimensions
 stack_size = image.getImageStackSize() # raw number of images in the stack
 if n_channels * n_slices * n_frames == stack_size:

@@ -1,6 +1,8 @@
 # Inverse ROI: replaces the current ROI by its inverse.
+from ij import IJ
+from ij.gui import Roi, ShapeRoi
 # Get current ImagePlus
-image = WindowManager.getCurrentImage()
+image = IJ.getImage()
 # Get current ROI
 roi = image.getRoi()
 if roi is not None:

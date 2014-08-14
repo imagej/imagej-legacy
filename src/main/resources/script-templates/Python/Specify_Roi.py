@@ -1,6 +1,8 @@
 # Create new ROI programmatically
+from ij import IJ
+from ij.gui import OvalRoi, Roi
 # Get current ImagePlus
-image = WindowManager.getCurrentImage()
+image = IJ.getImage()
 # Enter ROI coordinates
 width = 50
 height = 50

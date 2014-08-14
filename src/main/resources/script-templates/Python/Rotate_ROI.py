@@ -1,8 +1,10 @@
 # Rotate current ROI
+from ij import IJ
+from ij.gui import PolygonRoi, Roi
 import math
 angle = 0.1 # must be in radian
 # Get current ImagePlus
-image = WindowManager.getCurrentImage()
+image = IJ.getImage()
 # Get current ROI
 roi = image.getRoi()
 if roi is not None:
