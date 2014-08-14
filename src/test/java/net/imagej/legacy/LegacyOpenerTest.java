@@ -82,7 +82,7 @@ public class LegacyOpenerTest {
 				script.run("pauls-macro.ijm", macro, true).get();
 			final Integer nResults = (Integer) module.getOutput("nResults");
 			assertNotNull(nResults);
-			assertEquals(10, (int) nResults);
+			assertEquals(3, (int) nResults);
 		}
 		finally {
 			context.dispose();
