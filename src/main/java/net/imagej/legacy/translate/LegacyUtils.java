@@ -33,7 +33,6 @@ package net.imagej.legacy.translate;
 
 import ij.ImagePlus;
 import ij.WindowManager;
-import ij.gui.ImageWindow;
 import ij.macro.Interpreter;
 import net.imagej.Dataset;
 import net.imglib2.img.basictypeaccess.PlanarAccess;
@@ -67,12 +66,7 @@ public class LegacyUtils {
 	public static void deleteImagePlus(final ImagePlus imp) {
 		final ImagePlus currImagePlus = WindowManager.getCurrentImage();
 		if (imp == currImagePlus) WindowManager.setTempCurrentImage(null);
-		final ImageWindow ij1Window = imp.getWindow();
-		if (ij1Window == null) Interpreter.removeBatchModeImage(imp);
-		else {
-			imp.changes = false;
-			if (!ij1Window.isClosed()) ij1Window.close();
-		}
+		Interpreter.removeBatchModeImage(imp);
 	}
 
 	/**
