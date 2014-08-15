@@ -61,15 +61,13 @@ import org.scijava.widget.Button;
  * @author Mark Hiner
  * @author Curtis Rueden
  */
-@Plugin(type = OptionsPlugin.class,
-	label = "ImageJ2 Options", menu = {
-		@Menu(label = MenuConstants.EDIT_LABEL, weight = MenuConstants.EDIT_WEIGHT,
-			mnemonic = MenuConstants.EDIT_MNEMONIC), @Menu(label = "Options"),
-		@Menu(label = "ImageJ2...") }, attrs = { @Attr(name = "legacy-only") })
-public class ImageJ2Options extends OptionsPlugin implements Interactive
-{
+@Plugin(type = OptionsPlugin.class, label = "ImageJ2 Options", menu = {
+	@Menu(label = MenuConstants.EDIT_LABEL, weight = MenuConstants.EDIT_WEIGHT,
+		mnemonic = MenuConstants.EDIT_MNEMONIC), @Menu(label = "Options"),
+	@Menu(label = "ImageJ2...") }, attrs = { @Attr(name = "legacy-only") })
+public class ImageJ2Options extends OptionsPlugin implements Interactive {
 
-	// Fields
+	// -- Fields --
 
 	// TODO: Use <html> and <br> to put the following warning into a single
 	// parameter. There seems to be a bug with at the moment, though...
@@ -139,7 +137,7 @@ public class ImageJ2Options extends OptionsPlugin implements Interactive
 		try {
 			url = new URL("https://github.com/imagej/imagej/blob/master/WELCOME.md#welcome-to-imagej2");
 		}
-		catch (MalformedURLException e) {
+		catch (final MalformedURLException e) {
 			e.printStackTrace();
 		}
 		WELCOME_URL = url;
