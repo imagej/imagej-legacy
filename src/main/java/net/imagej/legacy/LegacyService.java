@@ -63,8 +63,8 @@ public interface LegacyService extends ImageJService {
 	void runLegacyCommand(String ij1ClassName, String argument);
 
 	/**
-	 * Ensures that the currently active {@link ij.ImagePlus} matches the currently
-	 * active {@link ImageDisplay}. Does not perform any harmonization.
+	 * Ensures that the currently active {@link ij.ImagePlus} matches the
+	 * currently active {@link ImageDisplay}. Does not perform any harmonization.
 	 */
 	void syncActiveImage();
 
