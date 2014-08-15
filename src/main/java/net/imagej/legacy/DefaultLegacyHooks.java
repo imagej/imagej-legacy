@@ -166,6 +166,8 @@ public class DefaultLegacyHooks extends LegacyHooks {
 
 	@Override
 	public void registerImage(final Object o) {
+		if (!legacyService.isSyncEnabled()) return;
+
 		final ImagePlus image = (ImagePlus) o;
 		if (image == null) return;
 		if (!image.isProcessor()) return;

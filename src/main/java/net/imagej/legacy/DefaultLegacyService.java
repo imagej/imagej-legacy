@@ -288,6 +288,13 @@ public final class DefaultLegacyService extends AbstractService implements
 	}
 
 	@Override
+	public boolean isSyncEnabled() {
+		final ImageJ2Options ij2Options =
+			optionsService.getOptions(ImageJ2Options.class);
+		return ij2Options == null ? false : ij2Options.isSyncEnabled();
+	}
+
+	@Override
 	public boolean isLegacyMode() {
 		return ij1Helper != null && ij1Helper.getIJ() != null;
 	}

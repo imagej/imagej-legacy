@@ -59,6 +59,7 @@ import org.scijava.widget.Button;
  * Not displayed in the IJ2 UI.
  * 
  * @author Mark Hiner
+ * @author Curtis Rueden
  */
 @Plugin(type = OptionsPlugin.class,
 	label = "ImageJ2 Options", menu = {
@@ -84,6 +85,13 @@ public class ImageJ2Options extends OptionsPlugin implements Interactive
 	@Parameter(visibility = ItemVisibility.MESSAGE)
 	private final String warning3 =
 		"and have not yet been optimized for performance.";
+
+	@Parameter(
+		label = "Enable ImageJ2 data structures",
+		description = "<html>Whether to synchronize ImageJ 1.x and ImageJ2 data structures.<br>"
+			+ "When enabled, commands that use the ImageJ2 API (net.imagej)<br>"
+			+ "will function, but with an impact on performance and stability.")
+	private boolean syncEnabled = false;
 
 	/**
 	 * If true, SCIFIO will be used during {@code File > Open} IJ1 calls.
@@ -138,6 +146,10 @@ public class ImageJ2Options extends OptionsPlugin implements Interactive
 	}
 
 	// -- Option accessors --
+
+	public boolean isSyncEnabled() {
+		return syncEnabled;
+	}
 
 	public boolean isNewStyleIO() {
 		return newStyleIO;
