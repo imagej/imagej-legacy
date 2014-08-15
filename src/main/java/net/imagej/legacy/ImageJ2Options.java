@@ -36,6 +36,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import org.scijava.ItemVisibility;
 import org.scijava.app.AppService;
 import org.scijava.command.Interactive;
 import org.scijava.display.DisplayService;
@@ -68,6 +69,21 @@ public class ImageJ2Options extends OptionsPlugin implements Interactive
 {
 
 	// Fields
+
+	// TODO: Use <html> and <br> to put the following warning into a single
+	// parameter. There seems to be a bug with at the moment, though...
+
+	@Parameter(visibility = ItemVisibility.MESSAGE)
+	private final String warning1 =
+		"These options enable beta ImageJ2 functionality.";
+
+	@Parameter(visibility = ItemVisibility.MESSAGE)
+	private final String warning2 =
+		"You can turn them on for testing, but they are still buggy,";
+
+	@Parameter(visibility = ItemVisibility.MESSAGE)
+	private final String warning3 =
+		"and have not yet been optimized for performance.";
 
 	/**
 	 * If true, SCIFIO will be used during {@code File > Open} IJ1 calls.
