@@ -62,7 +62,6 @@ import net.imagej.legacy.plugin.LegacyPostRefreshMenus;
 import net.imagej.patcher.LegacyHooks;
 
 import org.scijava.Context;
-import org.scijava.app.App;
 import org.scijava.log.LogService;
 import org.scijava.log.StderrLogService;
 import org.scijava.plugin.PluginInfo;
