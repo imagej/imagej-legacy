@@ -82,7 +82,7 @@ public interface LegacyService extends ImageJService {
 	 * the ImageJ 1.x GUI is shown. During this time, no synchronization should take
 	 * place.
 	 */
-	public boolean isLegacyMode();
+	boolean isLegacyMode();
 
 	/**
 	 * Switch to/from running legacy ImageJ 1.x mode.
