@@ -63,8 +63,8 @@ public interface LegacyService extends ImageJService {
 	void runLegacyCommand(String ij1ClassName, String argument);
 
 	/**
-	 * Ensures that the currently active {@link ij.ImagePlus} matches the currently
-	 * active {@link ImageDisplay}. Does not perform any harmonization.
+	 * Ensures that the currently active {@link ij.ImagePlus} matches the
+	 * currently active {@link ImageDisplay}. Does not perform any harmonization.
 	 */
 	void syncActiveImage();
 
@@ -75,6 +75,19 @@ public interface LegacyService extends ImageJService {
 	boolean isInitialized();
 
 	/**
+	 * States whether ImageJ1 and ImageJ2 data structures should be kept in sync.
+	 * <p>
+	 * While synchronization is supposed to be as cheap as possible, in practice
+	 * there are limitations with it currently which impact performance. So
+	 * such synchronization is off by default. The main consequence is that
+	 * it becomes harder to "mix and match" ImageJ1 and ImageJ2 APIs: you cannot
+	 * open an {@link ij.ImagePlus} and then reference it later from an ImageJ2
+	 * {@link org.scijava.command.Command} as a {@link net.imagej.Dataset} unless
+	 * synchronization is enabled.
+	 */
+	boolean isSyncEnabled();
+
+	/**
 	 * States whether we're running in legacy ImageJ 1.x mode.
 	 * 
 	 * To support work flows which are incompatible with ImageJ2, we want to allow
@@ -82,7 +95,7 @@ public interface LegacyService extends ImageJService {
 	 * the ImageJ 1.x GUI is shown. During this time, no synchronization should take
 	 * place.
 	 */
-	public boolean isLegacyMode();
+	boolean isLegacyMode();
 
 	/**
 	 * Switch to/from running legacy ImageJ 1.x mode.

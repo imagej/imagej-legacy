@@ -62,7 +62,6 @@ import net.imagej.legacy.plugin.LegacyPostRefreshMenus;
 import net.imagej.patcher.LegacyHooks;
 
 import org.scijava.Context;
-import org.scijava.app.App;
 import org.scijava.log.LogService;
 import org.scijava.log.StderrLogService;
 import org.scijava.plugin.PluginInfo;
@@ -167,6 +166,8 @@ public class DefaultLegacyHooks extends LegacyHooks {
 
 	@Override
 	public void registerImage(final Object o) {
+		if (!legacyService.isSyncEnabled()) return;
+
 		final ImagePlus image = (ImagePlus) o;
 		if (image == null) return;
 		if (!image.isProcessor()) return;

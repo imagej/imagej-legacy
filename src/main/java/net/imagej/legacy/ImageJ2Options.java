@@ -36,6 +36,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import org.scijava.ItemVisibility;
 import org.scijava.app.AppService;
 import org.scijava.command.Interactive;
 import org.scijava.display.DisplayService;
@@ -58,25 +59,47 @@ import org.scijava.widget.Button;
  * Not displayed in the IJ2 UI.
  * 
  * @author Mark Hiner
+ * @author Curtis Rueden
  */
-@Plugin(type = OptionsPlugin.class,
-	label = "ImageJ2 Options", menu = {
-		@Menu(label = MenuConstants.EDIT_LABEL, weight = MenuConstants.EDIT_WEIGHT,
-			mnemonic = MenuConstants.EDIT_MNEMONIC), @Menu(label = "Options"),
-		@Menu(label = "ImageJ2...") }, attrs = { @Attr(name = "legacy-only") })
-public class ImageJ2Options extends OptionsPlugin implements Interactive
-{
+@Plugin(type = OptionsPlugin.class, label = "ImageJ2 Options", menu = {
+	@Menu(label = MenuConstants.EDIT_LABEL, weight = MenuConstants.EDIT_WEIGHT,
+		mnemonic = MenuConstants.EDIT_MNEMONIC), @Menu(label = "Options"),
+	@Menu(label = "ImageJ2...") }, attrs = { @Attr(name = "legacy-only") })
+public class ImageJ2Options extends OptionsPlugin implements Interactive {
 
-	// Fields
+	// -- Fields --
+
+	// TODO: Use <html> and <br> to put the following warning into a single
+	// parameter. There seems to be a bug with at the moment, though...
+
+	@Parameter(visibility = ItemVisibility.MESSAGE)
+	private final String warning1 =
+		"These options enable beta ImageJ2 functionality.";
+
+	@Parameter(visibility = ItemVisibility.MESSAGE)
+	private final String warning2 =
+		"You can turn them on for testing, but they are still buggy,";
+
+	@Parameter(visibility = ItemVisibility.MESSAGE)
+	private final String warning3 =
+		"and have not yet been optimized for performance.";
+
+	@Parameter(
+		label = "Enable ImageJ2 data structures",
+		description = "<html>Whether to synchronize ImageJ 1.x and ImageJ2 data structures.<br>"
+			+ "When enabled, commands that use the ImageJ2 API (net.imagej)<br>"
+			+ "will function, but with an impact on performance and stability.")
+	private boolean syncEnabled = false;
 
 	/**
 	 * If true, SCIFIO will be used during {@code File > Open} IJ1 calls.
 	 */
-	@Parameter(label = "Use SCIFIO when opening files",
-		description = "Whether to use ImageJ2's file I/O mechanism when opening "
-			+ "files. Image files will be opened using the SCIFIO library "
-			+ "(SCientific Image Format Input and Output), which provides truly "
-			+ "extensible support for reading and writing image file formats.",
+	@Parameter(
+		label = "Use SCIFIO when opening files",
+		description = "<html>Whether to use ImageJ2's file I/O mechanism when opening "
+			+ "files.<br>Image files will be opened using the SCIFIO library "
+			+ "(SCientific Image<br>Format Input and Output), which provides truly "
+			+ "extensible support for<br>reading and writing image file formats.",
 		callback = "run")
 	private boolean newStyleIO = false;
 
@@ -114,13 +137,17 @@ public class ImageJ2Options extends OptionsPlugin implements Interactive
 		try {
 			url = new URL("https://github.com/imagej/imagej/blob/master/WELCOME.md#welcome-to-imagej2");
 		}
-		catch (MalformedURLException e) {
+		catch (final MalformedURLException e) {
 			e.printStackTrace();
 		}
 		WELCOME_URL = url;
 	}
 
 	// -- Option accessors --
+
+	public boolean isSyncEnabled() {
+		return syncEnabled;
+	}
 
 	public boolean isNewStyleIO() {
 		return newStyleIO;
