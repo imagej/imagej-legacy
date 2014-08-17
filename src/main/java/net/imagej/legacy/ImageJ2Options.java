@@ -88,7 +88,8 @@ public class ImageJ2Options extends OptionsPlugin implements Interactive {
 		label = "Enable ImageJ2 data structures",
 		description = "<html>Whether to synchronize ImageJ 1.x and ImageJ2 data structures.<br>"
 			+ "When enabled, commands that use the ImageJ2 API (net.imagej)<br>"
-			+ "will function, but with an impact on performance and stability.")
+			+ "will function, but with an impact on performance and stability.",
+		callback = "run")
 	private boolean syncEnabled = false;
 
 	/**
