@@ -105,7 +105,7 @@ public class DefaultLegacyOpener implements LegacyOpener {
 
 		// Check to see if SCIFIO has been disabled
 		final boolean newStyleIO =
-			optionsService.getOptions(ImageJ2Options.class).isNewStyleIO();
+			optionsService.getOptions(ImageJ2Options.class).isSciJavaIO();
 		if (!newStyleIO) return null;
 
 		if (path == null) {

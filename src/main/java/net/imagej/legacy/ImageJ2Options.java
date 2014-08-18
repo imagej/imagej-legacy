@@ -40,6 +40,7 @@ import org.scijava.ItemVisibility;
 import org.scijava.app.AppService;
 import org.scijava.command.Interactive;
 import org.scijava.display.DisplayService;
+import org.scijava.io.IOService;
 import org.scijava.log.LogService;
 import org.scijava.menu.MenuConstants;
 import org.scijava.options.OptionsPlugin;
@@ -92,7 +93,10 @@ public class ImageJ2Options extends OptionsPlugin implements Interactive {
 	private boolean syncEnabled = false;
 
 	/**
-	 * If true, SCIFIO will be used during {@code File > Open} IJ1 calls.
+	 * If true, the <a href="http://imagej.net/SciJava_Common">SciJava Common</a>
+	 * {@link IOService} will be used to handle {@code File > Open} IJ1 calls.
+	 * This system leverages the <a href="http://imagej.net/SCIFIO">SCIFIO</a>
+	 * library to open image files.
 	 */
 	@Parameter(
 		label = "Use SCIFIO when opening files",
@@ -101,7 +105,7 @@ public class ImageJ2Options extends OptionsPlugin implements Interactive {
 			+ "(SCientific Image<br>Format Input and Output), which provides truly "
 			+ "extensible support for<br>reading and writing image file formats.",
 		callback = "run")
-	private boolean newStyleIO = false;
+	private boolean sciJavaIO = false;
 
 	@Parameter(label = "What is ImageJ2?", persist = false, callback = "help")
 	private Button help;
@@ -149,8 +153,8 @@ public class ImageJ2Options extends OptionsPlugin implements Interactive {
 		return syncEnabled;
 	}
 
-	public boolean isNewStyleIO() {
-		return newStyleIO;
+	public boolean isSciJavaIO() {
+		return sciJavaIO;
 	}
 
 	@SuppressWarnings("unused")
