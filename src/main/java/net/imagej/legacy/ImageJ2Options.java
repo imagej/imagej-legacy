@@ -84,12 +84,11 @@ public class ImageJ2Options extends OptionsPlugin implements Interactive {
 	private final String warning3 =
 		"and have not yet been optimized for performance.";
 
-	@Parameter(
-		label = "Enable ImageJ2 data structures",
-		description = "<html>Whether to synchronize ImageJ 1.x and ImageJ2 data structures.<br>"
-			+ "When enabled, commands that use the ImageJ2 API (net.imagej)<br>"
-			+ "will function, but with an impact on performance and stability.",
-		callback = "run")
+	@Parameter(label = "Enable ImageJ2 data structures",
+		description = "<html>Whether to synchronize ImageJ 1.x and ImageJ2 data "
+			+ "structures.<br>When enabled, commands that use the ImageJ2 API "
+			+ "(net.imagej)<br>will function, but with an impact on performance "
+			+ "and stability.", callback = "run")
 	private boolean syncEnabled = false;
 
 	/**
@@ -97,8 +96,8 @@ public class ImageJ2Options extends OptionsPlugin implements Interactive {
 	 */
 	@Parameter(
 		label = "Use SCIFIO when opening files",
-		description = "<html>Whether to use ImageJ2's file I/O mechanism when opening "
-			+ "files.<br>Image files will be opened using the SCIFIO library "
+		description = "<html>Whether to use ImageJ2's file I/O mechanism when "
+			+ "opening files.<br>Image files will be opened using the SCIFIO library "
 			+ "(SCientific Image<br>Format Input and Output), which provides truly "
 			+ "extensible support for<br>reading and writing image file formats.",
 		callback = "run")
