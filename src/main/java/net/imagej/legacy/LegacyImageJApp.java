@@ -31,76 +31,55 @@
 
 package net.imagej.legacy;
 
-import java.util.List;
-
-import org.scijava.Priority;
-import org.scijava.platform.AppEventService;
-import org.scijava.platform.DefaultAppEventService;
+import org.scijava.app.AbstractApp;
+import org.scijava.app.App;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
-import org.scijava.plugin.PluginService;
-import org.scijava.service.Service;
 
 /**
- * ImageJ service for handling application-level events via ImageJ 1.x.
- * <p>
- * It offloads the {@link #about()}, {@link #prefs()} and {@link #quit()}
- * operations to the {@link IJ1Helper#appAbout}, {@link IJ1Helper#appPrefs}, and
- * {@link IJ1Helper#appQuit} methods, respectively, so that the patched ImageJ
- * 1.x can take care of them in a mostly backwards compatible way.
- * </p>
+ * Application metadata and operations for ImageJ 1.x.
  * 
  * @author Curtis Rueden
+ * @see org.scijava.app.AppService
  */
-@Plugin(type = Service.class, priority = Priority.HIGH_PRIORITY)
-public final class LegacyAppEventService extends DefaultAppEventService {
+@Plugin(type = App.class, name = LegacyImageJApp.NAME)
+public class LegacyImageJApp extends AbstractApp {
 
-	@Parameter
-	private PluginService pluginService;
+	public static final String NAME = "ImageJ1";
 
 	@Parameter
 	private DefaultLegacyService legacyService;
 
-	private AppEventService fallback;
-	private boolean initialized;
+	@Override
+	public String getGroupId() {
+		return "net.imagej";
+	}
+
+	@Override
+	public String getArtifactId() {
+		return "ij";
+	}
+
+	@Override
+	public String getVersion() {
+		return legacyService.getLegacyVersion();
+	}
 
 	// -- AppEventService methods --
 
 	@Override
 	public void about() {
-		legacyService.getIJ1Helper().appAbout(fallback());
+		legacyService.getIJ1Helper().appAbout();
 	}
 
 	@Override
 	public void prefs() {
-		legacyService.getIJ1Helper().appPrefs(fallback());
+		legacyService.getIJ1Helper().appPrefs();
 	}
 
 	@Override
 	public void quit() {
-		legacyService.getIJ1Helper().appQuit(fallback());
-	}
-
-	// -- Helper methods - lazy initialization --
-
-	/** Gets {@link #fallback}, initializing if needed. */
-	private AppEventService fallback() {
-		if (!initialized) initFallback();
-		return fallback;
-	}
-
-	/** Initializes {@link #fallback}. */
-	private synchronized void initFallback() {
-		if (initialized) return;
-		final List<Service> services =
-			getContext().getServiceIndex().get(AppEventService.class);
-		for (final Service service : services) {
-			if (service != this) {
-				fallback = (AppEventService) service;
-				break;
-			}
-		}
-		initialized = true;
+		legacyService.getIJ1Helper().appQuit();
 	}
 
 }
