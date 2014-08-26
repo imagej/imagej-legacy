@@ -774,6 +774,9 @@ public class IJ1Helper extends AbstractContextual {
 	 * @return the return value
 	 */
 	public String runMacro(final String macro) {
+		if (EventQueue.isDispatchThread()) {
+			throw new IllegalStateException("Cannot run macro from the EDT!");
+		}
 		final Thread thread = Thread.currentThread();
 		final String name = thread.getName();
 		try {
@@ -794,6 +797,9 @@ public class IJ1Helper extends AbstractContextual {
 	 * @return the return value
 	 */
 	public String runMacroFile(final String path, final String arg) {
+		if (EventQueue.isDispatchThread()) {
+			throw new IllegalStateException("Cannot run macro from the EDT!");
+		}
 		final Thread thread = Thread.currentThread();
 		final String name = thread.getName();
 		try {
