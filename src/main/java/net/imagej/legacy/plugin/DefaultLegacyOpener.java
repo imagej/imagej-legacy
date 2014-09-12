@@ -45,8 +45,6 @@ import net.imagej.legacy.DefaultLegacyService;
 import net.imagej.legacy.IJ1Helper;
 import net.imagej.legacy.ImageJ2Options;
 import net.imagej.legacy.LegacyImageMap;
-import net.imagej.legacy.translate.DefaultImageTranslator;
-import net.imagej.legacy.translate.ImageTranslator;
 
 import org.scijava.Cancelable;
 import org.scijava.Context;
@@ -163,10 +161,8 @@ public class DefaultLegacyOpener implements LegacyOpener {
 						((Dataset) data).getImgPlus().getSource());
 				}
 				else {
-					// Manually register the dataset, without creating a display
-					final ImageTranslator it = new DefaultImageTranslator(legacyService);
-					imp = it.createLegacyImage(d);
-					legacyService.getImageMap().registerLegacyImage(imp);
+					// Register the dataset, without creating a display
+					imp = legacyService.getImageMap().registerDataset(d);
 				}
 				// Set information about how this dataset was opened.
 				String loadingInfo = "";
