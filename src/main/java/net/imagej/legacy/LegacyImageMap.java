@@ -56,6 +56,7 @@ import net.imagej.patcher.LegacyInjector;
 import net.imagej.ui.viewer.image.ImageDisplayViewer;
 
 import org.scijava.AbstractContextual;
+import org.scijava.display.DisplayService;
 import org.scijava.display.event.DisplayDeletedEvent;
 import org.scijava.event.EventHandler;
 import org.scijava.plugin.Parameter;
@@ -160,6 +161,9 @@ public class LegacyImageMap extends AbstractContextual {
 	@Parameter
 	private ImageDisplayService imageDisplayService;
 
+	@Parameter
+	private DisplayService displayService;
+
 	// -- Constructor --
 
 	public LegacyImageMap(final DefaultLegacyService legacyService) {
@@ -194,6 +198,30 @@ public class LegacyImageMap extends AbstractContextual {
 			return weakReference == null ? null : weakReference.get();
 		}
 		return imagePlusTable.get(display);
+	}
+
+	/**
+	 * This method takes a provided {@link Dataset}, converts it to an
+	 * {@link ImagePlus}, stores the new {@code ImagePlus} in the {@code Dataset}
+	 * 's properties uner {@link LegacyImageMap#IMP_KEY} and finally creates an
+	 * {@link ImageDisplay} using the provided {@code Dataset}. This display will
+	 * not be rendered due to the {@code IMP_KEY} mapping. The resulting
+	 * {@code ImagePlus} and {@code ImageDisplay} will then be mapped to each
+	 * other.
+	 * <p>
+	 * Use this method to create an {@code ImagePlus} to {@code Display} mapping
+	 * without rendering the display.
+	 * </p>
+	 *
+	 * @return the {@link ImagePlus} object shadowing the given {@link Dataset}.
+	 */
+	public ImagePlus registerDataset(final Dataset ds) {
+		final ImagePlus imp = imageTranslator.createLegacyImage(ds);
+		ds.getProperties().put(LegacyImageMap.IMP_KEY, imp);
+		final ImageDisplay display =
+			(ImageDisplay)displayService.createDisplay(ds.getName(), ds);
+		addMapping(display, imp);
+		return imp;
 	}
 
 	/**
