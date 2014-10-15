@@ -85,7 +85,7 @@ public class IJ1MacroEngine extends AbstractScriptEngine {
 	@Override
 	public Object eval(final String macro) throws ScriptException {
 		final Integer noResult = 0xfeedbabe;
-		final StringBuilder pre = new StringBuilder().append("result = ").append(noResult).append("\n");
+		final StringBuilder pre = new StringBuilder().append("result = ").append(noResult).append(";\n");
 		final StringBuilder post = new StringBuilder();
 		if (module != null) {
 			for (final Entry<String, Object> entry : module.getInputs().entrySet()) {
