@@ -4,18 +4,18 @@ import ij.gui.Plot;
 
 import ij.plugin.PlugIn;
 
-import org.apache.commons.math.analysis.MultivariateRealFunction;
-import org.apache.commons.math.analysis.ParametricUnivariateRealFunction;
+import org.apache.commons.math3.analysis.MultivariateFunction;
+import org.apache.commons.math3.analysis.ParametricUnivariateFunction;
 
-import org.apache.commons.math.optimization.GoalType;
-import org.apache.commons.math.optimization.RealPointValuePair;
+import org.apache.commons.math3.optimization.GoalType;
+import org.apache.commons.math3.optimization.PointValuePair;
 
-import org.apache.commons.math.optimization.direct.NelderMeadSimplex;
-import org.apache.commons.math.optimization.direct.SimplexOptimizer;
+import org.apache.commons.math3.optimization.direct.NelderMeadSimplex;
+import org.apache.commons.math3.optimization.direct.SimplexOptimizer;
 
-import org.apache.commons.math.optimization.fitting.CurveFitter;
+import org.apache.commons.math3.optimization.fitting.CurveFitter;
 
-import org.apache.commons.math.optimization.general.LevenbergMarquardtOptimizer;
+import org.apache.commons.math3.optimization.general.LevenbergMarquardtOptimizer;
 
 /**
  * A demonstration how to use Apache commons math to perform
@@ -48,7 +48,7 @@ public class Optimization_Example implements PlugIn {
 		 * For demonstration purposes, we define it as a simple logarithmic function:
 		 * f(x) = a * log(x) + b
 		 */
-		ParametricUnivariateRealFunction function = new ParametricUnivariateRealFunction() {
+		ParametricUnivariateFunction function = new ParametricUnivariateFunction() {
 			@Override
 			public double[] gradient(double x, double[] params) {
 				double a = params[0];
@@ -123,7 +123,7 @@ public class Optimization_Example implements PlugIn {
 		 * Let's use the Rosenbrock function:
 		 * http://en.wikipedia.org/wiki/Rosenbrock_function
 		 */
-		MultivariateRealFunction function = new MultivariateRealFunction() {
+		MultivariateFunction function = new MultivariateFunction() {
 			@Override
 			public double value(double[] point) {
 				double x = point[0];
@@ -133,7 +133,7 @@ public class Optimization_Example implements PlugIn {
 		};
 		SimplexOptimizer optimizer = new SimplexOptimizer(1e-5, 1e-10);
 		optimizer.setSimplex(new NelderMeadSimplex(new double[] { 0.2, 0.2 }));
-		RealPointValuePair pair = optimizer.optimize(10000, function, GoalType.MINIMIZE, new double[] { 0, 0 });
+		PointValuePair pair = optimizer.optimize(10000, function, GoalType.MINIMIZE, new double[] { 0, 0 });
 
 		// Now, let's tell the user about it:
 		double[] point = pair.getPoint();
