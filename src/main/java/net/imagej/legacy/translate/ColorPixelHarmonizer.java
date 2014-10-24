@@ -34,11 +34,11 @@ package net.imagej.legacy.translate;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.process.ImageProcessor;
-import io.scif.util.FormatTools;
 import net.imagej.Dataset;
 import net.imglib2.RandomAccess;
 import net.imglib2.meta.Axes;
 import net.imglib2.type.numeric.RealType;
+import net.imglib2.util.IntervalIndexer;
 
 /**
  * Supports bidirectional synchronization between color {@link ImagePlus}es and
@@ -222,10 +222,11 @@ public class ColorPixelHarmonizer implements DataHarmonizer {
 	private void updatePosition(RandomAccess<? extends RealType<?>> accessor,
 		long[] lengths, int index, int start)
 	{
-		long[] values = FormatTools.rasterToPosition(lengths, index);
+		long[] position = new long[lengths.length];
+		IntervalIndexer.indexToPosition(index, lengths, position);
 		for (int i=0; i<lengths.length; i++) {
 			int dim = i + start;
-			accessor.setPosition(values[i], dim);
+			accessor.setPosition(position[i], dim);
 		}
 	}
 }

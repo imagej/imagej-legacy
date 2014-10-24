@@ -34,7 +34,6 @@ package net.imagej.legacy.translate;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.process.ImageProcessor;
-import io.scif.util.FormatTools;
 import net.imagej.Dataset;
 import net.imglib2.RandomAccess;
 import net.imglib2.meta.Axes;
@@ -44,6 +43,7 @@ import net.imglib2.meta.SpaceUtils;
 import net.imglib2.type.logic.BitType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.integer.ShortType;
+import net.imglib2.util.IntervalIndexer;
 
 /**
  * Supports bidirectional synchronization between {@link ImagePlus}es and gray
@@ -220,11 +220,12 @@ public class GrayPixelHarmonizer implements DataHarmonizer {
 	 * lengths.length], by converting the given index to a position, using the
 	 * given lengths array to convert from raster to position.
 	 */
-	private void updatePosition(long[] dims, long[] tPos, int index, int start) {
-		long[] values = FormatTools.rasterToPosition(tPos, index);
+	private void updatePosition(long[] position, long[] tPos, int index, int start) {
+		long[] temp = new long[tPos.length];
+		IntervalIndexer.indexToPosition(index, tPos, temp);
 		for (int i=0; i<tPos.length; i++) {
-			int pos = i + start;
-			dims[pos] = values[i];
+			int dim = i + start;
+			position[dim] = temp[i];
 		}
 	}
 
