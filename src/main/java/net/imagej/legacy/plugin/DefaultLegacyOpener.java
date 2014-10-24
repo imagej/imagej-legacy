@@ -164,6 +164,8 @@ public class DefaultLegacyOpener implements LegacyOpener {
 					// Register the dataset, without creating a display
 					imp = legacyService.getImageMap().registerDataset(d);
 				}
+				// TODO remove usage of SCIFIO classes after migrating ImageMetadata
+				// framework to imagej-common
 				// Set information about how this dataset was opened.
 				String loadingInfo = "";
 				App app = appService.getApp(SCIFIOApp.NAME);

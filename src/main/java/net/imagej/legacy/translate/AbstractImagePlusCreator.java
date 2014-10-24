@@ -210,6 +210,8 @@ System.err.println(1);
 		return imp;
 	}
 
+	// TODO remove usage of SCIFIO classes after migrating ImageMetadata
+	// framework to imagej-common
 	private String[] getSliceLabels(final Dataset ds) {
 		final Map<String, Object> properties = ds.getImgPlus().getProperties();
 		if (properties == null) return null;
@@ -224,6 +226,8 @@ System.err.println(1);
 			? (String[]) sliceLabels : null;
 	}
 
+	// TODO remove usage of SCIFIO classes after migrating ImageMetadata
+	// framework to imagej-common
 	private void fillInfo(final ImagePlus imp,
 		final ImgPlus<? extends RealType<?>> imgPlus)
 	{
@@ -245,6 +249,8 @@ System.err.println(1);
 		}
 	}
 
+	// TODO remove usage of SCIFIO classes after migrating ImageMetadata
+	// framework to imagej-common
 	private void fillImageInfo(final ImagePlus imp, final Metadata meta) {
 		addInfo(imp, "--- Dataset Information ---");
 		addInfo(imp, "BitsPerPixel = " + meta.get(0).getBitsPerPixel());
@@ -275,6 +281,8 @@ System.err.println(1);
 		imp.setProperty("Info", newInfo + "\n");
 	}
 
+	// TODO remove usage of SCIFIO classes after migrating ImageMetadata
+	// framework to imagej-common
 	private void fillInfo(final ImagePlus imp, final MetaTable table) {
 		String info = (String) imp.getProperty("Info");
 		if (info == null) info = "";
