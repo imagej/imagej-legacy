@@ -36,7 +36,6 @@ import static org.junit.Assert.assertNotSame;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.process.ByteProcessor;
-import io.scif.img.axes.SCIFIOAxes;
 import net.imagej.Extents;
 import net.imagej.Position;
 import net.imagej.patcher.LegacyInjector;
@@ -88,7 +87,7 @@ public class LegacyUtilsTest {
 	public void testRasterization() {
 		final long[][] dimsList = {{1,1,1}, {1,2,3}, {2,3,4}, {5,4,3}, {4,2,7}};
 		final AxisType[] axes =
-			{ Axes.CHANNEL, SCIFIOAxes.SPECTRA, SCIFIOAxes.FREQUENCY };
+			{ Axes.CHANNEL, Axes.get("Spectra"), Axes.get("Frequency") };
 		for (long[] dims : dimsList) {
 			// setup
 			long numChannels = 1;
