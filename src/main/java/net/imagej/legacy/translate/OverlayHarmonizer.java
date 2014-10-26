@@ -71,10 +71,10 @@ import net.imglib2.RealLocalizable;
 import net.imglib2.RealPoint;
 import net.imglib2.RealRandomAccess;
 import net.imglib2.img.Img;
+import net.imglib2.img.ImgView;
 import net.imglib2.img.array.ArrayImg;
-import net.imglib2.img.array.ArrayImgFactory;
-import net.imglib2.img.basictypeaccess.array.BitArray;
-import net.imglib2.img.transform.ImgTranslationAdapter;
+import net.imglib2.img.array.ArrayImgs;
+import net.imglib2.img.basictypeaccess.array.LongArray;
 import net.imglib2.roi.BinaryMaskRegionOfInterest;
 import net.imglib2.roi.EllipseRegionOfInterest;
 import net.imglib2.roi.GeneralPathRegionOfInterest;
@@ -82,6 +82,8 @@ import net.imglib2.roi.PolygonRegionOfInterest;
 import net.imglib2.roi.RectangleRegionOfInterest;
 import net.imglib2.roi.RegionOfInterest;
 import net.imglib2.type.logic.BitType;
+import net.imglib2.view.IntervalView;
+import net.imglib2.view.Views;
 
 import org.scijava.AbstractContextual;
 import org.scijava.Context;
@@ -730,16 +732,14 @@ public class OverlayHarmonizer extends AbstractContextual implements
 	private Overlay createDefaultOverlay(final Roi roi)
 	{
 		final Rectangle bounds = roi.getBounds();
-		final ArrayImg<BitType, BitArray> arrayImg =
-			new ArrayImgFactory<BitType>().createBitInstance(new long[] {
-				bounds.width, bounds.height }, 1);
-		final BitType t = new BitType(arrayImg);
-		arrayImg.setLinkedType(t);
+		final ArrayImg<BitType, LongArray> arrayImg =
+			ArrayImgs.bits(bounds.width, bounds.height);
+		arrayImg.setLinkedType(new BitType(arrayImg));
 		final int xOff = bounds.x;
 		final int yOff = bounds.y;
 		final Img<BitType> img =
-			new ImgTranslationAdapter<BitType, Img<BitType>>(arrayImg, new long[] {
-				xOff, yOff });
+			new ImgView<BitType>(Views.translate(arrayImg, xOff, yOff), arrayImg
+				.factory());
 		final RandomAccess<BitType> ra = img.randomAccess();
 		final ImageProcessor ip = roi.getMask();
 		for (int i = xOff; i < xOff + bounds.width; i++) {

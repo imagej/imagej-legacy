@@ -5,12 +5,12 @@
 	<parent>
 		<groupId>net.imagej</groupId>
 		<artifactId>pom-imagej</artifactId>
-		<version>2.49</version>
+		<version>3.2</version>
 		<relativePath />
 	</parent>
 
 	<artifactId>imagej-legacy</artifactId>
-	<version>0.8.6-SNAPSHOT</version>
+	<version>0.9.0-SNAPSHOT</version>
 
 	<name>ImageJ Legacy Bridge</name>
 	<description>The legacy component enables backward compatibility with the legacy version of ImageJ (1.x). It contains the code necessary to translate ImageJ images into ImageJ1 format and back, so that legacy plugins can be executed faithfully.</description>
@@ -21,12 +21,10 @@
 		<tag>HEAD</tag>
 		<url>https://github.com/imagej/imagej-legacy</url>
 	</scm>
-
 	<issueManagement>
 		<system>GitHub Issues</system>
 		<url>https://github.com/imagej/imagej-legacy/issues</url>
 	</issueManagement>
-
 	<ciManagement>
 		<system>Jenkins</system>
 		<url>http://jenkins.imagej.net/job/ImageJ-legacy/</url>
@@ -38,6 +36,12 @@
 			<url>http://maven.imagej.net/content/groups/public</url>
 		</repository>
 	</repositories>
+
+	<properties>
+		<imagej-ui-awt.version>0.2.0</imagej-ui-awt.version>
+		<imglib2.version>2.0.2</imglib2.version>
+		<scifio.version>0.17.0</scifio.version>
+	</properties>
 
 	<dependencies>
 		<!-- SCIFIO dependencies -->
@@ -72,10 +76,6 @@
 		<dependency>
 			<groupId>net.imglib2</groupId>
 			<artifactId>imglib2-ij</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>net.imglib2</groupId>
-			<artifactId>imglib2-meta</artifactId>
 		</dependency>
 
 		<!-- SciJava dependencies -->
