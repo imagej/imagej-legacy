@@ -127,6 +127,10 @@ public class IJ1MacroEngine extends AbstractScriptEngine {
 			}
 			outputs.remove();
 		}
+		if ("[aborted]".equals(result)) {
+			// NB: Macro was canceled. Return null, to avoid displaying the output.
+			return null;
+		}
 		return result;
 	}
 
