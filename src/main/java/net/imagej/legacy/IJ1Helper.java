@@ -782,6 +782,8 @@ public class IJ1Helper extends AbstractContextual {
 		try {
 			// to make getOptions() work
 			if (!name.startsWith("Run$_")) thread.setName("Run$_" + name);
+			// to make Macro.abort() work
+			if (!name.endsWith("Macro$")) thread.setName(thread.getName() + "Macro$");
 			return IJ.runMacro(macro);
 		}
 		finally {
