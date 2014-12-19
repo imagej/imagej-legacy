@@ -222,11 +222,14 @@ public class ColorPixelHarmonizer implements DataHarmonizer {
 	private void updatePosition(RandomAccess<? extends RealType<?>> accessor,
 		long[] lengths, int index, int start)
 	{
-		long[] position = new long[lengths.length];
-		IntervalIndexer.indexToPosition(index, lengths, position);
-		for (int i=0; i<lengths.length; i++) {
-			int dim = i + start;
-			accessor.setPosition(position[i], dim);
+		// IntervalIndexer throws an exception if given an empty array.
+		if (lengths.length > 0) {
+			long[] position = new long[lengths.length];
+			IntervalIndexer.indexToPosition(index, lengths, position);
+			for (int i=0; i<lengths.length; i++) {
+				int dim = i + start;
+				accessor.setPosition(position[i], dim);
+			}
 		}
 	}
 }

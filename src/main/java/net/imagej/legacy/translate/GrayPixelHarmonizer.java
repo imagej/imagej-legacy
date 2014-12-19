@@ -221,11 +221,14 @@ public class GrayPixelHarmonizer implements DataHarmonizer {
 	 * given lengths array to convert from raster to position.
 	 */
 	private void updatePosition(long[] position, long[] tPos, int index, int start) {
-		long[] temp = new long[tPos.length];
-		IntervalIndexer.indexToPosition(index, tPos, temp);
-		for (int i=0; i<tPos.length; i++) {
-			int dim = i + start;
-			position[dim] = temp[i];
+		// IntervalIndexer throws an exception if given an empty array.
+		if (tPos.length > 0) {
+			long[] temp = new long[tPos.length];
+			IntervalIndexer.indexToPosition(index, tPos, temp);
+			for (int i=0; i<tPos.length; i++) {
+				int dim = i + start;
+				position[dim] = temp[i];
+			}
 		}
 	}
 
