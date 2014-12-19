@@ -40,6 +40,7 @@ import ij.Menus;
 import ij.WindowManager;
 import ij.gui.ImageWindow;
 import ij.gui.Toolbar;
+import ij.io.LogStream;
 import ij.io.Opener;
 import ij.macro.Interpreter;
 import ij.plugin.Commands;
@@ -129,6 +130,10 @@ public class IJ1Helper extends AbstractContextual {
 			IJ.runPlugIn("ij.IJ.init", "");
 		}
 		if (ij1 != null) {
+			// always redirect stdout and stderr to the ImageJ 1.x Log window
+			System.setOut(new LogStream());
+			System.setErr(new LogStream());
+
 			// NB: *Always* call System.exit(0) when quitting:
 			// - In the case of batch mode, the JVM needs to terminate at the
 			//   conclusion of the macro/script, regardless of the actions performed
