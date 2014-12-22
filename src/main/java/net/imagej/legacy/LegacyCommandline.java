@@ -35,6 +35,7 @@ import java.util.WeakHashMap;
 
 import org.scijava.console.AbstractConsoleArgument;
 import org.scijava.console.ConsoleArgument;
+import org.scijava.log.LogService;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 
@@ -94,6 +95,9 @@ public abstract class LegacyCommandline extends AbstractConsoleArgument {
 
 	@Parameter
 	protected DefaultLegacyService legacyService;
+
+	@Parameter
+	protected LogService log;
 
 	private static class Flag extends WeakHashMap<LegacyService, Boolean> {
 		public boolean isActive(final LegacyService service) {
@@ -274,7 +278,7 @@ public abstract class LegacyCommandline extends AbstractConsoleArgument {
 			final String ijPath = args.removeFirst();
 
 			handleBatchOption(args);
-			legacyService.log().error("Skipping unsupported option -ijpath: " + ijPath);
+			log.error("Skipping unsupported option -ijpath: " + ijPath);
 			handleBatchExit(args);
 		}
 	}
@@ -295,7 +299,7 @@ public abstract class LegacyCommandline extends AbstractConsoleArgument {
 			final String option = args.removeFirst();
 
 			handleBatchOption(args);
-			legacyService.log().error("Skipping unsupported option " + option);
+			log.error("Skipping unsupported option " + option);
 			handleBatchExit(args);
 		}
 	}
