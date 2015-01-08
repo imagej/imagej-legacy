@@ -36,7 +36,7 @@ import ij.ImageStack;
 import net.imagej.Dataset;
 import net.imagej.Extents;
 import net.imagej.Position;
-import net.imglib2.meta.Axes;
+import net.imagej.axis.Axes;
 
 import org.scijava.log.LogService;
 

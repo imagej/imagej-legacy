@@ -33,10 +33,10 @@ package net.imagej.legacy.translate;
 
 import ij.ImagePlus;
 import net.imagej.Dataset;
+import net.imagej.axis.AxisType;
 import net.imagej.display.ImageDisplay;
 import net.imagej.display.ImageDisplayService;
 import net.imagej.legacy.LegacyService;
-import net.imglib2.meta.AxisType;
 
 import org.scijava.AbstractContextual;
 import org.scijava.Context;

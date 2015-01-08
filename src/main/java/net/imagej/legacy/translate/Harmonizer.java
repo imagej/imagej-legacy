@@ -39,12 +39,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 import net.imagej.Dataset;
+import net.imagej.ImgPlus;
+import net.imagej.axis.Axes;
 import net.imagej.display.ImageDisplay;
 import net.imagej.display.ImageDisplayService;
 import net.imagej.legacy.LegacyService;
-import net.imglib2.meta.Axes;
-import net.imglib2.meta.ImgPlus;
-import net.imglib2.meta.SpaceUtils;
+import net.imagej.space.SpaceUtils;
 import net.imglib2.type.numeric.RealType;
 
 import org.scijava.AbstractContextual;

@@ -35,9 +35,9 @@ import ij.VirtualStack;
 import ij.process.ColorProcessor;
 import ij.process.ImageProcessor;
 import net.imagej.Dataset;
+import net.imagej.axis.Axes;
+import net.imagej.axis.AxisType;
 import net.imglib2.RandomAccess;
-import net.imglib2.meta.Axes;
-import net.imglib2.meta.AxisType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.util.IntervalIndexer;
 

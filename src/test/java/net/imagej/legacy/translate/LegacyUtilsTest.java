@@ -38,9 +38,9 @@ import ij.ImageStack;
 import ij.process.ByteProcessor;
 import net.imagej.Extents;
 import net.imagej.Position;
+import net.imagej.axis.Axes;
+import net.imagej.axis.AxisType;
 import net.imagej.patcher.LegacyInjector;
-import net.imglib2.meta.Axes;
-import net.imglib2.meta.AxisType;
 
 import org.junit.Test;
 

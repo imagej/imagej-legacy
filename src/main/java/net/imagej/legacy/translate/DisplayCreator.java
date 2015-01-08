@@ -32,8 +32,8 @@
 package net.imagej.legacy.translate;
 
 import ij.ImagePlus;
+import net.imagej.axis.AxisType;
 import net.imagej.display.ImageDisplay;
-import net.imglib2.meta.AxisType;
 
 /**
  * The interface for creating {@link ImageDisplay}s from {@link ImagePlus}es.

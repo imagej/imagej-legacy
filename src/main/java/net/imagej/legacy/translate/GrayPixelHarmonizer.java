@@ -35,11 +35,11 @@ import ij.ImagePlus;
 import ij.ImageStack;
 import ij.process.ImageProcessor;
 import net.imagej.Dataset;
+import net.imagej.axis.Axes;
+import net.imagej.axis.AxisType;
+import net.imagej.space.SpaceUtils;
 import net.imglib2.RandomAccess;
-import net.imglib2.meta.Axes;
-import net.imglib2.meta.AxisType;
-import net.imglib2.meta.IntervalUtils;
-import net.imglib2.meta.SpaceUtils;
+import net.imglib2.util.Intervals;
 import net.imglib2.type.logic.BitType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.integer.ShortType;
@@ -94,7 +94,7 @@ public class GrayPixelHarmonizer implements DataHarmonizer {
 		final boolean signed16BitData = type instanceof ShortType;
 		final RandomAccess<? extends RealType<?>> accessor =
 			ds.getImgPlus().randomAccess();
-		final long[] dims = IntervalUtils.getDims(ds);
+		final long[] dims = Intervals.dimensionsAsLongArray(ds);
 		final AxisType[] axes = SpaceUtils.getAxisTypes(ds);
 		final int xIndex = ds.dimensionIndex(Axes.X);
 		final int yIndex = ds.dimensionIndex(Axes.Y);
@@ -167,7 +167,7 @@ public class GrayPixelHarmonizer implements DataHarmonizer {
 		final boolean bitData = type instanceof BitType;
 		final RandomAccess<? extends RealType<?>> accessor =
 			ds.getImgPlus().randomAccess();
-		final long[] dims = IntervalUtils.getDims(ds);
+		final long[] dims = Intervals.dimensionsAsLongArray(ds);
 		final int xIndex = ds.dimensionIndex(Axes.X);
 		final int yIndex = ds.dimensionIndex(Axes.Y);
 		final int zIndex = ds.dimensionIndex(Axes.Z);

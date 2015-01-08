@@ -36,11 +36,11 @@ import ij.VirtualStack;
 import ij.process.ImageProcessor;
 import net.imagej.Dataset;
 import net.imagej.DatasetService;
+import net.imagej.axis.Axes;
+import net.imagej.axis.AxisType;
 import net.imagej.display.ImageDisplay;
 import net.imagej.display.ImageDisplayService;
 import net.imglib2.RandomAccess;
-import net.imglib2.meta.Axes;
-import net.imglib2.meta.AxisType;
 import net.imglib2.type.numeric.RealType;
 
 import org.scijava.Context;
