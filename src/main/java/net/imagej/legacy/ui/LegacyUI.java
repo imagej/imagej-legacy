@@ -276,10 +276,10 @@ public class LegacyUI extends AbstractUserInterface implements SwingUI {
 					}
 					else if (FileWidget.SAVE_STYLE.equals(style)) {
 						// Use ImageJ1's SaveDialog.
-						final String defaultName = file.getName();
-						final String extension = FileUtils.getExtension(file);
+						final int dotIndex = file.getName().indexOf('.');
+						final String defaultName = file.getName().substring(0, dotIndex);
 						final SaveDialog saveDialog =
-							new SaveDialog("Save", defaultName, extension);
+							new SaveDialog("Save", defaultName, null);
 						final String directory = saveDialog.getDirectory();
 						final String fileName = saveDialog.getFileName();
 						if (directory != null && fileName != null) {
