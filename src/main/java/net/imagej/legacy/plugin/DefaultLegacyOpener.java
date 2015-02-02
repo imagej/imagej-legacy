@@ -40,6 +40,7 @@ import java.io.IOException;
 import java.util.concurrent.Future;
 
 import net.imagej.Dataset;
+import net.imagej.display.DefaultImageDisplay;
 import net.imagej.display.ImageDisplay;
 import net.imagej.legacy.DefaultLegacyService;
 import net.imagej.legacy.IJ1Helper;
@@ -146,16 +147,27 @@ public class DefaultLegacyOpener implements LegacyOpener {
 				final Dataset d = (Dataset) data;
 
 				if (displayResult) {
-					final ImageDisplay imageDisplay =
-						(ImageDisplay) displayService.createDisplay(d);
+
+					// --- HACK ---
+					// We should be using the DisplayService here, which would
+					// publish a DisplayCreatedEvent. However right now that
+					// causes deadlock issues due to the EventBus sharing the AWT EDT.
+					// If the ThreadService is converted to using its own off-EDT dedicated
+					// EventBus we can go back to the DisplayService mechanism.
+					// See https://github.com/scijava/scijava-common/issues/144
+
+					final ImageDisplay imageDisplay = new DefaultImageDisplay();
+					imageDisplay.setContext(c);
+					imageDisplay.display(d);
 
 					final LegacyImageMap imageMap = legacyService.getImageMap();
-					imp = imageMap.lookupImagePlus(imageDisplay);
-					if (imp == null) {
-						// we're in headless mode
-						imp = imageMap.registerDisplay(imageDisplay);
-						imp.show();
-					}
+					imp = imageMap.registerDisplay(imageDisplay);
+					imp.setTitle(d.getName());
+					imp.show();
+					// --- HACK ---
+					// We're not leaning on the IJ1 Framework as much so we have
+					// to reset this field after calling show, which sets it false.
+					legacyService.getIJ1Helper().setCheckNameDuplicates(true);
 
 					legacyService.getIJ1Helper().updateRecentMenu(
 						((Dataset) data).getImgPlus().getSource());

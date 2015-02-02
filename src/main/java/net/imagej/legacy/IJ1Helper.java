@@ -253,6 +253,13 @@ public class IJ1Helper extends AbstractContextual {
 		}
 	}
 
+	/**
+	 * Sets {@link WindowManager} {@code checkForDuplicateName} field.
+	 */
+	public void setCheckNameDuplicates(final boolean checkDuplicates) {
+		WindowManager.checkForDuplicateName = checkDuplicates;
+	}
+
 	public void setVisible(boolean toggle) {
 		if (batchMode) return;
 		final ImageJ ij = IJ.getInstance();
