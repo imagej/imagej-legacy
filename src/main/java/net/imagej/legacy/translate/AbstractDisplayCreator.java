@@ -32,6 +32,7 @@
 package net.imagej.legacy.translate;
 
 import ij.ImagePlus;
+import ij.io.FileInfo;
 import net.imagej.Dataset;
 import net.imagej.axis.AxisType;
 import net.imagej.display.ImageDisplay;
@@ -70,6 +71,15 @@ public abstract class AbstractDisplayCreator extends AbstractContextual
 	{
 		final Dataset ds = makeDataset(imp, preferredOrder);
 		ds.getProperties().put(LegacyImageMap.IMP_KEY, imp);
+		final FileInfo fileInfo = imp.getOriginalFileInfo();
+		String source;
+		if (fileInfo.url == null || fileInfo.url.isEmpty()) {
+			source = fileInfo.directory + fileInfo.fileName;
+		}
+		else {
+			source = fileInfo.url;
+		}
+		ds.getImgPlus().setSource(source);
 		return ds;
 	}
 
