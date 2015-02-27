@@ -72,12 +72,19 @@ public abstract class AbstractDisplayCreator extends AbstractContextual
 		final Dataset ds = makeDataset(imp, preferredOrder);
 		ds.getProperties().put(LegacyImageMap.IMP_KEY, imp);
 		final FileInfo fileInfo = imp.getOriginalFileInfo();
-		String source;
-		if (fileInfo.url == null || fileInfo.url.isEmpty()) {
-			source = fileInfo.directory + fileInfo.fileName;
+		String source = "";
+		if (fileInfo == null) {
+			// If no original file info, just use the title. This may be the case
+			// when an ImagePlus is created as the output of a command.
+			source = imp.getTitle();
 		}
 		else {
-			source = fileInfo.url;
+			if (fileInfo.url == null || fileInfo.url.isEmpty()) {
+				source = fileInfo.directory + fileInfo.fileName;
+			}
+			else {
+				source = fileInfo.url;
+			}
 		}
 		ds.getImgPlus().setSource(source);
 		return ds;
