@@ -86,7 +86,6 @@ import org.scijava.ui.viewer.DisplayWindow;
 import org.scijava.util.AppUtils;
 import org.scijava.util.Manifest;
 import org.scijava.util.POM;
-import org.scijava.welcome.event.WelcomeEvent;
 
 /**
  * Default service for working with legacy ImageJ 1.x.
@@ -537,12 +536,6 @@ public final class DefaultLegacyService extends AbstractService implements
 		if (ij1Helper.isMacintosh() && code == KeyCode.META) {
 			ij1Helper.setKeyUp(KeyCode.CONTROL.getCode());
 		}
-	}
-
-	/** @param event */
-	@EventHandler
-	private void onEvent(final WelcomeEvent event) {
-		commandService.run(ImageJ2Options.class, true);
 	}
 
 	// -- pre-initialization
