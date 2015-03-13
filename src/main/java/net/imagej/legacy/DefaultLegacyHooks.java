@@ -31,7 +31,9 @@
 
 package net.imagej.legacy;
 
+import ij.ImageJ;
 import ij.ImagePlus;
+import ij.gui.ImageWindow;
 
 import java.awt.Window;
 import java.awt.event.KeyEvent;
@@ -481,6 +483,23 @@ public class DefaultLegacyHooks extends LegacyHooks {
 		disposeWindows(unconfirmableWindows);
 
 		return true;
+	}
+
+	@Override
+	public void interceptImageWindowClose(final Object window) {
+		final ImageJ ij = legacyService.getIJ1Helper().getIJ();
+		final ImageWindow w = (ImageWindow)window;
+		// When quitting, IJ1 doesn't dispose closing ImageWindows.
+		// If the quit is later canceled this would leave orphaned windows.
+		// Thus we queue any closed windows for disposal.
+		if (w.isClosed() && ij != null && ij.quitting()) {
+			threadService().queue(new Runnable() {
+				@Override
+				public void run() {
+					w.dispose();
+				}
+			});
+		}
 	}
 
 	@Override
