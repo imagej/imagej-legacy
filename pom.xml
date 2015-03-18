@@ -10,7 +10,7 @@
 	</parent>
 
 	<artifactId>imagej-legacy</artifactId>
-	<version>0.11.1-SNAPSHOT</version>
+	<version>0.12.0</version>
 
 	<name>ImageJ Legacy Bridge</name>
 	<description>The legacy component enables backward compatibility with the legacy version of ImageJ (1.x). It contains the code necessary to translate ImageJ images into ImageJ1 format and back, so that legacy plugins can be executed faithfully.</description>
@@ -18,7 +18,7 @@
 	<scm>
 		<connection>scm:git:git://github.com/imagej/imagej-legacy</connection>
 		<developerConnection>scm:git:git@github.com:imagej/imagej-legacy</developerConnection>
-		<tag>HEAD</tag>
+		<tag>imagej-legacy-0.12.0</tag>
 		<url>https://github.com/imagej/imagej-legacy</url>
 	</scm>
 	<issueManagement>
