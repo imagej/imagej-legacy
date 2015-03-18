@@ -97,7 +97,7 @@ public class IJ1MacroEngine extends AbstractScriptEngine {
 				} else if (value instanceof File) {
 					value = ((File) value).getAbsolutePath();
 				}
-				if (value instanceof Number) {
+				if (value instanceof Number || value instanceof Boolean) {
 					pre.append(key).append(" = ").append(value).append(";\n");
 				} else {
 					String quoted = quote(value.toString());
