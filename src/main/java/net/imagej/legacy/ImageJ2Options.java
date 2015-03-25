@@ -85,13 +85,6 @@ public class ImageJ2Options extends OptionsPlugin implements Interactive {
 	private final String warning3 =
 		"and have not yet been optimized for performance.";
 
-	@Parameter(label = "Enable ImageJ2 data structures",
-		description = "<html>Whether to synchronize ImageJ 1.x and ImageJ2 data "
-			+ "structures.<br>When enabled, commands that use the ImageJ2 API "
-			+ "(net.imagej)<br>will function, but with an impact on performance "
-			+ "and stability.", callback = "run")
-	private boolean syncEnabled = false;
-
 	/**
 	 * If true, the <a href="http://imagej.net/SciJava_Common">SciJava Common</a>
 	 * {@link IOService} will be used to handle {@code File > Open} IJ1 calls.
@@ -149,8 +142,24 @@ public class ImageJ2Options extends OptionsPlugin implements Interactive {
 
 	// -- Option accessors --
 
+	/**
+	 * Gets whether to synchronize ImageJ 1.x and ImageJ2 data structures.
+	 * <p>
+	 * This is an experimental feature that proactively syncs objects between IJ1
+	 * (e.g., {@link ij.ImagePlus}) and IJ2 (e.g., {@link net.imagej.Dataset})
+	 * data structures.
+	 * </p>
+	 * <p>
+	 * <b>Warning:</b> this feature currently has serious bugs, and enabling it
+	 * will have a serious impact on performance and stability!
+	 * </p>
+	 * <p>
+	 * If you need to enable it for testing or development purposes, do so by
+	 * setting the {@code imagej.legacy.sync} system property.
+	 * </p>
+	 */
 	public boolean isSyncEnabled() {
-		return syncEnabled;
+		return Boolean.getBoolean("imagej.legacy.sync");
 	}
 
 	public boolean isSciJavaIO() {
