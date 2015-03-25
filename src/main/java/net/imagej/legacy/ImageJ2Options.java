@@ -36,7 +36,6 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import org.scijava.ItemVisibility;
 import org.scijava.app.AppService;
 import org.scijava.command.Interactive;
 import org.scijava.display.DisplayService;
@@ -70,28 +69,6 @@ public class ImageJ2Options extends OptionsPlugin implements Interactive {
 
 	// -- Fields --
 
-	// TODO: Use <html> and <br> to put the following warning into a single
-	// parameter. There seems to be a bug with at the moment, though...
-
-	@Parameter(visibility = ItemVisibility.MESSAGE)
-	private final String warning1 =
-		"These options enable beta ImageJ2 functionality.";
-
-	@Parameter(visibility = ItemVisibility.MESSAGE)
-	private final String warning2 =
-		"You can turn them on for testing, but they are still buggy,";
-
-	@Parameter(visibility = ItemVisibility.MESSAGE)
-	private final String warning3 =
-		"and have not yet been optimized for performance.";
-
-	@Parameter(label = "Enable ImageJ2 data structures",
-		description = "<html>Whether to synchronize ImageJ 1.x and ImageJ2 data "
-			+ "structures.<br>When enabled, commands that use the ImageJ2 API "
-			+ "(net.imagej)<br>will function, but with an impact on performance "
-			+ "and stability.", callback = "run")
-	private boolean syncEnabled = false;
-
 	/**
 	 * If true, the <a href="http://imagej.net/SciJava_Common">SciJava Common</a>
 	 * {@link IOService} will be used to handle {@code File > Open} IJ1 calls.
@@ -99,7 +76,7 @@ public class ImageJ2Options extends OptionsPlugin implements Interactive {
 	 * library to open image files.
 	 */
 	@Parameter(
-		label = "Use SCIFIO when opening files",
+		label = "Use SCIFIO when opening files (BETA!)",
 		description = "<html>Whether to use ImageJ2's file I/O mechanism when "
 			+ "opening files.<br>Image files will be opened using the SCIFIO library "
 			+ "(SCientific Image<br>Format Input and Output), which provides truly "
@@ -149,8 +126,24 @@ public class ImageJ2Options extends OptionsPlugin implements Interactive {
 
 	// -- Option accessors --
 
+	/**
+	 * Gets whether to synchronize ImageJ 1.x and ImageJ2 data structures.
+	 * <p>
+	 * This is an experimental feature that proactively syncs objects between IJ1
+	 * (e.g., {@link ij.ImagePlus}) and IJ2 (e.g., {@link net.imagej.Dataset})
+	 * data structures.
+	 * </p>
+	 * <p>
+	 * <b>Warning:</b> this feature currently has serious bugs, and enabling it
+	 * will have a serious impact on performance and stability!
+	 * </p>
+	 * <p>
+	 * If you need to enable it for testing or development purposes, do so by
+	 * setting the {@code imagej.legacy.sync} system property.
+	 * </p>
+	 */
 	public boolean isSyncEnabled() {
-		return syncEnabled;
+		return Boolean.getBoolean("imagej.legacy.sync");
 	}
 
 	public boolean isSciJavaIO() {
