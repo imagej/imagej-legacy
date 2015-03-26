@@ -39,6 +39,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
 import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.WindowConstants;
 
 import net.imagej.legacy.DefaultLegacyService;
 import net.imagej.legacy.IJ1Helper;
@@ -69,10 +71,10 @@ import org.scijava.ui.awt.AWTDropTargetEventDispatcher;
 import org.scijava.ui.awt.AWTInputEventDispatcher;
 import org.scijava.ui.awt.AWTWindowEventDispatcher;
 import org.scijava.ui.swing.SwingUI;
+import org.scijava.ui.swing.console.SwingConsolePane;
 import org.scijava.ui.swing.viewer.SwingDisplayWindow;
 import org.scijava.ui.viewer.DisplayViewer;
 import org.scijava.ui.viewer.DisplayWindow;
-import org.scijava.util.FileUtils;
 import org.scijava.widget.FileWidget;
 
 /**
@@ -107,11 +109,11 @@ public class LegacyUI extends AbstractUserInterface implements SwingUI {
 	private EventService eventService;
 
 	private IJ1Helper ij1Helper;
+
 	private LegacyApplicationFrame applicationFrame;
 	private ToolBar toolBar;
-
 	private StatusBar statusBar;
-
+	private SwingConsolePane consolePane;
 	private SystemClipboard systemClipboard;
 
 	private IJ1Helper ij1Helper() {
@@ -131,7 +133,19 @@ public class LegacyUI extends AbstractUserInterface implements SwingUI {
 	public void show() {
 		if (ij1Helper() != null) {
 			ij1Helper.setVisible(true);
+			createConsole();
 		}
+	}
+
+	private synchronized void createConsole() {
+		if (consolePane != null) return;
+		consolePane = new SwingConsolePane(getContext());
+
+		final JFrame frame = new JFrame("Console");
+		frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+		frame.setContentPane(getConsolePane().getComponent());
+		frame.pack();
+		getConsolePane().setWindow(frame);
 	}
 
 	@Override
@@ -217,6 +231,11 @@ public class LegacyUI extends AbstractUserInterface implements SwingUI {
 			statusBar = new LegacyStatusBar(legacyService);
 		}
 		return statusBar;
+	}
+
+	@Override
+	public SwingConsolePane getConsolePane() {
+		return consolePane;
 	}
 
 	@Override
