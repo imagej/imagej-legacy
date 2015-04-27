@@ -39,6 +39,8 @@ import java.util.Collection;
 import net.imagej.Dataset;
 import net.imagej.display.ImageDisplay;
 import net.imagej.display.ImageDisplayService;
+import net.imagej.legacy.DefaultLegacyService;
+import net.imagej.legacy.IJ1Helper;
 import net.imagej.legacy.LegacyService;
 
 import org.scijava.Priority;
@@ -115,7 +117,17 @@ public class ImagePlusDatasetConverter extends
 
 	@Override
 	public void populateInputCandidates(final Collection<Object> objects) {
-		objects.addAll(objectService.getObjects(ImagePlus.class));
+		final IJ1Helper ij1Helper = ((DefaultLegacyService)legacyService).getIJ1Helper();
+
+		final int[] imageIDs = ij1Helper.getIDList();
+
+		// Add any ImagePluses in the IJ1 WindowManager that are not already
+		// converted
+		for (final int id : imageIDs) {
+			final ImagePlus imgPlus = ij1Helper.getImage(id);
+			if (legacyService.getImageMap().lookupDisplay(imgPlus) == null) objects
+				.add(imgPlus);
+		}
 	}
 
 	@Override
