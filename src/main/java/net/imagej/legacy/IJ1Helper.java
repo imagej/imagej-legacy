@@ -345,6 +345,14 @@ public class IJ1Helper extends AbstractContextual {
 		return null;
 	}
 
+	public int[] getIDList() {
+		return WindowManager.getIDList();
+	}
+
+	public ImagePlus getImage(int imageID) {
+		return WindowManager.getImage(imageID);
+	}
+
 	public ClassLoader getClassLoader() {
 		return IJ.getClassLoader();
 	}
