@@ -1,3 +1,5 @@
+![](http://jenkins.imagej.net/job/ImageJ-legacy/lastBuild/badge/icon)
+
 ImageJ Legacy Bridge
 --------------------
 
