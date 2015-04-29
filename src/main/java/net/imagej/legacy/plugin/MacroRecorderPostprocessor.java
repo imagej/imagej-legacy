@@ -31,14 +31,15 @@
 
 package net.imagej.legacy.plugin;
 
-import ij.IJ;
-import ij.plugin.frame.Recorder;
+import net.imagej.legacy.DefaultLegacyService;
+import net.imagej.legacy.IJ1Helper;
 
 import org.scijava.Priority;
 import org.scijava.module.Module;
 import org.scijava.module.ModuleItem;
 import org.scijava.module.process.AbstractPostprocessorPlugin;
 import org.scijava.module.process.PostprocessorPlugin;
+import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 
 /**
@@ -50,18 +51,23 @@ import org.scijava.plugin.Plugin;
 @Plugin(type = PostprocessorPlugin.class, priority = Priority.VERY_LOW_PRIORITY)
 public class MacroRecorderPostprocessor extends AbstractPostprocessorPlugin {
 
+	@Parameter(required = false)
+	private DefaultLegacyService legacyService;
+
 	// -- ModuleProcessor methods --
 
 	@Override
 	public void process(final Module module) {
-		if (IJ.isMacro()) {
+		final IJ1Helper ij1Helper = legacyService.getIJ1Helper();
+		if (ij1Helper == null) return;
+		if (ij1Helper.isMacro()) {
 			// do not record parameters while in macro mode
 			return;
 		}
 		for (final ModuleItem<?> input : module.getInfo().inputs()) {
 			final String name = input.getName();
 			final Object value = module.getInput(name);
-			if (value != null) Recorder.recordOption(name, value.toString());
+			if (value != null) ij1Helper.recordOption(name, value.toString());
 		}
 	}
 

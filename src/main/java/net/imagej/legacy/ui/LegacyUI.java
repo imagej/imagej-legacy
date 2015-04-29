@@ -31,9 +31,6 @@
 
 package net.imagej.legacy.ui;
 
-import ij.io.OpenDialog;
-import ij.io.SaveDialog;
-
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
@@ -294,26 +291,16 @@ public class LegacyUI extends AbstractUserInterface implements SwingUI {
 						}
 					}
 					else if (FileWidget.SAVE_STYLE.equals(style)) {
-						// Use ImageJ1's SaveDialog.
-						final int dotIndex = file.getName().indexOf('.');
-						final String defaultName =
-							dotIndex > 0 ? file.getName().substring(0, dotIndex) : file
-								.getName();
-						final SaveDialog saveDialog =
-							new SaveDialog("Save", defaultName, null);
-						final String directory = saveDialog.getDirectory();
-						final String fileName = saveDialog.getFileName();
-						if (directory != null && fileName != null) {
-							chosenFile[0] = new File(directory, fileName);
+						final File chosen = ij1Helper().saveDialog("Save", file, null);
+						if (chosen != null) {
+							chosenFile[0] = chosen;
 						}
 					}
 					else { // FileWidget.OPEN_STYLE / default behavior
 						// Use ImageJ1's OpenDialog.
-						final OpenDialog openDialog = new OpenDialog("Open");
-						final String directory = openDialog.getDirectory();
-						final String fileName = openDialog.getFileName();
-						if (directory != null && fileName != null) {
-							chosenFile[0] = new File(directory, fileName);
+						final File chosen = ij1Helper().openDialog("Open");
+						if (chosen != null) {
+							chosenFile[0] = chosen;
 						}
 					}
 				}

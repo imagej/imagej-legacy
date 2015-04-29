@@ -40,12 +40,15 @@ import ij.Menus;
 import ij.WindowManager;
 import ij.gui.ImageWindow;
 import ij.gui.Toolbar;
+import ij.io.OpenDialog;
 import ij.io.Opener;
+import ij.io.SaveDialog;
 import ij.macro.Interpreter;
 import ij.plugin.Commands;
 import ij.plugin.PlugIn;
 import ij.plugin.filter.PlugInFilter;
 import ij.plugin.filter.PlugInFilterRunner;
+import ij.plugin.frame.Recorder;
 
 import java.awt.Component;
 import java.awt.EventQueue;
@@ -54,6 +57,7 @@ import java.awt.Image;
 import java.awt.Menu;
 import java.awt.MenuBar;
 import java.awt.MenuItem;
+import java.awt.Panel;
 import java.awt.Window;
 import java.awt.image.ImageProducer;
 import java.io.File;
@@ -338,11 +342,43 @@ public class IJ1Helper extends AbstractContextual {
 		return Toolbar.getInstance();
 	}
 
-	public ImageJ getIJ() {
+	public Panel getStatusBar() {
+		if (!hasInstance()) return null;
+		return IJ.getInstance().getStatusBar();
+	}
+
+	public Frame getIJ() {
 		if (hasInstance()) {
 			return IJ.getInstance();
 		}
 		return null;
+	}
+
+	public void setLocation(final int x, final int y) {
+		if (!hasInstance()) return;
+		IJ.getInstance().setLocation(x, y);
+	}
+
+	public int getX() {
+		if (!hasInstance()) return 0;
+		return IJ.getInstance().getX();
+	}
+
+	public int getY() {
+		if (!hasInstance()) return 0;
+		return IJ.getInstance().getY();
+	}
+
+	public boolean isWindowClosed(Frame window) {
+		if (window instanceof ImageWindow) {
+			return ((ImageWindow) window).isClosed();
+		}
+		return false;
+	}
+
+	public boolean quitting() {
+		if (hasInstance()) return IJ.getInstance().quitting();
+		return false;
 	}
 
 	public int[] getIDList() {
@@ -398,6 +434,25 @@ public class IJ1Helper extends AbstractContextual {
 			menu.insert(item, 0);
 		}
 		// if index was 0, already at the head so do nothing
+	}
+
+	/**
+	 * Records an option in ImageJ 1.x's macro recorder.
+	 * 
+	 * @param key the name of the option
+	 * @param value the value of the option
+	 */
+	public void recordOption(final String key, final String value) {
+		Recorder.recordOption(key, value);
+	}
+
+	/**
+	 * Determines whether we're running inside a macro right now.
+	 * 
+	 * @return whether we're running a macro right now.
+	 */
+	public boolean isMacro() {
+		return IJ.isMacro();
 	}
 
 	/**
@@ -576,7 +631,7 @@ public class IJ1Helper extends AbstractContextual {
 			legacyService.getScriptsAndNonLegacyCommands();
 		@SuppressWarnings("unchecked")
 		final Hashtable<String, String> ij1Commands = Menus.getCommands();
-		final ImageJ ij1 = getIJ();
+		final ImageJ ij1 = hasInstance() ? IJ.getInstance() : null;
 		final IJ1MenuWrapper wrapper = ij1 == null ? null : new IJ1MenuWrapper(ij1);
 		class Item implements Comparable<Item> {
 			private double weight;
@@ -907,6 +962,34 @@ public class IJ1Helper extends AbstractContextual {
 		if (legacyService.isLegacyMode()) {
 			IJ.run("About ImageJ...");
 		}
+	}
+
+	/** Uses ImageJ 1.x' OpenDialog */
+	public File openDialog(final String title) {
+		final OpenDialog openDialog = new OpenDialog(title);
+		final String directory = openDialog.getDirectory();
+		final String fileName = openDialog.getFileName();
+		if (directory != null && fileName != null) {
+			return new File(directory, fileName);
+		}
+		return null;
+	}
+
+	/** Uses ImageJ 1.x' SaveDialog */
+	public File saveDialog(final String title, final File file, final String extension) {
+		// Use ImageJ1's SaveDialog.
+		final int dotIndex = file.getName().indexOf('.');
+		final String defaultName =
+			dotIndex > 0 ? file.getName().substring(0, dotIndex) : file
+				.getName();
+		final SaveDialog saveDialog =
+			new SaveDialog(title, defaultName, extension);
+		final String directory = saveDialog.getDirectory();
+		final String fileName = saveDialog.getFileName();
+		if (directory != null && fileName != null) {
+			return new File(directory, fileName);
+		}
+		return null;
 	}
 
 	/** Handles display of the ImageJ 1.x preferences. */
