@@ -31,7 +31,7 @@
 
 package net.imagej.legacy.plugin;
 
-import net.imagej.legacy.DefaultLegacyService;
+import net.imagej.legacy.LegacyService;
 import net.imagej.legacy.IJ1Helper;
 
 import org.scijava.Priority;
@@ -54,7 +54,7 @@ import org.scijava.plugin.Plugin;
 public class MacroPreprocessor extends AbstractPreprocessorPlugin {
 
 	@Parameter(required = false)
-	private DefaultLegacyService legacyService;
+	private LegacyService legacyService;
 
 	@Parameter
 	private ConvertService convertService;

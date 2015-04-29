@@ -48,7 +48,7 @@ public class LegacyImageJApp extends AbstractApp {
 	public static final String NAME = "ImageJ1";
 
 	@Parameter
-	private DefaultLegacyService legacyService;
+	private LegacyService legacyService;
 
 	@Override
 	public String getGroupId() {

@@ -31,7 +31,7 @@
 
 package net.imagej.legacy.plugin;
 
-import net.imagej.legacy.DefaultLegacyService;
+import net.imagej.legacy.LegacyService;
 import net.imagej.legacy.IJ1Helper;
 
 import org.scijava.Priority;
@@ -52,7 +52,7 @@ import org.scijava.plugin.Plugin;
 public class MacroRecorderPostprocessor extends AbstractPostprocessorPlugin {
 
 	@Parameter(required = false)
-	private DefaultLegacyService legacyService;
+	private LegacyService legacyService;
 
 	// -- ModuleProcessor methods --
 

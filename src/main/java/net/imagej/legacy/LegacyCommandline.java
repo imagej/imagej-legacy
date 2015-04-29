@@ -94,7 +94,7 @@ import org.scijava.plugin.Plugin;
 public abstract class LegacyCommandline extends AbstractConsoleArgument {
 
 	@Parameter
-	protected DefaultLegacyService legacyService;
+	protected LegacyService legacyService;
 
 	@Parameter
 	protected LogService log;

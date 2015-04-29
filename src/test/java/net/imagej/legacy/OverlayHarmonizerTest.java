@@ -84,14 +84,14 @@ public class OverlayHarmonizerTest {
 
 	@Before
 	public void beforeMethod() {
-		synchronized (DefaultLegacyService.class) {
+		synchronized (LegacyService.class) {
 			context = new Context(LegacyService.class);
 		}
 	}
 
 	@After
 	public void afterMethod() {
-		synchronized (DefaultLegacyService.class) {
+		synchronized (LegacyService.class) {
 			if (context != null) {
 				context.dispose();
 				context = null;
@@ -112,7 +112,7 @@ public class OverlayHarmonizerTest {
 //		ImagePlus imagePlus = Helper.makeImagePlus("Bar", Helper.makeRandomByteArray(r, 11, 15));
 //		imagePlus.setRoi(Helper.makePolygonROI(new int[] { 0, 5, 5, 0, 0}, new int[] { 0, 0, 5, 5, 0}));
 //		ot.setDatasetOverlays(ds, imagePlus);
-		synchronized (DefaultLegacyService.class) {
+		synchronized (LegacyService.class) {
 			// fill me some day
 		}
 	}
@@ -132,7 +132,7 @@ public class OverlayHarmonizerTest {
 //		Dataset ds = Helper.makeDataset(Helper.makeRandomByteArray(r, 11, 15), "Foo");
 //		ImagePlus imagePlus = Helper.makeImagePlus("Bar", Helper.makeRandomByteArray(r, 11, 15));
 //		ot.setImagePlusOverlays(ds, imagePlus);
-		synchronized (DefaultLegacyService.class) {
+		synchronized (LegacyService.class) {
 			// fill me some day
 		}
 	}
@@ -142,7 +142,7 @@ public class OverlayHarmonizerTest {
 	 */
 	@Test
 	public void testGetOverlays() {
-		synchronized (DefaultLegacyService.class) {
+		synchronized (LegacyService.class) {
 			// Just test that we get a single overlay of the correct type. Other tests
 			// for particulars of the decoding.
 			final Random r = new Random(1234);
@@ -164,7 +164,7 @@ public class OverlayHarmonizerTest {
 	 */
 	@Test
 	public void testSetOverlays() {
-		synchronized (DefaultLegacyService.class) {
+		synchronized (LegacyService.class) {
 			final Random r = new Random(1234);
 			final OverlayHarmonizer ot =
 				new OverlayHarmonizer(context);
@@ -184,7 +184,7 @@ public class OverlayHarmonizerTest {
 	// translators that they wrote
 	@Test
 	public void testPolygonOverlay() {
-		synchronized (DefaultLegacyService.class) {
+		synchronized (LegacyService.class) {
 			final Random r = new Random(1234);
 			final int[][][] vertices =
 				new int[][][] { { { 0, 5, 5, 0 }, { 0, 0, 5, 5 } },
@@ -224,7 +224,7 @@ public class OverlayHarmonizerTest {
 
 	@Test
 	public void testPolygonROI() {
-		synchronized (DefaultLegacyService.class) {
+		synchronized (LegacyService.class) {
 			final Random r = new Random(1234);
 			final double[][][] vertices =
 				new double[][][] { { { 0, 5, 5, 0 }, { 0, 0, 5, 5 } },
@@ -268,7 +268,7 @@ public class OverlayHarmonizerTest {
 
 	@Test
 	public void testCompositeRoi() {
-		synchronized (DefaultLegacyService.class) {
+		synchronized (LegacyService.class) {
 			/*
 			 * The composite Roi has an offset and its contained Rois are relative to that offset
 			 */
@@ -326,7 +326,7 @@ public class OverlayHarmonizerTest {
 
 	@Test
 	public void testDonut() {
-		synchronized (DefaultLegacyService.class) {
+		synchronized (LegacyService.class) {
 			final OverlayHarmonizer ot =
 				new OverlayHarmonizer(context);
 			final Random r = new Random(1234);
@@ -359,7 +359,7 @@ public class OverlayHarmonizerTest {
 
 	@Test
 	public void testCreateBinaryMaskOverlay() {
-		synchronized (DefaultLegacyService.class) {
+		synchronized (LegacyService.class) {
 			final OverlayHarmonizer ot =
 				new OverlayHarmonizer(context);
 			final Random r = new Random(1234);
@@ -391,7 +391,7 @@ public class OverlayHarmonizerTest {
 
 	@Test
 	public void testCreateBinaryMaskROI() {
-		synchronized (DefaultLegacyService.class) {
+		synchronized (LegacyService.class) {
 			final Random r = new Random(54321);
 			final boolean[][] data = Helper.makeRandomBooleanArray(r, 7, 8);
 			final BinaryMaskOverlay<BitType, Img<BitType>> overlay =

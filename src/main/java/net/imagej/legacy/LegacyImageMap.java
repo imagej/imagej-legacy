@@ -156,7 +156,7 @@ public class LegacyImageMap extends AbstractContextual {
 	/**
 	 * The legacy service corresponding to this image map.
 	 */
-	private final DefaultLegacyService legacyService;
+	private final LegacyService legacyService;
 
 	@Parameter
 	private ImageDisplayService imageDisplayService;
@@ -166,7 +166,7 @@ public class LegacyImageMap extends AbstractContextual {
 
 	// -- Constructor --
 
-	public LegacyImageMap(final DefaultLegacyService legacyService) {
+	public LegacyImageMap(final LegacyService legacyService) {
 		setContext(legacyService.getContext());
 		this.legacyService = legacyService;
 		imagePlusTable = new ConcurrentHashMap<ImageDisplay, ImagePlus>();

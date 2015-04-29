@@ -39,7 +39,7 @@ import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.WindowConstants;
 
-import net.imagej.legacy.DefaultLegacyService;
+import net.imagej.legacy.LegacyService;
 import net.imagej.legacy.IJ1Helper;
 import net.imagej.legacy.LegacyService;
 import net.imagej.legacy.display.LegacyDisplayViewer;
@@ -115,8 +115,8 @@ public class LegacyUI extends AbstractUserInterface implements SwingUI {
 
 	private IJ1Helper ij1Helper() {
 		// FIXME: See https://github.com/imagej/imagej-legacy/issues/53
-		if (legacyService instanceof DefaultLegacyService) {
-			ij1Helper = ((DefaultLegacyService) legacyService).getIJ1Helper();
+		if (legacyService instanceof LegacyService) {
+			ij1Helper = ((LegacyService) legacyService).getIJ1Helper();
 		}
 		return ij1Helper;
 	}
