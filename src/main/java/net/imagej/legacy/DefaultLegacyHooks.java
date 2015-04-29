@@ -31,10 +31,10 @@
 
 package net.imagej.legacy;
 
-import ij.ImageJ;
 import ij.ImagePlus;
 import ij.gui.ImageWindow;
 
+import java.awt.Frame;
 import java.awt.Window;
 import java.awt.event.KeyEvent;
 import java.io.BufferedWriter;
@@ -487,12 +487,12 @@ public class DefaultLegacyHooks extends LegacyHooks {
 
 	@Override
 	public void interceptImageWindowClose(final Object window) {
-		final ImageJ ij = legacyService.getIJ1Helper().getIJ();
-		final ImageWindow w = (ImageWindow)window;
+		final IJ1Helper ij1Helper = legacyService.getIJ1Helper();
+		final Frame w = (Frame)window;
 		// When quitting, IJ1 doesn't dispose closing ImageWindows.
 		// If the quit is later canceled this would leave orphaned windows.
 		// Thus we queue any closed windows for disposal.
-		if (w.isClosed() && ij != null && ij.quitting()) {
+		if (ij1Helper.isWindowClosed(w) && ij1Helper.quitting()) {
 			threadService().queue(new Runnable() {
 				@Override
 				public void run() {

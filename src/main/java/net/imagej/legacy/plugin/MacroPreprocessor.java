@@ -31,8 +31,8 @@
 
 package net.imagej.legacy.plugin;
 
-import ij.IJ;
-import ij.Macro;
+import net.imagej.legacy.DefaultLegacyService;
+import net.imagej.legacy.IJ1Helper;
 
 import org.scijava.Priority;
 import org.scijava.convert.ConvertService;
@@ -53,6 +53,9 @@ import org.scijava.plugin.Plugin;
 	priority = 2 * Priority.VERY_HIGH_PRIORITY)
 public class MacroPreprocessor extends AbstractPreprocessorPlugin {
 
+	@Parameter(required = false)
+	private DefaultLegacyService legacyService;
+
 	@Parameter
 	private ConvertService convertService;
 
@@ -60,11 +63,12 @@ public class MacroPreprocessor extends AbstractPreprocessorPlugin {
 
 	@Override
 	public void process(final Module module) {
-		if (!IJ.isMacro()) return;
-		final String options = Macro.getOptions();
+		final IJ1Helper ij1Helper = legacyService.getIJ1Helper();
+		if (ij1Helper == null) return;
+		if (!ij1Helper.isMacro()) return;
 		for (final ModuleItem<?> input : module.getInfo().inputs()) {
 			final String name = input.getName();
-			final String value = Macro.getValue(options, name, null);
+			final String value = ij1Helper.getMacroParameter(name);
 			final Class<?> type = input.getType();
 			if (!convertService.supports(value, type)) {
 				// cannot convert macro value into the input's actual type

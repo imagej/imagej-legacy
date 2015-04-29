@@ -84,7 +84,7 @@ public class LegacyStatusBar extends AbstractLegacyAdapter implements
 
 	@Override
 	public Panel getComponent() {
-		return helper().getIJ().getStatusBar();
+		return helper().getStatusBar();
 	}
 
 	@Override
