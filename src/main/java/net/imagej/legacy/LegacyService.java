@@ -112,6 +112,15 @@ import org.scijava.util.POM;
 @Plugin(type = Service.class, priority = Priority.NORMAL_PRIORITY + 1)
 public final class LegacyService extends AbstractService {
 
+	/**
+	 * Static reference to the one and only active {@link LegacyService}. The JVM
+	 * can only have one instance of ImageJ 1.x, and hence one LegacyService,
+	 * active at a time.
+	 */
+	private static LegacyService instance;
+
+	private static Throwable instantiationStackTrace;
+
 	static {
 		// NB: Prime ImageJ 1.x for patching.
 		// This will only work if this class does _not_ need to load any ij.*
@@ -171,15 +180,6 @@ public final class LegacyService extends AbstractService {
 	@Parameter(required = false)
 	private ThresholdService thresholdService;
 
-	/**
-	 * Static reference to the one and only active {@link LegacyService}. The JVM
-	 * can only have one instance of ImageJ 1.x, and hence one LegacyService,
-	 * active at a time.
-	 */
-	private static LegacyService instance;
-
-	private static Throwable instantiationStackTrace;
-
 	/** Mapping between modern and legacy image data structures. */
 	private LegacyImageMap imageMap;
 
@@ -188,15 +188,6 @@ public final class LegacyService extends AbstractService {
 	 * this class.
 	 */
 	private IJ1Helper ij1Helper;
-
-	/**
-	 * Gets the helper class responsible for direct interfacing with ImageJ1.
-	 * Ideally, all accesses to {@code ij.*} classes should be done through this
-	 * helper class, to avoid class loader woes.
-	 */
-	public IJ1Helper getIJ1Helper() {
-		return ij1Helper;
-	}
 
 	private final ThreadLocal<Boolean> isProcessingEvents =
 		new ThreadLocal<Boolean>();
@@ -220,6 +211,20 @@ public final class LegacyService extends AbstractService {
 	/** Gets the StatusService associated with this LegacyService. */
 	public StatusService status() {
 		return statusService;
+	}
+
+	public synchronized UIService uiService() {
+		if (uiService == null) uiService = getContext().getService(UIService.class);
+		return uiService;
+	}
+
+	/**
+	 * Gets the helper class responsible for direct interfacing with ImageJ1.
+	 * Ideally, all accesses to {@code ij.*} classes should be done through this
+	 * helper class, to avoid class loader woes.
+	 */
+	public IJ1Helper getIJ1Helper() {
+		return ij1Helper;
 	}
 
 	/** Gets the LegacyImageMap associated with this LegacyService. */
@@ -436,6 +441,16 @@ public final class LegacyService extends AbstractService {
 		return version + "/" + getLegacyVersion();
 	}
 
+	public App getApp() {
+		if (appService == null) return null;
+		return appService.getApp();
+	}
+
+	public void handleException(final Throwable e) {
+		log.error(e);
+		ij1Helper.handleException(e);
+	}
+
 	// -- Service methods --
 
 	@Override
@@ -486,39 +501,6 @@ public final class LegacyService extends AbstractService {
 		ij1Helper.addMenuItems();
 	}
 
-	// -- Package protected events processing methods --
-
-	/**
-	 * NB: This method is not intended for public consumption. It is really
-	 * intended to be "jar protected". It is used to toggle a {@link ThreadLocal}
-	 * flag as to whether or not legacy UI components are in the process of
-	 * handling {@code StatusEvents}.
-	 * <p>
-	 * USE AT YOUR OWN RISK!
-	 * </p>
-	 *
-	 * @return the old processing value
-	 */
-	public boolean setProcessingEvents(final boolean processing) {
-		final boolean result = isProcessingEvents();
-		if (result != processing) {
-			isProcessingEvents.set(processing);
-		}
-		return result;
-	}
-
-	/**
-	 * {@link ThreadLocal} check to see if components are in the middle of
-	 * processing events.
-	 *
-	 * @return True iff this thread is already processing events through the
-	 *         {@code LegacyService}.
-	 */
-	public boolean isProcessingEvents() {
-		final Boolean result = isProcessingEvents.get();
-		return result == Boolean.TRUE;
-	}
-
 	// -- Disposable methods --
 
 	@Override
@@ -531,6 +513,19 @@ public final class LegacyService extends AbstractService {
 			instance = null;
 			instantiationStackTrace = null;
 		}
+	}
+
+	// -- Utility methods --
+
+	/**
+	 * Returns the legacy service associated with the ImageJ 1.x instance in the
+	 * current class loader. This method is invoked by the javassisted methods of
+	 * ImageJ 1.x.
+	 *
+	 * @return the legacy service
+	 */
+	public static LegacyService getInstance() {
+		return instance;
 	}
 
 	// -- Event handlers --
@@ -571,82 +566,45 @@ public final class LegacyService extends AbstractService {
 		}
 	}
 
-	// -- pre-initialization
+	// -- Internal methods --
 
 	/**
-	 * Makes sure that the ImageJ 1.x classes are patched.
+	 * <strong>This is not part of the public API. DO NOT USE!</strong>
 	 * <p>
-	 * We absolutely require that the LegacyInjector did its job before we use the
-	 * ImageJ 1.x classes.
-	 * </p>
-	 * <p>
-	 * Just loading the {@link LegacyService} class is not enough; it will
-	 * not necessarily get initialized. So we provide this method just to force
-	 * class initialization (and thereby the LegacyInjector to patch ImageJ 1.x).
+	 * This method toggles a {@link ThreadLocal} flag as to whether or not legacy
+	 * UI components are in the process of handling {@code StatusEvents}.
 	 * </p>
 	 *
-	 * @deprecated use {@link LegacyInjector#preinit()} instead
+	 * @return the old processing value
 	 */
-	@Deprecated
-	public static void preinit() {
-		try {
-			getLegacyEnvironment(Thread.currentThread().getContextClassLoader());
+	public boolean setProcessingEvents(final boolean processing) {
+		final boolean result = isProcessingEvents();
+		if (result != processing) {
+			isProcessingEvents.set(processing);
 		}
-		catch (final Throwable t) {
-			t.printStackTrace();
-		}
+		return result;
 	}
-
-	private static LegacyEnvironment
-		getLegacyEnvironment(final ClassLoader loader)
-			throws ClassNotFoundException
-	{
-		final boolean headless = GraphicsEnvironment.isHeadless();
-		final LegacyEnvironment ij1 = new LegacyEnvironment(loader, headless);
-		ij1.disableInitializer();
-		ij1.noPluginClassLoader();
-		ij1.suppressIJ1ScriptDiscovery();
-		ij1.applyPatches();
-		return ij1;
-	}
-
-	// -- helpers --
 
 	/**
-	 * Returns the legacy service associated with the ImageJ 1.x instance in the
-	 * current class loader. This method is invoked by the javassisted methods of
-	 * ImageJ 1.x.
+	 * <strong>This is not part of the public API. DO NOT USE!</strong>
+	 * <p>
+	 * {@link ThreadLocal} check to see if components are in the middle of
+	 * processing events.
+	 * </p>
 	 *
-	 * @return the legacy service
+	 * @return True iff this thread is already processing events through the
+	 *         {@code LegacyService}.
 	 */
-	public static LegacyService getInstance() {
-		return instance;
+	public boolean isProcessingEvents() {
+		final Boolean result = isProcessingEvents.get();
+		return result == Boolean.TRUE;
 	}
 
 	/**
-	 * @throws UnsupportedOperationException if the singleton
-	 *           {@code LegacyService} already exists.
-	 */
-	private void checkInstance() {
-		if (instance != null) {
-			throw new UnsupportedOperationException(
-				"Cannot instantiate more than one LegacyService",
-				instantiationStackTrace);
-		}
-	}
-
-	public App getApp() {
-		if (appService == null) return null;
-		return appService.getApp();
-	}
-
-	// -- Menu population --
-
-	/**
+	 * <strong>This is not part of the public API. DO NOT USE!</strong>
+	 * <p>
 	 * Adds all legacy compatible commands to the ImageJ1 menus. The nested menu
 	 * structure of each command is preserved.
-	 * <p>
-	 * This is not part of the public API. DO-NOT-USE!
 	 * </p>
 	 */
 	public Map<String, ModuleInfo> getScriptsAndNonLegacyCommands() {
@@ -679,6 +637,7 @@ public final class LegacyService extends AbstractService {
 		return modules;
 	}
 
+	/** <strong>This is not part of the public API. DO NOT USE!</strong> */
 	boolean handleShortcut(final String accelerator) {
 		final Accelerator acc = Accelerator.create(accelerator);
 		if (acc == null) return false;
@@ -688,13 +647,57 @@ public final class LegacyService extends AbstractService {
 		return true;
 	}
 
-	public synchronized UIService uiService() {
-		if (uiService == null) uiService = getContext().getService(UIService.class);
-		return uiService;
+	// -- Helper methods --
+
+	/**
+	 * @throws UnsupportedOperationException if the singleton
+	 *           {@code LegacyService} already exists.
+	 */
+	private void checkInstance() {
+		if (instance != null) {
+			throw new UnsupportedOperationException(
+				"Cannot instantiate more than one LegacyService",
+				instantiationStackTrace);
+		}
 	}
 
-	public void handleException(final Throwable e) {
-		log.error(e);
-		ij1Helper.handleException(e);
+	private static LegacyEnvironment
+		getLegacyEnvironment(final ClassLoader loader)
+			throws ClassNotFoundException
+	{
+		final boolean headless = GraphicsEnvironment.isHeadless();
+		final LegacyEnvironment ij1 = new LegacyEnvironment(loader, headless);
+		ij1.disableInitializer();
+		ij1.noPluginClassLoader();
+		ij1.suppressIJ1ScriptDiscovery();
+		ij1.applyPatches();
+		return ij1;
 	}
+
+	// -- Deprecated methods --
+
+	/**
+	 * Makes sure that the ImageJ 1.x classes are patched.
+	 * <p>
+	 * We absolutely require that the LegacyInjector did its job before we use the
+	 * ImageJ 1.x classes.
+	 * </p>
+	 * <p>
+	 * Just loading the {@link LegacyService} class is not enough; it will
+	 * not necessarily get initialized. So we provide this method just to force
+	 * class initialization (and thereby the LegacyInjector to patch ImageJ 1.x).
+	 * </p>
+	 *
+	 * @deprecated use {@link LegacyInjector#preinit()} instead
+	 */
+	@Deprecated
+	public static void preinit() {
+		try {
+			getLegacyEnvironment(Thread.currentThread().getContextClassLoader());
+		}
+		catch (final Throwable t) {
+			t.printStackTrace();
+		}
+	}
+
 }
