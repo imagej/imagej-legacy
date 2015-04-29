@@ -191,6 +191,11 @@ public final class DefaultLegacyService extends AbstractService implements
 	private IJ1Helper ij1Helper;
 
 	// FIXME: See https://github.com/imagej/imagej-legacy/issues/53
+	/**
+	 * Gets the helper class responsible for direct interfacing with ImageJ1.
+	 * Ideally, all accesses to {@code ij.*} classes should be done through this
+	 * helper class, to avoid class loader woes.
+	 */
 	public IJ1Helper getIJ1Helper() {
 		return ij1Helper;
 	}
