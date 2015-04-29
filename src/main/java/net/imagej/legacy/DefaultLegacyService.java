@@ -117,7 +117,7 @@ public final class DefaultLegacyService extends AbstractService implements
 	static {
 		// NB: Prime ImageJ 1.x for patching.
 		// This will only work if this class does _not_ need to load any ij.*
-		// classes for it itself to be loaded. I.e.: this class must have_no_
+		// classes for it itself to be loaded. I.e.: this class must have _no_
 		// references to ij.* classes in its API (supertypes, fields, method
 		// arguments and method return types).
 		LegacyInjector.preinit();
