@@ -145,6 +145,7 @@ public final class LegacyService extends AbstractService {
 	@Parameter(required = false)
 	private AppService appService;
 
+	// FIXME: Why isn't this service declared as an optional parameter?
 	private UIService uiService;
 
 	// NB: Unused services, declared only to affect service initialization order.
