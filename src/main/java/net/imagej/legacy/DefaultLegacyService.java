@@ -124,16 +124,7 @@ public final class DefaultLegacyService extends AbstractService implements
 	}
 
 	@Parameter
-	private OverlayService overlayService;
-
-	@Parameter
 	private LogService log;
-
-	@Parameter
-	private EventService eventService;
-
-	@Parameter
-	private PluginService pluginService;
 
 	@Parameter
 	private CommandService commandService;
@@ -143,18 +134,6 @@ public final class DefaultLegacyService extends AbstractService implements
 
 	@Parameter
 	private ImageDisplayService imageDisplayService;
-
-	@Parameter
-	private DisplayService displayService;
-
-	@Parameter
-	private ThresholdService thresholdService;
-
-	@Parameter
-	private DatasetService datasetService;
-
-	@Parameter
-	private MenuService menuService;
 
 	@Parameter
 	private ModuleService moduleService;
@@ -169,6 +148,29 @@ public final class DefaultLegacyService extends AbstractService implements
 	private AppService appService;
 
 	private UIService uiService;
+
+	// NB: Unused services, declared only to affect service initialization order.
+
+	@Parameter(required = false)
+	private DatasetService datasetService;
+
+	@Parameter(required = false)
+	private DisplayService displayService;
+
+	@Parameter(required = false)
+	private EventService eventService;
+
+	@Parameter(required = false)
+	private MenuService menuService;
+
+	@Parameter(required = false)
+	private OverlayService overlayService;
+
+	@Parameter(required = false)
+	private PluginService pluginService;
+
+	@Parameter(required = false)
+	private ThresholdService thresholdService;
 
 	/**
 	 * Static reference to the one and only active {@link LegacyService}. The JVM

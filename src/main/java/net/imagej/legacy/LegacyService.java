@@ -33,6 +33,15 @@ package net.imagej.legacy;
 
 import net.imagej.ImageJService;
 import net.imagej.display.ImageDisplay;
+import net.imagej.display.ImageDisplayService;
+import net.imagej.display.OverlayService;
+import net.imagej.legacy.plugin.LegacyCommand;
+import net.imagej.legacy.ui.LegacyUI;
+import net.imagej.patcher.LegacyEnvironment;
+import net.imagej.patcher.LegacyInjector;
+import net.imagej.threshold.ThresholdService;
+import net.imagej.ui.swing.script.TextEditor;
+import net.imagej.ui.viewer.image.ImageDisplayViewer;
 
 import org.scijava.app.StatusService;
 import org.scijava.log.LogService;
@@ -43,7 +52,101 @@ import org.scijava.log.LogService;
  * @author Barry DeZonia
  * @author Curtis Rueden
  */
-public interface LegacyService extends ImageJService { 
+@Plugin(type = Service.class, priority = Priority.NORMAL_PRIORITY + 1)
+public final class LegacyService extends AbstractService {
+
+	/**
+	 * Static reference to the one and only active {@link LegacyService}. The JVM
+	 * can only have one instance of ImageJ 1.x, and hence one LegacyService,
+	 * active at a time.
+	 */
+	private static LegacyService instance;
+
+	private static Throwable instantiationStackTrace;
+
+	static {
+		// NB: Prime ImageJ 1.x for patching.
+		// This will only work if this class does _not_ need to load any ij.*
+		// classes for it itself to be loaded. I.e.: this class must have _no_
+		// references to ij.* classes in its API (supertypes, fields, method
+		// arguments and method return types).
+		LegacyInjector.preinit();
+	}
+
+	@Parameter
+	private LogService log;
+
+	@Parameter
+	private CommandService commandService;
+
+	@Parameter
+	private OptionsService optionsService;
+
+	@Parameter
+	private ImageDisplayService imageDisplayService;
+
+	@Parameter
+	private ModuleService moduleService;
+
+	@Parameter
+	private ScriptService scriptService;
+
+	@Parameter
+	private StatusService statusService;
+
+	@Parameter(required = false)
+	private AppService appService;
+
+	// FIXME: Why isn't this service declared as an optional parameter?
+	private UIService uiService;
+
+	// NB: Unused services, declared only to affect service initialization order.
+
+	@Parameter(required = false)
+	private DatasetService datasetService;
+
+	@Parameter(required = false)
+	private DisplayService displayService;
+
+	@Parameter(required = false)
+	private EventService eventService;
+
+	@Parameter(required = false)
+	private MenuService menuService;
+
+	@Parameter(required = false)
+	private OverlayService overlayService;
+
+	@Parameter(required = false)
+	private PluginService pluginService;
+
+	@Parameter(required = false)
+	private ThresholdService thresholdService;
+
+	/** Mapping between modern and legacy image data structures. */
+	private LegacyImageMap imageMap;
+
+	/**
+	 * A buffer object which keeps all references to ImageJ 1.x separated from
+	 * this class.
+	 */
+	private IJ1Helper ij1Helper;
+
+	private final ThreadLocal<Boolean> isProcessingEvents =
+		new ThreadLocal<Boolean>();
+
+	/**
+	 * Map of ImageJ2 {@link Command}s which are compatible with the legacy user
+	 * interface. A command is considered compatible if it is not tagged with the
+	 * {@code "no-legacy"} key in its {@link Parameter#attrs()} list. The map is
+	 * keyed on identifier; see the {@link Identifiable} interface.
+	 */
+	private final Map<String, ModuleInfo> legacyCompatible =
+		new HashMap<String, ModuleInfo>();
+
+	// -- LegacyService methods --
+
+>>>>>>> 07d32b2... fixup! LegacyService: group unused services together
 	/** Gets the LogService associated with this LegacyService. */
 	LogService log();
 
