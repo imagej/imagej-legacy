@@ -409,7 +409,7 @@ public class IJ1Helper extends AbstractContextual {
 	 *            the default value
 	 * @return the boolean value
 	 */
-	public static boolean getMacroParameter(String label, boolean defaultValue) {
+	public boolean getMacroParameter(String label, boolean defaultValue) {
 		return getMacroParameter(label) != null || defaultValue;
 	}
 
@@ -422,7 +422,7 @@ public class IJ1Helper extends AbstractContextual {
 	 *            the default value
 	 * @return the double value
 	 */
-	public static double getMacroParameter(String label, double defaultValue) {
+	public double getMacroParameter(String label, double defaultValue) {
 		String value = Macro.getValue(Macro.getOptions(), label, null);
 		return value != null ? Double.parseDouble(value) : defaultValue;
 	}
@@ -436,7 +436,7 @@ public class IJ1Helper extends AbstractContextual {
 	 *            the default value
 	 * @return the value
 	 */
-	public static String getMacroParameter(String label, String defaultValue) {
+	public String getMacroParameter(String label, String defaultValue) {
 		return Macro.getValue(Macro.getOptions(), label, defaultValue);
 	}
 
@@ -447,7 +447,7 @@ public class IJ1Helper extends AbstractContextual {
 	 *            the name of the macro parameter
 	 * @return the value, <code>null</code> if the parameter was not specified
 	 */
-	public static String getMacroParameter(String label) {
+	public String getMacroParameter(String label) {
 		return Macro.getValue(Macro.getOptions(), label, null);
 	}
 
