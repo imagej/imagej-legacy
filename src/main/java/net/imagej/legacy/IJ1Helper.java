@@ -98,14 +98,14 @@ import org.scijava.util.ClassUtils;
 /**
  * A helper class to interact with ImageJ 1.x.
  * <p>
- * The DefaultLegacyService needs to patch ImageJ 1.x's classes before they are
- * loaded. Unfortunately, this is tricky: if the DefaultLegacyService already
+ * The LegacyService needs to patch ImageJ 1.x's classes before they are
+ * loaded. Unfortunately, this is tricky: if the LegacyService already
  * uses those classes, it is a matter of luck whether we can get the patches in
  * before those classes are loaded.
  * </p>
  * <p>
  * Therefore, we put as much interaction with ImageJ 1.x as possible into this
- * class and keep a reference to it in the DefaultLegacyService.
+ * class and keep a reference to it in the LegacyService.
  * </p>
  * 
  * @author Johannes Schindelin
@@ -113,7 +113,7 @@ import org.scijava.util.ClassUtils;
 public class IJ1Helper extends AbstractContextual {
 
 	/** A reference to the legacy service, just in case we need it. */
-	private final DefaultLegacyService legacyService;
+	private final LegacyService legacyService;
 
 	@Parameter
 	private LogService log;
@@ -121,7 +121,7 @@ public class IJ1Helper extends AbstractContextual {
 	/** Whether we are in the process of forcibly shutting down ImageJ1. */
 	private boolean disposing;
 
-	public IJ1Helper(final DefaultLegacyService legacyService) {
+	public IJ1Helper(final LegacyService legacyService) {
 		setContext(legacyService.getContext());
 		this.legacyService = legacyService;
 	}
@@ -565,7 +565,7 @@ public class IJ1Helper extends AbstractContextual {
 		}
 
 		private boolean isLegacyMode() {
-			// We call setContext() indirectly from DefaultLegacyService#initialize,
+			// We call setContext() indirectly from LegacyService#initialize,
 			// therefore legacyService might still be null at this point even if the
 			// context knows a legacy service now.
 			if (legacyService == null) {

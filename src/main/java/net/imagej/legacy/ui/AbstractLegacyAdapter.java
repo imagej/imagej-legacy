@@ -31,7 +31,7 @@
 
 package net.imagej.legacy.ui;
 
-import net.imagej.legacy.DefaultLegacyService;
+import net.imagej.legacy.LegacyService;
 import net.imagej.legacy.IJ1Helper;
 import net.imagej.legacy.LegacyService;
 
@@ -39,7 +39,7 @@ import org.scijava.Contextual;
 
 /**
  * Abstract {@link LegacyAdapter} implementation. Note that the
- * {@link IJ1Helper} class requires a {@link DefaultLegacyService} explicitly,
+ * {@link IJ1Helper} class requires a {@link LegacyService} explicitly,
  * thus we require one here in a constructor instead of going through the usual
  * {@link Contextual} injection.
  * 
@@ -47,11 +47,11 @@ import org.scijava.Contextual;
  */
 public abstract class AbstractLegacyAdapter implements LegacyAdapter {
 
-	private DefaultLegacyService legacyService;
+	private LegacyService legacyService;
 
 	public AbstractLegacyAdapter(final LegacyService legacyService) {
-		if (legacyService instanceof DefaultLegacyService) {
-			this.legacyService = ((DefaultLegacyService) legacyService);
+		if (legacyService instanceof LegacyService) {
+			this.legacyService = ((LegacyService) legacyService);
 		}
 	}
 
@@ -61,7 +61,7 @@ public abstract class AbstractLegacyAdapter implements LegacyAdapter {
 		return null;
 	}
 
-	protected DefaultLegacyService getLegacyService() {
+	protected LegacyService getLegacyService() {
 		return legacyService;
 	}
 }

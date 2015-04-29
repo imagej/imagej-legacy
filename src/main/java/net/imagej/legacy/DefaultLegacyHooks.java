@@ -81,7 +81,7 @@ import org.scijava.util.ListUtils;
  */
 public class DefaultLegacyHooks extends LegacyHooks {
 
-	private final DefaultLegacyService legacyService;
+	private final LegacyService legacyService;
 	private final IJ1Helper helper;
 
 	private LogService log;
@@ -93,11 +93,11 @@ public class DefaultLegacyHooks extends LegacyHooks {
 	/** If the ij.log.file property is set, logs every message to this file. */
 	private BufferedWriter logFileWriter;
 
-	public DefaultLegacyHooks(final DefaultLegacyService legacyService) {
+	public DefaultLegacyHooks(final LegacyService legacyService) {
 		this(legacyService, legacyService.getIJ1Helper());
 	}
 
-	public DefaultLegacyHooks(final DefaultLegacyService legacyService,
+	public DefaultLegacyHooks(final LegacyService legacyService,
 		final IJ1Helper helper)
 	{
 		this.legacyService = legacyService;

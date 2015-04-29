@@ -42,7 +42,7 @@ import java.util.concurrent.Future;
 import net.imagej.Dataset;
 import net.imagej.display.DefaultImageDisplay;
 import net.imagej.display.ImageDisplay;
-import net.imagej.legacy.DefaultLegacyService;
+import net.imagej.legacy.LegacyService;
 import net.imagej.legacy.IJ1Helper;
 import net.imagej.legacy.ImageJ2Options;
 import net.imagej.legacy.LegacyImageMap;
@@ -77,7 +77,7 @@ import org.scijava.service.Service;
 @Plugin(type = LegacyOpener.class, priority = Priority.LOW_PRIORITY)
 public class DefaultLegacyOpener implements LegacyOpener {
 
-	private DefaultLegacyService legacyService;
+	private LegacyService legacyService;
 	private DisplayService displayService;
 	private ModuleService moduleService;
 	private CommandService commandService;
@@ -93,7 +93,7 @@ public class DefaultLegacyOpener implements LegacyOpener {
 		final Context c = IJ1Helper.getLegacyContext();
 		ImagePlus imp = null;
 
-		legacyService = getCached(legacyService, DefaultLegacyService.class, c);
+		legacyService = getCached(legacyService, LegacyService.class, c);
 		displayService = getCached(displayService, DisplayService.class, c);
 		moduleService = getCached(moduleService, ModuleService.class, c);
 		commandService = getCached(commandService, CommandService.class, c);

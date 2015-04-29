@@ -37,7 +37,7 @@ import java.awt.GraphicsEnvironment;
 
 import ij.IJ;
 import net.imagej.legacy.DefaultLegacyHooks;
-import net.imagej.legacy.DefaultLegacyService;
+import net.imagej.legacy.LegacyService;
 import net.imagej.legacy.LegacyService;
 import net.imagej.legacy.ui.LegacyUI;
 import net.imagej.patcher.LegacyInjector;
@@ -73,7 +73,7 @@ public class SystemExitIT {
 		assertNotNull(IJ.getInstance());
 
 		// verify that the legacy layer is active
-		assertNotNull(DefaultLegacyService.getInstance());
+		assertNotNull(LegacyService.getInstance());
 
 		// NB: Tell ImageJ1 to shut down the entire JVM when quitting.
 		IJ.getInstance().exitWhenQuitting(true);

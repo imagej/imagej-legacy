@@ -88,7 +88,7 @@ public class ImageJ2Options extends OptionsPlugin implements Interactive {
 	private Button help;
 
 	@Parameter
-	private DefaultLegacyService legacyService;
+	private LegacyService legacyService;
 
 	@Parameter(required = false)
 	private WelcomeService welcomeService;
