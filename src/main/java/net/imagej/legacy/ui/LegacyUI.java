@@ -129,7 +129,7 @@ public class LegacyUI extends AbstractUserInterface implements SwingUI {
 	public void show() {
 		if (ij1Helper() != null) {
 			ij1Helper.setVisible(true);
-			createConsole();
+			if (ij1Helper.isVisible()) createConsole();
 		}
 	}
 
