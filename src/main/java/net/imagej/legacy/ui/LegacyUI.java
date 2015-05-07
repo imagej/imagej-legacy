@@ -129,7 +129,18 @@ public class LegacyUI extends AbstractUserInterface implements SwingUI {
 	public void show() {
 		if (ij1Helper() != null) {
 			ij1Helper.setVisible(true);
-			if (ij1Helper.isVisible()) createConsole();
+			if (ij1Helper.isVisible()) {
+				// NB: This check avoids creating a console UI while in headless mode.
+				//
+				// The ImageJ 1.x headless mode works by pretending to show the UI
+				// (i.e., walking through very similar code paths), but without
+				// actually instantiating or showing any UI components.
+				//
+				// So, even though we write ij1Helper.setVisible(true) above, the
+				// ImageJ1 user interface will not actually be shown when running
+				// in headless mode, and ij1Helper.isVisible() will return false.
+				createConsole();
+			}
 		}
 	}
 
