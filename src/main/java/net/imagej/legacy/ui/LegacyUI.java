@@ -39,7 +39,6 @@ import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.WindowConstants;
 
-import net.imagej.legacy.LegacyService;
 import net.imagej.legacy.IJ1Helper;
 import net.imagej.legacy.LegacyService;
 import net.imagej.legacy.display.LegacyDisplayViewer;
@@ -116,7 +115,7 @@ public class LegacyUI extends AbstractUserInterface implements SwingUI {
 	private IJ1Helper ij1Helper() {
 		// FIXME: See https://github.com/imagej/imagej-legacy/issues/53
 		if (legacyService instanceof LegacyService) {
-			ij1Helper = ((LegacyService) legacyService).getIJ1Helper();
+			ij1Helper = legacyService.getIJ1Helper();
 		}
 		return ij1Helper;
 	}
@@ -184,10 +183,10 @@ public class LegacyUI extends AbstractUserInterface implements SwingUI {
 					}
 				});
 			}
-			catch (InterruptedException e) {
+			catch (final InterruptedException e) {
 				legacyService.handleException(e);
 			}
-			catch (InvocationTargetException e) {
+			catch (final InvocationTargetException e) {
 				legacyService.handleException(e);
 			}
 		}
@@ -306,10 +305,10 @@ public class LegacyUI extends AbstractUserInterface implements SwingUI {
 				}
 			});
 		}
-		catch (InterruptedException e) {
+		catch (final InterruptedException e) {
 			legacyService.handleException(e);
 		}
-		catch (InvocationTargetException e) {
+		catch (final InvocationTargetException e) {
 			legacyService.handleException(e);
 		}
 		return chosenFile[0];
