@@ -113,10 +113,7 @@ public class LegacyUI extends AbstractUserInterface implements SwingUI {
 	private SystemClipboard systemClipboard;
 
 	private IJ1Helper ij1Helper() {
-		// FIXME: See https://github.com/imagej/imagej-legacy/issues/53
-		if (legacyService instanceof LegacyService) {
-			ij1Helper = legacyService.getIJ1Helper();
-		}
+		ij1Helper = legacyService.getIJ1Helper();
 		return ij1Helper;
 	}
 
