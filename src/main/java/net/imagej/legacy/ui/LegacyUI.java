@@ -39,7 +39,6 @@ import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.WindowConstants;
 
-import net.imagej.legacy.LegacyService;
 import net.imagej.legacy.IJ1Helper;
 import net.imagej.legacy.LegacyService;
 import net.imagej.legacy.display.LegacyDisplayViewer;
@@ -116,7 +115,7 @@ public class LegacyUI extends AbstractUserInterface implements SwingUI {
 	private IJ1Helper ij1Helper() {
 		// FIXME: See https://github.com/imagej/imagej-legacy/issues/53
 		if (legacyService instanceof LegacyService) {
-			ij1Helper = ((LegacyService) legacyService).getIJ1Helper();
+			ij1Helper = legacyService.getIJ1Helper();
 		}
 		return ij1Helper;
 	}
@@ -130,7 +129,18 @@ public class LegacyUI extends AbstractUserInterface implements SwingUI {
 	public void show() {
 		if (ij1Helper() != null) {
 			ij1Helper.setVisible(true);
-			createConsole();
+			if (ij1Helper.isVisible()) {
+				// NB: This check avoids creating a console UI while in headless mode.
+				//
+				// The ImageJ 1.x headless mode works by pretending to show the UI
+				// (i.e., walking through very similar code paths), but without
+				// actually instantiating or showing any UI components.
+				//
+				// So, even though we write ij1Helper.setVisible(true) above, the
+				// ImageJ1 user interface will not actually be shown when running
+				// in headless mode, and ij1Helper.isVisible() will return false.
+				createConsole();
+			}
 		}
 	}
 
@@ -184,10 +194,10 @@ public class LegacyUI extends AbstractUserInterface implements SwingUI {
 					}
 				});
 			}
-			catch (InterruptedException e) {
+			catch (final InterruptedException e) {
 				legacyService.handleException(e);
 			}
-			catch (InvocationTargetException e) {
+			catch (final InvocationTargetException e) {
 				legacyService.handleException(e);
 			}
 		}
@@ -306,10 +316,10 @@ public class LegacyUI extends AbstractUserInterface implements SwingUI {
 				}
 			});
 		}
-		catch (InterruptedException e) {
+		catch (final InterruptedException e) {
 			legacyService.handleException(e);
 		}
-		catch (InvocationTargetException e) {
+		catch (final InvocationTargetException e) {
 			legacyService.handleException(e);
 		}
 		return chosenFile[0];
