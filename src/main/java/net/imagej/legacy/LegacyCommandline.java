@@ -198,10 +198,10 @@ public abstract class LegacyCommandline extends AbstractConsoleArgument {
 		public void handle(LinkedList<String> args) {
 			if (!supports(args)) return;
 
+			handleBatchOption(args);
 			args.removeFirst(); // -batch or -batch-no-exit
 
-			handleBatchOption(args);
-			if (args.size() > 1) {
+			if (args.size() > 0) {
 				final String path = args.removeFirst();
 				final String arg = args.isEmpty() ? "" : args.removeFirst();
 				ij1Helper().runMacroFile(path, arg);
