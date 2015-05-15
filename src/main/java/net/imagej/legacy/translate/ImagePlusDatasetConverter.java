@@ -125,8 +125,9 @@ public class ImagePlusDatasetConverter extends
 		// converted
 		for (final int id : imageIDs) {
 			final ImagePlus imgPlus = ij1Helper.getImage(id);
-			if (legacyService.getImageMap().lookupDisplay(imgPlus) == null) objects
-				.add(imgPlus);
+			if (legacyService.getImageMap().lookupDisplay(imgPlus) == null) {
+				objects.add(imgPlus);
+			}
 		}
 	}
 
