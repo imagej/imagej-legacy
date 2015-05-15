@@ -117,7 +117,7 @@ public class ImagePlusDatasetConverter extends
 
 	@Override
 	public void populateInputCandidates(final Collection<Object> objects) {
-		final IJ1Helper ij1Helper = ((LegacyService)legacyService).getIJ1Helper();
+		final IJ1Helper ij1Helper = legacyService.getIJ1Helper();
 
 		final int[] imageIDs = ij1Helper.getIDList();
 

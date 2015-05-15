@@ -31,7 +31,6 @@
 
 package net.imagej.legacy.ui;
 
-import net.imagej.legacy.LegacyService;
 import net.imagej.legacy.IJ1Helper;
 import net.imagej.legacy.LegacyService;
 
@@ -50,9 +49,7 @@ public abstract class AbstractLegacyAdapter implements LegacyAdapter {
 	private LegacyService legacyService;
 
 	public AbstractLegacyAdapter(final LegacyService legacyService) {
-		if (legacyService instanceof LegacyService) {
-			this.legacyService = ((LegacyService) legacyService);
-		}
+		this.legacyService = legacyService;
 	}
 
 	@Override
