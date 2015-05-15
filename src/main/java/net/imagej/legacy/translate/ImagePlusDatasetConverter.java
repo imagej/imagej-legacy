@@ -120,6 +120,7 @@ public class ImagePlusDatasetConverter extends
 		final IJ1Helper ij1Helper = legacyService.getIJ1Helper();
 
 		final int[] imageIDs = ij1Helper.getIDList();
+		if (imageIDs == null) return; // no image IDs
 
 		// Add any ImagePluses in the IJ1 WindowManager that are not already
 		// converted
