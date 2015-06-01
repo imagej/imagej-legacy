@@ -121,8 +121,11 @@ public class IJ1MacroEngine extends AbstractScriptEngine {
 			for (final ModuleItem<?> item : module.getInfo().outputs()) {
 				if (ImagePlus.class.isAssignableFrom(item.getType())) {
 					final String name = item.getName();
-					final int imageID = Integer.parseInt((String) get(name));
-					put(name, WindowManager.getImage(imageID));
+					final Object value = get(name);
+					if (value != null) {
+						final int imageID = Integer.parseInt(value.toString());
+						put(name, WindowManager.getImage(imageID));
+					}
 				}
 			}
 			outputs.remove();
