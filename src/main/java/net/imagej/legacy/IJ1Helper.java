@@ -937,8 +937,9 @@ public class IJ1Helper extends AbstractContextual {
 	 * 
 	 * @return the macro options, or null
 	 */
-	public Object getOptions() {
-		return Macro.getOptions();
+	public String getOptions() {
+		final String options = Macro.getOptions();
+		return options == null ? "" : options;
 	}
 
 	/**
