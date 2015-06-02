@@ -478,7 +478,7 @@ public class IJ1Helper extends AbstractContextual {
 	 * @return the double value
 	 */
 	public double getMacroParameter(String label, double defaultValue) {
-		String value = Macro.getValue(Macro.getOptions(), label, null);
+		String value = Macro.getValue(getOptions(), label, null);
 		return value != null ? Double.parseDouble(value) : defaultValue;
 	}
 
@@ -492,7 +492,7 @@ public class IJ1Helper extends AbstractContextual {
 	 * @return the value
 	 */
 	public String getMacroParameter(String label, String defaultValue) {
-		return Macro.getValue(Macro.getOptions(), label, defaultValue);
+		return Macro.getValue(getOptions(), label, defaultValue);
 	}
 
 	/**
@@ -503,7 +503,7 @@ public class IJ1Helper extends AbstractContextual {
 	 * @return the value, <code>null</code> if the parameter was not specified
 	 */
 	public String getMacroParameter(String label) {
-		return Macro.getValue(Macro.getOptions(), label, null);
+		return Macro.getValue(getOptions(), label, null);
 	}
 
 	/** Gets the SciJava application context linked to the ImageJ 1.x instance. */
