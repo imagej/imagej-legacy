@@ -1,24 +1,18 @@
+# @File(label = "Input directory", style = "directory") srcFile
+# @File(label = "Output directory", style = "directory") dstFile
+# @String(label = "File extension", value=".tif") ext
+# @String(label = "File name contains", value = "") containString
+# @boolean(label = "Keep directory structure when saving", value = true) keepDirectories
+
+# Compare with the original Process_Folder to see how ImageJ 1.x
+# GenericDialog use can be converted to @Parameters.
+
 import os
 from ij import IJ, ImagePlus
-from ij.gui import GenericDialog
-  
+
 def run():
-  srcDir = IJ.getDirectory("Input_directory")
-  if not srcDir:
-    return
-  dstDir = IJ.getDirectory("Output_directory")
-  if not dstDir:
-    return
-  gd = GenericDialog("Process Folder")
-  gd.addStringField("File_extension", ".tif")
-  gd.addStringField("File_name_contains", "")
-  gd.addCheckbox("Keep directory structure when saving", True)
-  gd.showDialog()
-  if gd.wasCanceled():
-    return
-  ext = gd.getNextString()
-  containString = gd.getNextString()
-  keepDirectories = gd.getNextBoolean()
+  srcDir = srcFile.getAbsolutePath()
+  dstDir = dstFile.getAbsolutePath()
   for root, directories, filenames in os.walk(srcDir):
     for filename in filenames:
       # Check for file extension
