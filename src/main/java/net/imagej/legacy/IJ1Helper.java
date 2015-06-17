@@ -437,6 +437,15 @@ public class IJ1Helper extends AbstractContextual {
 	}
 
 	/**
+	 * Opens an image and adds the path to the <it>File>Open Recent</it> menu.
+	 * 
+	 * @param file the image to open
+	 */
+	public static void openAndAddToRecent(final File file) {
+		new Opener().openAndAddToRecent(file.getAbsolutePath());
+	}
+
+	/**
 	 * Records an option in ImageJ 1.x's macro recorder.
 	 * 
 	 * @param key the name of the option
@@ -559,7 +568,7 @@ public class IJ1Helper extends AbstractContextual {
 			if (isLegacyMode()) {
 				final List<File> files = new ArrayList<File>(event.getFiles());
 				for (final File file : files) {
-					new Opener().openAndAddToRecent(file.getAbsolutePath());
+					openAndAddToRecent(file);
 				}
 			}
 		}
