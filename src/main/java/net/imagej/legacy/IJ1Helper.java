@@ -37,6 +37,7 @@ import ij.ImageJ;
 import ij.ImagePlus;
 import ij.Macro;
 import ij.Menus;
+import ij.OtherInstance;
 import ij.WindowManager;
 import ij.gui.ImageWindow;
 import ij.gui.Toolbar;
@@ -238,6 +239,15 @@ public class IJ1Helper extends AbstractContextual {
 		final ImageJ ij = IJ.getInstance();
 		if (ij == null) return false;
 		return ij.isVisible();
+	}
+
+	/**
+	 * Determines whether <it>Edit>Options>Misc...>Run single instance listener</it> is set.
+	 * 
+	 * @return true if <it>Run single instance listener</it> is set
+	 */
+	public boolean isRMIEnabled() {
+		return OtherInstance.isRMIEnabled();
 	}
 
 	private boolean batchMode;
@@ -871,6 +881,21 @@ public class IJ1Helper extends AbstractContextual {
 	}
 
 	/**
+	 * Evaluates the specified command.
+	 * 
+	 * @param command the command to execute
+	 */
+	public void run(final String command) {
+		runMacroFriendly("macro", new Callable<Void>() {
+			@Override
+			public Void call() throws Exception {
+				IJ.run(command);
+				return null;
+			}
+		});
+	}
+
+	/**
 	 * Evaluates the specified macro.
 	 * 
 	 * @param macro the macro to evaluate
@@ -980,6 +1005,11 @@ public class IJ1Helper extends AbstractContextual {
 		if (legacyService.isLegacyMode()) {
 			IJ.run("About ImageJ...");
 		}
+	}
+
+	/** Sets OpenDialog's default directory */
+	public void setDefaultDirectory(final File directory) {
+		OpenDialog.setDefaultDirectory(directory.getPath());
 	}
 
 	/** Uses ImageJ 1.x' OpenDialog */
