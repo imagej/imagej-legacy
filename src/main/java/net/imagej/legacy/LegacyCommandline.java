@@ -30,6 +30,7 @@
  */
 package net.imagej.legacy;
 
+import java.awt.GraphicsEnvironment;
 import java.util.LinkedList;
 import java.util.WeakHashMap;
 
@@ -160,7 +161,7 @@ public abstract class LegacyCommandline extends AbstractConsoleArgument {
 			final String path = args.removeFirst(); // "file-name"
 
 			handleBatchOption(args);
-			ij1Helper().openImage(path, !isBatchMode());
+			ij1Helper().openImage(path, !GraphicsEnvironment.isHeadless() && !isBatchMode());
 			handleBatchExit(args);
 		}
 
