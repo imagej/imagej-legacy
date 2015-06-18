@@ -933,7 +933,19 @@ public class IJ1Helper extends AbstractContextual {
 	 * @return the image
 	 */
 	public Object openImage(final String path) {
-		return IJ.openImage(path);
+		return openImage(path, false);
+	}
+
+	/**
+	 * Opens an image using ImageJ 1.x.
+	 * 
+	 * @param path the image file to open
+	 * @return the image
+	 */
+	public Object openImage(final String path, final boolean show) {
+		final ImagePlus imp = IJ.openImage(path);
+		if (show && imp != null) imp.show();
+		return imp;
 	}
 
 	/**
