@@ -287,17 +287,14 @@ public class LegacyUI extends AbstractUserInterface implements SwingUI {
 				@Override
 				public void run() {
 					if (FileWidget.DIRECTORY_STYLE.equals(style)) {
-						// ImageJ1 does not provide a directory chooser, so we use a
-						// Swing JFileChooser in "DIRECTORIES_ONLY" mode.
-						final JFileChooser chooser = new JFileChooser(file);
-						chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-						final int rval =
-							chooser.showOpenDialog(getApplicationFrame().getComponent());
-						if (rval == JFileChooser.APPROVE_OPTION) {
-							chosenFile[0] = chooser.getSelectedFile();
+						// Use ImageJ1's DirectoryChooser.
+						final String dir = ij1Helper().getDirectory("Choose Folder", file);
+						if (dir != null) {
+							chosenFile[0] = new File(dir);
 						}
 					}
 					else if (FileWidget.SAVE_STYLE.equals(style)) {
+						// Use ImageJ1's SaveDialog.
 						final File chosen = ij1Helper().saveDialog("Save", file, null);
 						if (chosen != null) {
 							chosenFile[0] = chosen;

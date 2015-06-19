@@ -41,6 +41,7 @@ import ij.OtherInstance;
 import ij.WindowManager;
 import ij.gui.ImageWindow;
 import ij.gui.Toolbar;
+import ij.io.DirectoryChooser;
 import ij.io.OpenDialog;
 import ij.io.Opener;
 import ij.io.SaveDialog;
@@ -1050,6 +1051,15 @@ public class IJ1Helper extends AbstractContextual {
 			return new File(directory, fileName);
 		}
 		return null;
+	}
+
+	/** Chooses a directory using ImageJ 1.x' directory chooser. */
+	public String getDirectory(final String title, final File file) {
+		final String defaultDir =
+			file.isDirectory() ? file.getPath() : file.getParent();
+		DirectoryChooser.setDefaultDirectory(defaultDir);
+
+		return new DirectoryChooser(title).getDirectory();
 	}
 
 	/** Handles display of the ImageJ 1.x preferences. */
