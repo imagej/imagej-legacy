@@ -74,6 +74,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.Callable;
 
 import javax.swing.SwingUtilities;
 
@@ -846,13 +847,7 @@ public class IJ1Helper extends AbstractContextual {
 
 	}
 
-	/**
-	 * Evaluates the specified macro.
-	 * 
-	 * @param macro the macro to evaluate
-	 * @return the return value
-	 */
-	public String runMacro(final String macro) {
+	private<T> T runMacroFriendly(final String type, final Callable<T> call) {
 		if (EventQueue.isDispatchThread()) {
 			throw new IllegalStateException("Cannot run macro from the EDT!");
 		}
@@ -863,11 +858,31 @@ public class IJ1Helper extends AbstractContextual {
 			if (!name.startsWith("Run$_")) thread.setName("Run$_" + name);
 			// to make Macro.abort() work
 			if (!name.endsWith("Macro$")) thread.setName(thread.getName() + "Macro$");
-			return IJ.runMacro(macro);
+			return call.call();
+		}
+		catch (final RuntimeException e) {
+			throw e;
+		} catch (final Exception e) {
+			throw new RuntimeException(e);
 		}
 		finally {
 			thread.setName(name);
 		}
+	}
+
+	/**
+	 * Evaluates the specified macro.
+	 * 
+	 * @param macro the macro to evaluate
+	 * @return the return value
+	 */
+	public String runMacro(final String macro) {
+		return runMacroFriendly("macro", new Callable<String>() {
+			@Override
+			public String call() throws Exception {
+				return IJ.runMacro(macro);
+			}
+		});
 	}
 
 	/**
@@ -878,19 +893,12 @@ public class IJ1Helper extends AbstractContextual {
 	 * @return the return value
 	 */
 	public String runMacroFile(final String path, final String arg) {
-		if (EventQueue.isDispatchThread()) {
-			throw new IllegalStateException("Cannot run macro from the EDT!");
-		}
-		final Thread thread = Thread.currentThread();
-		final String name = thread.getName();
-		try {
-			// to make getOptions() work
-			if (!name.startsWith("Run$_")) thread.setName("Run$_" + name);
-			return IJ.runMacroFile(path, arg);
-		}
-		finally {
-			thread.setName(name);
-		}
+		return runMacroFriendly("macro", new Callable<String>() {
+			@Override
+			public String call() throws Exception {
+				return IJ.runMacroFile(path, arg);
+			}
+		});
 	}
 
 	/**
