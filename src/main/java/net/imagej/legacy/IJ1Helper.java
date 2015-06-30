@@ -37,6 +37,7 @@ import ij.ImageJ;
 import ij.ImagePlus;
 import ij.Macro;
 import ij.Menus;
+import ij.OtherInstance;
 import ij.WindowManager;
 import ij.gui.ImageWindow;
 import ij.gui.Toolbar;
@@ -74,6 +75,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.Callable;
 
 import javax.swing.SwingUtilities;
 
@@ -237,6 +239,15 @@ public class IJ1Helper extends AbstractContextual {
 		final ImageJ ij = IJ.getInstance();
 		if (ij == null) return false;
 		return ij.isVisible();
+	}
+
+	/**
+	 * Determines whether <it>Edit>Options>Misc...>Run single instance listener</it> is set.
+	 * 
+	 * @return true if <it>Run single instance listener</it> is set
+	 */
+	public boolean isRMIEnabled() {
+		return OtherInstance.isRMIEnabled();
 	}
 
 	private boolean batchMode;
@@ -437,6 +448,15 @@ public class IJ1Helper extends AbstractContextual {
 	}
 
 	/**
+	 * Opens an image and adds the path to the <it>File>Open Recent</it> menu.
+	 * 
+	 * @param file the image to open
+	 */
+	public static void openAndAddToRecent(final File file) {
+		new Opener().openAndAddToRecent(file.getAbsolutePath());
+	}
+
+	/**
 	 * Records an option in ImageJ 1.x's macro recorder.
 	 * 
 	 * @param key the name of the option
@@ -559,7 +579,7 @@ public class IJ1Helper extends AbstractContextual {
 			if (isLegacyMode()) {
 				final List<File> files = new ArrayList<File>(event.getFiles());
 				for (final File file : files) {
-					new Opener().openAndAddToRecent(file.getAbsolutePath());
+					openAndAddToRecent(file);
 				}
 			}
 		}
@@ -837,13 +857,7 @@ public class IJ1Helper extends AbstractContextual {
 
 	}
 
-	/**
-	 * Evaluates the specified macro.
-	 * 
-	 * @param macro the macro to evaluate
-	 * @return the return value
-	 */
-	public String runMacro(final String macro) {
+	private<T> T runMacroFriendly(final String type, final Callable<T> call) {
 		if (EventQueue.isDispatchThread()) {
 			throw new IllegalStateException("Cannot run macro from the EDT!");
 		}
@@ -854,11 +868,46 @@ public class IJ1Helper extends AbstractContextual {
 			if (!name.startsWith("Run$_")) thread.setName("Run$_" + name);
 			// to make Macro.abort() work
 			if (!name.endsWith("Macro$")) thread.setName(thread.getName() + "Macro$");
-			return IJ.runMacro(macro);
+			return call.call();
+		}
+		catch (final RuntimeException e) {
+			throw e;
+		} catch (final Exception e) {
+			throw new RuntimeException(e);
 		}
 		finally {
 			thread.setName(name);
 		}
+	}
+
+	/**
+	 * Evaluates the specified command.
+	 * 
+	 * @param command the command to execute
+	 */
+	public void run(final String command) {
+		runMacroFriendly("macro", new Callable<Void>() {
+			@Override
+			public Void call() throws Exception {
+				IJ.run(command);
+				return null;
+			}
+		});
+	}
+
+	/**
+	 * Evaluates the specified macro.
+	 * 
+	 * @param macro the macro to evaluate
+	 * @return the return value
+	 */
+	public String runMacro(final String macro) {
+		return runMacroFriendly("macro", new Callable<String>() {
+			@Override
+			public String call() throws Exception {
+				return IJ.runMacro(macro);
+			}
+		});
 	}
 
 	/**
@@ -869,19 +918,12 @@ public class IJ1Helper extends AbstractContextual {
 	 * @return the return value
 	 */
 	public String runMacroFile(final String path, final String arg) {
-		if (EventQueue.isDispatchThread()) {
-			throw new IllegalStateException("Cannot run macro from the EDT!");
-		}
-		final Thread thread = Thread.currentThread();
-		final String name = thread.getName();
-		try {
-			// to make getOptions() work
-			if (!name.startsWith("Run$_")) thread.setName("Run$_" + name);
-			return IJ.runMacroFile(path, arg);
-		}
-		finally {
-			thread.setName(name);
-		}
+		return runMacroFriendly("macro", new Callable<String>() {
+			@Override
+			public String call() throws Exception {
+				return IJ.runMacroFile(path, arg);
+			}
+		});
 	}
 
 	/**
@@ -891,7 +933,19 @@ public class IJ1Helper extends AbstractContextual {
 	 * @return the image
 	 */
 	public Object openImage(final String path) {
-		return IJ.openImage(path);
+		return openImage(path, false);
+	}
+
+	/**
+	 * Opens an image using ImageJ 1.x.
+	 * 
+	 * @param path the image file to open
+	 * @return the image
+	 */
+	public Object openImage(final String path, final boolean show) {
+		final ImagePlus imp = IJ.openImage(path);
+		if (show && imp != null) imp.show();
+		return imp;
 	}
 
 	/**
@@ -963,6 +1017,11 @@ public class IJ1Helper extends AbstractContextual {
 		if (legacyService.isLegacyMode()) {
 			IJ.run("About ImageJ...");
 		}
+	}
+
+	/** Sets OpenDialog's default directory */
+	public void setDefaultDirectory(final File directory) {
+		OpenDialog.setDefaultDirectory(directory.getPath());
 	}
 
 	/** Uses ImageJ 1.x' OpenDialog */

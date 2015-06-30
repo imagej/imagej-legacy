@@ -30,6 +30,7 @@
  */
 package net.imagej.legacy;
 
+import java.awt.GraphicsEnvironment;
 import java.util.LinkedList;
 import java.util.WeakHashMap;
 
@@ -111,6 +112,11 @@ public abstract class LegacyCommandline extends AbstractConsoleArgument {
 		return legacyService.getIJ1Helper();
 	}
 
+	protected boolean isBatchMode() {
+		final Boolean b = batchMode.get(legacyService);
+		return b != null && b.booleanValue();
+	}
+
 	protected void handleBatchOption(final LinkedList<String> args) {
 		if (args.isEmpty() || batchMode.get(legacyService) != null) return;
 		if (args.contains("-batch-no-exit")) {
@@ -155,7 +161,7 @@ public abstract class LegacyCommandline extends AbstractConsoleArgument {
 			final String path = args.removeFirst(); // "file-name"
 
 			handleBatchOption(args);
-			ij1Helper().openImage(path);
+			ij1Helper().openImage(path, !GraphicsEnvironment.isHeadless() && !isBatchMode());
 			handleBatchExit(args);
 		}
 
