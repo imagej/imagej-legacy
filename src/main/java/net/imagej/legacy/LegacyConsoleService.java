@@ -30,15 +30,26 @@
  */
 package net.imagej.legacy;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import org.scijava.Priority;
+import org.scijava.console.ConsoleArgument;
+import org.scijava.console.ConsoleService;
 import org.scijava.console.DefaultConsoleService;
+import org.scijava.console.OutputEvent;
+import org.scijava.console.OutputListener;
 import org.scijava.log.LogService;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
+import org.scijava.plugin.PluginInfo;
+import org.scijava.plugin.PluginService;
+import org.scijava.service.AbstractService;
 import org.scijava.service.Service;
+import org.scijava.service.ServiceIndex;
 
 @Plugin(type = Service.class, priority = Priority.HIGH_PRIORITY)
-public class LegacyConsoleService extends DefaultConsoleService {
+public class LegacyConsoleService extends AbstractService implements ConsoleService {
 
 	@Parameter
 	private LegacyService legacy;
@@ -46,6 +57,7 @@ public class LegacyConsoleService extends DefaultConsoleService {
 	@Parameter
 	private LogService log;
 
+	private ConsoleService consoleService;
 	private int port = 7;
 
 	@Override
@@ -61,8 +73,72 @@ public class LegacyConsoleService extends DefaultConsoleService {
 			}
 		}
 
-		super.processArgs(args);
+		consoleService().processArgs(args);
 	}
+
+	// -- ConsoleService API --
+
+	@Override
+	public ConsoleArgument getHandler(LinkedList<String> data) {
+		return consoleService().getHandler(data);
+	}
+
+	@Override
+	public List<ConsoleArgument> getInstances() {
+		return consoleService().getInstances();
+	}
+
+	@Override
+	public boolean supports(LinkedList<String> data) {
+		return consoleService().supports(data);
+	}
+
+	@Override
+	public <P extends ConsoleArgument> P getInstance(Class<P> pluginClass) {
+		return consoleService().getInstance(pluginClass);
+	}
+
+	@Override
+	public PluginService getPluginService() {
+		return consoleService().getPluginService();
+	}
+
+	@Override
+	public List<PluginInfo<ConsoleArgument>> getPlugins() {
+		return consoleService().getPlugins();
+	}
+
+	@Override
+	public Class<ConsoleArgument> getPluginType() {
+		return consoleService().getPluginType();
+	}
+
+	@Override
+	public <P extends ConsoleArgument> P create(Class<P> pluginClass) {
+		return consoleService().create(pluginClass);
+	}
+
+	@Override
+	public Class<LinkedList<String>> getType() {
+		return consoleService().getType();
+	}
+
+	@Override
+	public void addOutputListener(OutputListener l) {
+		consoleService().addOutputListener(l);
+	}
+
+	@Override
+	public void removeOutputListener(OutputListener l) {
+		consoleService().removeOutputListener(l);
+	}
+
+	@Override
+	public void notifyListeners(OutputEvent event) {
+		consoleService().notifyListeners(event);
+	}
+
+	// -- Helpers --
 
 	/**
 	 * Detects arguments that prevent handing off to existing instances.
@@ -85,5 +161,22 @@ public class LegacyConsoleService extends DefaultConsoleService {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Lazy helper method to allow {@link DefaultConsoleService} to perform much
+	 * of the work of this class, despite being lower priority.
+	 *
+	 * @return Active {@code ConsoleService}.
+	 */
+	private ConsoleService consoleService() {
+		if (consoleService == null) {
+			final ServiceIndex index = getContext().getServiceIndex();
+
+			// Set datasetService to the next highest priority service
+			consoleService =
+				index.getNextService(ConsoleService.class, LegacyConsoleService.class);
+		}
+		return consoleService;
 	}
 }
