@@ -15,7 +15,7 @@ processFolder(input);
 function processFolder(input) {
 	list = getFileList(input);
 	for (i = 0; i < list.length; i++) {
-		if(File.isDirectory(list[i]))
+		if(File.isDirectory(input + list[i]))
 			processFolder("" + input + list[i]);
 		if(endsWith(list[i], suffix))
 			processFile(input, output, list[i]);
