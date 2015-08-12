@@ -461,10 +461,11 @@ public class DefaultLegacyHooks extends LegacyHooks {
 					win.setVisible(false);
 				}
 			}
-			else {
-				// Nothing to do for these windows. Just add them to a list to be
-				// disposed later, as long as no CloseConfirmable windows are
-				// canceled.
+			else if (win.getClass().getPackage().getName().startsWith("ij.")) {
+				// Whitelist any classes from ij.* to be disposed. This should get
+				// around any offenders in core ImageJ that leave windows open when
+				// closing.
+				// External classes should just implement CloseConfirmable!
 				unconfirmableWindows.add(win);
 			}
 		}
