@@ -10,16 +10,16 @@ from jarray import array
 from ij import IJ
 
 # create a log kernel
-logKernel=ops.logKernel(inputData.numDimensions(), 1.0);
+logKernel=ops.create().kernelLog(inputData.numDimensions(), 1.0);
 
 # convolve with log kernel
-logFiltered=ops.convolve(inputData, logKernel);
+logFiltered=ops.filter().convolve(inputData, logKernel);
 
 # display log filter result
 display.createDisplay("log", ImgPlus(logFiltered));
 
 # otsu threshold and display
-thresholded = ops.run("threshold.otsu",logFiltered)
+thresholded = ops.threshold().otsu(logFiltered)
 display.createDisplay("thresholded", ImgPlus(thresholded));
 
 # convert to imagej1 imageplus so we can run analyze particles
