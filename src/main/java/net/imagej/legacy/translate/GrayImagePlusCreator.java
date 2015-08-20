@@ -53,6 +53,7 @@ import net.imglib2.converter.Converter;
 import net.imglib2.img.Img;
 import net.imglib2.img.basictypeaccess.PlanarAccess;
 import net.imglib2.img.cell.AbstractCellImg;
+import net.imglib2.img.display.imagej.ImageJVirtualStack;
 import net.imglib2.img.display.imagej.ImageJVirtualStackFloat;
 import net.imglib2.img.display.imagej.ImageJVirtualStackUnsignedByte;
 import net.imglib2.img.display.imagej.ImageJVirtualStackUnsignedShort;
@@ -340,17 +341,24 @@ public class GrayImagePlusCreator extends AbstractImagePlusCreator {
 		// ensure image being passed to imglib2-ij has XYCZT dimension order
 		RandomAccessibleInterval<T> rai = ensureXYCZT(imgPlus);
 
+		ImageJVirtualStack stack = null;
+
 		// finally, wrap the XYCZT image as an ImageJ virtual stack
 		if (bitDepth <= 8 && !isSigned) {
-			return new ImageJVirtualStackUnsignedByte<T>(rai, new ByteConverter<T>());
+			stack = new ImageJVirtualStackUnsignedByte<T>(rai, new ByteConverter<T>());
 		}
 		else if (bitDepth <= 16 && !isSigned) {
-			return new ImageJVirtualStackUnsignedShort<T>(rai,
+			stack = new ImageJVirtualStackUnsignedShort<T>(rai,
 				new ShortConverter<T>());
 		}
 		else { // other types translated as 32-bit float data
-			return new ImageJVirtualStackFloat<T>(rai, new FloatConverter<T>());
+			stack = new ImageJVirtualStackFloat<T>(rai, new FloatConverter<T>());
 		}
+
+		// Virtual stacks are writable when backed by a CellCache!
+		stack.setWritable(true);
+
+		return stack;
 	}
 
 	private static final List<AxisType> naturalOrder =
