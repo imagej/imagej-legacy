@@ -48,36 +48,6 @@ import javassist.expr.Instanceof;
 import javassist.expr.MethodCall;
 import javassist.expr.NewArray;
 import javassist.expr.NewExpr;
-import net.imagej.legacy.display.AbstractImagePlusDisplayViewer;
-import net.imagej.legacy.display.LegacyImageDisplayService;
-import net.imagej.legacy.display.LegacyImageDisplayViewer;
-import net.imagej.legacy.plugin.ActiveImagePlusPreprocessor;
-import net.imagej.legacy.plugin.DefaultLegacyOpener;
-import net.imagej.legacy.plugin.IJ1MacroEngine;
-import net.imagej.legacy.plugin.LegacyCommand;
-import net.imagej.legacy.plugin.LegacyInitializer;
-import net.imagej.legacy.translate.AbstractDisplayCreator;
-import net.imagej.legacy.translate.AbstractImagePlusCreator;
-import net.imagej.legacy.translate.ColorDisplayCreator;
-import net.imagej.legacy.translate.ColorImagePlusCreator;
-import net.imagej.legacy.translate.ColorPixelHarmonizer;
-import net.imagej.legacy.translate.ColorTableHarmonizer;
-import net.imagej.legacy.translate.CompositeHarmonizer;
-import net.imagej.legacy.translate.DatasetImagePlusConverter;
-import net.imagej.legacy.translate.DefaultImageTranslator;
-import net.imagej.legacy.translate.GrayDisplayCreator;
-import net.imagej.legacy.translate.GrayImagePlusCreator;
-import net.imagej.legacy.translate.GrayPixelHarmonizer;
-import net.imagej.legacy.translate.Harmonizer;
-import net.imagej.legacy.translate.ImagePlusDatasetConverter;
-import net.imagej.legacy.translate.LegacyUtils;
-import net.imagej.legacy.translate.MergedRgbVirtualStack;
-import net.imagej.legacy.translate.MetadataHarmonizer;
-import net.imagej.legacy.translate.NameHarmonizer;
-import net.imagej.legacy.translate.OverlayHarmonizer;
-import net.imagej.legacy.translate.PlaneHarmonizer;
-import net.imagej.legacy.translate.PositionHarmonizer;
-import net.imagej.legacy.translate.ResultsTableHarmonizer;
 import net.imagej.patcher.LegacyInjector;
 
 import org.junit.Test;
@@ -114,41 +84,42 @@ public class ImageJ1EncapsulationTest {
 
 			if (className.startsWith(IJ1Helper.class.getName()) ||
 					/* TODO: At least some of them should not need to access ImageJ 1.x classes directly! */
-					className.startsWith(LegacyOutputTracker.class.getName()) ||
-					className.startsWith(LegacyCommand.class.getName()) ||
-					className.startsWith(ActiveImagePlusPreprocessor.class.getName()) ||
-					className.startsWith(DefaultLegacyOpener.class.getName()) ||
-					className.startsWith(IJ1MacroEngine.class.getName()) ||
-					className.startsWith(LegacyInitializer.class.getName()) ||
-					className.startsWith(SwitchToModernMode.class.getName()) ||
-					className.startsWith(DefaultLegacyHooks.class.getName()) ||
-					className.startsWith(LegacyImageMap.class.getName()) ||
-					className.startsWith(PlaneHarmonizer.class.getName()) ||
-					className.startsWith(AbstractImagePlusCreator.class.getName()) ||
-					className.startsWith(ImagePlusDatasetConverter.class.getName()) ||
-					className.startsWith(GrayPixelHarmonizer.class.getName()) ||
-					className.startsWith(ColorDisplayCreator.class.getName()) ||
-					className.startsWith(DefaultImageTranslator.class.getName()) ||
-					className.startsWith(NameHarmonizer.class.getName()) ||
-					className.startsWith(ColorTableHarmonizer.class.getName()) ||
-					className.startsWith(Harmonizer.class.getName()) ||
-					className.startsWith(OverlayHarmonizer.class.getName()) ||
-					className.startsWith(MergedRgbVirtualStack.class.getName()) ||
-					className.startsWith(ColorPixelHarmonizer.class.getName()) ||
-					className.startsWith(MetadataHarmonizer.class.getName()) ||
-					className.startsWith(GrayDisplayCreator.class.getName()) ||
-					className.startsWith(ColorImagePlusCreator.class.getName()) ||
-					className.startsWith(GrayImagePlusCreator.class.getName()) ||
-					className.startsWith(PositionHarmonizer.class.getName()) ||
-					className.startsWith(ResultsTableHarmonizer.class.getName()) ||
-					className.startsWith(LegacyUtils.class.getName()) ||
-					className.startsWith(AbstractDisplayCreator.class.getName()) ||
-					className.startsWith(CompositeHarmonizer.class.getName()) ||
-					className.startsWith(DatasetImagePlusConverter.class.getName()) ||
-					className.startsWith(OptionsSynchronizer.class.getName()) ||
-					className.startsWith(LegacyImageDisplayViewer.class.getName()) ||
-					className.startsWith(LegacyImageDisplayService.class.getName()) ||
-					className.startsWith(AbstractImagePlusDisplayViewer.class.getName())) {
+					className.startsWith(net.imagej.legacy.DefaultLegacyHooks.class.getName()) ||
+					className.startsWith(net.imagej.legacy.LegacyImageMap.class.getName()) ||
+					className.startsWith(net.imagej.legacy.LegacyOutputTracker.class.getName()) ||
+					className.startsWith(net.imagej.legacy.OptionsSynchronizer.class.getName()) ||
+					className.startsWith(net.imagej.legacy.SwitchToModernMode.class.getName()) ||
+					className.startsWith(net.imagej.legacy.display.AbstractImagePlusDisplayViewer.class.getName()) ||
+					className.startsWith(net.imagej.legacy.display.LegacyImageDisplayService.class.getName()) ||
+					className.startsWith(net.imagej.legacy.display.LegacyImageDisplayViewer.class.getName()) ||
+					className.startsWith(net.imagej.legacy.plugin.ActiveImagePlusPreprocessor.class.getName()) ||
+					className.startsWith(net.imagej.legacy.plugin.DefaultLegacyOpener.class.getName()) ||
+					className.startsWith(net.imagej.legacy.plugin.IJ1MacroEngine.class.getName()) ||
+					className.startsWith(net.imagej.legacy.plugin.LegacyCommand.class.getName()) ||
+					className.startsWith(net.imagej.legacy.plugin.LegacyInitializer.class.getName()) ||
+					className.startsWith(net.imagej.legacy.translate.AbstractDisplayCreator.class.getName()) ||
+					className.startsWith(net.imagej.legacy.translate.AbstractImagePlusCreator.class.getName()) ||
+					className.startsWith(net.imagej.legacy.translate.ColorDisplayCreator.class.getName()) ||
+					className.startsWith(net.imagej.legacy.translate.ColorImagePlusCreator.class.getName()) ||
+					className.startsWith(net.imagej.legacy.translate.ColorPixelHarmonizer.class.getName()) ||
+					className.startsWith(net.imagej.legacy.translate.ColorTableHarmonizer.class.getName()) ||
+					className.startsWith(net.imagej.legacy.translate.CompositeHarmonizer.class.getName()) ||
+					className.startsWith(net.imagej.legacy.translate.DatasetImagePlusConverter.class.getName()) ||
+					className.startsWith(net.imagej.legacy.translate.DefaultImageTranslator.class.getName()) ||
+					className.startsWith(net.imagej.legacy.translate.GrayDisplayCreator.class.getName()) ||
+					className.startsWith(net.imagej.legacy.translate.GrayImagePlusCreator.class.getName()) ||
+					className.startsWith(net.imagej.legacy.translate.GrayPixelHarmonizer.class.getName()) ||
+					className.startsWith(net.imagej.legacy.translate.Harmonizer.class.getName()) ||
+					className.startsWith(net.imagej.legacy.translate.ImagePlusDatasetConverter.class.getName()) ||
+					className.startsWith(net.imagej.legacy.translate.LegacyUtils.class.getName()) ||
+					className.startsWith(net.imagej.legacy.translate.MergedRgbVirtualStack.class.getName()) ||
+					className.startsWith(net.imagej.legacy.translate.MetadataHarmonizer.class.getName()) ||
+					className.startsWith(net.imagej.legacy.translate.NameHarmonizer.class.getName()) ||
+					className.startsWith(net.imagej.legacy.translate.OverlayHarmonizer.class.getName()) ||
+					className.startsWith(net.imagej.legacy.translate.PlaneHarmonizer.class.getName()) ||
+					className.startsWith(net.imagej.legacy.translate.PositionHarmonizer.class.getName()) ||
+					className.startsWith(net.imagej.legacy.translate.ResultsTableHarmonizer.class.getName()))
+			{
 				continue;
 			}
 			try {
