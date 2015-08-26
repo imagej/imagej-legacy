@@ -31,12 +31,16 @@
 
 package net.imagej.legacy.ui;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
-import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
 import javax.swing.WindowConstants;
 
 import net.imagej.legacy.IJ1Helper;
@@ -148,6 +152,7 @@ public class LegacyUI extends AbstractUserInterface implements SwingUI {
 		final JFrame frame = new JFrame("Console");
 		frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		frame.setContentPane(getConsolePane().getComponent());
+		frame.setJMenuBar(createConsoleMenu());
 		frame.pack();
 		getConsolePane().setWindow(frame);
 	}
@@ -340,4 +345,23 @@ public class LegacyUI extends AbstractUserInterface implements SwingUI {
 	public boolean requiresEDT() {
 		return true;
 	}
+
+	// -- Helper methods --
+
+	private JMenuBar createConsoleMenu() {
+		final JMenuBar menuBar = new JMenuBar();
+		final JMenu edit = new JMenu("Edit");
+		menuBar.add(edit);
+		final JMenuItem editClear = new JMenuItem("Clear");
+		editClear.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				getConsolePane().clear();
+			}
+		});
+		edit.add(editClear);
+		return menuBar;
+	}
+
 }
