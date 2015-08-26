@@ -67,8 +67,14 @@ public class MacroRecorderPostprocessor extends AbstractPostprocessorPlugin {
 		for (final ModuleItem<?> input : module.getInfo().inputs()) {
 			final String name = input.getName();
 			final Object value = module.getInput(name);
-			if (value != null) ij1Helper.recordOption(name, value.toString());
+			if (value != null) ij1Helper.recordOption(name, toString(value));
 		}
+	}
+
+	// -- Helper methods --
+
+	private String toString(final Object value) {
+		return value.toString();
 	}
 
 }
