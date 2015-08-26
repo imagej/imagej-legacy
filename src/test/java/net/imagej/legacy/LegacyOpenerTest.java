@@ -66,13 +66,15 @@ public class LegacyOpenerTest {
 		assertNotNull(url);
 		assumeTrue("file".equals(url.getProtocol()));
 		final String path = url.getPath();
-		final String macro = "// @OUTPUT int nResults\n"
-				+ "open('" + path + "');\n"
-				+ "if (nImages() != 1) exit('Oh no!');\n"
-				+ "run('8-bit');"
-				+ "setThreshold(150,255);"
-				+ "run('Analyze Particles...', 'size=20-Infinity circularity=0.40-1.00');\n"
-				+ "close();";
+		final String macro = "" + //
+			"// @OUTPUT int nResults\n" + //
+			"open('" + path + "');\n" + //
+			"if (nImages() != 1) exit('Oh no!');\n" + //
+			"run('8-bit');" + //
+			"setThreshold(150,255);" + //
+			"run('Analyze Particles...', " + //
+			"'size=20-Infinity circularity=0.40-1.00');\n" + //
+			"close();";
 
 		final Context context = new Context();
 		try {
@@ -106,17 +108,19 @@ public class LegacyOpenerTest {
 		assumeTrue("file".equals(url.getProtocol()));
 
 		final String path = url.getPath();
-		final String macro = "// @OUTPUT String label\n"
-				+ "open('" + path + "');\n"
-				+ "if (nImages() != 1) exit('Oh no!');\n"
-				+ "label = getMetadata('Label');\n"
-				+ "close();";
+		final String macro = "" + //
+			"// @OUTPUT String label\n" + //
+			"open('" + path + "');\n" + //
+			"if (nImages() != 1) exit('Oh no!');\n" + //
+			"label = getMetadata('Label');\n" + //
+			"close();";
 
 		final Context context = new Context();
 		try {
 			final ScriptService script = context.getService(ScriptService.class);
 			assertNotNull(script);
-			final ScriptModule module = script.run("bobs-macro.ijm", macro, true).get();
+			final ScriptModule module =
+				script.run("bobs-macro.ijm", macro, true).get();
 			final String label = (String) module.getOutput("label");
 			assertNotNull(label);
 			assertEquals("Hello, World!", label);
@@ -127,7 +131,8 @@ public class LegacyOpenerTest {
 	}
 
 	/**
-	 * Verifies that the suffix (-1, -2, etc when a newly opened file would a have non-unique name) is reset after closing images.
+	 * Verifies that the suffix (-1, -2, etc when a newly opened file would a have
+	 * non-unique name) is reset after closing images.
 	 * 
 	 * @throws Exception
 	 */
@@ -137,19 +142,19 @@ public class LegacyOpenerTest {
 		assertNotNull(url);
 		assumeTrue("file".equals(url.getProtocol()));
 		final String path = url.getPath();
-		final String macro = "// @OUTPUT String title\n"
-				+ "open('" + path + "');\n"
-				+ "if (nImages() != 1) exit('Oh no!');\n"
-				+ "close();\n"
-				+ "open('" + path + "');\n"
-				+ "title = getTitle();\n";
+		final String macro = "" + //
+			"// @OUTPUT String title\n" + //
+			"open('" + path + "');\n" + //
+			"if (nImages() != 1) exit('Oh no!');\n" + //
+			"close();\n" + //
+			"open('" + path + "');\n" + //
+			"title = getTitle();\n";
 
 		final Context context = new Context();
 		try {
 			final ScriptService script = context.getService(ScriptService.class);
 			assertNotNull(script);
-			final ScriptModule module =
-				script.run("test.ijm", macro, true).get();
+			final ScriptModule module = script.run("test.ijm", macro, true).get();
 			final String title = (String) module.getOutput("title");
 			assertNotNull(title);
 			assertEquals("imagej-256.png", title);
@@ -158,4 +163,5 @@ public class LegacyOpenerTest {
 			context.dispose();
 		}
 	}
+
 }
