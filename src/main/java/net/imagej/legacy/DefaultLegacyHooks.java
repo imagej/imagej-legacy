@@ -445,11 +445,12 @@ public class DefaultLegacyHooks extends LegacyHooks {
 			final Window win = windows[w];
 
 			// Skip the ImageJ 1.x main window
-			if (win == legacyService.getIJ1Helper().getIJ()) {
+			if (win == null || win == legacyService.getIJ1Helper().getIJ()) {
 				continue;
 			}
 
-			if (CloseConfirmable.class.isAssignableFrom(win.getClass())) {
+			final Class<?> winClass = win.getClass();
+			if (CloseConfirmable.class.isAssignableFrom(winClass)) {
 				// Any CloseConfirmable window will have its confirmClose method
 				// called.
 				// If this operation was not canceled, we hide the window until it can
@@ -460,12 +461,17 @@ public class DefaultLegacyHooks extends LegacyHooks {
 					win.setVisible(false);
 				}
 			}
-			else if (win.getClass().getPackage().getName().startsWith("ij.")) {
+			else {
+				final Package winPackage = winClass.getPackage();
+				final String name = winPackage == null ? null : winPackage.getName();
+
 				// Whitelist any classes from ij.* to be disposed. This should get
 				// around any offenders in core ImageJ that leave windows open when
 				// closing.
 				// External classes should just implement CloseConfirmable!
-				unconfirmableWindows.add(win);
+				if (name != null && name.startsWith("ij.")) {
+					unconfirmableWindows.add(win);
+				}
 			}
 		}
 
