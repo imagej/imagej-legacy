@@ -858,7 +858,7 @@ public class IJ1Helper extends AbstractContextual {
 
 	}
 
-	private<T> T runMacroFriendly(final String type, final Callable<T> call) {
+	private<T> T runMacroFriendly(final Callable<T> call) {
 		if (EventQueue.isDispatchThread()) {
 			throw new IllegalStateException("Cannot run macro from the EDT!");
 		}
@@ -887,7 +887,7 @@ public class IJ1Helper extends AbstractContextual {
 	 * @param command the command to execute
 	 */
 	public void run(final String command) {
-		runMacroFriendly("macro", new Callable<Void>() {
+		runMacroFriendly(new Callable<Void>() {
 			@Override
 			public Void call() throws Exception {
 				IJ.run(command);
@@ -903,7 +903,7 @@ public class IJ1Helper extends AbstractContextual {
 	 * @return the return value
 	 */
 	public String runMacro(final String macro) {
-		return runMacroFriendly("macro", new Callable<String>() {
+		return runMacroFriendly(new Callable<String>() {
 			@Override
 			public String call() throws Exception {
 				return IJ.runMacro(macro);
@@ -919,7 +919,7 @@ public class IJ1Helper extends AbstractContextual {
 	 * @return the return value
 	 */
 	public String runMacroFile(final String path, final String arg) {
-		return runMacroFriendly("macro", new Callable<String>() {
+		return runMacroFriendly(new Callable<String>() {
 			@Override
 			public String call() throws Exception {
 				return IJ.runMacroFile(path, arg);
