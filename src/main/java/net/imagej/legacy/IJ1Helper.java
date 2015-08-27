@@ -556,12 +556,12 @@ public class IJ1Helper extends AbstractContextual {
 	 * </p>
 	 * <p>
 	 * This class implements the same functionality as the MacAdapter, but in a
-	 * way that is compatible with ImageJ 2's platform service.
+	 * way that is compatible with the SciJava platform service.
 	 * </p>
 	 * <p>
 	 * Note that the {@link AppAboutEvent}, {@link AppPreferencesEvent} and
-	 * {@link AppQuitEvent} are handled separately, by the
-	 * {@link LegacyAppEventService}. See also {@link IJ1Helper#appAbout},
+	 * {@link AppQuitEvent} are handled separately, indirectly, by the
+	 * {@link LegacyImageJApp}. See also {@link IJ1Helper#appAbout},
 	 * {@link IJ1Helper#appPrefs} and {@link IJ1Helper#appQuit}.
 	 * </p>
 	 * 
