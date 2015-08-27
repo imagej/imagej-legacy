@@ -401,6 +401,14 @@ public class IJ1Helper extends AbstractContextual {
 		return WindowManager.getImage(imageID);
 	}
 
+	/**
+	 * Returns {@link ImagePlus#getTitle()} if the object is an {@link ImagePlus},
+	 * otherwise null.
+	 */
+	public static String getTitle(final Object o) {
+		return o instanceof ImagePlus ? ((ImagePlus) o).getTitle() : null;
+	}
+
 	public ClassLoader getClassLoader() {
 		return IJ.getClassLoader();
 	}

@@ -74,6 +74,10 @@ public class MacroRecorderPostprocessor extends AbstractPostprocessorPlugin {
 	// -- Helper methods --
 
 	private String toString(final Object value) {
+		// if object is an ImagePlus, use its title as the string representation
+		final String title = IJ1Helper.getTitle(value);
+		if (title != null) return title;
+
 		return value.toString();
 	}
 
