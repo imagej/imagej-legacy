@@ -32,7 +32,6 @@
 package net.imagej.legacy;
 
 import ij.ImagePlus;
-import ij.gui.ImageWindow;
 
 import java.awt.Frame;
 import java.awt.Window;
