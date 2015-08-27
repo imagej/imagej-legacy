@@ -31,8 +31,8 @@
 
 package net.imagej.legacy.plugin;
 
-import net.imagej.legacy.LegacyService;
 import net.imagej.legacy.IJ1Helper;
+import net.imagej.legacy.LegacyService;
 
 import org.scijava.Priority;
 import org.scijava.module.Module;
