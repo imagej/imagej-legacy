@@ -537,62 +537,62 @@ public class OverlayHarmonizer extends AbstractContextual implements
 	{
 		if (roi == null) return;
 
-		log.warn("====> Roi class = " + roi.getClass().getName());
+		log.debug("====> Roi class = " + roi.getClass().getName());
 		if (roi instanceof TextRoi) {
-			log.warn("====> TEXT: " + roi);
+			log.debug("====> TEXT: " + roi);
 			overlays.add(createTextOverlay(roi));
 			return;
 		}
 		switch (roi.getType()) {
 			case Roi.RECTANGLE:
-				log.warn("====> RECTANGLE: " + roi);
+				log.debug("====> RECTANGLE: " + roi);
 				overlays.add(createRectangleOverlay(roi));
 				break;
 			case Roi.OVAL:
-				log.warn("====> OVAL: " + roi);
+				log.debug("====> OVAL: " + roi);
 				overlays.add(createEllipseOverlay(roi));
 				break;
 			case Roi.POLYGON:
-				log.warn("====> POLYGON: " + roi);
+				log.debug("====> POLYGON: " + roi);
 				overlays.add(createPolygonOverlay(roi));
 				break;
 			case Roi.FREEROI:
-				log.warn("====> FREEROI: " + roi);
+				log.debug("====> FREEROI: " + roi);
 				overlays.add(createPolygonOverlay(roi));
 				break;
 			case Roi.TRACED_ROI:
-				log.warn("====> TRACED_ROI: " + roi);
+				log.debug("====> TRACED_ROI: " + roi);
 				overlays.add(createPolygonOverlay(roi));
 				break;
 			case Roi.LINE:
-				log.warn("====> LINE: " + roi);
+				log.debug("====> LINE: " + roi);
 				overlays.add(createLineOverlay(roi));
 				break;
 			case Roi.POLYLINE:
-				log.warn("====> POLYLINE: " + roi);
+				log.debug("====> POLYLINE: " + roi);
 				// TODO - implement this
 				// throw new UnsupportedOperationException("POLYLINE unimplemented");
 				break;
 			case Roi.FREELINE:
-				log.warn("====> FREELINE: " + roi);
+				log.debug("====> FREELINE: " + roi);
 				// TODO - implement this
 				// throw new UnsupportedOperationException("FREELINE unimplemented");
 				break;
 			case Roi.ANGLE:
-				log.warn("====> ANGLE: " + roi);
+				log.debug("====> ANGLE: " + roi);
 				overlays.add(createAngleOverlay(roi));
 				break;
 			case Roi.POINT:
-				log.warn("====> POINT: " + roi);
+				log.debug("====> POINT: " + roi);
 				overlays.add(createPointOverlay(roi));
 				break;
 			case Roi.COMPOSITE:
-				log.warn("====> COMPOSITE: " + roi);
+				log.debug("====> COMPOSITE: " + roi);
 				final ShapeRoi shapeRoi = (ShapeRoi) roi;
 				overlays.add(createGeneralPathOverlay(shapeRoi));
 				break;
 			default:
-				log.warn("====> OTHER (" + roi.getType() + ", " + "): " + roi);
+				log.debug("====> OTHER (" + roi.getType() + ", " + "): " + roi);
 				throw new UnsupportedOperationException("OTHER unimplemented");
 		}
 	}
