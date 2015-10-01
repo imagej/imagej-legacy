@@ -1063,9 +1063,11 @@ public class IJ1Helper extends AbstractContextual {
 
 	/** Chooses a directory using ImageJ 1.x' directory chooser. */
 	public String getDirectory(final String title, final File file) {
-		final String defaultDir =
-			file.isDirectory() ? file.getPath() : file.getParent();
-		DirectoryChooser.setDefaultDirectory(defaultDir);
+		if (file != null) {
+			final String defaultDir =
+				file.isDirectory() ? file.getPath() : file.getParent();
+			DirectoryChooser.setDefaultDirectory(defaultDir);
+		}
 
 		return new DirectoryChooser(title).getDirectory();
 	}
