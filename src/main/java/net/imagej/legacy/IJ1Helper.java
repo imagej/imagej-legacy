@@ -876,7 +876,12 @@ public class IJ1Helper extends AbstractContextual {
 		}
 
 		private String key(final MenuPath menuPath, final int depth) {
-			return menuPath.get(depth).getName();
+			final StringBuilder sb = new StringBuilder();
+			for (int i = 0; i <= depth; i++) {
+				sb.append(menuPath.get(i).getName());
+				sb.append("\n"); // NB: an unambiguous separator
+			}
+			return sb.toString();
 		}
 	}
 
