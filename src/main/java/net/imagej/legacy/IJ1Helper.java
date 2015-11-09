@@ -799,9 +799,7 @@ public class IJ1Helper extends AbstractContextual {
 			return menu.getItemCount();
 		}
 
-		/**
-		 * Recursive helper method to builds the final {@link Menu} structure.
-		 */
+		/** Recursive helper method to build the final {@link Menu} structure. */
 		private Menu getParentMenu(final MenuPath menuPath, int depth) {
 			final MenuEntry currentItem = menuPath.get(depth);
 			final String currentLabel = currentItem.getName();
