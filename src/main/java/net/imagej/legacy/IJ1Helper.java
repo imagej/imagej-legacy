@@ -736,7 +736,7 @@ public class IJ1Helper extends AbstractContextual {
 	private static class IJ1MenuWrapper {
 		final ImageJ ij1;
 		final MenuBar menuBar = Menus.getMenuBar();
-		final Map<String, Menu> structure = new HashMap<String, Menu>();
+		final MenuCache menuCache = new MenuCache();
 		final Set<Menu> separators = new HashSet<Menu>();
 
 		private IJ1MenuWrapper(final ImageJ ij1) {
@@ -799,15 +799,13 @@ public class IJ1Helper extends AbstractContextual {
 			return menu.getItemCount();
 		}
 
-		/**
-		 * Recursive helper method to builds the final {@link Menu} structure.
-		 */
+		/** Recursive helper method to build the final {@link Menu} structure. */
 		private Menu getParentMenu(final MenuPath menuPath, int depth) {
 			final MenuEntry currentItem = menuPath.get(depth);
 			final String currentLabel = currentItem.getName();
 			// Check to see if we already know the menu associated with the desired
 			// label/path
-			final Menu cached = structure.get(currentLabel);
+			final Menu cached = menuCache.get(menuPath, depth);
 			if (cached != null) return cached;
 
 			// We are at the root of the menu, so see if we have a matching menu
@@ -815,7 +813,7 @@ public class IJ1Helper extends AbstractContextual {
 				// Special case check the help menu
 				if ("Help".equals(currentLabel)) {
 					final Menu menu = menuBar.getHelpMenu();
-					structure.put(currentLabel, menu);
+					menuCache.put(menuPath, depth, menu);
 					return menu;
 				}
 				// Check the other menus of the menu bar to see if our desired label
@@ -823,14 +821,14 @@ public class IJ1Helper extends AbstractContextual {
 				for (int i = 0; i < menuBar.getMenuCount(); i++) {
 					final Menu menu = menuBar.getMenu(i);
 					if (currentLabel.equals(menu.getLabel())) {
-						structure.put(currentLabel, menu);
+						menuCache.put(menuPath, depth, menu);
 						return menu;
 					}
 				}
 				// Didn't find a match so we have to create a new menu entry
 				final Menu menu = new Menu(currentLabel);
 				menuBar.add(menu);
-				structure.put(currentLabel, menu);
+				menuCache.put(menuPath, depth, menu);
 				return menu;
 			}
 			final Menu parent = getParentMenu(menuPath, depth - 1);
@@ -842,7 +840,7 @@ public class IJ1Helper extends AbstractContextual {
 					if (item instanceof Menu) {
 						// Found a menu entry that matches our desired label, so return
 						final Menu menu = (Menu) item;
-						structure.put(currentLabel, menu);
+						menuCache.put(menuPath, depth, menu);
 						return menu;
 					}
 					// Found a match but it was an existing non-menu item, so our menu
@@ -860,10 +858,31 @@ public class IJ1Helper extends AbstractContextual {
 			final Menu menu = new Menu(currentLabel);
 			parent.insert(menu, getIndex(parent, menu.getLabel()));
 
-			structure.put(currentLabel, menu);
+			menuCache.put(menuPath, depth, menu);
 			return menu;
 		}
 
+	}
+
+	private static class MenuCache {
+		private final Map<String, Menu> map = new HashMap<String, Menu>();
+
+		public void put(final MenuPath menuPath, final int depth, final Menu menu) {
+			map.put(key(menuPath, depth), menu);
+		}
+
+		public Menu get(final MenuPath menuPath, final int depth) {
+			return map.get(key(menuPath, depth));
+		}
+
+		private String key(final MenuPath menuPath, final int depth) {
+			final StringBuilder sb = new StringBuilder();
+			for (int i = 0; i <= depth; i++) {
+				sb.append(menuPath.get(i).getName());
+				sb.append("\n"); // NB: an unambiguous separator
+			}
+			return sb.toString();
+		}
 	}
 
 	private<T> T runMacroFriendly(final Callable<T> call) {
