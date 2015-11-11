@@ -37,6 +37,12 @@
 		</repository>
 	</repositories>
 
+	<properties>
+		<imagej1.version>1.50e-SNAPSHOT</imagej1.version>
+		<ij1-patcher.version>0.13.0-SNAPSHOT</ij1-patcher.version>
+		<enforcer.skip>true</enforcer.skip>
+	</properties>
+
 	<dependencies>
 		<!-- SCIFIO dependencies -->
 		<dependency>
