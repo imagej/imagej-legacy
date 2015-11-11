@@ -30,6 +30,95 @@
 		<url>http://jenkins.imagej.net/job/ImageJ-legacy/</url>
 	</ciManagement>
 
+	<developers>
+		<developer>
+			<id>ctrueden</id>
+			<name>Curtis Rueden</name>
+			<email>ctrueden@wisc.edu</email>
+			<url>http://loci.wisc.edu/people/curtis-rueden</url>
+			<organization>UW-Madison LOCI</organization>
+			<organizationUrl>http://loci.wisc.edu/</organizationUrl>
+			<roles>
+				<role>lead</role>
+				<role>developer</role>
+				<role>debugger</role>
+				<role>reviewer</role>
+				<role>support</role>
+				<role>maintainer</role>
+			</roles>
+			<timezone>-6</timezone>
+		</developer>
+		<developer>
+			<id>hinerm</id>
+			<name>Mark Hiner</name>
+			<email>hiner@wisc.edu</email>
+			<url>http://loci.wisc.edu/people/mark-hiner</url>
+			<organization>UW-Madison LOCI</organization>
+			<organizationUrl>http://loci.wisc.edu/</organizationUrl>
+			<roles>
+				<role>lead</role>
+				<role>developer</role>
+				<role>debugger</role>
+				<role>reviewer</role>
+				<role>support</role>
+				<role>maintainer</role>
+			</roles>
+			<timezone>-6</timezone>
+		</developer>
+	</developers>
+
+	<contributors>
+		<contributor>
+			<name>Johannes Schindelin</name>
+			<url>http://imagej.net/User:Schindelin</url>
+			<properties><id>dscho</id></properties>
+		</contributor>
+		<contributor>
+			<name>Barry DeZonia</name>
+			<url>http://imagej.net/User:Bdezonia</url>
+			<properties><id>bdezonia</id></properties>
+		</contributor>
+		<contributor>
+			<name>Lee Kamentsky</name>
+			<url>http://imagej.net/User:Leek</url>
+			<properties><id>LeeKamentsky</id></properties>
+		</contributor>
+		<contributor>
+			<name>Jan Eglinger</name>
+			<url>http://imagej.net/User:Eglinger</url>
+			<properties><id>imagejan</id></properties>
+		</contributor>
+		<contributor>
+			<name>Tiago Ferreira</name>
+			<url>http://imagej.net/User:Tiago</url>
+			<properties><id>tferr</id></properties>
+		</contributor>
+		<contributor>
+			<name>Aivar Grislis</name>
+			<url>http://loci.wisc.edu/people/aivar-grislis</url>
+			<properties><id>grislis</id></properties>
+		</contributor>
+		<contributor>
+			<name>Grant Harris</name>
+			<url>http://imagej.net/User:Harris</url>
+			<properties><id>tnargsirrah</id></properties>
+		</contributor>
+		<contributor>
+			<name>Florian Jug</name>
+			<url>http://imagej.net/User:Jug</url>
+			<properties><id>fjug</id></properties>
+		</contributor>
+		<contributor>
+			<name>Benjamin Nanes</name>
+			<url>http://imagej.net/User:Bnanes</url>
+			<properties><id>bnanes</id></properties>
+		</contributor>
+		<contributor>
+			<name>Brian Northan</name>
+			<properties><id>bnorthan</id></properties>
+		</contributor>
+	</contributors>
+
 	<repositories>
 		<repository>
 			<id>imagej.public</id>
