@@ -39,6 +39,7 @@ import java.util.Map;
 import java.util.concurrent.Future;
 
 import net.imagej.DatasetService;
+import net.imagej.ImageJService;
 import net.imagej.display.ImageDisplay;
 import net.imagej.display.ImageDisplayService;
 import net.imagej.display.OverlayService;
@@ -110,7 +111,9 @@ import org.scijava.util.POM;
  * @author Mark Hiner
  */
 @Plugin(type = Service.class, priority = Priority.NORMAL_PRIORITY + 1)
-public final class LegacyService extends AbstractService {
+public final class LegacyService extends AbstractService implements
+	ImageJService
+{
 
 	/**
 	 * Static reference to the one and only active {@link LegacyService}. The JVM
