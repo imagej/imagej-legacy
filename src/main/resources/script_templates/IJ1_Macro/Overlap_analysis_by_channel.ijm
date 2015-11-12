@@ -1,3 +1,7 @@
+// This macro originated after discussion on the ImageJ forum.
+// See the original thread:
+//    http://forum.imagej.net/t/creating-object-class-with-rois-from-multiple-channels/210
+//
 // This macro takes a multi-channel image as input.
 // The purpose of this macro is to identify objects in each channel, and determine
 // which of these objects overlap with each other.
