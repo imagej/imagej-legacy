@@ -1,301 +1,263 @@
 // This macro originated after discussion on the ImageJ forum.
 // See the original thread:
-//    http://forum.imagej.net/t/creating-object-class-with-rois-from-multiple-channels/210
+//    http://forum.imagej.net/t/how-can-i-obtain-a-table-relating-nucleus-number-and-area-of-each-cell/325
 //
-// This macro takes a multi-channel image as input.
-// The purpose of this macro is to identify objects in each channel, and determine
-// which of these objects overlap with each other.
+// This macro takes a 2-channel image as input.
+// The purpose of this macro is to identify objects in each channel.
+// The objects in one channel are assumed to contain one or more instances of objects
+// in the second channel.
+// After object identification (segmentation), this macro will count the number
+// of smaller objects contained in each larger object.
+//
 // This is a non-destructive alternative to the ROI manager's "AND" operation
 //
-// This template is written assuming 3-channel data, with a reference object
-// in the red channel. Update as needed for your data.
+// Search for "TODO" comments for the parts where you need to take some action before running the macro
 //
-// Search for "TODO" comments for parameters that need to be adjusted
+// To help determine the best parameters at the various "TODO" sections, it can be helpful to partially
+// execute this macro - up to the TODO line in question. To do this, simply select the code you want to run,
+// and choose "Run>Run selected code" from the script editor menu.
 //
 // For general information on image processing (selecting preprocessing techniques) see:
 //  http://imagej.net/Image_Processing_Principles
+//
+// For general information on macros see:
+//  http://imagej.net/Introduction_into_Macro_Programming
 
-// NOTE: As written, requires the Biomedgroup update site to be enabled.
-//            See http://imagej.net/How_to_follow_a_3rd_party_update_site
 
 // *** Start of macro ***
 
-//remove previous scales
-run("Set Scale...", "distance=0 known=0 global");
+// TODO
+//Before running this macro:
+//  - open your dataset (and no other images).
+//  - ensure the ROI manager is closed/empty
+//  - ensure the results table is closed/empty
 
-//TODO rename these to something appropriate for your objects
-redObject = "Red Object";
-blueObject = "Blue Object";
-greenObject = "Green Object";
-
-// split images
+// Step 1 - split image into individual channels
 T = getTitle;
 selectWindow(T);
 run("Stack to Images");
 
-// cache channel names
-selectImage(1);
-redImage = getTitle();
-selectImage(2);
-greenImage = getTitle();
-selectImage(3);
-blueImage = getTitle();
+//TODO
+// the "big channel" contains the larger objects.
+// the "small channel" contains the smaller objects
+// reverse these numbers if needed for your data
+bigChannel = 1;
+smallChannel = 2;
 
-// general preprocessing
-//TODO If you need to do any high-level image processing, do so here.
-//          For example, you may want to run the imageCalculator to limit the search
-//          scope of an image to regions of overlap.
-imageCalculator("and", greenImage, redImage);
+//TODO
+// These will be the names of our large and small objects in the
+// ROI manager. The names are arbitrary, but it is helpful for us
+// to remember what's what.
+// Update as appropriate for your data
+bigObject = "Cells";
+smallObject = "Organelles";
 
+// Here we get the title of each image so we can access them later
+selectImage(bigChannel);
+bigImage = getTitle();
+selectImage(smallChannel);
+smallImage = getTitle();
 
-// BLUE channel
-selectWindow(blueImage);
+print(bigImage);
+print(smallImage);
 
-// Preprocessing - BLUE channel
+// Step 2 - identify the larger objects
+selectWindow(bigImage);
 
-// TODO Use the threshold that best fits your data (AutoThreshold > Try all_
-// Minimum threshold is fairly aggressive, so it's helpful to Dilate after thresholding
+// Preprocessing - big channel
+
+// TODO 
+// The best preprocessing steps are really specific to your data.
+// The goal of preprocessing is to eliminate any background and get a mask image that
+// can be used later to analyze and identify our objects of interest.
+// 
+// You can find a threshold that best fits your data by using  "Image>Adjust>AutoThreshold" with "Try all"
+//
+// The following lines use the "Minimum" threshold, which is fairly aggressive. Then "Despeckles" to
+// remove noise, and "Dilates" to increase the size of the particles.
+//
+// You are encouraged to replace these lines with the preprocessing steps that work for your data.
+// You can record the commands for these steps by using "Plugins>Macros>Record..."
 setAutoThreshold("Minimum dark");
 run("Convert to Mask");
 run("Despeckle");
 run("Dilate");
 
-// Analysis - BLUE channel
+// Analysis - big channel
 
-// TODO Analyze Particles allows specification of particle size, roundness, and other options.
-//           Adjust these parameters to best fit your data
+//TODO
+// Before analyzing our data we should select what measurements we want to take.
+// Run "Analyze>Set Measurements..." and select the features you're interested in.
+
+// TODO
+// If your preprocessing is 100% successful in eliminating background noise then you can
+// run Analyze Particles without any extra configuration.
+// If needed, Analyze Particles has settings to limit the particles it selects based on size,
+// roundness, and other options.
+//
+// Update this call to Analyze Particles as needed.
 run("Analyze Particles...", "  show=Outlines display exclude summarize add");
 
-blueObjectCount = roiManager("count");
+// Analyze Particles creates ROIs around all the objects it identifies and adds them to the ROI manager.
+// Since nothing else is in our ROI manager yet, then the total ROI count is the number of larger objects
+// we identified.
+bigObjectCount = roiManager("count");
 
-setBatchMode("hide"); // hide the UI for this computation to avoid unnecessary overhead of ROI selection
+// ROI manipulation - big channel
 
-// Rename each blue object ROI to keep track of them.
-for(i=0;i<blueObjectCount;i++){
+// Any time we want to do some processing of ROIs, we should hide the active image to avoid
+// unnecessary overhead
+setBatchMode("hide");
+
+// Since we will have ROIs for both our larger and smaller objects of interest
+// it is a good idea to rename the ROI itself to remember what object it came from.
+//
+// The other thing Analyze Particles does is take a measurement of the ROI.
+// These measurements show up in the Results Table, which is what we will
+// use to record additional information about our objects.
+for(i=0;i<bigObjectCount;i++){
 	roiManager("select",i);
 	cIndex = i+1;
-	// rename to keep track of rois
-	roiManager("Rename", blueObject + " "+ cIndex);
-	// link to object index
-	setResult(blueObject + " Index", i, cIndex);
+	// this command renames the active ROI
+	roiManager("Rename", bigObject + " "+ cIndex);
+	// this command links the measurement row in the Results Table
+	// to the index we're setting in the ROI manager. This makes it
+	// easier to remember which measurements are tied to which ROIs.
+	setResult(bigObject + " Index", i, cIndex);
 }
 
+// We're done with ROI manipulation or now so we can exit batch mode and show
+// our image again.
 setBatchMode("exit and display");
 
-// End of BLUE channel
+// Step 3 - identify the smaller objects
 
+selectWindow(smallImage);
 
+// Preprocessing - small channel
 
-// RED channel
-
-selectWindow(redImage);
-
-// Preprocessing - RED channel
-
-// TODO Use the threshold that best fits your data (AutoThreshold > Try all_
+// TODO
+// Our preprocessing goals here are the same as with the big channel:
+// remove the background so we can identify all our small objects with Analyze Particles.
+// Find what works best for your data and put those commands here.
 setAutoThreshold("Default dark");
 run("Convert to Mask");
 run("Dilate");
 run("Despeckle");
 
-// Analysis - RED channel
+// Analysis - small channel
 
-// TODO Analyze Particles works great in general. However we can also use more specialized plugins to find regions of interest.
-//            For example, the Ridge Detection plugin (http://imagej.net/Ridge_Detection) is great at finding lines, and has options
-//            to preserve lines through intersection.
-//            In this example we'll use Ridge Detection. If Analyze Particles is sufficient for your data though, use it!
-run("Skeletonize");
-run("Invert LUT");
-
-//TODO find the parameters you want for ridge detection. You can record them using the Macro Recorder (Plugins>Macros>Record...) and then paste the command you use below 
-//          - replacing the "waitForUser" line.
-waitForUser("Wait for Ridge Detection...", "Please run Plugins>Ridge Detection.\nTune the parameters as needed - preview mode is recommended.\nAfter ridge detection is complete,  click \"OK\" in this dialog to continue.");
-//run("Ridge Detection", "line_width=2 high_contrast=255 low_contrast=240 estimate_width extend_line show_junction_points show_ids displayresults add_to_manager method_for_overlap_resolution=SLOPE sigma=1.2 lower_threshold=16.83 upper_threshold=40");
-
-setBatchMode("hide"); // hide the UI for this computation to avoid unnecessary overhead of ROI selection
-
-// Clean up from Ridge Detection
-// - Remove junction points
-// - Coutn red objects
-redObjectCount = 0;
-for(i=blueObjectCount;i<roiManager("count");i++){
-	roiManager("select",i);
-	if (startsWith(Roi.getName(), "JP-")) {
-		roiManager("delete");
-		i--;
-	}
-	else {
-		redObjectCount++;
-		// renaming to keep track of rois
-		roiManager("Rename", redObject + " "+ redObjectCount);
-		// In the blue channel, analyze particles measured for us.
-		// Since we used ridge detection here we need to manually measure.
-		roiManager("measure");
-		// link to object index
-		setResult(redObject + " Index", i, redObjectCount);
-	}
-}
-setBatchMode("exit and display");
-
-// determine which blue objects overlap with red objects
-for(i=0;i<blueObjectCount;i++) {
-	found = false;
-
-	// find the red object containing this blue object
-	for (j=blueObjectCount;j<blueObjectCount + redObjectCount && !found;j++) {
-		roiManager("select", j); // select next red object
-
-		pair = getResult("Paired " + blueObject, j);
-
-		// skip previously paired red objects
-		if (isNaN(pair) || pair==0) {
-			// get coordinates that make up this red object
-			Roi.getCoordinates(xPoints, yPoints);
-
-			// select the current blue object
-			roiManager("select", i);
-
-			// TODO optional: limit our search range to a section of the red object.
-			//           In this example, we care about the position of intersection between
-			//           objects. Since our red objects are skeletons, we can limit our
-			//           search area to a few "body lengths" around either end of the skeleton.
-
-			Roi.getBounds(cX, cY, cW, cH);
-			// We won't go more than "maxDist" away from either end point.
-			bodyLengths = 1.7;
-			maxDist = ((cW + cH) / 2) * bodyLengths;
-			index = -1;
-
-			// search through the skeleton from "head" position
-			for (k=0; k<xPoints.length && k<maxDist && !found; k++) {
-				x = xPoints[k];
-				y = yPoints[k];
-
-				// Check if the blue object roi contains this skeleton point
-				if (Roi.contains(x, y)) {
-					found = true;
-					index = k;
-				}
-			}
-
-			// search the skeleton from "tail" position
-			for (k=xPoints.length-1; k>0 && k>=xPoints.length - maxDist && !found; k--) {
-				x = xPoints[k];
-				y = yPoints[k];
-
-				// Check if the blue object roi contains this skeleton point
-				if (Roi.contains(x, y)) {
-					found = true;
-					index = k;
-				}
-			}
-
-			if (found) {
-				setResult("Paired " + blueObject, j, i+1); // record link between object indices
-				setResult("Position in skeleton", i, index); // record the position on the skeleton where the overlap was detected
-			}
-		}
-	}
-}
-
-setBatchMode("exit and display");
-
-// End of RED channel
-
-
-
-// GREEN channel
-
-selectWindow(greenImage);
-
-// Preprocessing - GREEN channel
-
-//TODO adjust threshold as needed
-run("Auto Threshold", "method=Intermodes white");
-run("Convert to Mask");
-
-// Analysis - GREEN channel
-
-// TODO in this example, we assume the green channel has noise but our objects of
-//            interest are larger than the background. Thus we bump up the minimum size a bit.
+// TODO
+// See the large object analysis section for more information about customizing
+// the call to Analyze Particles.
+//
+// In this example, we have increased the minimum size of our particles to distinguish
+// them from background noise that was left over after preprocessing.
 run("Analyze Particles...", "size=6-Infinity display exclude summarize add");
 
-setBatchMode("hide"); // hide the UI for this computation to avoid unnecessary overhead of ROI selection
+// - ROI manipulation - small channel
 
-// label green objects
-greenObjectCount = 0;
-for(i=blueObjectCount + redObjectCount;i<roiManager("count");i++) {
-	greenObjectCount++;
+// hide the UI for this computation to avoid unnecessary overhead of ROI selection
+setBatchMode("hide"); 
+
+// Again we want to label our small object ROIs and provide them with
+// a unique identifier in the results table.
+//
+// NOTE: since we have big object and small object ROIs in the same ROI
+//            manager, and big objects come first, we want to start our loop
+//            at the bigObjectCount.
+//            The ROI manager is "0-indexed", which means that the last
+//            big object ROI actually appears at index "bigObjectCount - 1"
+//            However, it would be confusing to start the small object indices
+//            at a large number.
+smallObjectCount = 0;
+for(i=bigObjectCount;i<roiManager("count");i++) {
+	smallObjectCount++;
 
 	roiManager("select", i);
-	//renaming to keep track of rois
-	roiManager("Rename", greenObject +" "+ greenObjectCount);
-	// Record index
-	setResult(greenObject + " Index",i, greenObjectCount);
+	//Rename the ROI
+	roiManager("Rename", smallObject +" "+ smallObjectCount);
+	// Set the index in the results table
+	setResult(smallObject + " Index",i, smallObjectCount);
 }
 
-// In this example we assume red objects are significantly larger than green.
-// Thus we iterate once over the red objects and find each overlapping green.
-for (j=blueObjectCount;j<blueObjectCount + redObjectCount;j++) {
-	roiManager("select", j); // select next red object
+// Step 4 - determine overlap
 
-	// get coordinates that make up this red object
+// We will be adding two new columns to the results table.
+// For small objects, we want to record which larger object contained them
+// For big objects, we want to record a count of how many smaller objects are contained by them.
+// By storing the column names in variables here we can ensure we don't make mistakes when using them later!
+pairedColumn = "Paired " + bigObject;
+smallCountColumn = smallObject + " Count";
+
+// Now that we have our large and small object ROIs, we can figure out
+// which overlap with each other.
+//
+// We have to use "nested" loops here - we need to look at each big object,
+//  then we need to look at each pixel in these big objects, and for each pixel
+// we need to look at each small object to determine if they overlap.
+// Because the bigger objects contain more pixels, we want to limit how many
+// times we scan them - for a given pixel, it is much faster to determine if
+// it's contained in a small ROI than a large ROI.
+// So our "outer" loop will go through the big objects, and in our "inner" loop
+// we will check for overlap with the small objects.
+for (i=0; i<bigObjectCount; i++) {
+	roiManager("select", i); // select ROI for the next big object
+
+	// Depending on how many big and small objects you have, this step could take a while.
+	// By printing status information we can keep the user informed about what's happening
+	print("Checking " + bigObject + " number " + (i+1) + " of " + bigObjectCount);
+
+	// This creates two new variables: xPoints and yPoints, which contain the
+	// coordinates that make up our current big object.
 	Roi.getCoordinates(xPoints, yPoints);
 
-	// For each point in this red object, search the green objects for a match.
-	for (k=0; k<xPoints.length; k++) {
-		x = xPoints[k];
-		y = yPoints[k];
+	// Now we need to check each pixel position in our big object
+	for (j=0; j<xPoints.length; j++) {
+		// X and Y are the actual coordinates of the current pixel we're looking at
+		x = xPoints[j];
+		y = yPoints[j];
 
-		for(i=blueObjectCount + redObjectCount;i<roiManager("count");i++) {
-			result = getResult("Paired " + redObject, i);
-			// only check green objects not already paired
+		// Now we can look at each small object. If it contains the current pixel
+		// we know it overlaps with the current big object!
+		for(k=bigObjectCount;k<roiManager("count");k++) {
+			// Note that i and k are also the indices for big and small objects, repsectively, in the results table.
+
+			// Check if the small object already has a paired big object. If so, we don't care if it contains this pixel or not.
+			result = getResult(pairedColumn, k);
+
+			// Since the pairedColumn may not exist yet, we could get back a NaN result, or a 0 if it exists but
+			// hasn't been set yet.
 			if (isNaN(result) || result ==0) {
-				// make the current green object roi active
-				roiManager("select", i);
+				// Whether NaN or 0, this small object doesn't have a paired big object. So we make it
+				// active in the ROI manager.
+				roiManager("select", k);
 
-				// Check for overlap
+				// Check if the small object contains our current point
 				if (Roi.contains(x, y)) {
-					// record the index of the containing red object
-					setResult("Paired " + redObject, i, j+1-blueObjectCount);
+					// If it does we found a match! So we record the pairing
+					// Note that we have to add 1 to the big object index (i) because we start all our
+					// object indices at 1 -  to differentiate them from the "0" default entry.
+					setResult(pairedColumn, k, (i+1));
 
-					//TODO here's an optional step where multiple green objects can overlap a single red object.
-					//           so we keep count of the number of overlaps.
-					count = getResult(greenObject + " Count", j);
+					// Now we want to increase the count in the paired big object's results table row
+					count = getResult(smallCountColumn, i);
+
+					// Check for NaN in case the column doesn't exist yet
 					if (isNaN(count)) count = 0;
+
+					// Increase the count
 					count++;
-					setResult(greenObject + " Count", j, count);
 
-					//TODO another optional step. Because multiple green objects overlap a single red,
-					//          but only one blue object overlaps per red, we can record the distance between
-					//          green and blue objects that overlap the same red object.
-					// this is a lookup of the blue object index previously paired to our overlapping red object
-					blueIndex = getResult("Paired " + blueObject, j);
-					if (blueIndex > 0) {
-						// record that this green object is paired to a blue
-						setResult("Paired " + blueObject, i, blueIndex);
-						// record the position of overlap between green object and red skeleton
-						setResult("Position in skeleton", i, k);
-						blueIndex--; // adjust for object index vs row index
-
-						// recall the position of the blue object in this skeleton
-						bluePos = getResult("Position in skeleton", blueIndex);
-
-						// Set the skeletal distance, which is simply the difference in
-						// indices within the skeleton between blue and green objects
-						if (!isNaN(bluePos)) {
-							length = abs(bluePos - k);
-							setResult(greenObject + " to " + blueObject + "i distance", i, length);
-						}
-					}
-					wait(50); // wait briefly when we find a match to ensure the UI has caught up.
+					// Update the count to its new value.
+					setResult(smallCountColumn, i, count);
 				}
 			}
 		}
 	}
 }
+
+// we're done with ROI manipulation now so we can exit batch mode
 setBatchMode("exit and display");
 
-// End of GREEN channel
-
-// End of macro
+// *** End of macro ***
