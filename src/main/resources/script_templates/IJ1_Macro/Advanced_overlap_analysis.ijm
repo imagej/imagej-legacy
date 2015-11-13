@@ -32,16 +32,15 @@ blueObject = "Blue Object";
 greenObject = "Green Object";
 
 // split images
-T = getTitle;
-selectWindow(T);
-run("Stack to Images");
+title = getTitle();
+run("Split Channels");
 
 // cache channel names
-selectImage(1);
+selectImage("C1-" + title);
 redImage = getTitle();
-selectImage(2);
+selectImage("C2-" + title);
 greenImage = getTitle();
-selectImage(3);
+selectImage("C3-" + title);
 blueImage = getTitle();
 
 // general preprocessing
@@ -52,7 +51,7 @@ imageCalculator("and", greenImage, redImage);
 
 
 // BLUE channel
-selectWindow(blueImage);
+selectImage(blueImage);
 
 // Preprocessing - BLUE channel
 
@@ -91,7 +90,7 @@ setBatchMode("exit and display");
 
 // RED channel
 
-selectWindow(redImage);
+selectImage(redImage);
 
 // Preprocessing - RED channel
 
@@ -209,7 +208,7 @@ setBatchMode("exit and display");
 
 // GREEN channel
 
-selectWindow(greenImage);
+selectImage(greenImage);
 
 // Preprocessing - GREEN channel
 

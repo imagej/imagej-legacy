@@ -33,9 +33,10 @@
 //  - ensure the results table is closed/empty
 
 // Step 1 - split image into individual channels
-T = getTitle;
-selectWindow(T);
-run("Stack to Images");
+
+// remember the original title of the image
+title = getTitle();
+run("Split Channels");
 
 //TODO
 // the "big channel" contains the larger objects.
@@ -53,16 +54,13 @@ bigObject = "Cells";
 smallObject = "Organelles";
 
 // Here we get the title of each image so we can access them later
-selectImage(bigChannel);
-bigImage = getTitle();
-selectImage(smallChannel);
-smallImage = getTitle();
-
-print(bigImage);
-print(smallImage);
+selectImage("C" + bigChannel + "-" + title);
+bigImage = getImageID();
+selectImage("C" + smallChannel + "-" + title);
+smallImage = getImageID();
 
 // Step 2 - identify the larger objects
-selectWindow(bigImage);
+selectImage(bigImage);
 
 // Preprocessing - big channel
 
@@ -132,7 +130,7 @@ setBatchMode("exit and display");
 
 // Step 3 - identify the smaller objects
 
-selectWindow(smallImage);
+selectImage(smallImage);
 
 // Preprocessing - small channel
 
