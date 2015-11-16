@@ -17,6 +17,10 @@
 // execute this macro - up to the TODO line in question. To do this, simply select the code you want to run,
 // and choose "Run>Run selected code" from the script editor menu.
 //
+// WARNING - you should also select all of the code preceding the
+//           section you are interested in, otherwise the variables
+//           used in this macro will not function properly.
+//
 // For general information on image processing (selecting preprocessing techniques) see:
 //  http://imagej.net/Image_Processing_Principles
 //
@@ -259,3 +263,10 @@ for (i=0; i<bigObjectCount; i++) {
 setBatchMode("exit and display");
 
 // *** End of macro ***
+
+/*
+	 This is a multi-line comment block
+	 everything between these comment markers will be ignored
+	 you can move the start marker from this block if you want to ignore
+	 part of this macro
+*/
