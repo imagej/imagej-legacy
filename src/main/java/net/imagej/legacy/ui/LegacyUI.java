@@ -67,12 +67,9 @@ import org.scijava.ui.ToolBar;
 import org.scijava.ui.UIService;
 import org.scijava.ui.UserInterface;
 import org.scijava.ui.awt.AWTClipboard;
-import org.scijava.ui.awt.AWTDropTargetEventDispatcher;
-import org.scijava.ui.awt.AWTInputEventDispatcher;
-import org.scijava.ui.awt.AWTWindowEventDispatcher;
 import org.scijava.ui.swing.SwingUI;
 import org.scijava.ui.swing.console.SwingConsolePane;
-import org.scijava.ui.swing.viewer.SwingDisplayWindow;
+import org.scijava.ui.swing.sdi.SwingSDIUI;
 import org.scijava.ui.viewer.DisplayViewer;
 import org.scijava.ui.viewer.DisplayWindow;
 import org.scijava.widget.FileWidget;
@@ -257,21 +254,7 @@ public class LegacyUI extends AbstractUserInterface implements SwingUI {
 
 	@Override
 	public DisplayWindow createDisplayWindow(final Display<?> display) {
-		final SwingDisplayWindow displayWindow = new SwingDisplayWindow();
-
-		// broadcast input events (keyboard and mouse)
-		new AWTInputEventDispatcher(display).register(displayWindow, true, false);
-
-		// broadcast window events
-		new AWTWindowEventDispatcher(display).register(displayWindow);
-
-		// broadcast drag-and-drop events
-		new AWTDropTargetEventDispatcher(display, eventService);
-
-		return displayWindow;
-
-		//FIXME: replace with this code after releasing scijava-ui-swing
-//		return SwingSDIUI.createDisplayWindow(display, eventService);
+		return SwingSDIUI.createDisplayWindow(display, eventService);
 	}
 
 	@Override
