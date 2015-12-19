@@ -89,7 +89,7 @@ public class LegacyStatusBar extends AbstractLegacyAdapter implements
 
 	@Override
 	public Class<Panel> getComponentType() {
-		return java.awt.Panel.class;
+		return Panel.class;
 	}
 
 }
