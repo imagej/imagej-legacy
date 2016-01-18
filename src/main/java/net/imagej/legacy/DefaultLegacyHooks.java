@@ -63,6 +63,7 @@ import net.imagej.legacy.plugin.LegacyPostRefreshMenus;
 import net.imagej.patcher.LegacyHooks;
 
 import org.scijava.Context;
+import org.scijava.app.AppService;
 import org.scijava.log.LogService;
 import org.scijava.log.StderrLogService;
 import org.scijava.plugin.PluginInfo;
@@ -256,7 +257,10 @@ public class DefaultLegacyHooks extends LegacyHooks {
 	 */
 	@Override
 	public String getAppVersion() {
-		return legacyService.getCombinedVersion();
+		final AppService appService = legacyService.getContext().getService(
+			AppService.class);
+		if (appService == null) return legacyService.getVersion();
+		return appService.getApp().getVersion();
 	}
 
 	/**
