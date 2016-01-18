@@ -62,7 +62,7 @@ public class LegacyImageJApp extends AbstractApp {
 
 	@Override
 	public String getVersion() {
-		return legacyService.getLegacyVersion();
+		return legacyService.getVersion();
 	}
 
 	// -- AppEventService methods --

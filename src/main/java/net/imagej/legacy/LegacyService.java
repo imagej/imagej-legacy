@@ -54,6 +54,7 @@ import net.imagej.ui.viewer.image.ImageDisplayViewer;
 import org.scijava.Identifiable;
 import org.scijava.MenuPath;
 import org.scijava.Priority;
+import org.scijava.Versioned;
 import org.scijava.app.App;
 import org.scijava.app.AppService;
 import org.scijava.app.StatusService;
@@ -112,7 +113,7 @@ import org.scijava.util.POM;
  */
 @Plugin(type = Service.class, priority = Priority.NORMAL_PRIORITY + 1)
 public final class LegacyService extends AbstractService implements
-	ImageJService
+	ImageJService, Versioned
 {
 
 	/**
@@ -409,41 +410,6 @@ public final class LegacyService extends AbstractService implements
 		getImageMap().toggleLegacyMode(wantIJ1);
 	}
 
-	/** Gets the version of ImageJ 1.x being used. */
-	public String getLegacyVersion() {
-		return ij1Helper.getVersion();
-	}
-
-	/**
-	 * Gets the combined version of ImageJ2/ImageJ1, with a slash separator.
-	 * <p>
-	 * This is the string that gets displayed in the ImageJ status bar.
-	 * </p>
-	 */
-	public String getCombinedVersion() {
-		String version = "Unknown";
-		if (appService != null) {
-			final App app = appService.getApp();
-			if (app != null) {
-				final POM pom = app.getPOM();
-				if (pom != null) version = pom.getVersion();
-				else {
-					// no Maven POM; try the manifest instead
-					final Manifest manifest = app.getManifest();
-					if (manifest != null) {
-						final String implVersion = manifest.getImplementationVersion();
-						if (implVersion != null) version = implVersion;
-						else {
-							final String specVersion = manifest.getImplementationVersion();
-							if (specVersion != null) version = specVersion;
-						}
-					}
-				}
-			}
-		}
-		return version + "/" + getLegacyVersion();
-	}
-
 	public App getApp() {
 		if (appService == null) return null;
 		return appService.getApp();
@@ -516,6 +482,14 @@ public final class LegacyService extends AbstractService implements
 			instance = null;
 			instantiationStackTrace = null;
 		}
+	}
+
+	// -- Versioned methods --
+
+	/** Gets the version of ImageJ 1.x being used. */
+	@Override
+	public String getVersion() {
+		return ij1Helper.getVersion();
 	}
 
 	// -- Utility methods --
