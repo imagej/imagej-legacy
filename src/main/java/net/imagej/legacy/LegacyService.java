@@ -33,6 +33,8 @@ package net.imagej.legacy;
 
 import java.awt.GraphicsEnvironment;
 import java.io.File;
+import java.rmi.NoSuchObjectException;
+import java.rmi.server.UnicastRemoteObject;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -482,6 +484,18 @@ public final class LegacyService extends AbstractService implements
 			instance = null;
 			instantiationStackTrace = null;
 		}
+
+		// clean up SingleInstance remote objects
+		try {
+			if (SingleInstance.implementation != null) {
+				UnicastRemoteObject.unexportObject(SingleInstance.implementation, true);
+			}
+		} catch (final NoSuchObjectException exc) { }
+		try {
+			if (SingleInstance.stub != null) {
+				UnicastRemoteObject.unexportObject(SingleInstance.stub, true);
+			}
+		} catch (final NoSuchObjectException exc) { }
 	}
 
 	// -- Versioned methods --
