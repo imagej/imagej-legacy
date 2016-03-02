@@ -105,6 +105,9 @@ public class SingleInstance {
 			// avoid problems with non-existing directories
 			display = display.replace(':', '_');
 			display = display.replace('/', '_');
+			// The display value after a "." refers to monitor index. If ImageJ is active on any
+			// monitor we want to trigger the single instance listener.
+			if (display.contains(".")) display = display.substring(0, display.indexOf('.'));
 		}
 		String tmpDir = System.getProperty("java.io.tmpdir");
 		if (!tmpDir.endsWith(File.separator))
