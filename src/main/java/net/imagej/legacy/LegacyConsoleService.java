@@ -68,6 +68,7 @@ public class LegacyConsoleService extends AbstractService implements ConsoleServ
 				final SingleInstance instance = new SingleInstance(port, log, helper);
 				if (helper.isRMIEnabled() && instance.sendArguments(args)) {
 					context().dispose();
+					return;
 				}
 			}
 		}
