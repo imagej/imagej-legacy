@@ -72,6 +72,7 @@ public class SingleInstance {
 	}
 
 	private class Implementation implements ImageJInstance {
+		@Override
 		public void sendArgument(String cmd) {
 			log.debug("SocketServer.sendArgument: \""+ cmd+"\"");
 			if (cmd.startsWith("open "))
