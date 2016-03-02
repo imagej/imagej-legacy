@@ -197,6 +197,7 @@ public class SingleInstance {
 	static Implementation implementation;
 
 	private void startServer() {
+		// TODO: not thread safe
 		log.debug("OtherInstance: starting server");
 		try {
 			implementation = new Implementation();
