@@ -32,7 +32,6 @@ package net.imagej.legacy;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -72,6 +71,7 @@ public class SingleInstance {
 	}
 
 	private class Implementation implements ImageJInstance {
+		@Override
 		public void sendArgument(String cmd) {
 			log.debug("SocketServer.sendArgument: \""+ cmd+"\"");
 			if (cmd.startsWith("open "))
@@ -105,6 +105,9 @@ public class SingleInstance {
 			// avoid problems with non-existing directories
 			display = display.replace(':', '_');
 			display = display.replace('/', '_');
+			// The display value after a "." refers to monitor index. If ImageJ is active on any
+			// monitor we want to trigger the single instance listener.
+			if (display.contains(".")) display = display.substring(0, display.indexOf('.'));
 		}
 		String tmpDir = System.getProperty("java.io.tmpdir");
 		if (!tmpDir.endsWith(File.separator))
@@ -140,62 +143,79 @@ public class SingleInstance {
 		}
 	}
 
+	/**
+	 * @return true iff this method connected to an existing server. If false,
+	 *         creates a new server instance.
+	 */
 	public boolean sendArguments(String[] args) {
 		if (!helper.isRMIEnabled())
 			return false;
-		String file = getStubPath();
-		if (args.length > 0) try {
-			FileInputStream in = new FileInputStream(file);
-			ImageJInstance instance = (ImageJInstance) new ObjectInputStream(in).readObject();
-			in.close();
-			if (instance==null)
-				return false;
+		File file = new File(getStubPath());
 
-			//IJ.log("sendArguments3: "+instance);
-			instance.sendArgument("user.dir "+System.getProperty("user.dir"));
-			int macros = 0;
-			for (int i=0; i<args.length; i++) {
-				String arg = args[i];
-				if (arg==null) continue;
-				String cmd = null;
-				if (macros==0 && arg.endsWith(".ijm")) {
-					cmd = "macro " + arg;
-					macros++;
-				} else if (arg.startsWith("-macro") && i+1<args.length) {
-					String macroArg = i+2<args.length?"("+args[i+2]+")":"";
-					cmd = "macro " + args[i+1] + macroArg;
-					instance.sendArgument(cmd);
-					break;
-				} else if (arg.startsWith("-eval") && i+1<args.length) {
-					cmd = "eval " + args[i+1];
-					args[i+1] = null;
-				} else if (arg.startsWith("-run") && i+1<args.length) {
-					cmd = "run " + args[i+1];
-					args[i+1] = null;
-				} else if (arg.indexOf("ij.ImageJ")==-1 && !arg.startsWith("-"))
-					cmd = "open " + arg;
-				if (cmd!=null)
-					instance.sendArgument(cmd);
+		// If there is no stub, then the server hasn't
+		// started yet. So start it up and return false.
+		if (file.exists()) {
+			try {
+				// Try recovering the remote instance
+				FileInputStream in = new FileInputStream(file);
+				ImageJInstance instance = (ImageJInstance) new ObjectInputStream(in).readObject();
+				in.close();
+
+				// Instance was bad so we need a new server
+				if (instance == null) {
+					file.delete();
+				} else if (args.length > 0) {
+					log.debug("sendArguments: " + instance);
+					instance.sendArgument("user.dir " + System.getProperty("user.dir"));
+					int macros = 0;
+					for (int i = 0; i < args.length; i++) {
+						String arg = args[i];
+						if (arg == null)
+							continue;
+						String cmd = null;
+						if (macros == 0 && arg.endsWith(".ijm")) {
+							cmd = "macro " + arg;
+							macros++;
+						} else if (arg.startsWith("-macro") && i + 1 < args.length) {
+							String macroArg = i + 2 < args.length ? "(" + args[i + 2] + ")" : "";
+							cmd = "macro " + args[i + 1] + macroArg;
+							instance.sendArgument(cmd);
+							break;
+						} else if (arg.startsWith("-eval") && i + 1 < args.length) {
+							cmd = "eval " + args[i + 1];
+							args[i + 1] = null;
+						} else if (arg.startsWith("-run") && i + 1 < args.length) {
+							cmd = "run " + args[i + 1];
+							args[i + 1] = null;
+						} else if (arg.indexOf("ij.ImageJ") == -1 && !arg.startsWith("-"))
+							cmd = "open " + arg;
+						if (cmd != null)
+							instance.sendArgument(cmd);
+					}
+				}
+			} catch (Exception e) {
+				log.error(e);
+				// If any problems, we need a new server instance
+				file.delete();
 			}
-
-			log.debug("sendArguments: return true");
-			return true;
-		} catch (FileNotFoundException e) {
-			// ignore silently
-		} catch (Exception e) {
-			log.error(e);
-			new File(file).delete();
 		}
-		if (!new File(file).exists())
+
+		if (!file.exists()) {
+			// If there were any problems, start a new server
 			startServer();
-		log.debug("sendArguments: return false ");
-		return false;
+			log.debug("sendArguments: return false ");
+			return false;
+		}
+
+		log.debug("sendArguments: return true ");
+		return true;
 	}
 
 	static ImageJInstance stub;
 	static Implementation implementation;
 
 	private void startServer() {
+		// TODO: not thread safe
 		log.debug("OtherInstance: starting server");
 		try {
 			implementation = new Implementation();
