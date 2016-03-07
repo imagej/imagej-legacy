@@ -486,16 +486,7 @@ public final class LegacyService extends AbstractService implements
 		}
 
 		// clean up SingleInstance remote objects
-		try {
-			if (SingleInstance.implementation != null) {
-				UnicastRemoteObject.unexportObject(SingleInstance.implementation, true);
-			}
-		} catch (final NoSuchObjectException exc) { }
-		try {
-			if (SingleInstance.stub != null) {
-				UnicastRemoteObject.unexportObject(SingleInstance.stub, true);
-			}
-		} catch (final NoSuchObjectException exc) { }
+		SingleInstance.shutDown();
 	}
 
 	// -- Versioned methods --

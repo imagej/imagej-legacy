@@ -35,6 +35,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.rmi.NoSuchObjectException;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
@@ -223,8 +224,8 @@ public class SingleInstance {
 		}
 	}
 
-	static ImageJInstance stub;
-	static Implementation implementation;
+	private static ImageJInstance stub;
+	private static Implementation implementation;
 
 	private void startServer() {
 		// TODO: not thread safe
@@ -242,6 +243,26 @@ public class SingleInstance {
 			log.debug("OtherInstance: server ready");
 		} catch (Exception e) {
 			log.error(e);
+		}
+	}
+
+	/**
+	 * Clean up remote objects
+	 */
+	public static void shutDown() {
+		try {
+			if (SingleInstance.implementation != null) {
+				UnicastRemoteObject.unexportObject(SingleInstance.implementation, true);
+			}
+		} catch (final NoSuchObjectException exc) {
+			// No-op
+		}
+		try {
+			if (SingleInstance.stub != null) {
+				UnicastRemoteObject.unexportObject(SingleInstance.stub, true);
+			}
+		} catch (final NoSuchObjectException exc) {
+			// No-op
 		}
 	}
 }
