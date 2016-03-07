@@ -67,6 +67,7 @@ public class LegacyConsoleService extends AbstractService implements ConsoleServ
 			if (helper != null) {
 				final SingleInstance instance = new SingleInstance(port, log, helper);
 				if (helper.isRMIEnabled() && instance.sendArguments(args)) {
+					log.info("Detected existing ImageJ; passing arguments along");
 					context().dispose();
 					return;
 				}
