@@ -155,11 +155,10 @@ public class SingleInstance {
 		// If there is no stub, then the server hasn't
 		// started yet. So start it up and return false.
 		if (file.exists()) {
-			try {
+			try (FileInputStream in = new FileInputStream(file);
+					ObjectInputStream objIn = new ObjectInputStream(in)) {
 				// Try recovering the remote instance
-				FileInputStream in = new FileInputStream(file);
-				ImageJInstance instance = (ImageJInstance) new ObjectInputStream(in).readObject();
-				in.close();
+				ImageJInstance instance = (ImageJInstance)objIn.readObject();
 
 				// Instance was bad so we need a new server
 				if (instance == null) {
@@ -217,16 +216,15 @@ public class SingleInstance {
 	private void startServer() {
 		// TODO: not thread safe
 		log.debug("OtherInstance: starting server");
-		try {
+		final String path = getStubPath();
+		try (FileOutputStream out = new FileOutputStream(path);
+				ObjectOutputStream objOut = new ObjectOutputStream(out)) {
 			implementation = new Implementation();
 			stub = (ImageJInstance)UnicastRemoteObject.exportObject(implementation, 0);
 
 			// Write serialized object
-			String path = getStubPath();
-			FileOutputStream out = new FileOutputStream(path);
 			makeFilePrivate(path);
-			new ObjectOutputStream(out).writeObject(stub);
-			out.close();
+			objOut.writeObject(stub);
 
 			log.debug("OtherInstance: server ready");
 		} catch (Exception e) {
