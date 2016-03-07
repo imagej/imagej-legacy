@@ -150,6 +150,8 @@ public class SingleInstance {
 	public boolean sendArguments(String[] args) {
 		if (!helper.isRMIEnabled())
 			return false;
+
+		boolean sent = false;
 		final File file = new File(getStubPath());
 		file.deleteOnExit();
 
@@ -161,37 +163,14 @@ public class SingleInstance {
 				// Try recovering the remote instance
 				ImageJInstance instance = (ImageJInstance)objIn.readObject();
 
-				// Instance was bad so we need a new server
 				if (instance == null) {
+					// Instance was bad so we need a new server
 					file.delete();
-				} else if (args.length > 0) {
-					log.debug("sendArguments: " + instance);
-					instance.sendArgument("user.dir " + System.getProperty("user.dir"));
-					int macros = 0;
-					for (int i = 0; i < args.length; i++) {
-						String arg = args[i];
-						if (arg == null)
-							continue;
-						String cmd = null;
-						if (macros == 0 && arg.endsWith(".ijm")) {
-							cmd = "macro " + arg;
-							macros++;
-						} else if (arg.startsWith("-macro") && i + 1 < args.length) {
-							String macroArg = i + 2 < args.length ? "(" + args[i + 2] + ")" : "";
-							cmd = "macro " + args[i + 1] + macroArg;
-							instance.sendArgument(cmd);
-							break;
-						} else if (arg.startsWith("-eval") && i + 1 < args.length) {
-							cmd = "eval " + args[i + 1];
-							args[i + 1] = null;
-						} else if (arg.startsWith("-run") && i + 1 < args.length) {
-							cmd = "run " + args[i + 1];
-							args[i + 1] = null;
-						} else if (arg.indexOf("ij.ImageJ") == -1 && !arg.startsWith("-"))
-							cmd = "open " + arg;
-						if (cmd != null)
-							instance.sendArgument(cmd);
-					}
+				} else {
+					if (args.length > 0) sendArguments(args, instance);
+
+					// Instance was non-null and arguments sent
+					sent = true;
 				}
 			} catch (Exception e) {
 				log.error(e);
@@ -200,7 +179,7 @@ public class SingleInstance {
 			}
 		}
 
-		if (!file.exists()) {
+		if (!sent) {
 			// If there were any problems, start a new server
 			startServer();
 			log.debug("sendArguments: return false ");
@@ -209,6 +188,39 @@ public class SingleInstance {
 
 		log.debug("sendArguments: return true ");
 		return true;
+	}
+
+	/**
+	 * Sends arguments to specified ImageJ instance
+	 */
+	private void sendArguments(String[] args, ImageJInstance instance) throws RemoteException {
+		log.debug("sendArguments: " + instance);
+		instance.sendArgument("user.dir " + System.getProperty("user.dir"));
+		int macros = 0;
+		for (int i = 0; i < args.length; i++) {
+			String arg = args[i];
+			if (arg == null)
+				continue;
+			String cmd = null;
+			if (macros == 0 && arg.endsWith(".ijm")) {
+				cmd = "macro " + arg;
+				macros++;
+			} else if (arg.startsWith("-macro") && i + 1 < args.length) {
+				String macroArg = i + 2 < args.length ? "(" + args[i + 2] + ")" : "";
+				cmd = "macro " + args[i + 1] + macroArg;
+				instance.sendArgument(cmd);
+				break;
+			} else if (arg.startsWith("-eval") && i + 1 < args.length) {
+				cmd = "eval " + args[i + 1];
+				args[i + 1] = null;
+			} else if (arg.startsWith("-run") && i + 1 < args.length) {
+				cmd = "run " + args[i + 1];
+				args[i + 1] = null;
+			} else if (arg.indexOf("ij.ImageJ") == -1 && !arg.startsWith("-"))
+				cmd = "open " + arg;
+			if (cmd != null)
+				instance.sendArgument(cmd);
+		}
 	}
 
 	static ImageJInstance stub;
