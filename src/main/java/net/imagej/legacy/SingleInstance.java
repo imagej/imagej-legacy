@@ -150,7 +150,8 @@ public class SingleInstance {
 	public boolean sendArguments(String[] args) {
 		if (!helper.isRMIEnabled())
 			return false;
-		File file = new File(getStubPath());
+		final File file = new File(getStubPath());
+		file.deleteOnExit();
 
 		// If there is no stub, then the server hasn't
 		// started yet. So start it up and return false.
