@@ -154,7 +154,6 @@ public class SingleInstance {
 
 		boolean sent = false;
 		final File file = new File(getStubPath());
-		file.deleteOnExit();
 
 		// If there is no stub, then the server hasn't
 		// started yet. So start it up and return false.
@@ -164,10 +163,7 @@ public class SingleInstance {
 				// Try recovering the remote instance
 				ImageJInstance instance = (ImageJInstance)objIn.readObject();
 
-				if (instance == null) {
-					// Instance was bad so we need a new server
-					file.delete();
-				} else {
+				if (instance != null) {
 					if (args.length > 0) sendArguments(args, instance);
 
 					// Instance was non-null and arguments sent
@@ -176,14 +172,20 @@ public class SingleInstance {
 			} catch (Exception e) {
 				log.error(e);
 				// If any problems, we need a new server instance
-				file.delete();
 			}
 		}
 
 		if (!sent) {
-			// If there were any problems, start a new server
-			startServer();
-			log.debug("sendArguments: return false ");
+			if (file.exists()) {
+				log.error(
+						"Could not connect to existing ImageJ instance. Please delete file: " + file.getAbsolutePath());
+			}
+			else {
+				// Only start a new server if we aren't going to clash with an existing file.
+				startServer();
+				log.debug("sendArguments: return false ");
+			}
+
 			return false;
 		}
 
