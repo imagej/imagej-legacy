@@ -165,7 +165,7 @@ public class SingleInstance {
 				ImageJInstance instance = (ImageJInstance)objIn.readObject();
 
 				if (instance != null) {
-					if (args.length > 0) sendArguments(args, instance);
+					sendArguments(args, instance);
 
 					// Instance was non-null and arguments sent
 					sent = true;
