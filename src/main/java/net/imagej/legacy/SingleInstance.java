@@ -51,6 +51,7 @@ import org.scijava.log.LogService;
  * a hard-to-guess hash code.
  *
  *@author Johannes Schindelin
+ *@author Mark Hiner
  */
 public class SingleInstance {
 
