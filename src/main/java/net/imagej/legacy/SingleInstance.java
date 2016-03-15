@@ -179,7 +179,8 @@ public class SingleInstance {
 		if (!sent) {
 			if (file.exists()) {
 				log.error(
-						"Could not connect to existing ImageJ instance. Please delete file: " + file.getAbsolutePath());
+						"Could not connect to existing ImageJ instance. If problem persists, please delete file: " + file.getAbsolutePath());
+				file.deleteOnExit();
 			}
 			else {
 				// Only start a new server if we aren't going to clash with an existing file.
