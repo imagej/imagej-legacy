@@ -1056,7 +1056,16 @@ public class IJ1Helper extends AbstractContextual {
 	public File openDialog(final String title) {
 		final OpenDialog openDialog = new OpenDialog(title);
 		final String directory = openDialog.getDirectory();
+
+		// NB: As a side effect, ImageJ1 normally appends the selected
+		// file as a macro parameter when the getFileName() is called!
+		// We need to suppress that problematic behavior here; see:
+		// https://github.com/scijava/scijava-common/issues/235
+		final boolean recording = Recorder.record;
+		Recorder.record = false;
 		final String fileName = openDialog.getFileName();
+		Recorder.record = recording;
+
 		if (directory != null && fileName != null) {
 			return new File(directory, fileName);
 		}
@@ -1073,7 +1082,16 @@ public class IJ1Helper extends AbstractContextual {
 		final SaveDialog saveDialog =
 			new SaveDialog(title, defaultName, extension);
 		final String directory = saveDialog.getDirectory();
+
+		// NB: As a side effect, ImageJ1 normally appends the selected
+		// file as a macro parameter when the getFileName() is called!
+		// We need to suppress that problematic behavior here; see:
+		// https://github.com/scijava/scijava-common/issues/235
+		final boolean recording = Recorder.record;
+		Recorder.record = false;
 		final String fileName = saveDialog.getFileName();
+		Recorder.record = recording;
+
 		if (directory != null && fileName != null) {
 			return new File(directory, fileName);
 		}
@@ -1088,7 +1106,16 @@ public class IJ1Helper extends AbstractContextual {
 			DirectoryChooser.setDefaultDirectory(defaultDir);
 		}
 
-		return new DirectoryChooser(title).getDirectory();
+		// NB: As a side effect, ImageJ1 normally appends the selected
+		// directory as a macro parameter when getDirectory() is called!
+		// We need to suppress that problematic behavior here; see:
+		// https://github.com/scijava/scijava-common/issues/235
+		final boolean recording = Recorder.record;
+		Recorder.record = false;
+		final String directory = new DirectoryChooser(title).getDirectory();
+		Recorder.record = recording;
+
+		return directory;
 	}
 
 	/** Handles display of the ImageJ 1.x preferences. */
