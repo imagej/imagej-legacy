@@ -84,6 +84,13 @@ public class ImageJ2Options extends OptionsPlugin implements Interactive {
 		callback = "run")
 	private boolean sciJavaIO = false;
 
+	@Parameter(
+		label = "SciJava log level",
+		description = "<html>Log level for SciJava",
+		callback = "setLogLevel",
+		choices = {"ERROR", "WARN", "INFO", "DEBUG", "TRACE"})
+	private String logLevel = "WARN";
+
 	@Parameter(label = "What is ImageJ2?", persist = false, callback = "help")
 	private Button help;
 
@@ -200,5 +207,29 @@ public class ImageJ2Options extends OptionsPlugin implements Interactive {
 		else {
 			System.err.println(message);
 		}
+	}
+
+	@SuppressWarnings("unused")
+	private void setLogLevel() {
+		log.setLevel(parseLogLevel(logLevel));
+	}
+
+	/**
+	 * Parses a log level from a {@code String}.
+	 * 
+	 * @param level
+	 * @return the {@code int} associated with the level
+	 */
+	private int parseLogLevel(final String level) {
+		switch (level) {
+			case "NONE": return LogService.NONE;
+			case "ERROR": return LogService.ERROR;
+			case "WARN": return LogService.WARN;
+			case "INFO": return LogService.INFO;
+			case "DEBUG": return LogService.DEBUG;
+			case "TRACE": return LogService.TRACE;
+		}
+
+		return LogService.WARN;
 	}
 }
