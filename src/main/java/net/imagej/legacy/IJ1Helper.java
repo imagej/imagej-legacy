@@ -466,13 +466,18 @@ public class IJ1Helper extends AbstractContextual {
 	}
 
 	/**
-	 * Records an option in ImageJ 1.x's macro recorder.
+	 * Records an option in ImageJ 1.x's macro recorder, <em>safely</em>.
+	 * <p>
+	 * Both the key and the value will be escaped to avoid problems. This behavior
+	 * differs from direct calls to {@link Recorder#recordOption(String, String)},
+	 * which do not escape either string.
+	 * </p>
 	 * 
 	 * @param key the name of the option
 	 * @param value the value of the option
 	 */
 	public void recordOption(final String key, final String value) {
-		Recorder.recordOption(key, value);
+		Recorder.recordOption(escape(key), escape(value));
 	}
 
 	/**
@@ -1195,6 +1200,24 @@ public class IJ1Helper extends AbstractContextual {
 			WindowManager.removeWindow(window);
 			window.dispose();
 		}
+	}
+
+	/** Escapes the given string according to the Java language specification. */
+	private String escape(final String s) {
+		// NB: It would be nice to use the StringEscapeUtils.escapeJava method of
+		// Apache Commons Lang, but we eschew it for now to avoid the dependency.
+
+		// escape quotes and backslashes
+		String escaped = s.replaceAll("([\"\\\\])", "\\\\$1");
+
+		// escape special characters
+		escaped = escaped.replaceAll("\b", "\\\\b");
+		escaped = escaped.replaceAll("\n", "\\\\n");
+		escaped = escaped.replaceAll("\t", "\\\\t");
+		escaped = escaped.replaceAll("\f", "\\\\f");
+		escaped = escaped.replaceAll("\r", "\\\\r");
+
+		return escaped;
 	}
 
 }
