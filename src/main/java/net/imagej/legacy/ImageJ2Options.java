@@ -89,7 +89,8 @@ public class ImageJ2Options extends OptionsPlugin implements Interactive {
 		description = "<html>Log level for SciJava",
 		initializer = "initializeLogLevel",
 		callback = "setLogLevel",
-		choices = {"ERROR", "WARN", "INFO", "DEBUG", "TRACE"})
+		choices = {"ERROR", "WARN", "INFO", "DEBUG", "TRACE"},
+		persist = false)
 	private String logLevel;
 
 	@Parameter(label = "What is ImageJ2?", persist = false, callback = "help")
