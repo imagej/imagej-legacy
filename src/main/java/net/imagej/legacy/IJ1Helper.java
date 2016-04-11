@@ -466,13 +466,18 @@ public class IJ1Helper extends AbstractContextual {
 	}
 
 	/**
-	 * Records an option in ImageJ 1.x's macro recorder.
+	 * Records an option in ImageJ 1.x's macro recorder, <em>safely</em>.
+	 * <p>
+	 * Both the key and the value will be escaped to avoid problems. This behavior
+	 * differs from direct calls to {@link Recorder#recordOption(String, String)},
+	 * which do not escape either string.
+	 * </p>
 	 * 
 	 * @param key the name of the option
 	 * @param value the value of the option
 	 */
 	public void recordOption(final String key, final String value) {
-		Recorder.recordOption(key, value);
+		Recorder.recordOption(escape(key), escape(value));
 	}
 
 	/**
@@ -1056,7 +1061,16 @@ public class IJ1Helper extends AbstractContextual {
 	public File openDialog(final String title) {
 		final OpenDialog openDialog = new OpenDialog(title);
 		final String directory = openDialog.getDirectory();
+
+		// NB: As a side effect, ImageJ1 normally appends the selected
+		// file as a macro parameter when the getFileName() is called!
+		// We need to suppress that problematic behavior here; see:
+		// https://github.com/scijava/scijava-common/issues/235
+		final boolean recording = Recorder.record;
+		Recorder.record = false;
 		final String fileName = openDialog.getFileName();
+		Recorder.record = recording;
+
 		if (directory != null && fileName != null) {
 			return new File(directory, fileName);
 		}
@@ -1073,7 +1087,16 @@ public class IJ1Helper extends AbstractContextual {
 		final SaveDialog saveDialog =
 			new SaveDialog(title, defaultName, extension);
 		final String directory = saveDialog.getDirectory();
+
+		// NB: As a side effect, ImageJ1 normally appends the selected
+		// file as a macro parameter when the getFileName() is called!
+		// We need to suppress that problematic behavior here; see:
+		// https://github.com/scijava/scijava-common/issues/235
+		final boolean recording = Recorder.record;
+		Recorder.record = false;
 		final String fileName = saveDialog.getFileName();
+		Recorder.record = recording;
+
 		if (directory != null && fileName != null) {
 			return new File(directory, fileName);
 		}
@@ -1088,7 +1111,16 @@ public class IJ1Helper extends AbstractContextual {
 			DirectoryChooser.setDefaultDirectory(defaultDir);
 		}
 
-		return new DirectoryChooser(title).getDirectory();
+		// NB: As a side effect, ImageJ1 normally appends the selected
+		// directory as a macro parameter when getDirectory() is called!
+		// We need to suppress that problematic behavior here; see:
+		// https://github.com/scijava/scijava-common/issues/235
+		final boolean recording = Recorder.record;
+		Recorder.record = false;
+		final String directory = new DirectoryChooser(title).getDirectory();
+		Recorder.record = recording;
+
+		return directory;
 	}
 
 	/** Handles display of the ImageJ 1.x preferences. */
@@ -1168,6 +1200,24 @@ public class IJ1Helper extends AbstractContextual {
 			WindowManager.removeWindow(window);
 			window.dispose();
 		}
+	}
+
+	/** Escapes the given string according to the Java language specification. */
+	private String escape(final String s) {
+		// NB: It would be nice to use the StringEscapeUtils.escapeJava method of
+		// Apache Commons Lang, but we eschew it for now to avoid the dependency.
+
+		// escape quotes and backslashes
+		String escaped = s.replaceAll("([\"\\\\])", "\\\\$1");
+
+		// escape special characters
+		escaped = escaped.replaceAll("\b", "\\\\b");
+		escaped = escaped.replaceAll("\n", "\\\\n");
+		escaped = escaped.replaceAll("\t", "\\\\t");
+		escaped = escaped.replaceAll("\f", "\\\\f");
+		escaped = escaped.replaceAll("\r", "\\\\r");
+
+		return escaped;
 	}
 
 }
