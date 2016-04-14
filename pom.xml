@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>net.imagej</groupId>
 		<artifactId>pom-imagej</artifactId>
-		<version>14.7.1</version>
+		<version>15.1.0</version>
 		<relativePath />
 	</parent>
 
@@ -180,10 +180,6 @@
 		<dependency>
 			<groupId>org.scijava</groupId>
 			<artifactId>scijava-ui-swing</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.scijava</groupId>
-			<artifactId>scripting-java</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.scijava</groupId>

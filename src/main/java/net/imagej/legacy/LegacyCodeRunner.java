@@ -31,41 +31,78 @@
 
 package net.imagej.legacy;
 
+import java.lang.reflect.InvocationTargetException;
+import java.util.Map;
+
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
-import org.scijava.plugins.scripting.java.AbstractJavaRunner;
-import org.scijava.plugins.scripting.java.JavaRunner;
+import org.scijava.run.AbstractCodeRunner;
+import org.scijava.run.CodeRunner;
+import org.scijava.util.ClassUtils;
 
 /**
  * Runs the given ImageJ 1.x {@code PlugIn} class.
  * 
  * @author Curtis Rueden
  */
-@Plugin(type = JavaRunner.class)
-public class LegacyJavaRunner extends AbstractJavaRunner {
+@Plugin(type = CodeRunner.class)
+public class LegacyCodeRunner extends AbstractCodeRunner {
 
 	@Parameter
 	private LegacyService legacyService;
 
-	// -- JavaRunner methods --
+	// -- CodeRunner methods --
 
 	@Override
-	public void run(final Class<?> c) {
-		IJ1Helper.run(c);
+	public void run(final Object code, final Object... args)
+		throws InvocationTargetException
+	{
+		final Class<?> c = getPlugInClass(code);
+		if (code != null) IJ1Helper.run(c);
+		// TODO: Pass args somehow.
+		// * arg -- PlugIn.run(String) and IJ.runPlugIn(String, String)
+		// * options -- IJ.run(String, String)
+	}
+
+	@Override
+	public void run(final Object code, final Map<String, Object> inputMap)
+		throws InvocationTargetException
+	{
+		final Class<?> c = getPlugInClass(code);
+		if (code != null) IJ1Helper.run(c);
+		// TODO: Pass args somehow.
+		// * arg -- PlugIn.run(String) and IJ.runPlugIn(String, String)
+		// * options -- IJ.run(String, String)
 	}
 
 	// -- Typed methods --
 
 	@Override
-	public boolean supports(final Class<?> c) {
-		if (c == null) return false;
-		if (c.getName().equals("ij.plugin.PlugIn")) return true;
-		if (c.getName().equals("ij.plugin.filter.PlugInFilter")) return true;
-		if (supports(c.getSuperclass())) return true;
+	public boolean supports(final Object code) {
+		return getPlugInClass(code) != null;
+	}
+
+	// -- Helper methods --
+
+	private Class<?> getPlugInClass(final Object code) {
+		final Class<?> c = asClass(code);
+		if (c == null) return null;
+		// NB: No direct refs to ImageJ 1.x API, to avoid class loading issues.
+		if (c.getName().equals("ij.plugin.PlugIn")) return c;
+		if (c.getName().equals("ij.plugin.filter.PlugInFilter")) return c;
+		if (getPlugInClass(c.getSuperclass()) != null) return c;
 		for (final Class<?> iface : c.getInterfaces()) {
-			if (supports(iface)) return true;
+			if (getPlugInClass(iface) != null) return c;
 		}
-		return false;
+		return null;
+	}
+
+	// TODO: Migrate this common function to AbstractCodeRunner?
+	// Or... make it a Converter plugin?
+	private Class<?> asClass(final Object code) {
+		if (code instanceof Class) return (Class<?>) code;
+		if (code instanceof String) return ClassUtils.loadClass((String) code);
+		return null;
 	}
 
 }
