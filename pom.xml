@@ -16,21 +16,6 @@
 	<description>The legacy component enables backward compatibility with the legacy version of ImageJ (1.x). It contains the code necessary to translate ImageJ images into ImageJ1 format and back, so that legacy plugins can be executed faithfully.</description>
 	<url>http://imagej.net/ImageJ_Legacy</url>
 
-	<scm>
-		<connection>scm:git:git://github.com/imagej/imagej-legacy</connection>
-		<developerConnection>scm:git:git@github.com:imagej/imagej-legacy</developerConnection>
-		<tag>HEAD</tag>
-		<url>https://github.com/imagej/imagej-legacy</url>
-	</scm>
-	<issueManagement>
-		<system>GitHub Issues</system>
-		<url>https://github.com/imagej/imagej-legacy/issues</url>
-	</issueManagement>
-	<ciManagement>
-		<system>Jenkins</system>
-		<url>http://jenkins.imagej.net/job/ImageJ-legacy/</url>
-	</ciManagement>
-
 	<developers>
 		<developer>
 			<id>ctrueden</id>
@@ -117,6 +102,21 @@
 			<properties><id>bnorthan</id></properties>
 		</contributor>
 	</contributors>
+
+	<scm>
+		<connection>scm:git:git://github.com/imagej/imagej-legacy</connection>
+		<developerConnection>scm:git:git@github.com:imagej/imagej-legacy</developerConnection>
+		<tag>HEAD</tag>
+		<url>https://github.com/imagej/imagej-legacy</url>
+	</scm>
+	<issueManagement>
+		<system>GitHub Issues</system>
+		<url>https://github.com/imagej/imagej-legacy/issues</url>
+	</issueManagement>
+	<ciManagement>
+		<system>Jenkins</system>
+		<url>http://jenkins.imagej.net/job/ImageJ-legacy/</url>
+	</ciManagement>
 
 	<repositories>
 		<repository>
@@ -233,5 +233,4 @@
 			</plugin>
 		</plugins>
 	</build>
-
 </project>
