@@ -65,6 +65,7 @@ import java.awt.image.ImageProducer;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.ArrayList;
@@ -924,6 +925,19 @@ public class IJ1Helper extends AbstractContextual {
 		}
 		finally {
 			thread.setName(name);
+			// HACK: Try to null out the ij.macro.Interpreter, just in case.
+			// See: http://fiji.sc/bugzilla/show_bug.cgi?id=1266
+			try {
+				final Method m = Interpreter.class.getDeclaredMethod("setInstance",
+					Interpreter.class);
+				m.setAccessible(true);
+				m.invoke(null, new Object[] { null });
+			}
+			catch (final NoSuchMethodException | IllegalAccessException
+					| InvocationTargetException exc)
+			{
+				log.error(exc);
+			}
 		}
 	}
 
