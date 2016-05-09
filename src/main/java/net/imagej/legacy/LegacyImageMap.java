@@ -56,8 +56,10 @@ import net.imagej.patcher.LegacyInjector;
 import net.imagej.ui.viewer.image.ImageDisplayViewer;
 
 import org.scijava.AbstractContextual;
+import org.scijava.display.Display;
 import org.scijava.display.DisplayService;
 import org.scijava.display.event.DisplayDeletedEvent;
+import org.scijava.display.event.DisplayUpdatedEvent;
 import org.scijava.event.EventHandler;
 import org.scijava.plugin.Parameter;
 import org.scijava.ui.viewer.DisplayWindow;
@@ -497,6 +499,19 @@ public class LegacyImageMap extends AbstractContextual {
 		 */
 		if (event.getObject() instanceof ImageDisplay) {
 			unregisterDisplay((ImageDisplay) event.getObject());
+		}
+	}
+
+	/**
+	 * Check if updated display is an {@link ImageDisplay} with a mapped
+	 * {@link ImagePlus}. If so, call {@link ImagePlus#updateAndDraw()}.
+	 */
+	@EventHandler
+	private void onEvent(final DisplayUpdatedEvent event) {
+		final Display<?> display = event.getDisplay();
+		if (display instanceof ImageDisplay) {
+			final ImagePlus mappedImagePlus = lookupImagePlus((ImageDisplay) event.getDisplay());
+			if (mappedImagePlus != null) mappedImagePlus.updateAndDraw();
 		}
 	}
 }
