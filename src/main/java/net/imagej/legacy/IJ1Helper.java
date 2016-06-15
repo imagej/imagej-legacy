@@ -1139,7 +1139,7 @@ public class IJ1Helper extends AbstractContextual {
 		if (file != null) {
 			final String defaultDir = //
 				file.isDirectory() ? file.getPath() : file.getParent();
-			DirectoryChooser.setDefaultDirectory(defaultDir);
+			if (defaultDir != null) DirectoryChooser.setDefaultDirectory(defaultDir);
 		}
 
 		// NB: As a side effect, ImageJ1 normally appends the selected
