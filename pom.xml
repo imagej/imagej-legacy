@@ -139,6 +139,10 @@
 		</dependency>
 		<dependency>
 			<groupId>net.imagej</groupId>
+			<artifactId>imagej-deprecated</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>net.imagej</groupId>
 			<artifactId>imagej-ui-swing</artifactId>
 		</dependency>
 
@@ -150,6 +154,10 @@
 		<dependency>
 			<groupId>net.imglib2</groupId>
 			<artifactId>imglib2-ij</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>net.imglib2</groupId>
+			<artifactId>imglib2-roi</artifactId>
 		</dependency>
 
 		<!-- SciJava dependencies -->
@@ -165,26 +173,11 @@
 			<groupId>org.scijava</groupId>
 			<artifactId>scijava-ui-swing</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>org.scijava</groupId>
-			<artifactId>scijava-plugins-commands</artifactId>
-		</dependency>
 
-		<!-- Optional SciJava dependencies -->
+		<!-- Third party dependencies -->
 		<dependency>
-			<groupId>org.scijava</groupId>
-			<artifactId>scripting-beanshell</artifactId>
-			<optional>true</optional>
-		</dependency>
-		<dependency>
-			<groupId>org.scijava</groupId>
-			<artifactId>scijava-plugins-text-plain</artifactId>
-			<optional>true</optional>
-		</dependency>
-		<dependency>
-			<groupId>org.scijava</groupId>
-			<artifactId>scijava-plugins-text-markdown</artifactId>
-			<optional>true</optional>
+			<groupId>org.javassist</groupId>
+			<artifactId>javassist</artifactId>
 		</dependency>
 
 		<!-- Test dependencies -->
