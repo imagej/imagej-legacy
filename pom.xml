@@ -110,6 +110,10 @@
 		<url>http://jenkins.imagej.net/job/ImageJ-legacy/</url>
 	</ciManagement>
 
+	<properties>
+		<scijava-ui-swing.version>0.9.0</scijava-ui-swing.version>
+	</properties>
+
 	<repositories>
 		<repository>
 			<id>imagej.public</id>
@@ -141,10 +145,6 @@
 			<groupId>net.imagej</groupId>
 			<artifactId>imagej-deprecated</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>net.imagej</groupId>
-			<artifactId>imagej-ui-swing</artifactId>
-		</dependency>
 
 		<!-- ImgLib2 dependencies -->
 		<dependency>
@@ -172,6 +172,11 @@
 		<dependency>
 			<groupId>org.scijava</groupId>
 			<artifactId>scijava-ui-swing</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.scijava</groupId>
+			<artifactId>script-editor</artifactId>
+			<version>0.1.0</version>
 		</dependency>
 
 		<!-- Third party dependencies -->

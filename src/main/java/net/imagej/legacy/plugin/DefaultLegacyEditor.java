@@ -33,14 +33,13 @@ package net.imagej.legacy.plugin;
 
 import java.io.File;
 
-import net.imagej.ui.swing.script.TextEditor;
-
 import org.scijava.Context;
 import org.scijava.Priority;
 import org.scijava.event.EventHandler;
 import org.scijava.platform.event.AppQuitEvent;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
+import org.scijava.ui.swing.script.TextEditor;
 
 /**
  * The default {@link LegacyEditor} plugin.

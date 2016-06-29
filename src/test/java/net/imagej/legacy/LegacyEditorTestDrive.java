@@ -36,10 +36,9 @@ import java.awt.event.WindowEvent;
 
 import javax.swing.SwingUtilities;
 
-import net.imagej.ui.swing.script.TextEditor;
-
 import org.scijava.Context;
 import org.scijava.ui.UIService;
+import org.scijava.ui.swing.script.TextEditor;
 
 /**
  * Interactive test for the script editor in legacy mode.

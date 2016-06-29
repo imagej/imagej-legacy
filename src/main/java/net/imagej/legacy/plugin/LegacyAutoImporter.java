@@ -40,12 +40,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-import net.imagej.ui.swing.script.AutoImporter;
-
 import org.scijava.log.LogService;
 import org.scijava.log.StderrLogService;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
+import org.scijava.ui.swing.script.AutoImporter;
 import org.scijava.util.ClassUtils;
 import org.scijava.util.FileUtils;
 

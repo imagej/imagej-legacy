@@ -50,7 +50,6 @@ import net.imagej.legacy.ui.LegacyUI;
 import net.imagej.patcher.LegacyEnvironment;
 import net.imagej.patcher.LegacyInjector;
 import net.imagej.threshold.ThresholdService;
-import net.imagej.ui.swing.script.TextEditor;
 import net.imagej.ui.viewer.image.ImageDisplayViewer;
 
 import org.scijava.Identifiable;
@@ -86,6 +85,7 @@ import org.scijava.service.Service;
 import org.scijava.ui.ApplicationFrame;
 import org.scijava.ui.UIService;
 import org.scijava.ui.UserInterface;
+import org.scijava.ui.swing.script.TextEditor;
 import org.scijava.ui.viewer.DisplayWindow;
 import org.scijava.util.AppUtils;
 import org.scijava.util.Manifest;
