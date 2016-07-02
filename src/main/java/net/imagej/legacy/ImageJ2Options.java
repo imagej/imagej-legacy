@@ -75,21 +75,19 @@ public class ImageJ2Options extends OptionsPlugin implements Interactive {
 	 * This system leverages the <a href="http://imagej.net/SCIFIO">SCIFIO</a>
 	 * library to open image files.
 	 */
-	@Parameter(
-		label = "Use SCIFIO when opening files (BETA!)",
-		description = "<html>Whether to use ImageJ2's file I/O mechanism when "
-			+ "opening files.<br>Image files will be opened using the SCIFIO library "
-			+ "(SCientific Image<br>Format Input and Output), which provides truly "
-			+ "extensible support for<br>reading and writing image file formats.",
+	@Parameter(label = "Use SCIFIO when opening files (BETA!)",
+		description = "<html>Whether to use ImageJ2's file I/O mechanism when " +
+			"opening files.<br>Image files will be opened using the SCIFIO library " +
+			"(SCientific Image<br>Format Input and Output), which provides truly " +
+			"extensible support for<br>reading and writing image file formats.",
 		callback = "run")
 	private boolean sciJavaIO = false;
 
-	@Parameter(
-		label = "SciJava log level",
+	@Parameter(label = "SciJava log level",
 		description = "<html>Log level for SciJava",
-		initializer = "initializeLogLevel",
-		callback = "setLogLevel",
-		choices = {"ERROR", "WARN", "INFO", "DEBUG", "TRACE"},
+		initializer = "initializeLogLevel", //
+		callback = "setLogLevel", //
+		choices = { "ERROR", "WARN", "INFO", "DEBUG", "TRACE" }, //
 		persist = false)
 	private String logLevel;
 
