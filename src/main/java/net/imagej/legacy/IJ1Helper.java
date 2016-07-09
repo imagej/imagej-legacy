@@ -1113,9 +1113,13 @@ public class IJ1Helper extends AbstractContextual {
 		final String extension)
 	{
 		// Use ImageJ1's SaveDialog.
-		final int dotIndex = file.getName().indexOf('.');
-		final String defaultName = dotIndex > 0 ? //
-			file.getName().substring(0, dotIndex) : file.getName();
+		final String defaultName;
+		if (file == null) defaultName = null;
+		else {
+			final int dotIndex = file.getName().indexOf('.');
+			defaultName = dotIndex > 0 ? //
+				file.getName().substring(0, dotIndex) : file.getName();
+		}
 		final SaveDialog saveDialog = new SaveDialog(title, defaultName, extension);
 		final String directory = saveDialog.getDirectory();
 
