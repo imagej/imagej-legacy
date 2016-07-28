@@ -69,6 +69,10 @@ public class MacroPreprocessor extends AbstractPreprocessorPlugin {
 		for (final ModuleItem<?> input : module.getInfo().inputs()) {
 			final String name = input.getName();
 			final String value = ij1Helper.getMacroParameter(name);
+			if (value == null) {
+				// no macro parameter value provided
+				continue;
+			}
 			final Class<?> type = input.getType();
 			if (!convertService.supports(value, type)) {
 				// cannot convert macro value into the input's actual type
