@@ -386,7 +386,7 @@ public class DefaultLegacyHooks extends LegacyHooks {
 		final ThreadService threadService = threadService();
 		if (threadService == null) return null;
 		final Thread current = Thread.currentThread();
-		final Set<Thread> seen = new HashSet<Thread>();
+		final Set<Thread> seen = new HashSet<>();
 		seen.add(current);
 		return new Iterable<Thread>() {
 
@@ -428,8 +428,8 @@ public class DefaultLegacyHooks extends LegacyHooks {
 	public boolean interceptCloseAllWindows() {
 		final Window[] windows = Window.getWindows();
 		boolean continueClose = true;
-		final List<Window> confirmableWindows = new ArrayList<Window>();
-		final List<Window> unconfirmableWindows = new ArrayList<Window>();
+		final List<Window> confirmableWindows = new ArrayList<>();
+		final List<Window> unconfirmableWindows = new ArrayList<>();
 
 		// For each Window, we split them into confirmable or unconfirmable based
 		// on whether or not they implement CloseConfirmable. As CloseAllWindows

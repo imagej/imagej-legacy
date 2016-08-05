@@ -61,7 +61,7 @@ public class LegacyAutoImporter implements AutoImporter {
 		if (defaultImports != null)
 			return defaultImports;
 
-		defaultImports = new HashMap<String, List<String>>();
+		defaultImports = new HashMap<>();
 		final String[] classNames =
 			{ "ij.IJ", "ini.trakem2.Project", "script.imglib.math.Compute" };
 
@@ -108,7 +108,7 @@ public class LegacyAutoImporter implements AutoImporter {
 				final String baseName = className.substring(dot + 1);
 				List<String> list = defaultImports.get(packageName);
 				if (list == null) {
-					list = new ArrayList<String>();
+					list = new ArrayList<>();
 					defaultImports.put(packageName, list);
 				}
 				list.add(baseName);
@@ -116,7 +116,7 @@ public class LegacyAutoImporter implements AutoImporter {
 		}
 
 		// remove non-unique class names
-		Map<String, String> reverse = new HashMap<String, String>();
+		Map<String, String> reverse = new HashMap<>();
 		for (Map.Entry<String, List<String>> entry : defaultImports.entrySet()) {
 			final String packageName = entry.getKey();
 			for (final Iterator<String> iter = entry.getValue().iterator(); iter

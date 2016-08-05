@@ -160,11 +160,11 @@ public class OverlayHarmonizer extends AbstractContextual implements
 	 */
 	public List<Overlay> getOverlays(final ImagePlus imp) {
 		Roi roi = imp.getRoi();
-		final ArrayList<Overlay> overlays = new ArrayList<Overlay>();
+		final ArrayList<Overlay> overlays = new ArrayList<>();
 		createOverlays(roi, overlays);
 		final ij.gui.Overlay overlay = imp.getOverlay();
 		if (overlay != null) {
-			final ArrayList<Overlay> list = new ArrayList<Overlay>();
+			final ArrayList<Overlay> list = new ArrayList<>();
 			for (int i = 0; i < overlay.size(); i++) {
 				list.clear();
 				roi = overlay.get(i);
@@ -243,7 +243,7 @@ public class OverlayHarmonizer extends AbstractContextual implements
 	private ij.gui.Overlay createIJ1Overlay(final List<Overlay> overlays,
 		Overlay activeOverlay)
 	{
-		List<Roi> rois = new ArrayList<Roi>();
+		List<Roi> rois = new ArrayList<>();
 		for (Overlay o : overlays) {
 			if (o != activeOverlay) {
 				Roi roi = createRoi(o);
@@ -716,7 +716,7 @@ public class OverlayHarmonizer extends AbstractContextual implements
 		assert roi instanceof PointRoi;
 		final PointRoi ptRoi = (PointRoi) roi;
 		final FloatPolygon poly = ptRoi.getFloatPolygon();
-		final List<double[]> points = new ArrayList<double[]>();
+		final List<double[]> points = new ArrayList<>();
 		for (int i = 0; i < poly.npoints; i++) {
 			final double x = poly.xpoints[i];
 			final double y = poly.ypoints[i];

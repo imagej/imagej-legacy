@@ -170,7 +170,7 @@ public class OverlayHarmonizerTest {
 				new OverlayHarmonizer(context);
 			final ImagePlus imagePlus =
 				Helper.makeImagePlus("Bar", Helper.makeRandomByteArray(r, 11, 15));
-			final ArrayList<Overlay> l = new ArrayList<Overlay>();
+			final ArrayList<Overlay> l = new ArrayList<>();
 			l.add(Helper.makePolygonOverlay(context, new double[] { 0, 5, 5, 0, 0 },
 				new double[] { 0, 0, 5, 5, 0 }));
 			ot.setOverlays(l, l.get(0), imagePlus);
@@ -238,7 +238,7 @@ public class OverlayHarmonizerTest {
 					Helper.makePolygonOverlay(context, testCase[0], testCase[1]);
 				final ImagePlus imagePlus =
 					Helper.makeImagePlus("Bar", Helper.makeRandomByteArray(r, 11, 15));
-				final ArrayList<Overlay> overlays = new ArrayList<Overlay>();
+				final ArrayList<Overlay> overlays = new ArrayList<>();
 				overlays.add(overlay);
 				ot.setOverlays(overlays, overlay, imagePlus);
 				assertTrue(imagePlus.getRoi() instanceof PolygonRoi);
@@ -402,7 +402,7 @@ public class OverlayHarmonizerTest {
 				new OverlayHarmonizer(context);
 			final ImagePlus imagePlus =
 				Helper.makeImagePlus("Bar", Helper.makeRandomByteArray(r, 15, 20));
-			final ArrayList<Overlay> overlays = new ArrayList<Overlay>();
+			final ArrayList<Overlay> overlays = new ArrayList<>();
 			overlays.add(overlay);
 			ot.setOverlays(overlays, overlay, imagePlus);
 			final Roi roi = imagePlus.getRoi();

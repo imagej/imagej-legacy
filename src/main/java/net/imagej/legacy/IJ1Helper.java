@@ -597,7 +597,7 @@ public class IJ1Helper extends AbstractContextual {
 		@EventHandler
 		private void onEvent(final AppOpenFilesEvent event) {
 			if (isLegacyMode()) {
-				final List<File> files = new ArrayList<File>(event.getFiles());
+				final List<File> files = new ArrayList<>(event.getFiles());
 				for (final File file : files) {
 					openAndAddToRecent(file);
 				}
@@ -704,7 +704,7 @@ public class IJ1Helper extends AbstractContextual {
 				return 0;
 			}
 		}
-		final List<Item> items = new ArrayList<Item>();
+		final List<Item> items = new ArrayList<>();
 		for (final Entry<String, ModuleInfo> entry : modules.entrySet()) {
 			final String key = entry.getKey();
 			final ModuleInfo info = entry.getValue();
@@ -755,7 +755,7 @@ public class IJ1Helper extends AbstractContextual {
 		final ImageJ ij1;
 		final MenuBar menuBar = Menus.getMenuBar();
 		final MenuCache menuCache = new MenuCache();
-		final Set<Menu> separators = new HashSet<Menu>();
+		final Set<Menu> separators = new HashSet<>();
 
 		private IJ1MenuWrapper(final ImageJ ij1) {
 			this.ij1 = ij1;
@@ -884,7 +884,7 @@ public class IJ1Helper extends AbstractContextual {
 
 	private static class MenuCache {
 
-		private final Map<String, Menu> map = new HashMap<String, Menu>();
+		private final Map<String, Menu> map = new HashMap<>();
 
 		public void put(final MenuPath menuPath, final int depth, final Menu menu) {
 			map.put(key(menuPath, depth), menu);

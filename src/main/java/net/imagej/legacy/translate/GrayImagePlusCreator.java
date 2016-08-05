@@ -345,14 +345,14 @@ public class GrayImagePlusCreator extends AbstractImagePlusCreator {
 
 		// finally, wrap the XYCZT image as an ImageJ virtual stack
 		if (bitDepth <= 8 && !isSigned) {
-			stack = new ImageJVirtualStackUnsignedByte<T>(rai, new ByteConverter<T>());
+			stack = new ImageJVirtualStackUnsignedByte<>(rai, new ByteConverter<T>());
 		}
 		else if (bitDepth <= 16 && !isSigned) {
-			stack = new ImageJVirtualStackUnsignedShort<T>(rai,
+			stack = new ImageJVirtualStackUnsignedShort<>(rai,
 				new ShortConverter<T>());
 		}
 		else { // other types translated as 32-bit float data
-			stack = new ImageJVirtualStackFloat<T>(rai, new FloatConverter<T>());
+			stack = new ImageJVirtualStackFloat<>(rai, new FloatConverter<T>());
 		}
 
 		// Virtual stacks are writable when backed by a CellCache!
@@ -399,7 +399,7 @@ public class GrayImagePlusCreator extends AbstractImagePlusCreator {
 		// permute the axis order to XYCZT...
 		final MixedTransform t = new MixedTransform(rai.numDimensions(), 5);
 		t.setComponentMapping(axes);
-		return Views.interval(new MixedTransformView< T >( rai, t ), min, max);
+		return Views.interval(new MixedTransformView< >( rai, t ), min, max);
 	}
 
 	private class ByteConverter<S extends RealType<S>> implements

@@ -427,7 +427,7 @@ public class ColorTableHarmonizer implements DisplayHarmonizer {
 
 	/** Creates a list of ColorTables from an ImagePlus. */
 	private List<ColorTable> colorTablesFromImagePlus(final ImagePlus imp) {
-		final List<ColorTable> colorTables = new ArrayList<ColorTable>();
+		final List<ColorTable> colorTables = new ArrayList<>();
 		final LUT[] luts = imp.getLuts();
 		if (luts == null) { // not a CompositeImage
 			if (imp.getType() == ImagePlus.COLOR_RGB) {

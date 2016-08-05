@@ -65,7 +65,7 @@ public class IJ1MacroEngine extends AbstractScriptEngine {
 	private final IJ1Helper ij1Helper;
 	private ScriptModule module;
 
-	private static ThreadLocal<Bindings> outputs = new ThreadLocal<Bindings>();
+	private static ThreadLocal<Bindings> outputs = new ThreadLocal<>();
 
 	public static void setOutput(final String key, final String value) {
 		outputs.get().put(key, value);

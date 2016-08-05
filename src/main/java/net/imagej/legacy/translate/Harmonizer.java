@@ -90,7 +90,7 @@ public class Harmonizer extends AbstractContextual {
 	{
 		setContext(context);
 		imageTranslator = trans;
-		bitDepthMap = new HashMap<ImagePlus, Integer>();
+		bitDepthMap = new HashMap<>();
 		grayPixelHarmonizer = new GrayPixelHarmonizer();
 		colorPixelHarmonizer = new ColorPixelHarmonizer();
 		colorTableHarmonizer = new ColorTableHarmonizer(imageDisplayService);

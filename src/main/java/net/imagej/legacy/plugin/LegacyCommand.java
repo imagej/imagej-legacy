@@ -118,7 +118,7 @@ public class LegacyCommand implements Command {
 				"The active dataset is not compatible with ImageJ v1.x.";
 			log.error(err);
 			notifyUser(err);
-			outputs = new ArrayList<ImageDisplay>();
+			outputs = new ArrayList<>();
 			return;
 		}
 
@@ -232,7 +232,7 @@ public class LegacyCommand implements Command {
 				// make sure our ImagePluses are in sync with original Datasets
 				updateImagePlusesFromDisplays();
 				// return no outputs
-				outputs = new ArrayList<ImageDisplay>();
+				outputs = new ArrayList<>();
 			}
 			finally {
 				// clean up - basically avoid dangling refs to large objects
@@ -279,7 +279,7 @@ public class LegacyCommand implements Command {
 				size *= 2;
 			}
 			while (numThreads > threads.length);
-			final List<Thread> threadList = new LinkedList<Thread>();
+			final List<Thread> threadList = new LinkedList<>();
 			for (int i = 0; i < numThreads; i++)
 				threadList.add(threads[i]);
 			return threadList;
@@ -369,7 +369,7 @@ public class LegacyCommand implements Command {
 
 			// the IJ1 plugin may not have any outputs but just changes current
 			// ImagePlus make sure we catch any changes via harmonization
-			final List<ImageDisplay> displays = new ArrayList<ImageDisplay>();
+			final List<ImageDisplay> displays = new ArrayList<>();
 			if (currImp != null) {
 				ImageDisplay display = map.lookupDisplay(currImp);
 				if (display != null) {

@@ -134,20 +134,20 @@ public class LegacyImageMap extends AbstractContextual {
 	 * {@code ImageDisplay}s otherwise.
 	 */
 	private final Map<ImagePlus, ImageDisplay> legacyDisplayTable =
-		new WeakHashMap<ImagePlus, ImageDisplay>();
+		new WeakHashMap<>();
 
 	/**
 	 * Legacy mode mapping of {@link ImageDisplay}s to {@link ImagePlus}es. Uses
 	 * {@link WeakReference}s for both keys and values.
 	 */
 	private final Map<ImageDisplay, WeakReference<ImagePlus>> legacyImagePlusTable =
-		new WeakHashMap<ImageDisplay, WeakReference<ImagePlus>>();
+		new WeakHashMap<>();
 
 	/**
 	 * Effectively a {@code WeakHashSet} for tracking known {@link ImagePlus}es.
 	 */
 	private final Map<ImagePlus, Object> imagePluses =
-		new WeakHashMap<ImagePlus, Object>();
+		new WeakHashMap<>();
 
 	/**
 	 * The {@link ImageTranslator} to use when creating {@link ImagePlus} and
@@ -171,8 +171,8 @@ public class LegacyImageMap extends AbstractContextual {
 	public LegacyImageMap(final LegacyService legacyService) {
 		setContext(legacyService.getContext());
 		this.legacyService = legacyService;
-		imagePlusTable = new ConcurrentHashMap<ImageDisplay, ImagePlus>();
-		displayTable = new ConcurrentHashMap<ImagePlus, ImageDisplay>();
+		imagePlusTable = new ConcurrentHashMap<>();
+		displayTable = new ConcurrentHashMap<>();
 		imageTranslator = new DefaultImageTranslator(legacyService);
 	}
 
@@ -423,7 +423,7 @@ public class LegacyImageMap extends AbstractContextual {
 			final ImageDisplay toRemove = legacyDisplayTable.remove(imp);
 			if (toRemove != null) legacyImagePlusTable.remove(toRemove);
 			legacyDisplayTable.put(imp, display);
-			legacyImagePlusTable.put(display, new WeakReference<ImagePlus>(imp));
+			legacyImagePlusTable.put(display, new WeakReference<>(imp));
 		}
 		else {
 			final ImagePlus toRemove = imagePlusTable.remove(display);

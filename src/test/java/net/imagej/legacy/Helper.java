@@ -105,10 +105,10 @@ public class Helper {
 			}
 		}
 		final Img<BitType> offsetImg =
-			new ImgView<BitType>(Views.translate(img, x, y), img.factory());
+			new ImgView<>(Views.translate(img, x, y), img.factory());
 		final BinaryMaskOverlay<BitType, Img<BitType>> overlay =
-			new BinaryMaskOverlay<BitType, Img<BitType>>(context,
-				new BinaryMaskRegionOfInterest<BitType, Img<BitType>>(
+			new BinaryMaskOverlay<>(context,
+				new BinaryMaskRegionOfInterest<>(
 					offsetImg));
 		return overlay;
 	}

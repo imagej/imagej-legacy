@@ -286,7 +286,7 @@ System.err.println(1);
 	private void fillInfo(final ImagePlus imp, final MetaTable table) {
 		String info = (String) imp.getProperty("Info");
 		if (info == null) info = "";
-		List<String> keySet = new ArrayList<String>(table.keySet());
+		List<String> keySet = new ArrayList<>(table.keySet());
 		Collections.sort(keySet);
 		for (final String key : keySet) {
 			info += key + " = " + table.get(key) + "\n";

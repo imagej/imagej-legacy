@@ -52,7 +52,7 @@ import org.scijava.ui.UIService;
 public class LegacyInitializer implements Runnable {
 
 	private final static ThreadLocal<Class<?>> semaphore =
-			new ThreadLocal<Class<?>>();
+			new ThreadLocal<>();
 
 	@Override
 	public void run() {

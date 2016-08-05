@@ -192,7 +192,7 @@ public final class LegacyService extends AbstractService implements
 	private IJ1Helper ij1Helper;
 
 	private final ThreadLocal<Boolean> isProcessingEvents =
-		new ThreadLocal<Boolean>();
+		new ThreadLocal<>();
 
 	/**
 	 * Map of ImageJ2 {@link Command}s which are compatible with the legacy user
@@ -201,7 +201,7 @@ public final class LegacyService extends AbstractService implements
 	 * keyed on identifier; see the {@link Identifiable} interface.
 	 */
 	private final Map<String, ModuleInfo> legacyCompatible =
-		new HashMap<String, ModuleInfo>();
+		new HashMap<>();
 
 	// -- LegacyService methods --
 
@@ -246,7 +246,7 @@ public final class LegacyService extends AbstractService implements
 		runLegacyCommand(final String ij1ClassName, final String argument)
 	{
 		final String arg = argument == null ? "" : argument;
-		final Map<String, Object> inputMap = new HashMap<String, Object>();
+		final Map<String, Object> inputMap = new HashMap<>();
 		inputMap.put("className", ij1ClassName);
 		inputMap.put("arg", arg);
 		commandService.run(LegacyCommand.class, true, inputMap);
@@ -587,7 +587,7 @@ public final class LegacyService extends AbstractService implements
 	 */
 	public Map<String, ModuleInfo> getScriptsAndNonLegacyCommands() {
 		final Map<String, ModuleInfo> modules =
-			new LinkedHashMap<String, ModuleInfo>();
+			new LinkedHashMap<>();
 		legacyCompatible.clear();
 		for (final CommandInfo info : commandService
 			.getCommandsOfType(Command.class))
