@@ -8,13 +8,13 @@
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright notice,
  *    this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
  *    and/or other materials provided with the distribution.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -191,8 +191,7 @@ public final class LegacyService extends AbstractService implements
 	 */
 	private IJ1Helper ij1Helper;
 
-	private final ThreadLocal<Boolean> isProcessingEvents =
-		new ThreadLocal<>();
+	private final ThreadLocal<Boolean> isProcessingEvents = new ThreadLocal<>();
 
 	/**
 	 * Map of ImageJ2 {@link Command}s which are compatible with the legacy user
@@ -200,8 +199,7 @@ public final class LegacyService extends AbstractService implements
 	 * {@code "no-legacy"} key in its {@link Parameter#attrs()} list. The map is
 	 * keyed on identifier; see the {@link Identifiable} interface.
 	 */
-	private final Map<String, ModuleInfo> legacyCompatible =
-		new HashMap<>();
+	private final Map<String, ModuleInfo> legacyCompatible = new HashMap<>();
 
 	// -- LegacyService methods --
 
@@ -237,13 +235,13 @@ public final class LegacyService extends AbstractService implements
 
 	/**
 	 * Runs a legacy command programmatically.
-	 * 
+	 *
 	 * @param ij1ClassName The name of the plugin class you want to run e.g.
 	 *          "ij.plugin.Clipboard"
 	 * @param argument The argument string to pass to the plugin e.g. "copy"
 	 */
-	public void
-		runLegacyCommand(final String ij1ClassName, final String argument)
+	public void runLegacyCommand(final String ij1ClassName,
+		final String argument)
 	{
 		final String arg = argument == null ? "" : argument;
 		final Map<String, Object> inputMap = new HashMap<>();
@@ -297,7 +295,7 @@ public final class LegacyService extends AbstractService implements
 	 * currently active {@link ImageDisplay}. Does not perform any harmonization.
 	 */
 	public void syncActiveImage() {
-		final ImageDisplay activeDisplay =
+		final ImageDisplay activeDisplay = //
 			imageDisplayService.getActiveImageDisplay();
 		ij1Helper.syncActiveImage(activeDisplay);
 	}
@@ -314,26 +312,27 @@ public final class LegacyService extends AbstractService implements
 	 * States whether ImageJ1 and ImageJ2 data structures should be kept in sync.
 	 * <p>
 	 * While synchronization is supposed to be as cheap as possible, in practice
-	 * there are limitations with it currently which impact performance. So
-	 * such synchronization is off by default. The main consequence is that
-	 * it becomes harder to "mix and match" ImageJ1 and ImageJ2 APIs: you cannot
-	 * open an {@link ij.ImagePlus} and then reference it later from an ImageJ2
+	 * there are limitations with it currently which impact performance. So such
+	 * synchronization is off by default. The main consequence is that it becomes
+	 * harder to "mix and match" ImageJ1 and ImageJ2 APIs: you cannot open an
+	 * {@link ij.ImagePlus} and then reference it later from an ImageJ2
 	 * {@link org.scijava.command.Command} as a {@link net.imagej.Dataset} unless
 	 * synchronization is enabled.
 	 */
 	public boolean isSyncEnabled() {
-		final ImageJ2Options ij2Options =
+		final ImageJ2Options ij2Options = //
 			optionsService.getOptions(ImageJ2Options.class);
 		return ij2Options == null ? false : ij2Options.isSyncEnabled();
 	}
 
 	/**
 	 * States whether we're running in legacy ImageJ 1.x mode.
-	 * 
+	 * <p>
 	 * To support work flows which are incompatible with ImageJ2, we want to allow
 	 * users to run in legacy ImageJ 1.x mode, where the ImageJ2 GUI is hidden and
-	 * the ImageJ 1.x GUI is shown. During this time, no synchronization should take
-	 * place.
+	 * the ImageJ 1.x GUI is shown. During this time, no synchronization should
+	 * take place.
+	 * </p>
 	 */
 	public boolean isLegacyMode() {
 		return ij1Helper != null && ij1Helper.getIJ() != null;
@@ -379,7 +378,7 @@ public final class LegacyService extends AbstractService implements
 					modernFrame.setVisible(!wantIJ1);
 				}
 				else {
-					final ApplicationFrame appFrame =
+					final ApplicationFrame appFrame = //
 						ui == null ? null : ui.getApplicationFrame();
 					if (appFrame == null) {
 						if (ui != null && !wantIJ1) uiService.showUI();
@@ -394,8 +393,8 @@ public final class LegacyService extends AbstractService implements
 			// the uiService
 			// hide/show the IJ2 datasets corresponding to legacy ImagePlus instances
 			for (final ImageDisplay display : getImageMap().getImageDisplays()) {
-				final ImageDisplayViewer viewer =
-					(ImageDisplayViewer) uiService.getDisplayViewer(display);
+				final ImageDisplayViewer viewer = (ImageDisplayViewer) uiService
+					.getDisplayViewer(display);
 				if (viewer == null) continue;
 				final DisplayWindow window = viewer.getWindow();
 				if (window != null) window.showDisplay(!wantIJ1);
@@ -426,7 +425,7 @@ public final class LegacyService extends AbstractService implements
 
 		try {
 			final ClassLoader loader = Thread.currentThread().getContextClassLoader();
-			final boolean ij1Initialized =
+			final boolean ij1Initialized = //
 				LegacyEnvironment.isImageJ1Initialized(loader);
 			if (!ij1Initialized) {
 				getLegacyEnvironment(loader).newImageJ1(true);
@@ -455,7 +454,7 @@ public final class LegacyService extends AbstractService implements
 		// that prevents the net.imagej.app.ToplevelImageJApp from getting its
 		// LegacyService parameter injected properly.
 		// So we get the app directory in a much more unsafe way...
-		final File topLevel =
+		final File topLevel = //
 			AppUtils.getBaseDirectory("imagej.dir", getClass(), null);
 
 		final File plugins = new File(topLevel, "plugins");
@@ -525,8 +524,9 @@ public final class LegacyService extends AbstractService implements
 		if (code == KeyCode.SPACE) ij1Helper.setKeyDown(KeyCode.SPACE.getCode());
 		if (code == KeyCode.ALT) ij1Helper.setKeyDown(KeyCode.ALT.getCode());
 		if (code == KeyCode.SHIFT) ij1Helper.setKeyDown(KeyCode.SHIFT.getCode());
-		if (code == KeyCode.CONTROL) ij1Helper
-			.setKeyDown(KeyCode.CONTROL.getCode());
+		if (code == KeyCode.CONTROL) {
+			ij1Helper.setKeyDown(KeyCode.CONTROL.getCode());
+		}
 		if (ij1Helper.isMacintosh() && code == KeyCode.META) {
 			ij1Helper.setKeyDown(KeyCode.CONTROL.getCode());
 		}
@@ -586,11 +586,10 @@ public final class LegacyService extends AbstractService implements
 	 * </p>
 	 */
 	public Map<String, ModuleInfo> getScriptsAndNonLegacyCommands() {
-		final Map<String, ModuleInfo> modules =
-			new LinkedHashMap<>();
+		final Map<String, ModuleInfo> modules = new LinkedHashMap<>();
 		legacyCompatible.clear();
-		for (final CommandInfo info : commandService
-			.getCommandsOfType(Command.class))
+		for (final CommandInfo info : commandService.getCommandsOfType(
+			Command.class))
 		{
 			if (info.getMenuPath().size() == 0 || info.is("no-legacy")) {
 				continue;
@@ -639,9 +638,8 @@ public final class LegacyService extends AbstractService implements
 		}
 	}
 
-	private static LegacyEnvironment
-		getLegacyEnvironment(final ClassLoader loader)
-			throws ClassNotFoundException
+	private static LegacyEnvironment getLegacyEnvironment(
+		final ClassLoader loader) throws ClassNotFoundException
 	{
 		final boolean headless = GraphicsEnvironment.isHeadless();
 		final LegacyEnvironment ij1 = new LegacyEnvironment(loader, headless);
@@ -661,9 +659,9 @@ public final class LegacyService extends AbstractService implements
 	 * ImageJ 1.x classes.
 	 * </p>
 	 * <p>
-	 * Just loading the {@link LegacyService} class is not enough; it will
-	 * not necessarily get initialized. So we provide this method just to force
-	 * class initialization (and thereby the LegacyInjector to patch ImageJ 1.x).
+	 * Just loading the {@link LegacyService} class is not enough; it will not
+	 * necessarily get initialized. So we provide this method just to force class
+	 * initialization (and thereby the LegacyInjector to patch ImageJ 1.x).
 	 * </p>
 	 *
 	 * @deprecated use {@link LegacyInjector#preinit()} instead
