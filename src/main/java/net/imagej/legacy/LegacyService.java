@@ -33,8 +33,6 @@ package net.imagej.legacy;
 
 import java.awt.GraphicsEnvironment;
 import java.io.File;
-import java.rmi.NoSuchObjectException;
-import java.rmi.server.UnicastRemoteObject;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -88,8 +86,6 @@ import org.scijava.ui.UserInterface;
 import org.scijava.ui.swing.script.TextEditor;
 import org.scijava.ui.viewer.DisplayWindow;
 import org.scijava.util.AppUtils;
-import org.scijava.util.Manifest;
-import org.scijava.util.POM;
 
 /**
  * Service for working with legacy ImageJ 1.x.
