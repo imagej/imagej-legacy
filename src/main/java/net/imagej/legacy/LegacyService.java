@@ -121,8 +121,6 @@ public final class LegacyService extends AbstractService implements
 	 */
 	private static LegacyService instance;
 
-	private static Throwable instantiationStackTrace;
-
 	static {
 		// NB: Prime ImageJ 1.x for patching.
 		// This will only work if this class does _not_ need to load any ij.*
@@ -219,9 +217,24 @@ public final class LegacyService extends AbstractService implements
 	}
 
 	/**
+	 * Gets whether this {@code LegacyService} is fully operational, linked to the
+	 * ImageJ 1.x singleton instance. Inactive {@code LegacyService}s are dummies,
+	 * which are not tied to ImageJ 1.x.
+	 *
+	 * @return true iff this {@code LegacyService} is the active one, tied to the
+	 *         singleton instance of ImageJ 1.x.
+	 */
+	public boolean isActive() {
+		return instance == this;
+	}
+
+	/**
 	 * Gets the helper class responsible for direct interfacing with ImageJ1.
 	 * Ideally, all accesses to {@code ij.*} classes should be done through this
 	 * helper class, to avoid class loader woes.
+	 *
+	 * @return The {@link IJ1Helper}, or {@code null} if this
+	 *         {@code LegacyService} is inactive (see {@link #isActive()}).
 	 */
 	public IJ1Helper getIJ1Helper() {
 		return ij1Helper;
@@ -229,6 +242,7 @@ public final class LegacyService extends AbstractService implements
 
 	/** Gets the LegacyImageMap associated with this LegacyService. */
 	public synchronized LegacyImageMap getImageMap() {
+		if (!isActive()) return null;
 		if (imageMap == null) imageMap = new LegacyImageMap(this);
 		return imageMap;
 	}
@@ -243,6 +257,7 @@ public final class LegacyService extends AbstractService implements
 	public void runLegacyCommand(final String ij1ClassName,
 		final String argument)
 	{
+		checkActive();
 		final String arg = argument == null ? "" : argument;
 		final Map<String, Object> inputMap = new HashMap<>();
 		inputMap.put("className", ij1ClassName);
@@ -261,6 +276,7 @@ public final class LegacyService extends AbstractService implements
 	 * @see Identifiable
 	 */
 	public Object runLegacyCompatibleCommand(final String key) {
+		checkActive();
 		final ModuleInfo info = legacyCompatible.get(key);
 		if (info == null) return null;
 		if (info instanceof CommandInfo) try {
@@ -295,6 +311,7 @@ public final class LegacyService extends AbstractService implements
 	 * currently active {@link ImageDisplay}. Does not perform any harmonization.
 	 */
 	public void syncActiveImage() {
+		if (!isActive()) return;
 		final ImageDisplay activeDisplay = //
 			imageDisplayService.getActiveImageDisplay();
 		ij1Helper.syncActiveImage(activeDisplay);
@@ -346,6 +363,8 @@ public final class LegacyService extends AbstractService implements
 	public synchronized void toggleLegacyMode(final boolean wantIJ1,
 		final boolean initializing)
 	{
+		checkActive();
+
 		// TODO: hide/show Brightness/Contrast, Color Picker, Command Launcher, etc
 
 		if (!initializing) {
@@ -414,15 +433,18 @@ public final class LegacyService extends AbstractService implements
 
 	public void handleException(final Throwable e) {
 		log.error(e);
-		ij1Helper.handleException(e);
+		if (ij1Helper != null) ij1Helper.handleException(e);
 	}
 
 	// -- Service methods --
 
 	@Override
 	public void initialize() {
-		checkInstance();
-
+		if (instance != null) {
+			// NB: There is already an active LegacyService. So this one is a dummy,
+			// part of another simultaneously existing application context.
+			return;
+		}
 		try {
 			final ClassLoader loader = Thread.currentThread().getContextClassLoader();
 			final boolean ij1Initialized = //
@@ -437,9 +459,7 @@ public final class LegacyService extends AbstractService implements
 		}
 
 		synchronized (LegacyService.class) {
-			checkInstance();
 			instance = this;
-			instantiationStackTrace = new Throwable("Initialized here:");
 			final ClassLoader loader = Thread.currentThread().getContextClassLoader();
 			LegacyInjector.installHooks(loader, new DefaultLegacyHooks(this,
 				ij1Helper));
@@ -471,13 +491,14 @@ public final class LegacyService extends AbstractService implements
 
 	@Override
 	public void dispose() {
+		if (!isActive()) return;
+
 		ij1Helper.dispose();
 
 		final ClassLoader loader = Thread.currentThread().getContextClassLoader();
 		LegacyInjector.installHooks(loader, null);
 		synchronized (LegacyService.class) {
 			instance = null;
-			instantiationStackTrace = null;
 		}
 
 		// clean up SingleInstance remote objects
@@ -489,7 +510,7 @@ public final class LegacyService extends AbstractService implements
 	/** Gets the version of ImageJ 1.x being used. */
 	@Override
 	public String getVersion() {
-		return ij1Helper.getVersion();
+		return ij1Helper == null ? "Inactive" : ij1Helper.getVersion();
 	}
 
 	// -- Utility methods --
@@ -520,6 +541,7 @@ public final class LegacyService extends AbstractService implements
 
 	@EventHandler
 	private void onEvent(final KyPressedEvent event) {
+		if (!isActive()) return;
 		final KeyCode code = event.getCode();
 		if (code == KeyCode.SPACE) ij1Helper.setKeyDown(KeyCode.SPACE.getCode());
 		if (code == KeyCode.ALT) ij1Helper.setKeyDown(KeyCode.ALT.getCode());
@@ -534,6 +556,7 @@ public final class LegacyService extends AbstractService implements
 
 	@EventHandler
 	private void onEvent(final KyReleasedEvent event) {
+		if (!isActive()) return;
 		final KeyCode code = event.getCode();
 		if (code == KeyCode.SPACE) ij1Helper.setKeyUp(KeyCode.SPACE.getCode());
 		if (code == KeyCode.ALT) ij1Helper.setKeyUp(KeyCode.ALT.getCode());
@@ -627,15 +650,14 @@ public final class LegacyService extends AbstractService implements
 	// -- Helper methods --
 
 	/**
-	 * @throws UnsupportedOperationException if the singleton
-	 *           {@code LegacyService} already exists.
+	 * @throws UnsupportedOperationException if this {@code LegacyService} is not
+	 *           the active one.
+	 * @see #isActive()
 	 */
-	private void checkInstance() {
-		if (instance != null) {
-			throw new UnsupportedOperationException(
-				"Cannot instantiate more than one LegacyService",
-				instantiationStackTrace);
-		}
+	private void checkActive() {
+		if (isActive()) return;
+		throw new UnsupportedOperationException(
+			"This context's LegacyService is inactive");
 	}
 
 	private static LegacyEnvironment getLegacyEnvironment(
