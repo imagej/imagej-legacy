@@ -111,7 +111,6 @@
 	</ciManagement>
 
 	<properties>
-		<scijava-ui-swing.version>0.9.0</scijava-ui-swing.version>
 		<ij1-patcher.version>0.12.4</ij1-patcher.version>
 	</properties>
 
