@@ -187,7 +187,7 @@ public class LegacyConsoleService extends AbstractService implements ConsoleServ
 		if (consoleService == null) {
 			final ServiceIndex index = getContext().getServiceIndex();
 
-			// Set datasetService to the next highest priority service
+			// Set consoleService to the next highest priority service
 			consoleService =
 				index.getNextService(ConsoleService.class, LegacyConsoleService.class);
 		}
