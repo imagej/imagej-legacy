@@ -82,7 +82,6 @@ import net.imglib2.roi.PolygonRegionOfInterest;
 import net.imglib2.roi.RectangleRegionOfInterest;
 import net.imglib2.roi.RegionOfInterest;
 import net.imglib2.type.logic.BitType;
-import net.imglib2.view.IntervalView;
 import net.imglib2.view.Views;
 
 import org.scijava.AbstractContextual;

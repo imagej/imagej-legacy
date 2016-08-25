@@ -53,7 +53,6 @@ import net.imagej.ui.viewer.image.ImageDisplayViewer;
 import org.scijava.Identifiable;
 import org.scijava.MenuPath;
 import org.scijava.Priority;
-import org.scijava.Versioned;
 import org.scijava.app.App;
 import org.scijava.app.AppService;
 import org.scijava.app.StatusService;
@@ -111,7 +110,7 @@ import org.scijava.util.AppUtils;
  */
 @Plugin(type = Service.class, priority = Priority.NORMAL_PRIORITY + 1)
 public final class LegacyService extends AbstractService implements
-	ImageJService, Versioned
+	ImageJService
 {
 
 	/**

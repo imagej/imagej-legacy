@@ -546,23 +546,23 @@ public class DefaultLegacyHooks extends LegacyHooks {
 	 * @return whether it is binary
 	 */
 	private static boolean isBinaryFile(final File file) {
-		try {
-			final InputStream in = new FileInputStream(file);
-			final byte[] buffer = new byte[1024];
-			int offset = 0;
+		final byte[] buffer = new byte[1024];
+		int offset = 0;
+		try (final InputStream in = new FileInputStream(file)) {
 			while (offset < buffer.length) {
 				final int count = in.read(buffer, offset, buffer.length - offset);
 				if (count < 0) break;
 				offset += count;
 			}
-			in.close();
-			while (offset > 0) {
-				if (buffer[--offset] == 0) {
-					return true;
-				}
+		}
+		catch (final IOException e) {
+			return false;
+		}
+		while (offset > 0) {
+			if (buffer[--offset] == 0) {
+				return true;
 			}
 		}
-		catch (final IOException e) {}
 		return false;
 	}
 

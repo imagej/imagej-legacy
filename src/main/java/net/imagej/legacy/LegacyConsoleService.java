@@ -40,6 +40,7 @@ import org.scijava.console.DefaultConsoleService;
 import org.scijava.console.OutputEvent;
 import org.scijava.console.OutputListener;
 import org.scijava.log.LogService;
+import org.scijava.object.ObjectService;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 import org.scijava.plugin.PluginInfo;
@@ -53,6 +54,9 @@ public class LegacyConsoleService extends AbstractService implements ConsoleServ
 
 	@Parameter
 	private LegacyService legacy;
+
+	@Parameter
+	private ObjectService objectService;
 
 	@Parameter
 	private LogService log;
@@ -85,6 +89,15 @@ public class LegacyConsoleService extends AbstractService implements ConsoleServ
 	}
 
 	@Override
+	public ObjectService objectService() {
+		// NB: Cannot use consoleService().objectService(), because the
+		// delegate ConsoleService is initialized _after_ this one, and
+		// this objectService() accessor is used in the SingletonService
+		// supertype during _this_ service's initialization.
+		return objectService;
+	}
+
+	@Override
 	public List<ConsoleArgument> getInstances() {
 		return consoleService().getInstances();
 	}
@@ -100,8 +113,8 @@ public class LegacyConsoleService extends AbstractService implements ConsoleServ
 	}
 
 	@Override
-	public PluginService getPluginService() {
-		return consoleService().getPluginService();
+	public PluginService pluginService() {
+		return consoleService().pluginService();
 	}
 
 	@Override
@@ -174,7 +187,7 @@ public class LegacyConsoleService extends AbstractService implements ConsoleServ
 		if (consoleService == null) {
 			final ServiceIndex index = getContext().getServiceIndex();
 
-			// Set datasetService to the next highest priority service
+			// Set consoleService to the next highest priority service
 			consoleService =
 				index.getNextService(ConsoleService.class, LegacyConsoleService.class);
 		}
