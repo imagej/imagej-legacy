@@ -84,8 +84,7 @@ public class IJ1MacroEngine extends AbstractScriptEngine {
 
 	@Override
 	public Object eval(final String macro) throws ScriptException {
-		final Integer noResult = 0xfeedbabe;
-		final StringBuilder pre = new StringBuilder().append("result = ").append(noResult).append(";\n");
+		final StringBuilder pre = new StringBuilder();
 		final StringBuilder post = new StringBuilder();
 		if (module != null) {
 			for (final Entry<String, Object> entry : module.getInputs().entrySet()) {
@@ -113,9 +112,8 @@ public class IJ1MacroEngine extends AbstractScriptEngine {
 			}
 		}
 
-		final String result = ij1Helper.runMacro(pre.toString() + macro + post.toString());
+		final String returnValue = ij1Helper.runMacro(pre.toString() + macro + post.toString());
 		if (module != null) {
-			if (noResult.equals(get("result"))) put("result", null);
 			// No need to convert the outputs except for ImagePlus instances;
 			// ScriptModule.run() does that for us already!
 			for (final ModuleItem<?> item : module.getInfo().outputs()) {
@@ -130,11 +128,11 @@ public class IJ1MacroEngine extends AbstractScriptEngine {
 			}
 			outputs.remove();
 		}
-		if ("[aborted]".equals(result)) {
+		if ("[aborted]".equals(returnValue)) {
 			// NB: Macro was canceled. Return null, to avoid displaying the output.
 			return null;
 		}
-		return result;
+		return returnValue;
 	}
 
 	private String quote(final String value) {
