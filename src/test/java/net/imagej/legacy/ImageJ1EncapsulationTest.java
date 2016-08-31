@@ -90,7 +90,9 @@ public class ImageJ1EncapsulationTest {
 					className.startsWith(net.imagej.legacy.OptionsSynchronizer.class.getName()) ||
 					className.startsWith(net.imagej.legacy.SwitchToModernMode.class.getName()) ||
 					className.startsWith(net.imagej.legacy.convert.DatasetToImagePlusConverter.class.getName()) ||
+					className.startsWith(net.imagej.legacy.convert.ImageDisplayToImagePlusConverter.class.getName()) ||
 					className.startsWith(net.imagej.legacy.convert.ImagePlusToDatasetConverter.class.getName()) ||
+					className.startsWith(net.imagej.legacy.convert.ImagePlusToImageDisplayConverter.class.getName()) ||
 					className.startsWith(net.imagej.legacy.convert.ImageTitleToImagePlusConverter.class.getName()) ||
 					className.startsWith(net.imagej.legacy.convert.StringToImagePlusConverter.class.getName()) ||
 					className.startsWith(net.imagej.legacy.display.AbstractImagePlusDisplayViewer.class.getName()) ||
