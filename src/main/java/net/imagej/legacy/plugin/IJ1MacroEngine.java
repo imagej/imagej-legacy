@@ -181,7 +181,18 @@ public class IJ1MacroEngine extends AbstractScriptEngine {
 
 	private Object convertToImagePlus(final Object value) {
 		if (value == null) return null;
-		final int imageID = Integer.parseInt(value.toString());
+		final int imageID;
+		if (value instanceof Number) {
+			imageID = ((Number) value).intValue();
+		}
+		else {
+			try {
+				imageID = Integer.parseInt(value.toString());
+			}
+			catch (final NumberFormatException exc) {
+				return null;
+			}
+		}
 		return ij1Helper.getImage(imageID);
 	}
 
