@@ -29,45 +29,38 @@
  * #L%
  */
 
-package net.imagej.legacy.translate;
-
-import ij.ImagePlus;
+package net.imagej.legacy.convert;
 
 import java.lang.reflect.Type;
 import java.util.Collection;
 
-import net.imagej.Dataset;
+import net.imagej.display.ImageDisplay;
+import net.imagej.legacy.IJ1Helper;
 import net.imagej.legacy.LegacyService;
 
 import org.scijava.Priority;
 import org.scijava.convert.AbstractConverter;
 import org.scijava.convert.Converter;
-import org.scijava.object.ObjectService;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 import org.scijava.util.ConversionUtils;
 import org.scijava.util.GenericUtils;
 
+import ij.ImagePlus;
+
 /**
- * {@link Converter} implementation for converting {@link Dataset} to a
- * {@link ImagePlus}.
- * <p>
- * NB: should be LOWER priority than any default {@code Converter}s to avoid
- * unintentionally grabbing undesired conversions (e.g. involving nulls).
- * </p>
+ * {@link Converter} implementation for converting {@link ImagePlus} to a
+ * {@link ImageDisplay}.
  *
- * @author Mark Hiner
+ * @author Curtis Rueden
  */
 @Plugin(type = Converter.class, priority = Priority.LOW_PRIORITY)
-public class DatasetImagePlusConverter extends
-	AbstractConverter<Dataset, ImagePlus>
+public class ImagePlusToImageDisplayConverter extends
+	AbstractConverter<ImagePlus, ImageDisplay>
 {
 
-	@Parameter
+	@Parameter(required = false)
 	private LegacyService legacyService;
-
-	@Parameter
-	private ObjectService objectService;
 
 	// -- Converter methods --
 
@@ -78,8 +71,9 @@ public class DatasetImagePlusConverter extends
 
 	@Override
 	public boolean canConvert(final Class<?> src, final Class<?> dest) {
-		return ConversionUtils.canCast(src, Dataset.class) &&
-			ConversionUtils.canCast(dest, ImagePlus.class);
+		if (legacyService == null) return false;
+		return legacyService.getIJ1Helper().isImagePlus(src) &&
+			ConversionUtils.canCast(dest, ImageDisplay.class);
 	}
 
 	@Override
@@ -100,25 +94,41 @@ public class DatasetImagePlusConverter extends
 	@SuppressWarnings("unchecked")
 	@Override
 	public <T> T convert(final Object src, final Class<T> dest) {
-		// Convert using the LegacyImageMap
-		final ImagePlus imagePlus =
-			legacyService.getImageMap().registerDataset((Dataset) src);
+		if (legacyService == null) throw new UnsupportedOperationException();
 
-		return (T) imagePlus;
+		// Convert using the LegacyImageMap
+		final ImageDisplay display =
+			legacyService.getImageMap().registerLegacyImage((ImagePlus) src);
+
+		return (T) display;
 	}
 
 	@Override
 	public void populateInputCandidates(final Collection<Object> objects) {
-		objects.addAll(objectService.getObjects(Dataset.class));
+		if (legacyService == null) return;
+
+		final IJ1Helper ij1Helper = legacyService.getIJ1Helper();
+
+		final int[] imageIDs = ij1Helper.getIDList();
+		if (imageIDs == null) return; // no image IDs
+
+		// Add any ImagePluses in the IJ1 WindowManager that are not already
+		// converted
+		for (final int id : imageIDs) {
+			final ImagePlus imp = ij1Helper.getImage(id);
+			if (legacyService.getImageMap().lookupDisplay(imp) == null) {
+				objects.add(imp);
+			}
+		}
 	}
 
 	@Override
-	public Class<ImagePlus> getOutputType() {
+	public Class<ImageDisplay> getOutputType() {
+		return ImageDisplay.class;
+	}
+
+	@Override
+	public Class<ImagePlus> getInputType() {
 		return ImagePlus.class;
-	}
-
-	@Override
-	public Class<Dataset> getInputType() {
-		return Dataset.class;
 	}
 }
