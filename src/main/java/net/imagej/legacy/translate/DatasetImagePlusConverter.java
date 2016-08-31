@@ -79,7 +79,7 @@ public class DatasetImagePlusConverter extends
 	@Override
 	public boolean canConvert(final Class<?> src, final Class<?> dest) {
 		return ConversionUtils.canCast(src, Dataset.class) &&
-			ConversionUtils.canCast(dest, ImagePlus.class);
+			legacyService.getIJ1Helper().isImagePlus(dest);
 	}
 
 	@Override
@@ -101,8 +101,7 @@ public class DatasetImagePlusConverter extends
 	@Override
 	public <T> T convert(final Object src, final Class<T> dest) {
 		// Convert using the LegacyImageMap
-		final ImagePlus imagePlus =
-			legacyService.getImageMap().registerDataset((Dataset) src);
+		final Object imagePlus =
 
 		return (T) imagePlus;
 	}
