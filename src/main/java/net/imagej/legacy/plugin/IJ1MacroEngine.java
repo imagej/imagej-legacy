@@ -35,6 +35,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map.Entry;
 
 import javax.script.Bindings;
@@ -51,7 +52,7 @@ import org.scijava.script.ScriptModule;
  * <p>
  * As far as possible, this script engine conforms to JSR-223. It lets the user
  * evaluate ImageJ 1.x macros. Due to the ImageJ 1.x macro interpreter's
- * limitations, functionality such as the {@link #put(String, Object)} is not
+ * limitations, functionality such as the {@link #get(String)} method is not
  * supported, however.
  * </p>
  *
@@ -81,13 +82,20 @@ public class IJ1MacroEngine extends AbstractScriptEngine {
 
 	@Override
 	public Object eval(final String macro) throws ScriptException {
+		// collect input variable key/value pairs from bindings + module inputs
+		final LinkedHashMap<String, Object> inVars = new LinkedHashMap<>();
+		inVars.putAll(engineScopeBindings);
+		if (module != null) inVars.putAll(module.getInputs());
+
 		final StringBuilder pre = new StringBuilder();
+
+		// prepend variable assignments to the macro
+		for (final Entry<String, Object> entry : inVars.entrySet()) {
+			appendVar(pre, entry.getKey(), entry.getValue());
+		}
+
 		final StringBuilder post = new StringBuilder();
 		if (module != null) {
-			for (final Entry<String, Object> entry : module.getInputs().entrySet()) {
-				appendVar(pre, entry.getKey(), entry.getValue());
-			}
-
 			outputs.set(engineScopeBindings);
 			for (final Entry<String, Object> entry : module.getOutputs().entrySet()) {
 				post.append("call(\"");
