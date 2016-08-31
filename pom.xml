@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>net.imagej</groupId>
 		<artifactId>pom-imagej</artifactId>
-		<version>16.1.0</version>
+		<version>16.2.1</version>
 		<relativePath />
 	</parent>
 
@@ -109,10 +109,6 @@
 		<system>Jenkins</system>
 		<url>http://jenkins.imagej.net/job/ImageJ-legacy/</url>
 	</ciManagement>
-
-	<properties>
-		<ij1-patcher.version>0.12.4</ij1-patcher.version>
-	</properties>
 
 	<repositories>
 		<repository>

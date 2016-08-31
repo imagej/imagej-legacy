@@ -2,7 +2,7 @@
  * #%L
  * ImageJ software for multidimensional image processing and analysis.
  * %%
- * Copyright (C) 2009 - 2015 Board of Regents of the University of
+ * Copyright (C) 2009 - 2016 Board of Regents of the University of
  * Wisconsin-Madison, Broad Institute of MIT and Harvard, and Max Planck
  * Institute of Molecular Cell Biology and Genetics.
  * %%
@@ -31,13 +31,11 @@
 
 package net.imagej.legacy.plugin;
 
-import ij.ImagePlus;
-import ij.WindowManager;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map.Entry;
 
 import javax.script.Bindings;
@@ -50,32 +48,27 @@ import org.scijava.script.AbstractScriptEngine;
 import org.scijava.script.ScriptModule;
 
 /**
- * An almost JSR-223-compliant script engine for the ImageJ 1.x macro language.
- * <p>
- * As far as possible, this script engine conforms to JSR-223. It lets the user
- * evaluate ImageJ 1.x macros. Due to the ImageJ 1.x macro interpreter's
- * limitations, functionality such as the {@link #put(String, Object)} is not
- * supported, however.
- * </p>
- * 
+ * A JSR-223-compliant script engine for the ImageJ 1.x macro language.
+ *
  * @author Johannes Schindelin
+ * @author Curtis Rueden
  */
 public class IJ1MacroEngine extends AbstractScriptEngine {
 
 	private final IJ1Helper ij1Helper;
 	private ScriptModule module;
 
-	private static ThreadLocal<Bindings> outputs = new ThreadLocal<>();
+	private static ThreadLocal<Object> interpreters = new ThreadLocal<>();
 
-	public static void setOutput(final String key, final String value) {
-		outputs.get().put(key, value);
+	/** Called by ImageJ 1.x at the beginning of each macro execution. */
+	public static void saveInterpreter() {
+		interpreters.set(IJ1Helper.getInterpreter());
 	}
 
 	/**
 	 * Constructs an ImageJ 1.x macro engine.
-	 * 
-	 * @param ij1Helper
-	 *            the helper to evaluate the macros
+	 *
+	 * @param ij1Helper the helper to evaluate the macros
 	 */
 	public IJ1MacroEngine(final IJ1Helper ij1Helper) {
 		this.ij1Helper = ij1Helper;
@@ -84,64 +77,51 @@ public class IJ1MacroEngine extends AbstractScriptEngine {
 
 	@Override
 	public Object eval(final String macro) throws ScriptException {
-		final Integer noResult = 0xfeedbabe;
-		final StringBuilder pre = new StringBuilder().append("result = ").append(noResult).append(";\n");
-		final StringBuilder post = new StringBuilder();
-		if (module != null) {
-			for (final Entry<String, Object> entry : module.getInputs().entrySet()) {
-				final String key = entry.getKey();
-				Object value = entry.getValue();
-				if (value == null) continue;
-				if (value instanceof ImagePlus) {
-					value = ((ImagePlus) value).getID();
-				} else if (value instanceof File) {
-					value = ((File) value).getAbsolutePath();
-				}
-				if (value instanceof Number || value instanceof Boolean) {
-					pre.append(key).append(" = ").append(value).append(";\n");
-				} else {
-					String quoted = quote(value.toString());
-					pre.append(key).append(" = \"").append(quoted).append("\";\n");
-				}
-			}
+		// collect input variable key/value pairs from bindings + module inputs
+		final LinkedHashMap<String, Object> inVars = new LinkedHashMap<>();
+		inVars.putAll(engineScopeBindings);
+		if (module != null) inVars.putAll(module.getInputs());
 
-			outputs.set(engineScopeBindings);
-			for (final Entry<String, Object> entry : module.getOutputs().entrySet()) {
-				post.append("call(\"").append(getClass().getName()).append(".setOutput\", \"");
-				post.append(entry.getKey()).append("\", ");
-				post.append(entry.getKey()).append(");\n");
-			}
+		final StringBuilder pre = new StringBuilder();
+
+		// during macro execution, save a reference to the ij.macro.Interpreter
+		final String method = "\"" + getClass().getName() + ".saveInterpreter\"";
+		pre.append("call(" + method + ");\n");
+
+		// prepend variable assignments to the macro
+		for (final Entry<String, Object> entry : inVars.entrySet()) {
+			appendVar(pre, entry.getKey(), entry.getValue());
 		}
 
-		final String result = ij1Helper.runMacro(pre.toString() + macro + post.toString());
+		// run the macro!
+		final String returnValue = ij1Helper.runMacro(pre + macro);
+
+		// retrieve the interpreter used
+		final Object interpreter = interpreters.get();
+		interpreters.remove();
+
+		// populate bindings with the results
+		for (final String var : ij1Helper.getVariables(interpreter)) {
+			final String name = var.substring(0, var.indexOf('\t'));
+			engineScopeBindings.put(name, ij1Helper.getVariable(interpreter, name));
+		}
+
 		if (module != null) {
-			if (noResult.equals(get("result"))) put("result", null);
-			// No need to convert the outputs except for ImagePlus instances;
-			// ScriptModule.run() does that for us already!
+			// convert ImagePlus IDs to their corresponding instances
 			for (final ModuleItem<?> item : module.getInfo().outputs()) {
-				if (ImagePlus.class.isAssignableFrom(item.getType())) {
+				if (ij1Helper.isImagePlus(item.getType())) {
 					final String name = item.getName();
-					final Object value = get(name);
-					if (value != null) {
-						final int imageID = Integer.parseInt(value.toString());
-						put(name, WindowManager.getImage(imageID));
-					}
+					final Object value = convertToImagePlus(get(name));
+					if (value != null) put(name, value);
 				}
 			}
-			outputs.remove();
 		}
-		if ("[aborted]".equals(result)) {
+
+		if ("[aborted]".equals(returnValue)) {
 			// NB: Macro was canceled. Return null, to avoid displaying the output.
 			return null;
 		}
-		return result;
-	}
-
-	private String quote(final String value) {
-		String quoted = value.replaceAll("([\"\\\\])", "\\\\$1");
-		quoted = quoted.replaceAll("\f", "\\\\f").replaceAll("\n", "\\\\n");
-		quoted = quoted.replaceAll("\r", "\\\\r").replaceAll("\t", "\\\\t");
-		return quoted;
+		return returnValue;
 	}
 
 	@Override
@@ -157,7 +137,8 @@ public class IJ1MacroEngine extends AbstractScriptEngine {
 				builder.append(buffer, 0, count);
 			}
 			reader.close();
-		} catch (final IOException e) {
+		}
+		catch (final IOException e) {
 			throw new ScriptException(e);
 		}
 		return eval(builder.toString());
@@ -172,5 +153,66 @@ public class IJ1MacroEngine extends AbstractScriptEngine {
 		engineScopeBindings.put(key, value);
 	}
 
-	private static class IJ1MacroBindings extends HashMap<String, Object> implements Bindings {}
+	// -- Helper methods --
+
+	private void appendVar(final StringBuilder pre, //
+		final String key, final Object value)
+	{
+		if (key.matches(".*[^a-zA-Z0-9_].*")) return; // illegal identifier
+		if (value == null) return;
+		final Object v;
+		if (ij1Helper.isImagePlus(value)) {
+			v = ij1Helper.getImageID(value);
+		}
+		else if (value instanceof File) {
+			v = ((File) value).getAbsolutePath();
+		}
+		else v = value;
+		if (v instanceof Number || v instanceof Boolean) {
+			pre.append(key).append(" = ").append(v).append(";\n");
+		}
+		else {
+			final String quoted = quote(v.toString());
+			pre.append(key).append(" = \"").append(quoted).append("\";\n");
+		}
+	}
+
+	private String quote(final String value) {
+		String quoted = value.replaceAll("([\"\\\\])", "\\\\$1");
+		quoted = quoted.replaceAll("\f", "\\\\f").replaceAll("\n", "\\\\n");
+		quoted = quoted.replaceAll("\r", "\\\\r").replaceAll("\t", "\\\\t");
+		return quoted;
+	}
+
+	private Object convertToImagePlus(final Object value) {
+		if (value == null) return null;
+		final int imageID;
+		if (value instanceof Number) {
+			imageID = ((Number) value).intValue();
+		}
+		else {
+			try {
+				imageID = Integer.parseInt(value.toString());
+			}
+			catch (final NumberFormatException exc) {
+				return null;
+			}
+		}
+		return ij1Helper.getImage(imageID);
+	}
+
+	// -- Helper classes --
+
+	private static class IJ1MacroBindings extends HashMap<String, Object>
+		implements Bindings
+	{}
+
+	// -- Deprecated --
+
+	/** @deprecated Macros no longer call this method. Nor should you. */
+	@Deprecated
+	@SuppressWarnings("unused")
+	public static void setOutput(final String key, final String value) {
+		throw new UnsupportedOperationException();
+	}
 }
