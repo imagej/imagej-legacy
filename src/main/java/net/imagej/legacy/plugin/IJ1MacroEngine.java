@@ -66,10 +66,6 @@ public class IJ1MacroEngine extends AbstractScriptEngine {
 
 	private static ThreadLocal<Bindings> outputs = new ThreadLocal<>();
 
-	public static void setOutput(final String key, final String value) {
-		outputs.get().put(key, value);
-	}
-
 	/**
 	 * Constructs an ImageJ 1.x macro engine.
 	 *
@@ -207,4 +203,10 @@ public class IJ1MacroEngine extends AbstractScriptEngine {
 	private static class IJ1MacroBindings extends HashMap<String, Object>
 		implements Bindings
 	{}
+
+	// -- (Soon To Be) Deprecated --
+
+	public static void setOutput(final String key, final String value) {
+		outputs.get().put(key, value);
+	}
 }
