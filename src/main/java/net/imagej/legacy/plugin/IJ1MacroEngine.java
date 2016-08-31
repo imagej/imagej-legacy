@@ -32,7 +32,6 @@
 package net.imagej.legacy.plugin;
 
 import ij.ImagePlus;
-import ij.WindowManager;
 
 import java.io.File;
 import java.io.IOException;
@@ -103,16 +102,12 @@ public class IJ1MacroEngine extends AbstractScriptEngine {
 
 		final String returnValue = ij1Helper.runMacro(pre + macro + post);
 		if (module != null) {
-			// No need to convert the outputs except for ImagePlus instances;
-			// ScriptModule.run() does that for us already!
+			// convert ImagePlus IDs to their corresponding instances
 			for (final ModuleItem<?> item : module.getInfo().outputs()) {
 				if (ImagePlus.class.isAssignableFrom(item.getType())) {
 					final String name = item.getName();
-					final Object value = get(name);
-					if (value != null) {
-						final int imageID = Integer.parseInt(value.toString());
-						put(name, WindowManager.getImage(imageID));
-					}
+					final Object value = convertToImagePlus(get(name));
+					if (value != null) put(name, value);
 				}
 			}
 			outputs.remove();
@@ -182,6 +177,12 @@ public class IJ1MacroEngine extends AbstractScriptEngine {
 		quoted = quoted.replaceAll("\f", "\\\\f").replaceAll("\n", "\\\\n");
 		quoted = quoted.replaceAll("\r", "\\\\r").replaceAll("\t", "\\\\t");
 		return quoted;
+	}
+
+	private Object convertToImagePlus(final Object value) {
+		if (value == null) return null;
+		final int imageID = Integer.parseInt(value.toString());
+		return ij1Helper.getImage(imageID);
 	}
 
 	// -- Helper classes --
