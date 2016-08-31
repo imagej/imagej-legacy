@@ -63,10 +63,10 @@ public class DatasetImagePlusConverter extends
 	AbstractConverter<Dataset, ImagePlus>
 {
 
-	@Parameter
+	@Parameter(required = false)
 	private LegacyService legacyService;
 
-	@Parameter
+	@Parameter(required = false)
 	private ObjectService objectService;
 
 	// -- Converter methods --
@@ -78,6 +78,7 @@ public class DatasetImagePlusConverter extends
 
 	@Override
 	public boolean canConvert(final Class<?> src, final Class<?> dest) {
+		if (legacyService == null) return false;
 		return ConversionUtils.canCast(src, Dataset.class) &&
 			legacyService.getIJ1Helper().isImagePlus(dest);
 	}
@@ -100,14 +101,15 @@ public class DatasetImagePlusConverter extends
 	@SuppressWarnings("unchecked")
 	@Override
 	public <T> T convert(final Object src, final Class<T> dest) {
-		// Convert using the LegacyImageMap
-		final Object imagePlus =
-
-		return (T) imagePlus;
+		if (legacyService == null) throw new UnsupportedOperationException();
+		final Dataset d = (Dataset) src;
+		final Object imp = legacyService.getImageMap().registerDataset(d);
+		return (T) imp;
 	}
 
 	@Override
 	public void populateInputCandidates(final Collection<Object> objects) {
+		if (objectService == null) return;
 		objects.addAll(objectService.getObjects(Dataset.class));
 	}
 
