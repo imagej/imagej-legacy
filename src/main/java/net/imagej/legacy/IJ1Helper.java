@@ -546,6 +546,29 @@ public class IJ1Helper extends AbstractContextual {
 		return Macro.getValue(getOptions(), label, null);
 	}
 
+	/** Returns true if the object is an instance of {@link ImagePlus}. */
+	public boolean isImagePlus(final Object o) {
+		return o instanceof ImagePlus;
+	}
+
+	/** Returns true if the class is assignable to {@link ImagePlus}. */
+	public boolean isImagePlus(final Class<?> c) {
+		return ImagePlus.class.isAssignableFrom(c);
+	}
+
+	/**
+	 * Gets the ID of the given {@link ImagePlus} object. If the given object is
+	 * not an {@link ImagePlus}, throws {@link IllegalArgumentException}.
+	 *
+	 * @param o The {@link ImagePlus} whose ID is needed.
+	 * @return The value of {@link ImagePlus#getID()}.
+	 * @see #isImagePlus(Object)
+	 * @throws ClassCastException if the given object is not an {@link ImagePlus}.
+	 */
+	public int getImageID(final Object o) {
+		return ((ImagePlus) o).getID();
+	}
+
 	/** Gets the SciJava application context linked to the ImageJ 1.x instance. */
 	public static Context getLegacyContext() {
 		// NB: This call instantiates a Context if there is none.
