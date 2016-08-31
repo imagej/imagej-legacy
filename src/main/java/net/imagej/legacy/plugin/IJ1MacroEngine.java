@@ -102,7 +102,9 @@ public class IJ1MacroEngine extends AbstractScriptEngine {
 			}
 		}
 
+		// run the macro!
 		final String returnValue = ij1Helper.runMacro(pre + macro + post);
+
 		if (module != null) {
 			// convert ImagePlus IDs to their corresponding instances
 			for (final ModuleItem<?> item : module.getInfo().outputs()) {
