@@ -57,7 +57,7 @@ import org.scijava.script.ScriptModule;
  * limitations, functionality such as the {@link #put(String, Object)} is not
  * supported, however.
  * </p>
- * 
+ *
  * @author Johannes Schindelin
  * @author Curtis Rueden
  */
@@ -74,9 +74,8 @@ public class IJ1MacroEngine extends AbstractScriptEngine {
 
 	/**
 	 * Constructs an ImageJ 1.x macro engine.
-	 * 
-	 * @param ij1Helper
-	 *            the helper to evaluate the macros
+	 *
+	 * @param ij1Helper the helper to evaluate the macros
 	 */
 	public IJ1MacroEngine(final IJ1Helper ij1Helper) {
 		this.ij1Helper = ij1Helper;
@@ -94,13 +93,15 @@ public class IJ1MacroEngine extends AbstractScriptEngine {
 
 			outputs.set(engineScopeBindings);
 			for (final Entry<String, Object> entry : module.getOutputs().entrySet()) {
-				post.append("call(\"").append(getClass().getName()).append(".setOutput\", \"");
+				post.append("call(\"");
+				post.append(getClass().getName());
+				post.append(".setOutput\", \"");
 				post.append(entry.getKey()).append("\", ");
 				post.append(entry.getKey()).append(");\n");
 			}
 		}
 
-		final String returnValue = ij1Helper.runMacro(pre.toString() + macro + post.toString());
+		final String returnValue = ij1Helper.runMacro(pre + macro + post);
 		if (module != null) {
 			// No need to convert the outputs except for ImagePlus instances;
 			// ScriptModule.run() does that for us already!
@@ -136,7 +137,8 @@ public class IJ1MacroEngine extends AbstractScriptEngine {
 				builder.append(buffer, 0, count);
 			}
 			reader.close();
-		} catch (final IOException e) {
+		}
+		catch (final IOException e) {
 			throw new ScriptException(e);
 		}
 		return eval(builder.toString());
@@ -184,5 +186,7 @@ public class IJ1MacroEngine extends AbstractScriptEngine {
 
 	// -- Helper classes --
 
-	private static class IJ1MacroBindings extends HashMap<String, Object> implements Bindings {}
+	private static class IJ1MacroBindings extends HashMap<String, Object>
+		implements Bindings
+	{}
 }
