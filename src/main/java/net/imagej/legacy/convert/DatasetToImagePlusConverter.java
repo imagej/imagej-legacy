@@ -29,7 +29,7 @@
  * #L%
  */
 
-package net.imagej.legacy.translate;
+package net.imagej.legacy.convert;
 
 import ij.ImagePlus;
 
@@ -59,7 +59,7 @@ import org.scijava.util.GenericUtils;
  * @author Mark Hiner
  */
 @Plugin(type = Converter.class, priority = Priority.LOW_PRIORITY)
-public class DatasetImagePlusConverter extends
+public class DatasetToImagePlusConverter extends
 	AbstractConverter<Dataset, ImagePlus>
 {
 

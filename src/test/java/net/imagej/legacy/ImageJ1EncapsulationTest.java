@@ -89,6 +89,8 @@ public class ImageJ1EncapsulationTest {
 					className.startsWith(net.imagej.legacy.LegacyOutputTracker.class.getName()) ||
 					className.startsWith(net.imagej.legacy.OptionsSynchronizer.class.getName()) ||
 					className.startsWith(net.imagej.legacy.SwitchToModernMode.class.getName()) ||
+					className.startsWith(net.imagej.legacy.convert.DatasetToImagePlusConverter.class.getName()) ||
+					className.startsWith(net.imagej.legacy.convert.ImagePlusToDatasetConverter.class.getName()) ||
 					className.startsWith(net.imagej.legacy.convert.ImageTitleToImagePlusConverter.class.getName()) ||
 					className.startsWith(net.imagej.legacy.convert.StringToImagePlusConverter.class.getName()) ||
 					className.startsWith(net.imagej.legacy.display.AbstractImagePlusDisplayViewer.class.getName()) ||
@@ -106,13 +108,11 @@ public class ImageJ1EncapsulationTest {
 					className.startsWith(net.imagej.legacy.translate.ColorPixelHarmonizer.class.getName()) ||
 					className.startsWith(net.imagej.legacy.translate.ColorTableHarmonizer.class.getName()) ||
 					className.startsWith(net.imagej.legacy.translate.CompositeHarmonizer.class.getName()) ||
-					className.startsWith(net.imagej.legacy.translate.DatasetImagePlusConverter.class.getName()) ||
 					className.startsWith(net.imagej.legacy.translate.DefaultImageTranslator.class.getName()) ||
 					className.startsWith(net.imagej.legacy.translate.GrayDisplayCreator.class.getName()) ||
 					className.startsWith(net.imagej.legacy.translate.GrayImagePlusCreator.class.getName()) ||
 					className.startsWith(net.imagej.legacy.translate.GrayPixelHarmonizer.class.getName()) ||
 					className.startsWith(net.imagej.legacy.translate.Harmonizer.class.getName()) ||
-					className.startsWith(net.imagej.legacy.translate.ImagePlusDatasetConverter.class.getName()) ||
 					className.startsWith(net.imagej.legacy.translate.LegacyUtils.class.getName()) ||
 					className.startsWith(net.imagej.legacy.translate.MergedRgbVirtualStack.class.getName()) ||
 					className.startsWith(net.imagej.legacy.translate.MetadataHarmonizer.class.getName()) ||
