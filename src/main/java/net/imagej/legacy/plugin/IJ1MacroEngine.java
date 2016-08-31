@@ -48,13 +48,7 @@ import org.scijava.script.AbstractScriptEngine;
 import org.scijava.script.ScriptModule;
 
 /**
- * An almost JSR-223-compliant script engine for the ImageJ 1.x macro language.
- * <p>
- * As far as possible, this script engine conforms to JSR-223. It lets the user
- * evaluate ImageJ 1.x macros. Due to the ImageJ 1.x macro interpreter's
- * limitations, functionality such as the {@link #get(String)} method is not
- * supported, however.
- * </p>
+ * A JSR-223-compliant script engine for the ImageJ 1.x macro language.
  *
  * @author Johannes Schindelin
  * @author Curtis Rueden
@@ -64,7 +58,12 @@ public class IJ1MacroEngine extends AbstractScriptEngine {
 	private final IJ1Helper ij1Helper;
 	private ScriptModule module;
 
-	private static ThreadLocal<Bindings> outputs = new ThreadLocal<>();
+	private static ThreadLocal<Object> interpreters = new ThreadLocal<>();
+
+	/** Called by ImageJ 1.x at the beginning of each macro execution. */
+	public static void saveInterpreter() {
+		interpreters.set(IJ1Helper.getInterpreter());
+	}
 
 	/**
 	 * Constructs an ImageJ 1.x macro engine.
@@ -85,25 +84,27 @@ public class IJ1MacroEngine extends AbstractScriptEngine {
 
 		final StringBuilder pre = new StringBuilder();
 
+		// during macro execution, save a reference to the ij.macro.Interpreter
+		final String method = "\"" + getClass().getName() + ".saveInterpreter\"";
+		pre.append("call(" + method + ");\n");
+
 		// prepend variable assignments to the macro
 		for (final Entry<String, Object> entry : inVars.entrySet()) {
 			appendVar(pre, entry.getKey(), entry.getValue());
 		}
 
-		final StringBuilder post = new StringBuilder();
-		if (module != null) {
-			outputs.set(engineScopeBindings);
-			for (final Entry<String, Object> entry : module.getOutputs().entrySet()) {
-				post.append("call(\"");
-				post.append(getClass().getName());
-				post.append(".setOutput\", \"");
-				post.append(entry.getKey()).append("\", ");
-				post.append(entry.getKey()).append(");\n");
-			}
-		}
-
 		// run the macro!
-		final String returnValue = ij1Helper.runMacro(pre + macro + post);
+		final String returnValue = ij1Helper.runMacro(pre + macro);
+
+		// retrieve the interpreter used
+		final Object interpreter = interpreters.get();
+		interpreters.remove();
+
+		// populate bindings with the results
+		for (final String var : ij1Helper.getVariables(interpreter)) {
+			final String name = var.substring(0, var.indexOf('\t'));
+			engineScopeBindings.put(name, ij1Helper.getVariable(interpreter, name));
+		}
 
 		if (module != null) {
 			// convert ImagePlus IDs to their corresponding instances
@@ -114,8 +115,8 @@ public class IJ1MacroEngine extends AbstractScriptEngine {
 					if (value != null) put(name, value);
 				}
 			}
-			outputs.remove();
 		}
+
 		if ("[aborted]".equals(returnValue)) {
 			// NB: Macro was canceled. Return null, to avoid displaying the output.
 			return null;
@@ -206,9 +207,12 @@ public class IJ1MacroEngine extends AbstractScriptEngine {
 		implements Bindings
 	{}
 
-	// -- (Soon To Be) Deprecated --
+	// -- Deprecated --
 
+	/** @deprecated Macros no longer call this method. Nor should you. */
+	@Deprecated
+	@SuppressWarnings("unused")
 	public static void setOutput(final String key, final String value) {
-		outputs.get().put(key, value);
+		throw new UnsupportedOperationException();
 	}
 }
