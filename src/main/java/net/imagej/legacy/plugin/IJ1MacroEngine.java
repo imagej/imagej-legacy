@@ -89,20 +89,7 @@ public class IJ1MacroEngine extends AbstractScriptEngine {
 		final StringBuilder post = new StringBuilder();
 		if (module != null) {
 			for (final Entry<String, Object> entry : module.getInputs().entrySet()) {
-				final String key = entry.getKey();
-				Object value = entry.getValue();
-				if (value == null) continue;
-				if (value instanceof ImagePlus) {
-					value = ((ImagePlus) value).getID();
-				} else if (value instanceof File) {
-					value = ((File) value).getAbsolutePath();
-				}
-				if (value instanceof Number || value instanceof Boolean) {
-					pre.append(key).append(" = ").append(value).append(";\n");
-				} else {
-					String quoted = quote(value.toString());
-					pre.append(key).append(" = \"").append(quoted).append("\";\n");
-				}
+				appendVar(pre, entry.getKey(), entry.getValue());
 			}
 
 			outputs.set(engineScopeBindings);
@@ -165,6 +152,28 @@ public class IJ1MacroEngine extends AbstractScriptEngine {
 	}
 
 	// -- Helper methods --
+
+	private void appendVar(final StringBuilder pre, //
+		final String key, final Object value)
+	{
+		if (key.matches(".*[^a-zA-Z0-9_].*")) return; // illegal identifier
+		if (value == null) return;
+		final Object v;
+		if (value instanceof ImagePlus) {
+			v = ((ImagePlus) value).getID();
+		}
+		else if (value instanceof File) {
+			v = ((File) value).getAbsolutePath();
+		}
+		else v = value;
+		if (v instanceof Number || v instanceof Boolean) {
+			pre.append(key).append(" = ").append(v).append(";\n");
+		}
+		else {
+			final String quoted = quote(v.toString());
+			pre.append(key).append(" = \"").append(quoted).append("\";\n");
+		}
+	}
 
 	private String quote(final String value) {
 		String quoted = value.replaceAll("([\"\\\\])", "\\\\$1");
