@@ -59,6 +59,7 @@ import org.scijava.script.ScriptModule;
  * </p>
  * 
  * @author Johannes Schindelin
+ * @author Curtis Rueden
  */
 public class IJ1MacroEngine extends AbstractScriptEngine {
 
@@ -135,13 +136,6 @@ public class IJ1MacroEngine extends AbstractScriptEngine {
 		return returnValue;
 	}
 
-	private String quote(final String value) {
-		String quoted = value.replaceAll("([\"\\\\])", "\\\\$1");
-		quoted = quoted.replaceAll("\f", "\\\\f").replaceAll("\n", "\\\\n");
-		quoted = quoted.replaceAll("\r", "\\\\r").replaceAll("\t", "\\\\t");
-		return quoted;
-	}
-
 	@Override
 	public Object eval(final Reader reader) throws ScriptException {
 		final StringBuilder builder = new StringBuilder();
@@ -169,6 +163,17 @@ public class IJ1MacroEngine extends AbstractScriptEngine {
 		}
 		engineScopeBindings.put(key, value);
 	}
+
+	// -- Helper methods --
+
+	private String quote(final String value) {
+		String quoted = value.replaceAll("([\"\\\\])", "\\\\$1");
+		quoted = quoted.replaceAll("\f", "\\\\f").replaceAll("\n", "\\\\n");
+		quoted = quoted.replaceAll("\r", "\\\\r").replaceAll("\t", "\\\\t");
+		return quoted;
+	}
+
+	// -- Helper classes --
 
 	private static class IJ1MacroBindings extends HashMap<String, Object> implements Bindings {}
 }
