@@ -32,15 +32,20 @@
 package net.imagej.legacy.plugin;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 
+import javax.script.Bindings;
+import javax.script.ScriptContext;
+import javax.script.ScriptEngine;
 import javax.script.ScriptException;
 
 import org.junit.Test;
 import org.scijava.Context;
+import org.scijava.script.ScriptLanguage;
 import org.scijava.script.ScriptModule;
 import org.scijava.script.ScriptService;
 
@@ -62,6 +67,49 @@ public class IJ1MacroLanguageTest {
 		final Object returnValue = m.getReturnValue();
 		assertSame(String.class, returnValue.getClass());
 		assertEquals("green eggs and ham", returnValue);
+
+		context.dispose();
+	}
+
+	@Test
+	public void testBindings() throws ScriptException {
+		final Context context = new Context();
+		final ScriptService scriptService = context.service(ScriptService.class);
+
+		final ScriptLanguage language = scriptService.getLanguageByExtension("ijm");
+		final ScriptEngine engine = language.getScriptEngine();
+		assertSame(IJ1MacroEngine.class, engine.getClass());
+
+		assertNull(engine.get("hello"));
+		assertNull(engine.get("temperature"));
+		assertNull(engine.get("salutations"));
+
+		// populate bindings with initial values
+		engine.put("hello", "salutations");
+		engine.put("temperature", 98.6);
+		engine.put("goodbye", "farewell");
+		assertEquals("salutations", engine.get("hello"));
+		assertEquals(98.6, engine.get("temperature"));
+		assertEquals("farewell", engine.get("goodbye"));
+
+		// execute a macro which changes those values
+		final Object returnValue = engine.eval("" + //
+			"hello = \"greetings and \" + hello\n" + //
+			"temperature = 37" + //
+			"return \"bye\"\n" + //
+			"goodbye = \"adios\"" //
+		);
+		assertEquals("bye", returnValue);
+		assertEquals("greetings and salutations", engine.get("hello"));
+		assertEquals(37.0, engine.get("temperature"));
+		assertEquals("farewell", engine.get("goodbye"));
+
+		// clear the bindings
+		final Bindings bindings = engine.getBindings(ScriptContext.ENGINE_SCOPE);
+		bindings.size();
+		bindings.clear();
+		assertNull(engine.get("hello"));
+		assertNull(engine.get("goodbye"));
 
 		context.dispose();
 	}
