@@ -31,8 +31,6 @@
 
 package net.imagej.legacy.plugin;
 
-import ij.ImagePlus;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
@@ -104,7 +102,7 @@ public class IJ1MacroEngine extends AbstractScriptEngine {
 		if (module != null) {
 			// convert ImagePlus IDs to their corresponding instances
 			for (final ModuleItem<?> item : module.getInfo().outputs()) {
-				if (ImagePlus.class.isAssignableFrom(item.getType())) {
+				if (ij1Helper.isImagePlus(item.getType())) {
 					final String name = item.getName();
 					final Object value = convertToImagePlus(get(name));
 					if (value != null) put(name, value);
@@ -156,8 +154,8 @@ public class IJ1MacroEngine extends AbstractScriptEngine {
 		if (key.matches(".*[^a-zA-Z0-9_].*")) return; // illegal identifier
 		if (value == null) return;
 		final Object v;
-		if (value instanceof ImagePlus) {
-			v = ((ImagePlus) value).getID();
+		if (ij1Helper.isImagePlus(value)) {
+			v = ij1Helper.getImageID(value);
 		}
 		else if (value instanceof File) {
 			v = ((File) value).getAbsolutePath();
