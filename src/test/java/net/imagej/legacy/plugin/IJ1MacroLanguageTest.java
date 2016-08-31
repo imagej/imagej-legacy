@@ -43,6 +43,8 @@ import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
 import javax.script.ScriptException;
 
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.scijava.Context;
 import org.scijava.script.ScriptLanguage;
@@ -56,26 +58,33 @@ import org.scijava.script.ScriptService;
  */
 public class IJ1MacroLanguageTest {
 
+	private Context context;
+	private ScriptService scriptService;
+
+	@Before
+	public void setUp() {
+		context = new Context();
+		scriptService = context.service(ScriptService.class);
+	}
+
+	@After
+	public void tearDown() {
+		context.dispose();
+	}
+
 	@Test
 	public void testReturnValues() throws InterruptedException, ExecutionException,
 		IOException, ScriptException
 	{
-		final Context context = new Context();
-		final ScriptService scriptService = context.service(ScriptService.class);
 		final String script = "return \"green eggs and ham\"";
 		final ScriptModule m = scriptService.run("return.ijm", script, true).get();
 		final Object returnValue = m.getReturnValue();
 		assertSame(String.class, returnValue.getClass());
 		assertEquals("green eggs and ham", returnValue);
-
-		context.dispose();
 	}
 
 	@Test
 	public void testBindings() throws ScriptException {
-		final Context context = new Context();
-		final ScriptService scriptService = context.service(ScriptService.class);
-
 		final ScriptLanguage language = scriptService.getLanguageByExtension("ijm");
 		final ScriptEngine engine = language.getScriptEngine();
 		assertSame(IJ1MacroEngine.class, engine.getClass());
@@ -110,17 +119,12 @@ public class IJ1MacroLanguageTest {
 		bindings.clear();
 		assertNull(engine.get("hello"));
 		assertNull(engine.get("goodbye"));
-
-		context.dispose();
 	}
 
 	@Test
 	public void testParameters() throws InterruptedException, ExecutionException,
 		IOException, ScriptException
 	{
-		final Context context = new Context();
-		final ScriptService scriptService = context.service(ScriptService.class);
-
 		final String script = "" + //
 			"// @String name\n" + //
 			"// @int age\n" + //
@@ -133,7 +137,5 @@ public class IJ1MacroLanguageTest {
 
 		final Object actual = m.getOutput("greeting");
 		assertEquals("Hello, Oliver Twist! Happy birthday #9", actual);
-
-		context.dispose();
 	}
 }
