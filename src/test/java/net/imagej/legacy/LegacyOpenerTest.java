@@ -67,14 +67,15 @@ public class LegacyOpenerTest {
 		assumeTrue("file".equals(url.getProtocol()));
 		final String path = url.getPath();
 		final String macro = "" + //
-			"// @OUTPUT int nResults\n" + //
+			"// @OUTPUT int numResults\n" + //
 			"open('" + path + "');\n" + //
 			"if (nImages() != 1) exit('Oh no!');\n" + //
 			"run('8-bit');" + //
 			"setThreshold(150,255);" + //
 			"run('Analyze Particles...', " + //
 			"'size=20-Infinity circularity=0.40-1.00');\n" + //
-			"close();";
+			"close();\n" + //
+			"numResults = nResults;";
 
 		final Context context = new Context();
 		try {
@@ -82,9 +83,9 @@ public class LegacyOpenerTest {
 			assertNotNull(script);
 			final ScriptModule module =
 				script.run("pauls-macro.ijm", macro, true).get();
-			final Integer nResults = (Integer) module.getOutput("nResults");
-			assertNotNull(nResults);
-			assertEquals(3, (int) nResults);
+			final Integer numResults = (Integer) module.getOutput("numResults");
+			assertNotNull(numResults);
+			assertEquals(3, (int) numResults);
 		}
 		finally {
 			context.dispose();
