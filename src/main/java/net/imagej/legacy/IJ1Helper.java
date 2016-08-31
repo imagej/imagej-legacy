@@ -546,6 +546,50 @@ public class IJ1Helper extends AbstractContextual {
 		return Macro.getValue(getOptions(), label, null);
 	}
 
+	/** Returns the active macro {@link Interpreter}. */
+	public static Object getInterpreter() {
+		return Interpreter.getInstance();
+	}
+
+	/**
+	 * Gets the value of the specified variable, from the given macro
+	 * {@link Interpreter}.
+	 * 
+	 * @param interpreter The macro {@link Interpreter} to query.
+	 * @return The list of variables in {@code key\tvalue} form, as given by
+	 *         {@link Interpreter#getVariables()}.
+	 * @throws ClassCastException if the given interpreter is not an
+	 *           {@link Interpreter}.
+	 */
+	public String[] getVariables(final Object interpreter) {
+		return ((Interpreter) interpreter).getVariables();
+	}
+
+	/**
+	 * Gets the value of the specified variable, from the given macro
+	 * {@link Interpreter}.
+	 * 
+	 * @param interpreter The macro {@link Interpreter} to query.
+	 * @param name The name of the variable to retrieve.
+	 * @return The value of the requested variable, as either a {@link String}, a
+	 *         {@link Double} or {@code null}.
+	 * @throws ClassCastException if the given interpreter is not an
+	 *           {@link Interpreter}.
+	 */
+	public Object getVariable(final Object interpreter, final String name) {
+		final Interpreter interp = (Interpreter) interpreter;
+
+		// might be a string
+		final String sValue = interp.getStringVariable(name);
+		if (sValue != null) return sValue;
+
+		// probably a number
+		final double nValue = interp.getVariable2(name);
+		if (!Double.isNaN(nValue)) return nValue;
+
+		return null;
+	}
+
 	/** Returns true if the object is an instance of {@link ImagePlus}. */
 	public boolean isImagePlus(final Object o) {
 		return o instanceof ImagePlus;
