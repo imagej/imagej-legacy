@@ -74,7 +74,6 @@ public class LegacyOpenerTest {
 			"setThreshold(150,255);" + //
 			"run('Analyze Particles...', " + //
 			"'size=20-Infinity circularity=0.40-1.00');\n" + //
-			"close();\n" + //
 			"numResults = nResults;";
 
 		final Context context = new Context();
@@ -113,8 +112,7 @@ public class LegacyOpenerTest {
 			"// @OUTPUT String label\n" + //
 			"open('" + path + "');\n" + //
 			"if (nImages() != 1) exit('Oh no!');\n" + //
-			"label = getMetadata('Label');\n" + //
-			"close();";
+			"label = getMetadata('Label');\n";
 
 		final Context context = new Context();
 		try {
