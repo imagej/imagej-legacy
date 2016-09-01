@@ -32,7 +32,9 @@
 package net.imagej.legacy;
 
 import java.awt.GraphicsEnvironment;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -287,9 +289,39 @@ public final class LegacyService extends AbstractService implements
 		}
 		if (info instanceof ScriptInfo) {
 			if (ij1Helper.shiftKeyDown()) {
+				// open the script in the script editor
 				final ScriptInfo script = (ScriptInfo) info;
 				final TextEditor editor = new TextEditor(getContext());
-				editor.open(new File(script.getPath()));
+				final String scriptPath = script.getPath();
+				final File file = new File(scriptPath);
+				final StringBuilder sb = new StringBuilder();
+				try (final BufferedReader reader = script.getReader()) {
+					if (reader != null) {
+						// script is text from somewhere (a URL?); read it
+						while (true) {
+							final String line = reader.readLine();
+							if (line == null) break; // eof
+							sb.append(line);
+							sb.append("\n");
+						}
+					}
+				}
+				catch (final IOException exc) {
+					log.error("Error reading script: " + scriptPath, exc);
+				}
+				if (sb.length() > 0) {
+					editor.getEditorPane().setFileName(file.getName());
+					editor.getEditorPane().setText(sb.toString());
+				}
+				else if (file.exists()) {
+					// script is a file on disk; open it
+					editor.open(new File(scriptPath));
+				}
+				else {
+					// give up, and report the problem
+					final String error = "[Cannot load script: " + scriptPath + "]";
+					editor.getEditorPane().setText(error);
+				}
 				editor.setVisible(true);
 				return editor;
 			}
