@@ -293,7 +293,7 @@ public final class LegacyService extends AbstractService implements
 				final ScriptInfo script = (ScriptInfo) info;
 				final TextEditor editor = new TextEditor(getContext());
 				final String scriptPath = script.getPath();
-				final File file = new File(scriptPath);
+				final File scriptFile = new File(scriptPath);
 				final StringBuilder sb = new StringBuilder();
 				try (final BufferedReader reader = script.getReader()) {
 					if (reader != null) {
@@ -310,12 +310,12 @@ public final class LegacyService extends AbstractService implements
 					log.error("Error reading script: " + scriptPath, exc);
 				}
 				if (sb.length() > 0) {
-					editor.getEditorPane().setFileName(file.getName());
+					editor.getEditorPane().setFileName(scriptFile.getName());
 					editor.getEditorPane().setText(sb.toString());
 				}
-				else if (file.exists()) {
+				else if (scriptFile.exists()) {
 					// script is a file on disk; open it
-					editor.open(new File(scriptPath));
+					editor.open(scriptFile);
 				}
 				else {
 					// give up, and report the problem
