@@ -215,17 +215,18 @@ public class IJ1Helper extends AbstractContextual {
 	 */
 	public synchronized void dispose() {
 		final ImageJ ij = IJ.getInstance();
-		if (ij == null) return; // no ImageJ1 to dispose
-		if (ij.quitting()) return; // ImageJ1 is already on its way out
+		if (ij != null && ij.quitting()) return; // IJ1 is already on its way out
 
 		disposing = true;
 
 		closeImageWindows();
 		disposeNonImageWindows();
 
-		// quit legacy ImageJ on the same thread
-		ij.exitWhenQuitting(false); // do *not* quit the JVM!
-		ij.run();
+		if (ij != null) {
+			// quit legacy ImageJ on the same thread
+			ij.exitWhenQuitting(false); // do *not* quit the JVM!
+			ij.run();
+		}
 		disposing = false;
 	}
 
