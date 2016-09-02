@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>net.imagej</groupId>
 		<artifactId>pom-imagej</artifactId>
-		<version>16.2.1</version>
+		<version>16.4.0</version>
 		<relativePath />
 	</parent>
 
@@ -15,6 +15,10 @@
 	<name>ImageJ Legacy Bridge</name>
 	<description>The legacy component enables backward compatibility with the legacy version of ImageJ (1.x). It contains the code necessary to translate ImageJ images into ImageJ1 format and back, so that legacy plugins can be executed faithfully.</description>
 	<url>http://imagej.net/ImageJ_Legacy</url>
+
+	<properties>
+		<package-name>net.imagej.legacy</package-name>
+	</properties>
 
 	<developers>
 		<developer>
@@ -194,9 +198,6 @@
 				<artifactId>maven-jar-plugin</artifactId>
 				<configuration>
 					<archive>
-						<manifest>
-							<packageName>net.imagej.legacy</packageName>
-						</manifest>
 						<manifestEntries>
 							<Premain-Class>net.imagej.legacy.LegacyJavaAgent</Premain-Class>
 						</manifestEntries>
