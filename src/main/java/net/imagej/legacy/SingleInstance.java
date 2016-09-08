@@ -233,7 +233,7 @@ public class SingleInstance {
 
 	private void startServer() {
 		// TODO: not thread safe
-		log.debug("OtherInstance: starting server");
+		log.debug("SingleInstance: starting server");
 		final String path = getStubPath();
 		try (FileOutputStream out = new FileOutputStream(path);
 				ObjectOutputStream objOut = new ObjectOutputStream(out)) {
@@ -244,7 +244,7 @@ public class SingleInstance {
 			makeFilePrivate(path);
 			objOut.writeObject(stub);
 
-			log.debug("OtherInstance: server ready");
+			log.debug("SingleInstance: server ready");
 		} catch (Exception e) {
 			log.error(e);
 		}
