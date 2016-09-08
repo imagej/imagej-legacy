@@ -37,7 +37,7 @@ import ij.ImageJ;
 import ij.ImagePlus;
 import ij.Macro;
 import ij.Menus;
-import ij.OtherInstance;
+import ij.Prefs;
 import ij.WindowManager;
 import ij.gui.ImageWindow;
 import ij.gui.Toolbar;
@@ -253,7 +253,7 @@ public class IJ1Helper extends AbstractContextual {
 	 * @return true if <it>Run single instance listener</it> is set
 	 */
 	public boolean isRMIEnabled() {
-		return OtherInstance.isRMIEnabled();
+		return Prefs.runSocketListener;
 	}
 
 	private boolean batchMode;
