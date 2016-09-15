@@ -290,7 +290,7 @@ public class LegacyUI extends AbstractUserInterface implements SwingUI {
 					}
 					else { // FileWidget.OPEN_STYLE / default behavior
 						// Use ImageJ1's OpenDialog.
-						final File chosen = ij1Helper().openDialog("Open");
+						final File chosen = ij1Helper().openDialog("Open", file);
 						if (chosen != null) {
 							chosenFile[0] = chosen;
 						}

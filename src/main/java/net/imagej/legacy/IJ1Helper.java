@@ -1158,7 +1158,15 @@ public class IJ1Helper extends AbstractContextual {
 
 	/** Uses ImageJ 1.x' OpenDialog */
 	public File openDialog(final String title) {
-		final OpenDialog openDialog = new OpenDialog(title);
+		return openDialog(title, null);
+	}
+
+	/** Uses ImageJ 1.x' OpenDialog */
+	public File openDialog(final String title, final File file) {
+		final String defaultDir = file == null ? null : file.getParent();
+		final String defaultName = file == null ? null : file.getName();
+		final OpenDialog openDialog = //
+			new OpenDialog(title, defaultDir, defaultName);
 		final String directory = openDialog.getDirectory();
 
 		// NB: As a side effect, ImageJ1 normally appends the selected
