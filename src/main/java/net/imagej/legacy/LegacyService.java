@@ -290,40 +290,7 @@ public final class LegacyService extends AbstractService implements
 		if (info instanceof ScriptInfo) {
 			if (ij1Helper.shiftKeyDown()) {
 				// open the script in the script editor
-				final ScriptInfo script = (ScriptInfo) info;
-				final TextEditor editor = new TextEditor(getContext());
-				final String scriptPath = script.getPath();
-				final File scriptFile = new File(scriptPath);
-				final StringBuilder sb = new StringBuilder();
-				try (final BufferedReader reader = script.getReader()) {
-					if (reader != null) {
-						// script is text from somewhere (a URL?); read it
-						while (true) {
-							final String line = reader.readLine();
-							if (line == null) break; // eof
-							sb.append(line);
-							sb.append("\n");
-						}
-					}
-				}
-				catch (final IOException exc) {
-					log.error("Error reading script: " + scriptPath, exc);
-				}
-				if (sb.length() > 0) {
-					editor.getEditorPane().setFileName(scriptFile.getName());
-					editor.getEditorPane().setText(sb.toString());
-				}
-				else if (scriptFile.exists()) {
-					// script is a file on disk; open it
-					editor.open(scriptFile);
-				}
-				else {
-					// give up, and report the problem
-					final String error = "[Cannot load script: " + scriptPath + "]";
-					editor.getEditorPane().setText(error);
-				}
-				editor.setVisible(true);
-				return editor;
+				return openScriptInTextEditor((ScriptInfo) info);
 			}
 			try {
 				return scriptService.run((ScriptInfo) info, true).get();
@@ -689,6 +656,42 @@ public final class LegacyService extends AbstractService implements
 		if (isActive()) return;
 		throw new UnsupportedOperationException(
 			"This context's LegacyService is inactive");
+	}
+
+	private TextEditor openScriptInTextEditor(final ScriptInfo script) {
+		final TextEditor editor = new TextEditor(getContext());
+		final String scriptPath = script.getPath();
+		final File scriptFile = new File(scriptPath);
+		final StringBuilder sb = new StringBuilder();
+		try (final BufferedReader reader = script.getReader()) {
+			if (reader != null) {
+				// script is text from somewhere (a URL?); read it
+				while (true) {
+					final String line = reader.readLine();
+					if (line == null) break; // eof
+					sb.append(line);
+					sb.append("\n");
+				}
+			}
+		}
+		catch (final IOException exc) {
+			log.error("Error reading script: " + scriptPath, exc);
+		}
+		if (sb.length() > 0) {
+			editor.getEditorPane().setFileName(scriptFile.getName());
+			editor.getEditorPane().setText(sb.toString());
+		}
+		else if (scriptFile.exists()) {
+			// script is a file on disk; open it
+			editor.open(scriptFile);
+		}
+		else {
+			// give up, and report the problem
+			final String error = "[Cannot load script: " + scriptPath + "]";
+			editor.getEditorPane().setText(error);
+		}
+		editor.setVisible(true);
+		return editor;
 	}
 
 	private static LegacyEnvironment getLegacyEnvironment(
