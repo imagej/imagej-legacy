@@ -35,6 +35,8 @@ import java.awt.GraphicsEnvironment;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -87,6 +89,7 @@ import org.scijava.ui.UserInterface;
 import org.scijava.ui.swing.script.TextEditor;
 import org.scijava.ui.viewer.DisplayWindow;
 import org.scijava.util.AppUtils;
+import org.scijava.util.FileUtils;
 
 /**
  * Service for working with legacy ImageJ 1.x.
@@ -660,8 +663,16 @@ public final class LegacyService extends AbstractService implements
 
 	private TextEditor openScriptInTextEditor(final ScriptInfo script) {
 		final TextEditor editor = new TextEditor(getContext());
-		final String scriptPath = script.getPath();
-		final File scriptFile = new File(scriptPath);
+
+		final File scriptFile = getScriptFile(script);
+		if (scriptFile.exists()) {
+			// script is a file on disk; open it
+			editor.open(scriptFile);
+			editor.setVisible(true);
+			return editor;
+		}
+
+		// try to read the script from its associated reader
 		final StringBuilder sb = new StringBuilder();
 		try (final BufferedReader reader = script.getReader()) {
 			if (reader != null) {
@@ -675,23 +686,34 @@ public final class LegacyService extends AbstractService implements
 			}
 		}
 		catch (final IOException exc) {
-			log.error("Error reading script: " + scriptPath, exc);
+			log.error("Error reading script: " + script.getPath(), exc);
 		}
+
 		if (sb.length() > 0) {
-			editor.getEditorPane().setFileName(scriptFile.getName());
+			// script came from somewhere, but not from a regular file
+			editor.getEditorPane().setFileName(scriptFile);
 			editor.getEditorPane().setText(sb.toString());
-		}
-		else if (scriptFile.exists()) {
-			// script is a file on disk; open it
-			editor.open(scriptFile);
 		}
 		else {
 			// give up, and report the problem
-			final String error = "[Cannot load script: " + scriptPath + "]";
+			final String error = "[Cannot load script: " + script.getPath() + "]";
 			editor.getEditorPane().setText(error);
 		}
+
 		editor.setVisible(true);
 		return editor;
+	}
+
+	private File getScriptFile(final ScriptInfo script) {
+		final URL scriptURL = script.getURL();
+		try {
+			if (scriptURL != null) return new File(scriptURL.toURI());
+		}
+		catch (final URISyntaxException | IllegalArgumentException exc) {
+			log.debug(exc);
+		}
+		final File scriptDir = scriptService.getScriptDirectories().get(0);
+		return new File(scriptDir.getPath() + File.separator + script.getPath());
 	}
 
 	private static LegacyEnvironment getLegacyEnvironment(
