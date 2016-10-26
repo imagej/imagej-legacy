@@ -22,7 +22,7 @@ function processFolder(input) {
 function processFile(input, output, file) {
 	// do the processing here by replacing
 	// the following two lines by your own code
-	// leave them in until things are working... then replace all wiht your own code
+	// leave them in until things are working... then replace all with your own code
 	print("Processing: " + input + file);
 	print("Saving to: " + output);
 }
