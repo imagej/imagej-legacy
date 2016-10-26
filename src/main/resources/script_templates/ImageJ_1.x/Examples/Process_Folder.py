@@ -4,6 +4,9 @@
 # @String(label = "File name contains", value = "") containString
 # @boolean(label = "Keep directory structure when saving", value = true) keepDirectories
 
+# See also Process_Folder.ijm for a version of this code
+# in the ImageJ 1.x macro language.
+
 import os
 from ij import IJ, ImagePlus
 
