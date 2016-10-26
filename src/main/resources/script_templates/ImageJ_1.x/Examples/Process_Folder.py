@@ -4,9 +4,6 @@
 # @String(label = "File name contains", value = "") containString
 # @boolean(label = "Keep directory structure when saving", value = true) keepDirectories
 
-# Compare with the original Process_Folder to see how ImageJ 1.x
-# GenericDialog use can be converted to @Parameters.
-
 import os
 from ij import IJ, ImagePlus
 
