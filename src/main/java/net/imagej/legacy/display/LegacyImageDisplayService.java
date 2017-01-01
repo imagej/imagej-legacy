@@ -118,7 +118,10 @@ public class LegacyImageDisplayService extends AbstractService implements
 		if (imp != null) {
 			imageDisplay = getImageMap().registerLegacyImage(imp);
 		}
-		return imageDisplay;
+		if (imageDisplay != null)
+			return imageDisplay;
+		// Try the delegate ImageDisplayService if the WindowManager fails
+		return imageDisplayService().getActiveImageDisplay();
 	}
 
 	@Override
