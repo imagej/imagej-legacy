@@ -67,6 +67,7 @@ import org.scijava.ui.ToolBar;
 import org.scijava.ui.UIService;
 import org.scijava.ui.UserInterface;
 import org.scijava.ui.awt.AWTClipboard;
+import org.scijava.ui.console.ConsolePane;
 import org.scijava.ui.swing.SwingUI;
 import org.scijava.ui.swing.console.SwingConsolePane;
 import org.scijava.ui.swing.sdi.SwingSDIUI;
@@ -144,6 +145,7 @@ public class LegacyUI extends AbstractUserInterface implements SwingUI {
 
 	private synchronized void createConsole() {
 		if (consolePane != null) return;
+		if (Boolean.getBoolean(ConsolePane.NO_CONSOLE_PROPERTY)) return;
 		consolePane = new SwingConsolePane(getContext());
 
 		final JFrame frame = new JFrame("Console");
