@@ -131,6 +131,7 @@
 
 	<properties>
 		<package-name>net.imagej.legacy</package-name>
+		<premain-class>net.imagej.legacy.LegacyJavaAgent</premain-class>
 
 		<license.licenseName>bsd_2</license.licenseName>
 		<license.copyrightOwners>Board of Regents of the University of
@@ -224,7 +225,7 @@ Institute of Molecular Cell Biology and Genetics.</license.copyrightOwners>
 				<configuration>
 					<archive>
 						<manifestEntries>
-							<Premain-Class>net.imagej.legacy.LegacyJavaAgent</Premain-Class>
+							<Premain-Class>${premain-class}</Premain-Class>
 						</manifestEntries>
 					</archive>
 				</configuration>
