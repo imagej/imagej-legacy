@@ -125,8 +125,8 @@
 		<url>https://github.com/imagej/imagej-legacy/issues</url>
 	</issueManagement>
 	<ciManagement>
-		<system>Jenkins</system>
-		<url>http://jenkins.imagej.net/job/ImageJ-legacy/</url>
+		<system>Travis CI</system>
+		<url>https://travis-ci.org/imagej/imagej-legacy</url>
 	</ciManagement>
 
 	<properties>

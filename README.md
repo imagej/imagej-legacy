@@ -1,4 +1,4 @@
-[![](http://jenkins.imagej.net/job/ImageJ-legacy/lastBuild/badge/icon)](http://jenkins.imagej.net/job/ImageJ-legacy/)
+[![](https://travis-ci.org/imagej/imagej-legacy.svg?branch=master)](https://travis-ci.org/imagej/imagej-legacy)
 
 ImageJ Legacy Bridge
 --------------------
