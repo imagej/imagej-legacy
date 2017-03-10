@@ -2,7 +2,7 @@
  * #%L
  * ImageJ software for multidimensional image processing and analysis.
  * %%
- * Copyright (C) 2009 - 2014 Board of Regents of the University of
+ * Copyright (C) 2009 - 2017 Board of Regents of the University of
  * Wisconsin-Madison, Broad Institute of MIT and Harvard, and Max Planck
  * Institute of Molecular Cell Biology and Genetics.
  * %%
@@ -33,10 +33,10 @@ package net.imagej.legacy.translate;
 
 import ij.ImagePlus;
 import net.imagej.Dataset;
+import net.imagej.axis.AxisType;
 import net.imagej.display.ImageDisplay;
 import net.imagej.display.ImageDisplayService;
 import net.imagej.legacy.LegacyService;
-import net.imglib2.meta.AxisType;
 
 import org.scijava.AbstractContextual;
 import org.scijava.Context;

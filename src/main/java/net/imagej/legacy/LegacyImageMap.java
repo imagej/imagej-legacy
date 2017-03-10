@@ -2,7 +2,7 @@
  * #%L
  * ImageJ software for multidimensional image processing and analysis.
  * %%
- * Copyright (C) 2009 - 2014 Board of Regents of the University of
+ * Copyright (C) 2009 - 2017 Board of Regents of the University of
  * Wisconsin-Madison, Broad Institute of MIT and Harvard, and Max Planck
  * Institute of Molecular Cell Biology and Genetics.
  * %%
@@ -56,8 +56,10 @@ import net.imagej.patcher.LegacyInjector;
 import net.imagej.ui.viewer.image.ImageDisplayViewer;
 
 import org.scijava.AbstractContextual;
+import org.scijava.display.Display;
 import org.scijava.display.DisplayService;
 import org.scijava.display.event.DisplayDeletedEvent;
+import org.scijava.display.event.DisplayUpdatedEvent;
 import org.scijava.event.EventHandler;
 import org.scijava.plugin.Parameter;
 import org.scijava.ui.viewer.DisplayWindow;
@@ -132,20 +134,20 @@ public class LegacyImageMap extends AbstractContextual {
 	 * {@code ImageDisplay}s otherwise.
 	 */
 	private final Map<ImagePlus, ImageDisplay> legacyDisplayTable =
-		new WeakHashMap<ImagePlus, ImageDisplay>();
+		new WeakHashMap<>();
 
 	/**
 	 * Legacy mode mapping of {@link ImageDisplay}s to {@link ImagePlus}es. Uses
 	 * {@link WeakReference}s for both keys and values.
 	 */
 	private final Map<ImageDisplay, WeakReference<ImagePlus>> legacyImagePlusTable =
-		new WeakHashMap<ImageDisplay, WeakReference<ImagePlus>>();
+		new WeakHashMap<>();
 
 	/**
 	 * Effectively a {@code WeakHashSet} for tracking known {@link ImagePlus}es.
 	 */
 	private final Map<ImagePlus, Object> imagePluses =
-		new WeakHashMap<ImagePlus, Object>();
+		new WeakHashMap<>();
 
 	/**
 	 * The {@link ImageTranslator} to use when creating {@link ImagePlus} and
@@ -156,7 +158,7 @@ public class LegacyImageMap extends AbstractContextual {
 	/**
 	 * The legacy service corresponding to this image map.
 	 */
-	private final DefaultLegacyService legacyService;
+	private final LegacyService legacyService;
 
 	@Parameter
 	private ImageDisplayService imageDisplayService;
@@ -166,11 +168,11 @@ public class LegacyImageMap extends AbstractContextual {
 
 	// -- Constructor --
 
-	public LegacyImageMap(final DefaultLegacyService legacyService) {
+	public LegacyImageMap(final LegacyService legacyService) {
 		setContext(legacyService.getContext());
 		this.legacyService = legacyService;
-		imagePlusTable = new ConcurrentHashMap<ImageDisplay, ImagePlus>();
-		displayTable = new ConcurrentHashMap<ImagePlus, ImageDisplay>();
+		imagePlusTable = new ConcurrentHashMap<>();
+		displayTable = new ConcurrentHashMap<>();
 		imageTranslator = new DefaultImageTranslator(legacyService);
 	}
 
@@ -421,7 +423,7 @@ public class LegacyImageMap extends AbstractContextual {
 			final ImageDisplay toRemove = legacyDisplayTable.remove(imp);
 			if (toRemove != null) legacyImagePlusTable.remove(toRemove);
 			legacyDisplayTable.put(imp, display);
-			legacyImagePlusTable.put(display, new WeakReference<ImagePlus>(imp));
+			legacyImagePlusTable.put(display, new WeakReference<>(imp));
 		}
 		else {
 			final ImagePlus toRemove = imagePlusTable.remove(display);
@@ -497,6 +499,19 @@ public class LegacyImageMap extends AbstractContextual {
 		 */
 		if (event.getObject() instanceof ImageDisplay) {
 			unregisterDisplay((ImageDisplay) event.getObject());
+		}
+	}
+
+	/**
+	 * Check if updated display is an {@link ImageDisplay} with a mapped
+	 * {@link ImagePlus}. If so, call {@link ImagePlus#updateAndDraw()}.
+	 */
+	@EventHandler
+	private void onEvent(final DisplayUpdatedEvent event) {
+		final Display<?> display = event.getDisplay();
+		if (display instanceof ImageDisplay) {
+			final ImagePlus mappedImagePlus = lookupImagePlus((ImageDisplay) event.getDisplay());
+			if (mappedImagePlus != null) mappedImagePlus.updateAndDraw();
 		}
 	}
 }

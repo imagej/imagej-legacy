@@ -2,7 +2,7 @@
  * #%L
  * ImageJ software for multidimensional image processing and analysis.
  * %%
- * Copyright (C) 2009 - 2014 Board of Regents of the University of
+ * Copyright (C) 2009 - 2017 Board of Regents of the University of
  * Wisconsin-Madison, Broad Institute of MIT and Harvard, and Max Planck
  * Institute of Molecular Cell Biology and Genetics.
  * %%
@@ -40,6 +40,10 @@ import java.util.Arrays;
 import java.util.List;
 
 import net.imagej.Dataset;
+import net.imagej.ImgPlus;
+import net.imagej.axis.Axes;
+import net.imagej.axis.AxisType;
+import net.imagej.axis.CalibratedAxis;
 import net.imagej.display.ColorMode;
 import net.imagej.display.DatasetView;
 import net.imagej.display.ImageDisplay;
@@ -49,13 +53,10 @@ import net.imglib2.converter.Converter;
 import net.imglib2.img.Img;
 import net.imglib2.img.basictypeaccess.PlanarAccess;
 import net.imglib2.img.cell.AbstractCellImg;
+import net.imglib2.img.display.imagej.ImageJVirtualStack;
 import net.imglib2.img.display.imagej.ImageJVirtualStackFloat;
 import net.imglib2.img.display.imagej.ImageJVirtualStackUnsignedByte;
 import net.imglib2.img.display.imagej.ImageJVirtualStackUnsignedShort;
-import net.imglib2.meta.Axes;
-import net.imglib2.meta.AxisType;
-import net.imglib2.meta.CalibratedAxis;
-import net.imglib2.meta.ImgPlus;
 import net.imglib2.transform.integer.MixedTransform;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.integer.ShortType;
@@ -340,17 +341,24 @@ public class GrayImagePlusCreator extends AbstractImagePlusCreator {
 		// ensure image being passed to imglib2-ij has XYCZT dimension order
 		RandomAccessibleInterval<T> rai = ensureXYCZT(imgPlus);
 
+		ImageJVirtualStack stack = null;
+
 		// finally, wrap the XYCZT image as an ImageJ virtual stack
 		if (bitDepth <= 8 && !isSigned) {
-			return new ImageJVirtualStackUnsignedByte<T>(rai, new ByteConverter<T>());
+			stack = new ImageJVirtualStackUnsignedByte<>(rai, new ByteConverter<T>());
 		}
 		else if (bitDepth <= 16 && !isSigned) {
-			return new ImageJVirtualStackUnsignedShort<T>(rai,
+			stack = new ImageJVirtualStackUnsignedShort<>(rai,
 				new ShortConverter<T>());
 		}
 		else { // other types translated as 32-bit float data
-			return new ImageJVirtualStackFloat<T>(rai, new FloatConverter<T>());
+			stack = new ImageJVirtualStackFloat<>(rai, new FloatConverter<T>());
 		}
+
+		// Virtual stacks are writable when backed by a CellCache!
+		stack.setWritable(true);
+
+		return stack;
 	}
 
 	private static final List<AxisType> naturalOrder =
@@ -391,7 +399,7 @@ public class GrayImagePlusCreator extends AbstractImagePlusCreator {
 		// permute the axis order to XYCZT...
 		final MixedTransform t = new MixedTransform(rai.numDimensions(), 5);
 		t.setComponentMapping(axes);
-		return Views.interval(new MixedTransformView< T >( rai, t ), min, max);
+		return Views.interval(new MixedTransformView< >( rai, t ), min, max);
 	}
 
 	private class ByteConverter<S extends RealType<S>> implements

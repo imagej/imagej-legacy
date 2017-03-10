@@ -2,7 +2,7 @@
  * #%L
  * ImageJ software for multidimensional image processing and analysis.
  * %%
- * Copyright (C) 2009 - 2014 Board of Regents of the University of
+ * Copyright (C) 2009 - 2017 Board of Regents of the University of
  * Wisconsin-Madison, Broad Institute of MIT and Harvard, and Max Planck
  * Institute of Molecular Cell Biology and Genetics.
  * %%
@@ -39,12 +39,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 import net.imagej.Dataset;
+import net.imagej.ImgPlus;
+import net.imagej.axis.Axes;
 import net.imagej.display.ImageDisplay;
 import net.imagej.display.ImageDisplayService;
 import net.imagej.legacy.LegacyService;
-import net.imglib2.meta.Axes;
-import net.imglib2.meta.ImgPlus;
-import net.imglib2.meta.SpaceUtils;
+import net.imagej.space.SpaceUtils;
 import net.imglib2.type.numeric.RealType;
 
 import org.scijava.AbstractContextual;
@@ -90,7 +90,7 @@ public class Harmonizer extends AbstractContextual {
 	{
 		setContext(context);
 		imageTranslator = trans;
-		bitDepthMap = new HashMap<ImagePlus, Integer>();
+		bitDepthMap = new HashMap<>();
 		grayPixelHarmonizer = new GrayPixelHarmonizer();
 		colorPixelHarmonizer = new ColorPixelHarmonizer();
 		colorTableHarmonizer = new ColorTableHarmonizer(imageDisplayService);

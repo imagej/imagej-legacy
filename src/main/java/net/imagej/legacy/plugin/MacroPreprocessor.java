@@ -2,7 +2,7 @@
  * #%L
  * ImageJ software for multidimensional image processing and analysis.
  * %%
- * Copyright (C) 2009 - 2014 Board of Regents of the University of
+ * Copyright (C) 2009 - 2017 Board of Regents of the University of
  * Wisconsin-Madison, Broad Institute of MIT and Harvard, and Max Planck
  * Institute of Molecular Cell Biology and Genetics.
  * %%
@@ -29,43 +29,59 @@
  * #L%
  */
 
-package net.imagej.legacy;
+package net.imagej.legacy.plugin;
 
+import net.imagej.legacy.LegacyService;
+import net.imagej.legacy.IJ1Helper;
+
+import org.scijava.Priority;
+import org.scijava.convert.ConvertService;
+import org.scijava.module.Module;
+import org.scijava.module.ModuleItem;
+import org.scijava.module.process.AbstractPreprocessorPlugin;
+import org.scijava.module.process.PreprocessorPlugin;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
-import org.scijava.plugins.scripting.java.AbstractJavaRunner;
-import org.scijava.plugins.scripting.java.JavaRunner;
 
 /**
- * Runs the given ImageJ 1.x {@code PlugIn} class.
+ * Populates the module's input values, when the command is invoked from an
+ * ImageJ 1.x macro.
  * 
  * @author Curtis Rueden
  */
-@Plugin(type = JavaRunner.class)
-public class LegacyJavaRunner extends AbstractJavaRunner {
+@Plugin(type = PreprocessorPlugin.class,
+	priority = 2 * Priority.VERY_HIGH_PRIORITY)
+public class MacroPreprocessor extends AbstractPreprocessorPlugin {
 
-	@Parameter
+	@Parameter(required = false)
 	private LegacyService legacyService;
 
-	// -- JavaRunner methods --
+	@Parameter
+	private ConvertService convertService;
+
+	// -- ModuleProcessor methods --
 
 	@Override
-	public void run(final Class<?> c) {
-		IJ1Helper.run(c);
-	}
-
-	// -- Typed methods --
-
-	@Override
-	public boolean supports(final Class<?> c) {
-		if (c == null) return false;
-		if (c.getName().equals("ij.plugin.PlugIn")) return true;
-		if (c.getName().equals("ij.plugin.filter.PlugInFilter")) return true;
-		if (supports(c.getSuperclass())) return true;
-		for (final Class<?> iface : c.getInterfaces()) {
-			if (supports(iface)) return true;
+	public void process(final Module module) {
+		final IJ1Helper ij1Helper = legacyService.getIJ1Helper();
+		if (ij1Helper == null) return;
+		if (!ij1Helper.isMacro()) return;
+		for (final ModuleItem<?> input : module.getInfo().inputs()) {
+			final String name = input.getName();
+			final String value = ij1Helper.getMacroParameter(name);
+			if (value == null) {
+				// no macro parameter value provided
+				continue;
+			}
+			final Class<?> type = input.getType();
+			if (!convertService.supports(value, type)) {
+				// cannot convert macro value into the input's actual type
+				continue;
+			}
+			final Object converted = convertService.convert(value, type);
+			module.setInput(name, converted);
+			module.setResolved(name, true);
 		}
-		return false;
 	}
 
 }

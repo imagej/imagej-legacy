@@ -2,7 +2,7 @@
  * #%L
  * ImageJ software for multidimensional image processing and analysis.
  * %%
- * Copyright (C) 2009 - 2014 Board of Regents of the University of
+ * Copyright (C) 2009 - 2017 Board of Regents of the University of
  * Wisconsin-Madison, Broad Institute of MIT and Harvard, and Max Planck
  * Institute of Molecular Cell Biology and Genetics.
  * %%
@@ -49,13 +49,14 @@ import net.imagej.overlay.PolygonOverlay;
 import net.imglib2.RandomAccess;
 import net.imglib2.RealPoint;
 import net.imglib2.img.Img;
+import net.imglib2.img.ImgView;
 import net.imglib2.img.array.ArrayImg;
-import net.imglib2.img.array.ArrayImgFactory;
-import net.imglib2.img.basictypeaccess.array.BitArray;
-import net.imglib2.img.transform.ImgTranslationAdapter;
+import net.imglib2.img.array.ArrayImgs;
+import net.imglib2.img.basictypeaccess.array.LongArray;
 import net.imglib2.roi.BinaryMaskRegionOfInterest;
 import net.imglib2.roi.PolygonRegionOfInterest;
 import net.imglib2.type.logic.BitType;
+import net.imglib2.view.Views;
 
 import org.scijava.Context;
 
@@ -93,10 +94,8 @@ public class Helper {
 	{
 		final long w = mask.length;
 		final long h = mask[0].length;
-		final ArrayImg<BitType, BitArray> img =
-			new ArrayImgFactory<BitType>().createBitInstance(new long[] { w, h }, 1);
-		final BitType t = new BitType(img);
-		img.setLinkedType(t);
+		final ArrayImg<BitType, LongArray> img = ArrayImgs.bits(w, h);
+		img.setLinkedType(new BitType(img));
 		final RandomAccess<BitType> ra = img.randomAccess();
 		for (int i = 0; i < mask.length; i++) {
 			ra.setPosition(i, 0);
@@ -106,10 +105,11 @@ public class Helper {
 			}
 		}
 		final Img<BitType> offsetImg =
-			new ImgTranslationAdapter<BitType, Img<BitType>>(img, new long[] { x, y });
+			new ImgView<>(Views.translate(img, x, y), img.factory());
 		final BinaryMaskOverlay<BitType, Img<BitType>> overlay =
-			new BinaryMaskOverlay<BitType, Img<BitType>>(context,
-				new BinaryMaskRegionOfInterest<BitType, Img<BitType>>(offsetImg));
+			new BinaryMaskOverlay<>(context,
+				new BinaryMaskRegionOfInterest<>(
+					offsetImg));
 		return overlay;
 	}
 

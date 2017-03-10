@@ -2,7 +2,7 @@
  * #%L
  * ImageJ software for multidimensional image processing and analysis.
  * %%
- * Copyright (C) 2009 - 2014 Board of Regents of the University of
+ * Copyright (C) 2009 - 2017 Board of Regents of the University of
  * Wisconsin-Madison, Broad Institute of MIT and Harvard, and Max Planck
  * Institute of Molecular Cell Biology and Genetics.
  * %%
@@ -36,12 +36,11 @@ import static org.junit.Assert.assertNotSame;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.process.ByteProcessor;
-import io.scif.img.axes.SCIFIOAxes;
 import net.imagej.Extents;
 import net.imagej.Position;
+import net.imagej.axis.Axes;
+import net.imagej.axis.AxisType;
 import net.imagej.patcher.LegacyInjector;
-import net.imglib2.meta.Axes;
-import net.imglib2.meta.AxisType;
 
 import org.junit.Test;
 
@@ -88,7 +87,7 @@ public class LegacyUtilsTest {
 	public void testRasterization() {
 		final long[][] dimsList = {{1,1,1}, {1,2,3}, {2,3,4}, {5,4,3}, {4,2,7}};
 		final AxisType[] axes =
-			{ Axes.CHANNEL, SCIFIOAxes.SPECTRA, SCIFIOAxes.FREQUENCY };
+			{ Axes.CHANNEL, Axes.get("Spectra"), Axes.get("Frequency") };
 		for (long[] dims : dimsList) {
 			// setup
 			long numChannels = 1;

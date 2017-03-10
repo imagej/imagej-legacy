@@ -2,7 +2,7 @@
  * #%L
  * ImageJ software for multidimensional image processing and analysis.
  * %%
- * Copyright (C) 2009 - 2014 Board of Regents of the University of
+ * Copyright (C) 2009 - 2017 Board of Regents of the University of
  * Wisconsin-Madison, Broad Institute of MIT and Harvard, and Max Planck
  * Institute of Molecular Cell Biology and Genetics.
  * %%
@@ -37,7 +37,7 @@ import java.awt.GraphicsEnvironment;
 
 import ij.IJ;
 import net.imagej.legacy.DefaultLegacyHooks;
-import net.imagej.legacy.DefaultLegacyService;
+import net.imagej.legacy.LegacyService;
 import net.imagej.legacy.LegacyService;
 import net.imagej.legacy.ui.LegacyUI;
 import net.imagej.patcher.LegacyInjector;
@@ -73,7 +73,7 @@ public class SystemExitIT {
 		assertNotNull(IJ.getInstance());
 
 		// verify that the legacy layer is active
-		assertNotNull(DefaultLegacyService.getInstance());
+		assertNotNull(LegacyService.getInstance());
 
 		// NB: Tell ImageJ1 to shut down the entire JVM when quitting.
 		IJ.getInstance().exitWhenQuitting(true);

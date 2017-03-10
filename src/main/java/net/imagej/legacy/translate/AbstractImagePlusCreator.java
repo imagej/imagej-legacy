@@ -2,7 +2,7 @@
  * #%L
  * ImageJ software for multidimensional image processing and analysis.
  * %%
- * Copyright (C) 2009 - 2014 Board of Regents of the University of
+ * Copyright (C) 2009 - 2017 Board of Regents of the University of
  * Wisconsin-Madison, Broad Institute of MIT and Harvard, and Max Planck
  * Institute of Molecular Cell Biology and Genetics.
  * %%
@@ -49,8 +49,8 @@ import java.util.List;
 import java.util.Map;
 
 import net.imagej.Dataset;
-import net.imglib2.meta.Axes;
-import net.imglib2.meta.ImgPlus;
+import net.imagej.ImgPlus;
+import net.imagej.axis.Axes;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
 
@@ -210,6 +210,8 @@ System.err.println(1);
 		return imp;
 	}
 
+	// TODO remove usage of SCIFIO classes after migrating ImageMetadata
+	// framework to imagej-common
 	private String[] getSliceLabels(final Dataset ds) {
 		final Map<String, Object> properties = ds.getImgPlus().getProperties();
 		if (properties == null) return null;
@@ -224,6 +226,8 @@ System.err.println(1);
 			? (String[]) sliceLabels : null;
 	}
 
+	// TODO remove usage of SCIFIO classes after migrating ImageMetadata
+	// framework to imagej-common
 	private void fillInfo(final ImagePlus imp,
 		final ImgPlus<? extends RealType<?>> imgPlus)
 	{
@@ -245,6 +249,8 @@ System.err.println(1);
 		}
 	}
 
+	// TODO remove usage of SCIFIO classes after migrating ImageMetadata
+	// framework to imagej-common
 	private void fillImageInfo(final ImagePlus imp, final Metadata meta) {
 		addInfo(imp, "--- Dataset Information ---");
 		addInfo(imp, "BitsPerPixel = " + meta.get(0).getBitsPerPixel());
@@ -275,10 +281,12 @@ System.err.println(1);
 		imp.setProperty("Info", newInfo + "\n");
 	}
 
+	// TODO remove usage of SCIFIO classes after migrating ImageMetadata
+	// framework to imagej-common
 	private void fillInfo(final ImagePlus imp, final MetaTable table) {
 		String info = (String) imp.getProperty("Info");
 		if (info == null) info = "";
-		List<String> keySet = new ArrayList<String>(table.keySet());
+		List<String> keySet = new ArrayList<>(table.keySet());
 		Collections.sort(keySet);
 		for (final String key : keySet) {
 			info += key + " = " + table.get(key) + "\n";

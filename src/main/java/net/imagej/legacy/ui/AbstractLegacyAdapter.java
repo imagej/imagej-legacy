@@ -2,7 +2,7 @@
  * #%L
  * ImageJ software for multidimensional image processing and analysis.
  * %%
- * Copyright (C) 2009 - 2014 Board of Regents of the University of
+ * Copyright (C) 2009 - 2017 Board of Regents of the University of
  * Wisconsin-Madison, Broad Institute of MIT and Harvard, and Max Planck
  * Institute of Molecular Cell Biology and Genetics.
  * %%
@@ -31,7 +31,6 @@
 
 package net.imagej.legacy.ui;
 
-import net.imagej.legacy.DefaultLegacyService;
 import net.imagej.legacy.IJ1Helper;
 import net.imagej.legacy.LegacyService;
 
@@ -39,7 +38,7 @@ import org.scijava.Contextual;
 
 /**
  * Abstract {@link LegacyAdapter} implementation. Note that the
- * {@link IJ1Helper} class requires a {@link DefaultLegacyService} explicitly,
+ * {@link IJ1Helper} class requires a {@link LegacyService} explicitly,
  * thus we require one here in a constructor instead of going through the usual
  * {@link Contextual} injection.
  * 
@@ -47,12 +46,10 @@ import org.scijava.Contextual;
  */
 public abstract class AbstractLegacyAdapter implements LegacyAdapter {
 
-	private DefaultLegacyService legacyService;
+	private LegacyService legacyService;
 
 	public AbstractLegacyAdapter(final LegacyService legacyService) {
-		if (legacyService instanceof DefaultLegacyService) {
-			this.legacyService = ((DefaultLegacyService) legacyService);
-		}
+		this.legacyService = legacyService;
 	}
 
 	@Override
@@ -61,7 +58,7 @@ public abstract class AbstractLegacyAdapter implements LegacyAdapter {
 		return null;
 	}
 
-	protected DefaultLegacyService getLegacyService() {
+	protected LegacyService getLegacyService() {
 		return legacyService;
 	}
 }

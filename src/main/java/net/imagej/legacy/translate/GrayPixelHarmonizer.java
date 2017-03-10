@@ -2,7 +2,7 @@
  * #%L
  * ImageJ software for multidimensional image processing and analysis.
  * %%
- * Copyright (C) 2009 - 2014 Board of Regents of the University of
+ * Copyright (C) 2009 - 2017 Board of Regents of the University of
  * Wisconsin-Madison, Broad Institute of MIT and Harvard, and Max Planck
  * Institute of Molecular Cell Biology and Genetics.
  * %%
@@ -34,16 +34,16 @@ package net.imagej.legacy.translate;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.process.ImageProcessor;
-import io.scif.util.FormatTools;
 import net.imagej.Dataset;
+import net.imagej.axis.Axes;
+import net.imagej.axis.AxisType;
+import net.imagej.space.SpaceUtils;
 import net.imglib2.RandomAccess;
-import net.imglib2.meta.Axes;
-import net.imglib2.meta.AxisType;
-import net.imglib2.meta.IntervalUtils;
-import net.imglib2.meta.SpaceUtils;
+import net.imglib2.util.Intervals;
 import net.imglib2.type.logic.BitType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.integer.ShortType;
+import net.imglib2.util.IntervalIndexer;
 
 /**
  * Supports bidirectional synchronization between {@link ImagePlus}es and gray
@@ -94,7 +94,7 @@ public class GrayPixelHarmonizer implements DataHarmonizer {
 		final boolean signed16BitData = type instanceof ShortType;
 		final RandomAccess<? extends RealType<?>> accessor =
 			ds.getImgPlus().randomAccess();
-		final long[] dims = IntervalUtils.getDims(ds);
+		final long[] dims = Intervals.dimensionsAsLongArray(ds);
 		final AxisType[] axes = SpaceUtils.getAxisTypes(ds);
 		final int xIndex = ds.dimensionIndex(Axes.X);
 		final int yIndex = ds.dimensionIndex(Axes.Y);
@@ -167,7 +167,7 @@ public class GrayPixelHarmonizer implements DataHarmonizer {
 		final boolean bitData = type instanceof BitType;
 		final RandomAccess<? extends RealType<?>> accessor =
 			ds.getImgPlus().randomAccess();
-		final long[] dims = IntervalUtils.getDims(ds);
+		final long[] dims = Intervals.dimensionsAsLongArray(ds);
 		final int xIndex = ds.dimensionIndex(Axes.X);
 		final int yIndex = ds.dimensionIndex(Axes.Y);
 		final int zIndex = ds.dimensionIndex(Axes.Z);
@@ -220,11 +220,15 @@ public class GrayPixelHarmonizer implements DataHarmonizer {
 	 * lengths.length], by converting the given index to a position, using the
 	 * given lengths array to convert from raster to position.
 	 */
-	private void updatePosition(long[] dims, long[] tPos, int index, int start) {
-		long[] values = FormatTools.rasterToPosition(tPos, index);
-		for (int i=0; i<tPos.length; i++) {
-			int pos = i + start;
-			dims[pos] = values[i];
+	private void updatePosition(long[] position, long[] tPos, int index, int start) {
+		// IntervalIndexer throws an exception if given an empty array.
+		if (tPos.length > 0) {
+			long[] temp = new long[tPos.length];
+			IntervalIndexer.indexToPosition(index, tPos, temp);
+			for (int i=0; i<tPos.length; i++) {
+				int dim = i + start;
+				position[dim] = temp[i];
+			}
 		}
 	}
 

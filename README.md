@@ -1,3 +1,5 @@
+[![](https://travis-ci.org/imagej/imagej-legacy.svg?branch=master)](https://travis-ci.org/imagej/imagej-legacy)
+
 ImageJ Legacy Bridge
 --------------------
 

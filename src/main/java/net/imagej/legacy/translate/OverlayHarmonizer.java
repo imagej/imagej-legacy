@@ -2,7 +2,7 @@
  * #%L
  * ImageJ software for multidimensional image processing and analysis.
  * %%
- * Copyright (C) 2009 - 2014 Board of Regents of the University of
+ * Copyright (C) 2009 - 2017 Board of Regents of the University of
  * Wisconsin-Madison, Broad Institute of MIT and Harvard, and Max Planck
  * Institute of Molecular Cell Biology and Genetics.
  * %%
@@ -71,10 +71,10 @@ import net.imglib2.RealLocalizable;
 import net.imglib2.RealPoint;
 import net.imglib2.RealRandomAccess;
 import net.imglib2.img.Img;
+import net.imglib2.img.ImgView;
 import net.imglib2.img.array.ArrayImg;
-import net.imglib2.img.array.ArrayImgFactory;
-import net.imglib2.img.basictypeaccess.array.BitArray;
-import net.imglib2.img.transform.ImgTranslationAdapter;
+import net.imglib2.img.array.ArrayImgs;
+import net.imglib2.img.basictypeaccess.array.LongArray;
 import net.imglib2.roi.BinaryMaskRegionOfInterest;
 import net.imglib2.roi.EllipseRegionOfInterest;
 import net.imglib2.roi.GeneralPathRegionOfInterest;
@@ -82,6 +82,7 @@ import net.imglib2.roi.PolygonRegionOfInterest;
 import net.imglib2.roi.RectangleRegionOfInterest;
 import net.imglib2.roi.RegionOfInterest;
 import net.imglib2.type.logic.BitType;
+import net.imglib2.view.Views;
 
 import org.scijava.AbstractContextual;
 import org.scijava.Context;
@@ -158,11 +159,11 @@ public class OverlayHarmonizer extends AbstractContextual implements
 	 */
 	public List<Overlay> getOverlays(final ImagePlus imp) {
 		Roi roi = imp.getRoi();
-		final ArrayList<Overlay> overlays = new ArrayList<Overlay>();
+		final ArrayList<Overlay> overlays = new ArrayList<>();
 		createOverlays(roi, overlays);
 		final ij.gui.Overlay overlay = imp.getOverlay();
 		if (overlay != null) {
-			final ArrayList<Overlay> list = new ArrayList<Overlay>();
+			final ArrayList<Overlay> list = new ArrayList<>();
 			for (int i = 0; i < overlay.size(); i++) {
 				list.clear();
 				roi = overlay.get(i);
@@ -241,7 +242,7 @@ public class OverlayHarmonizer extends AbstractContextual implements
 	private ij.gui.Overlay createIJ1Overlay(final List<Overlay> overlays,
 		Overlay activeOverlay)
 	{
-		List<Roi> rois = new ArrayList<Roi>();
+		List<Roi> rois = new ArrayList<>();
 		for (Overlay o : overlays) {
 			if (o != activeOverlay) {
 				Roi roi = createRoi(o);
@@ -535,62 +536,62 @@ public class OverlayHarmonizer extends AbstractContextual implements
 	{
 		if (roi == null) return;
 
-		log.warn("====> Roi class = " + roi.getClass().getName());
+		log.debug("====> Roi class = " + roi.getClass().getName());
 		if (roi instanceof TextRoi) {
-			log.warn("====> TEXT: " + roi);
+			log.debug("====> TEXT: " + roi);
 			overlays.add(createTextOverlay(roi));
 			return;
 		}
 		switch (roi.getType()) {
 			case Roi.RECTANGLE:
-				log.warn("====> RECTANGLE: " + roi);
+				log.debug("====> RECTANGLE: " + roi);
 				overlays.add(createRectangleOverlay(roi));
 				break;
 			case Roi.OVAL:
-				log.warn("====> OVAL: " + roi);
+				log.debug("====> OVAL: " + roi);
 				overlays.add(createEllipseOverlay(roi));
 				break;
 			case Roi.POLYGON:
-				log.warn("====> POLYGON: " + roi);
+				log.debug("====> POLYGON: " + roi);
 				overlays.add(createPolygonOverlay(roi));
 				break;
 			case Roi.FREEROI:
-				log.warn("====> FREEROI: " + roi);
+				log.debug("====> FREEROI: " + roi);
 				overlays.add(createPolygonOverlay(roi));
 				break;
 			case Roi.TRACED_ROI:
-				log.warn("====> TRACED_ROI: " + roi);
+				log.debug("====> TRACED_ROI: " + roi);
 				overlays.add(createPolygonOverlay(roi));
 				break;
 			case Roi.LINE:
-				log.warn("====> LINE: " + roi);
+				log.debug("====> LINE: " + roi);
 				overlays.add(createLineOverlay(roi));
 				break;
 			case Roi.POLYLINE:
-				log.warn("====> POLYLINE: " + roi);
+				log.debug("====> POLYLINE: " + roi);
 				// TODO - implement this
 				// throw new UnsupportedOperationException("POLYLINE unimplemented");
 				break;
 			case Roi.FREELINE:
-				log.warn("====> FREELINE: " + roi);
+				log.debug("====> FREELINE: " + roi);
 				// TODO - implement this
 				// throw new UnsupportedOperationException("FREELINE unimplemented");
 				break;
 			case Roi.ANGLE:
-				log.warn("====> ANGLE: " + roi);
+				log.debug("====> ANGLE: " + roi);
 				overlays.add(createAngleOverlay(roi));
 				break;
 			case Roi.POINT:
-				log.warn("====> POINT: " + roi);
+				log.debug("====> POINT: " + roi);
 				overlays.add(createPointOverlay(roi));
 				break;
 			case Roi.COMPOSITE:
-				log.warn("====> COMPOSITE: " + roi);
+				log.debug("====> COMPOSITE: " + roi);
 				final ShapeRoi shapeRoi = (ShapeRoi) roi;
 				overlays.add(createGeneralPathOverlay(shapeRoi));
 				break;
 			default:
-				log.warn("====> OTHER (" + roi.getType() + ", " + "): " + roi);
+				log.debug("====> OTHER (" + roi.getType() + ", " + "): " + roi);
 				throw new UnsupportedOperationException("OTHER unimplemented");
 		}
 	}
@@ -714,7 +715,7 @@ public class OverlayHarmonizer extends AbstractContextual implements
 		assert roi instanceof PointRoi;
 		final PointRoi ptRoi = (PointRoi) roi;
 		final FloatPolygon poly = ptRoi.getFloatPolygon();
-		final List<double[]> points = new ArrayList<double[]>();
+		final List<double[]> points = new ArrayList<>();
 		for (int i = 0; i < poly.npoints; i++) {
 			final double x = poly.xpoints[i];
 			final double y = poly.ypoints[i];
@@ -730,16 +731,14 @@ public class OverlayHarmonizer extends AbstractContextual implements
 	private Overlay createDefaultOverlay(final Roi roi)
 	{
 		final Rectangle bounds = roi.getBounds();
-		final ArrayImg<BitType, BitArray> arrayImg =
-			new ArrayImgFactory<BitType>().createBitInstance(new long[] {
-				bounds.width, bounds.height }, 1);
-		final BitType t = new BitType(arrayImg);
-		arrayImg.setLinkedType(t);
+		final ArrayImg<BitType, LongArray> arrayImg =
+			ArrayImgs.bits(bounds.width, bounds.height);
+		arrayImg.setLinkedType(new BitType(arrayImg));
 		final int xOff = bounds.x;
 		final int yOff = bounds.y;
 		final Img<BitType> img =
-			new ImgTranslationAdapter<BitType, Img<BitType>>(arrayImg, new long[] {
-				xOff, yOff });
+			new ImgView<BitType>(Views.translate(arrayImg, xOff, yOff), arrayImg
+				.factory());
 		final RandomAccess<BitType> ra = img.randomAccess();
 		final ImageProcessor ip = roi.getMask();
 		for (int i = xOff; i < xOff + bounds.width; i++) {

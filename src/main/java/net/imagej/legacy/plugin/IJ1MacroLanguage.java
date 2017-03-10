@@ -2,7 +2,7 @@
  * #%L
  * ImageJ software for multidimensional image processing and analysis.
  * %%
- * Copyright (C) 2009 - 2014 Board of Regents of the University of
+ * Copyright (C) 2009 - 2017 Board of Regents of the University of
  * Wisconsin-Madison, Broad Institute of MIT and Harvard, and Max Planck
  * Institute of Molecular Cell Biology and Genetics.
  * %%
@@ -36,7 +36,7 @@ import java.util.List;
 
 import javax.script.ScriptEngine;
 
-import net.imagej.legacy.DefaultLegacyService;
+import net.imagej.legacy.LegacyService;
 
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
@@ -52,7 +52,7 @@ import org.scijava.script.ScriptLanguage;
 public class IJ1MacroLanguage extends AbstractScriptLanguage {
 
 	@Parameter(required = false)
-	private DefaultLegacyService legacyService;
+	private LegacyService legacyService;
 
 	@Override
 	public List<String> getExtensions() {
@@ -64,11 +64,11 @@ public class IJ1MacroLanguage extends AbstractScriptLanguage {
 		return new IJ1MacroEngine(legacyService().getIJ1Helper());
 	}
 
-	private DefaultLegacyService legacyService() {
+	private LegacyService legacyService() {
 		if (legacyService != null) return legacyService;
 		synchronized (this) {
 			if (legacyService != null) return legacyService;
-			legacyService = getContext().getService(DefaultLegacyService.class);
+			legacyService = getContext().getService(LegacyService.class);
 			if (legacyService == null) {
 				throw new RuntimeException("No legacy service available!");
 			}

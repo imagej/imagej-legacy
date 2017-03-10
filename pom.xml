@@ -3,17 +3,116 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
-		<groupId>net.imagej</groupId>
-		<artifactId>pom-imagej</artifactId>
-		<version>2.49</version>
+		<groupId>org.scijava</groupId>
+		<artifactId>pom-scijava</artifactId>
+		<version>12.0.0</version>
 		<relativePath />
 	</parent>
 
+	<groupId>net.imagej</groupId>
 	<artifactId>imagej-legacy</artifactId>
-	<version>0.8.6-SNAPSHOT</version>
+	<version>0.23.6-SNAPSHOT</version>
 
 	<name>ImageJ Legacy Bridge</name>
 	<description>The legacy component enables backward compatibility with the legacy version of ImageJ (1.x). It contains the code necessary to translate ImageJ images into ImageJ1 format and back, so that legacy plugins can be executed faithfully.</description>
+	<url>http://imagej.net/ImageJ_Legacy</url>
+	<inceptionYear>2009</inceptionYear>
+	<organization>
+		<name>ImageJ</name>
+		<url>http://imagej.net/</url>
+	</organization>
+	<licenses>
+		<license>
+			<name>Simplified BSD License</name>
+			<distribution>repo</distribution>
+		</license>
+	</licenses>
+
+	<developers>
+		<developer>
+			<id>ctrueden</id>
+			<name>Curtis Rueden</name>
+			<url>http://imagej.net/User:Rueden</url>
+			<roles>
+				<role>founder</role>
+				<role>lead</role>
+				<role>developer</role>
+				<role>debugger</role>
+				<role>reviewer</role>
+				<role>support</role>
+				<role>maintainer</role>
+			</roles>
+		</developer>
+	</developers>
+	<contributors>
+		<contributor>
+			<name>Johannes Schindelin</name>
+			<url>http://imagej.net/User:Schindelin</url>
+			<roles><role>founder</role></roles>
+			<properties><id>dscho</id></properties>
+		</contributor>
+		<contributor>
+			<name>Barry DeZonia</name>
+			<url>http://imagej.net/User:Bdezonia</url>
+			<properties><id>bdezonia</id></properties>
+		</contributor>
+		<contributor>
+			<name>Lee Kamentsky</name>
+			<url>http://imagej.net/User:Leek</url>
+			<properties><id>LeeKamentsky</id></properties>
+		</contributor>
+		<contributor>
+			<name>Jan Eglinger</name>
+			<url>http://imagej.net/User:Eglinger</url>
+			<properties><id>imagejan</id></properties>
+		</contributor>
+		<contributor>
+			<name>Tiago Ferreira</name>
+			<url>http://imagej.net/User:Tiago</url>
+			<properties><id>tferr</id></properties>
+		</contributor>
+		<contributor>
+			<name>Aivar Grislis</name>
+			<url>http://imagej.net/User:Grislis</url>
+			<properties><id>grislis</id></properties>
+		</contributor>
+		<contributor>
+			<name>Grant Harris</name>
+			<url>http://imagej.net/User:Harris</url>
+			<properties><id>tnargsirrah</id></properties>
+		</contributor>
+		<contributor>
+			<name>Mark Hiner</name>
+			<url>http://imagej.net/User:Hinerm</url>
+			<properties><id>hinerm</id></properties>
+		</contributor>
+		<contributor>
+			<name>Florian Jug</name>
+			<url>http://imagej.net/User:Jug</url>
+			<properties><id>fjug</id></properties>
+		</contributor>
+		<contributor>
+			<name>Rick Lentz</name>
+			<url>http://imagej.net/User:Lentz</url>
+		</contributor>
+		<contributor>
+			<name>Benjamin Nanes</name>
+			<url>http://imagej.net/User:Bnanes</url>
+			<properties><id>bnanes</id></properties>
+		</contributor>
+		<contributor>
+			<name>Brian Northan</name>
+			<url>http://imagej.net/User:Bnorthan</url>
+			<properties><id>bnorthan</id></properties>
+		</contributor>
+	</contributors>
+
+	<mailingLists>
+		<mailingList>
+			<name>ImageJ Forum</name>
+			<archive>http://forum.imagej.net/</archive>
+		</mailingList>
+	</mailingLists>
 
 	<scm>
 		<connection>scm:git:git://github.com/imagej/imagej-legacy</connection>
@@ -21,16 +120,25 @@
 		<tag>HEAD</tag>
 		<url>https://github.com/imagej/imagej-legacy</url>
 	</scm>
-
 	<issueManagement>
 		<system>GitHub Issues</system>
 		<url>https://github.com/imagej/imagej-legacy/issues</url>
 	</issueManagement>
-
 	<ciManagement>
-		<system>Jenkins</system>
-		<url>http://jenkins.imagej.net/job/ImageJ-legacy/</url>
+		<system>Travis CI</system>
+		<url>https://travis-ci.org/imagej/imagej-legacy</url>
 	</ciManagement>
+
+	<properties>
+		<package-name>net.imagej.legacy</package-name>
+		<premain-class>net.imagej.legacy.LegacyJavaAgent</premain-class>
+
+		<license.licenseName>bsd_2</license.licenseName>
+		<license.copyrightOwners>Board of Regents of the University of
+Wisconsin-Madison, Broad Institute of MIT and Harvard, and Max Planck
+Institute of Molecular Cell Biology and Genetics.</license.copyrightOwners>
+		<license.projectName>ImageJ software for multidimensional image processing and analysis.</license.projectName>
+	</properties>
 
 	<repositories>
 		<repository>
@@ -61,7 +169,7 @@
 		</dependency>
 		<dependency>
 			<groupId>net.imagej</groupId>
-			<artifactId>imagej-ui-swing</artifactId>
+			<artifactId>imagej-deprecated</artifactId>
 		</dependency>
 
 		<!-- ImgLib2 dependencies -->
@@ -75,7 +183,7 @@
 		</dependency>
 		<dependency>
 			<groupId>net.imglib2</groupId>
-			<artifactId>imglib2-meta</artifactId>
+			<artifactId>imglib2-roi</artifactId>
 		</dependency>
 
 		<!-- SciJava dependencies -->
@@ -93,28 +201,13 @@
 		</dependency>
 		<dependency>
 			<groupId>org.scijava</groupId>
-			<artifactId>scripting-java</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.scijava</groupId>
-			<artifactId>scijava-plugins-commands</artifactId>
+			<artifactId>script-editor</artifactId>
 		</dependency>
 
-		<!-- Optional SciJava dependencies -->
+		<!-- Third party dependencies -->
 		<dependency>
-			<groupId>org.scijava</groupId>
-			<artifactId>scripting-beanshell</artifactId>
-			<optional>true</optional>
-		</dependency>
-		<dependency>
-			<groupId>org.scijava</groupId>
-			<artifactId>scijava-plugins-text-plain</artifactId>
-			<optional>true</optional>
-		</dependency>
-		<dependency>
-			<groupId>org.scijava</groupId>
-			<artifactId>scijava-plugins-text-markdown</artifactId>
-			<optional>true</optional>
+			<groupId>org.javassist</groupId>
+			<artifactId>javassist</artifactId>
 		</dependency>
 
 		<!-- Test dependencies -->
@@ -131,25 +224,12 @@
 				<artifactId>maven-jar-plugin</artifactId>
 				<configuration>
 					<archive>
-						<manifest>
-							<packageName>net.imagej.legacy</packageName>
-						</manifest>
 						<manifestEntries>
-							<Premain-Class>net.imagej.legacy.LegacyJavaAgent</Premain-Class>
+							<Premain-Class>${premain-class}</Premain-Class>
 						</manifestEntries>
 					</archive>
 				</configuration>
 			</plugin>
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>license-maven-plugin</artifactId>
-				<configuration>
-					<excludes>
-						<exclude>**/script-templates/**/*</exclude>
-					</excludes>
-				</configuration>
-			</plugin>
 		</plugins>
 	</build>
-
 </project>

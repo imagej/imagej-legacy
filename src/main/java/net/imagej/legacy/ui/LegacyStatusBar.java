@@ -2,7 +2,7 @@
  * #%L
  * ImageJ software for multidimensional image processing and analysis.
  * %%
- * Copyright (C) 2009 - 2014 Board of Regents of the University of
+ * Copyright (C) 2009 - 2017 Board of Regents of the University of
  * Wisconsin-Madison, Broad Institute of MIT and Harvard, and Max Planck
  * Institute of Molecular Cell Biology and Genetics.
  * %%
@@ -84,12 +84,12 @@ public class LegacyStatusBar extends AbstractLegacyAdapter implements
 
 	@Override
 	public Panel getComponent() {
-		return helper().getIJ().getStatusBar();
+		return helper().getStatusBar();
 	}
 
 	@Override
 	public Class<Panel> getComponentType() {
-		return java.awt.Panel.class;
+		return Panel.class;
 	}
 
 }

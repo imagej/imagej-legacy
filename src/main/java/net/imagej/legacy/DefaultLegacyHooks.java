@@ -2,19 +2,19 @@
  * #%L
  * ImageJ software for multidimensional image processing and analysis.
  * %%
- * Copyright (C) 2009 - 2014 Board of Regents of the University of
+ * Copyright (C) 2009 - 2017 Board of Regents of the University of
  * Wisconsin-Madison, Broad Institute of MIT and Harvard, and Max Planck
  * Institute of Molecular Cell Biology and Genetics.
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *
+ * 
  * 1. Redistributions of source code must retain the above copyright notice,
  *    this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
  *    and/or other materials provided with the distribution.
- *
+ * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -33,6 +33,7 @@ package net.imagej.legacy;
 
 import ij.ImagePlus;
 
+import java.awt.Frame;
 import java.awt.Window;
 import java.awt.event.KeyEvent;
 import java.io.BufferedWriter;
@@ -62,6 +63,7 @@ import net.imagej.legacy.plugin.LegacyPostRefreshMenus;
 import net.imagej.patcher.LegacyHooks;
 
 import org.scijava.Context;
+import org.scijava.app.AppService;
 import org.scijava.log.LogService;
 import org.scijava.log.StderrLogService;
 import org.scijava.plugin.PluginInfo;
@@ -79,7 +81,7 @@ import org.scijava.util.ListUtils;
  */
 public class DefaultLegacyHooks extends LegacyHooks {
 
-	private final DefaultLegacyService legacyService;
+	private final LegacyService legacyService;
 	private final IJ1Helper helper;
 
 	private LogService log;
@@ -91,11 +93,11 @@ public class DefaultLegacyHooks extends LegacyHooks {
 	/** If the ij.log.file property is set, logs every message to this file. */
 	private BufferedWriter logFileWriter;
 
-	public DefaultLegacyHooks(final DefaultLegacyService legacyService) {
+	public DefaultLegacyHooks(final LegacyService legacyService) {
 		this(legacyService, legacyService.getIJ1Helper());
 	}
 
-	public DefaultLegacyHooks(final DefaultLegacyService legacyService,
+	public DefaultLegacyHooks(final LegacyService legacyService,
 		final IJ1Helper helper)
 	{
 		this.legacyService = legacyService;
@@ -255,7 +257,10 @@ public class DefaultLegacyHooks extends LegacyHooks {
 	 */
 	@Override
 	public String getAppVersion() {
-		return legacyService.getCombinedVersion();
+		final AppService appService = legacyService.getContext().getService(
+			AppService.class);
+		if (appService == null) return legacyService.getVersion();
+		return appService.getApp().getVersion();
 	}
 
 	/**
@@ -381,7 +386,7 @@ public class DefaultLegacyHooks extends LegacyHooks {
 		final ThreadService threadService = threadService();
 		if (threadService == null) return null;
 		final Thread current = Thread.currentThread();
-		final Set<Thread> seen = new HashSet<Thread>();
+		final Set<Thread> seen = new HashSet<>();
 		seen.add(current);
 		return new Iterable<Thread>() {
 
@@ -423,8 +428,8 @@ public class DefaultLegacyHooks extends LegacyHooks {
 	public boolean interceptCloseAllWindows() {
 		final Window[] windows = Window.getWindows();
 		boolean continueClose = true;
-		final List<Window> confirmableWindows = new ArrayList<Window>();
-		final List<Window> unconfirmableWindows = new ArrayList<Window>();
+		final List<Window> confirmableWindows = new ArrayList<>();
+		final List<Window> unconfirmableWindows = new ArrayList<>();
 
 		// For each Window, we split them into confirmable or unconfirmable based
 		// on whether or not they implement CloseConfirmable. As CloseAllWindows
@@ -444,11 +449,12 @@ public class DefaultLegacyHooks extends LegacyHooks {
 			final Window win = windows[w];
 
 			// Skip the ImageJ 1.x main window
-			if (win == legacyService.getIJ1Helper().getIJ()) {
+			if (win == null || win == legacyService.getIJ1Helper().getIJ()) {
 				continue;
 			}
 
-			if (CloseConfirmable.class.isAssignableFrom(win.getClass())) {
+			final Class<?> winClass = win.getClass();
+			if (CloseConfirmable.class.isAssignableFrom(winClass)) {
 				// Any CloseConfirmable window will have its confirmClose method
 				// called.
 				// If this operation was not canceled, we hide the window until it can
@@ -460,10 +466,16 @@ public class DefaultLegacyHooks extends LegacyHooks {
 				}
 			}
 			else {
-				// Nothing to do for these windows. Just add them to a list to be
-				// disposed later, as long as no CloseConfirmable windows are
-				// canceled.
-				unconfirmableWindows.add(win);
+				final Package winPackage = winClass.getPackage();
+				final String name = winPackage == null ? null : winPackage.getName();
+
+				// Whitelist any classes from ij.* to be disposed. This should get
+				// around any offenders in core ImageJ that leave windows open when
+				// closing.
+				// External classes should just implement CloseConfirmable!
+				if (name != null && name.startsWith("ij.")) {
+					unconfirmableWindows.add(win);
+				}
 			}
 		}
 
@@ -481,6 +493,23 @@ public class DefaultLegacyHooks extends LegacyHooks {
 		disposeWindows(unconfirmableWindows);
 
 		return true;
+	}
+
+	@Override
+	public void interceptImageWindowClose(final Object window) {
+		final IJ1Helper ij1Helper = legacyService.getIJ1Helper();
+		final Frame w = (Frame)window;
+		// When quitting, IJ1 doesn't dispose closing ImageWindows.
+		// If the quit is later canceled this would leave orphaned windows.
+		// Thus we queue any closed windows for disposal.
+		if (ij1Helper.isWindowClosed(w) && ij1Helper.quitting()) {
+			threadService().queue(new Runnable() {
+				@Override
+				public void run() {
+					w.dispose();
+				}
+			});
+		}
 	}
 
 	@Override
@@ -517,23 +546,23 @@ public class DefaultLegacyHooks extends LegacyHooks {
 	 * @return whether it is binary
 	 */
 	private static boolean isBinaryFile(final File file) {
-		try {
-			final InputStream in = new FileInputStream(file);
-			final byte[] buffer = new byte[1024];
-			int offset = 0;
+		final byte[] buffer = new byte[1024];
+		int offset = 0;
+		try (final InputStream in = new FileInputStream(file)) {
 			while (offset < buffer.length) {
 				final int count = in.read(buffer, offset, buffer.length - offset);
 				if (count < 0) break;
 				offset += count;
 			}
-			in.close();
-			while (offset > 0) {
-				if (buffer[--offset] == 0) {
-					return true;
-				}
+		}
+		catch (final IOException e) {
+			return false;
+		}
+		while (offset > 0) {
+			if (buffer[--offset] == 0) {
+				return true;
 			}
 		}
-		catch (final IOException e) {}
 		return false;
 	}
 

@@ -2,7 +2,7 @@
  * #%L
  * ImageJ software for multidimensional image processing and analysis.
  * %%
- * Copyright (C) 2009 - 2014 Board of Regents of the University of
+ * Copyright (C) 2009 - 2017 Board of Regents of the University of
  * Wisconsin-Madison, Broad Institute of MIT and Harvard, and Max Planck
  * Institute of Molecular Cell Biology and Genetics.
  * %%
@@ -31,8 +31,8 @@
 
 package net.imagej.legacy;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assume.assumeTrue;
 import ij.IJ;
 import net.imagej.patcher.LegacyInjector;
@@ -80,7 +80,7 @@ public class LegacyServiceTest {
 
 		Context context2 = (Context)IJ.runPlugIn(Context.class.getName(), null);
 		assertNotNull(context2);
-		assertEquals(context, context2);
+		assertSame(context, context2);
 	}
 
 	@Test

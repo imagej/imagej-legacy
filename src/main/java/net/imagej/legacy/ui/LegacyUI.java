@@ -2,7 +2,7 @@
  * #%L
  * ImageJ software for multidimensional image processing and analysis.
  * %%
- * Copyright (C) 2009 - 2014 Board of Regents of the University of
+ * Copyright (C) 2009 - 2017 Board of Regents of the University of
  * Wisconsin-Madison, Broad Institute of MIT and Harvard, and Max Planck
  * Institute of Molecular Cell Biology and Genetics.
  * %%
@@ -31,16 +31,18 @@
 
 package net.imagej.legacy.ui;
 
-import ij.io.OpenDialog;
-import ij.io.SaveDialog;
-
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
-import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.WindowConstants;
 
-import net.imagej.legacy.DefaultLegacyService;
 import net.imagej.legacy.IJ1Helper;
 import net.imagej.legacy.LegacyService;
 import net.imagej.legacy.display.LegacyDisplayViewer;
@@ -65,14 +67,12 @@ import org.scijava.ui.ToolBar;
 import org.scijava.ui.UIService;
 import org.scijava.ui.UserInterface;
 import org.scijava.ui.awt.AWTClipboard;
-import org.scijava.ui.awt.AWTDropTargetEventDispatcher;
-import org.scijava.ui.awt.AWTInputEventDispatcher;
-import org.scijava.ui.awt.AWTWindowEventDispatcher;
+import org.scijava.ui.console.ConsolePane;
 import org.scijava.ui.swing.SwingUI;
-import org.scijava.ui.swing.viewer.SwingDisplayWindow;
+import org.scijava.ui.swing.console.SwingConsolePane;
+import org.scijava.ui.swing.sdi.SwingSDIUI;
 import org.scijava.ui.viewer.DisplayViewer;
 import org.scijava.ui.viewer.DisplayWindow;
-import org.scijava.util.FileUtils;
 import org.scijava.widget.FileWidget;
 
 /**
@@ -107,18 +107,15 @@ public class LegacyUI extends AbstractUserInterface implements SwingUI {
 	private EventService eventService;
 
 	private IJ1Helper ij1Helper;
+
 	private LegacyApplicationFrame applicationFrame;
 	private ToolBar toolBar;
-
 	private StatusBar statusBar;
-
+	private SwingConsolePane consolePane;
 	private SystemClipboard systemClipboard;
 
 	private IJ1Helper ij1Helper() {
-		// FIXME: See https://github.com/imagej/imagej-legacy/issues/53
-		if (legacyService instanceof DefaultLegacyService) {
-			ij1Helper = ((DefaultLegacyService) legacyService).getIJ1Helper();
-		}
+		ij1Helper = legacyService.getIJ1Helper();
 		return ij1Helper;
 	}
 
@@ -131,7 +128,32 @@ public class LegacyUI extends AbstractUserInterface implements SwingUI {
 	public void show() {
 		if (ij1Helper() != null) {
 			ij1Helper.setVisible(true);
+			if (ij1Helper.isVisible()) {
+				// NB: This check avoids creating a console UI while in headless mode.
+				//
+				// The ImageJ 1.x headless mode works by pretending to show the UI
+				// (i.e., walking through very similar code paths), but without
+				// actually instantiating or showing any UI components.
+				//
+				// So, even though we write ij1Helper.setVisible(true) above, the
+				// ImageJ1 user interface will not actually be shown when running
+				// in headless mode, and ij1Helper.isVisible() will return false.
+				createConsole();
+			}
 		}
+	}
+
+	private synchronized void createConsole() {
+		if (consolePane != null) return;
+		if (Boolean.getBoolean(ConsolePane.NO_CONSOLE_PROPERTY)) return;
+		consolePane = new SwingConsolePane(getContext());
+
+		final JFrame frame = new JFrame("Console");
+		frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+		frame.setContentPane(getConsolePane().getComponent());
+		frame.setJMenuBar(createConsoleMenu());
+		frame.pack();
+		getConsolePane().setWindow(frame);
 	}
 
 	@Override
@@ -173,10 +195,10 @@ public class LegacyUI extends AbstractUserInterface implements SwingUI {
 					}
 				});
 			}
-			catch (InterruptedException e) {
+			catch (final InterruptedException e) {
 				legacyService.handleException(e);
 			}
-			catch (InvocationTargetException e) {
+			catch (final InvocationTargetException e) {
 				legacyService.handleException(e);
 			}
 		}
@@ -220,6 +242,11 @@ public class LegacyUI extends AbstractUserInterface implements SwingUI {
 	}
 
 	@Override
+	public SwingConsolePane getConsolePane() {
+		return consolePane;
+	}
+
+	@Override
 	public synchronized SystemClipboard getSystemClipboard() {
 		// TODO consider extending abstractAWTUI common class..
 		if (systemClipboard != null) return systemClipboard;
@@ -229,21 +256,7 @@ public class LegacyUI extends AbstractUserInterface implements SwingUI {
 
 	@Override
 	public DisplayWindow createDisplayWindow(final Display<?> display) {
-		final SwingDisplayWindow displayWindow = new SwingDisplayWindow();
-
-		// broadcast input events (keyboard and mouse)
-		new AWTInputEventDispatcher(display).register(displayWindow, true, false);
-
-		// broadcast window events
-		new AWTWindowEventDispatcher(display).register(displayWindow);
-
-		// broadcast drag-and-drop events
-		new AWTDropTargetEventDispatcher(display, eventService);
-
-		return displayWindow;
-
-		//FIXME: replace with this code after releasing scijava-ui-swing
-//		return SwingSDIUI.createDisplayWindow(display, eventService);
+		return SwingSDIUI.createDisplayWindow(display, eventService);
 	}
 
 	@Override
@@ -264,44 +277,33 @@ public class LegacyUI extends AbstractUserInterface implements SwingUI {
 				@Override
 				public void run() {
 					if (FileWidget.DIRECTORY_STYLE.equals(style)) {
-						// ImageJ1 does not provide a directory chooser, so we use a
-						// Swing JFileChooser in "DIRECTORIES_ONLY" mode.
-						final JFileChooser chooser = new JFileChooser(file);
-						chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-						final int rval =
-							chooser.showOpenDialog(getApplicationFrame().getComponent());
-						if (rval == JFileChooser.APPROVE_OPTION) {
-							chosenFile[0] = chooser.getSelectedFile();
+						// Use ImageJ1's DirectoryChooser.
+						final String dir = ij1Helper().getDirectory("Choose Folder", file);
+						if (dir != null) {
+							chosenFile[0] = new File(dir);
 						}
 					}
 					else if (FileWidget.SAVE_STYLE.equals(style)) {
 						// Use ImageJ1's SaveDialog.
-						final String defaultName = file.getName();
-						final String extension = FileUtils.getExtension(file);
-						final SaveDialog saveDialog =
-							new SaveDialog("Save", defaultName, extension);
-						final String directory = saveDialog.getDirectory();
-						final String fileName = saveDialog.getFileName();
-						if (directory != null && fileName != null) {
-							chosenFile[0] = new File(directory, fileName);
+						final File chosen = ij1Helper().saveDialog("Save", file, null);
+						if (chosen != null) {
+							chosenFile[0] = chosen;
 						}
 					}
 					else { // FileWidget.OPEN_STYLE / default behavior
 						// Use ImageJ1's OpenDialog.
-						final OpenDialog openDialog = new OpenDialog("Open");
-						final String directory = openDialog.getDirectory();
-						final String fileName = openDialog.getFileName();
-						if (directory != null && fileName != null) {
-							chosenFile[0] = new File(directory, fileName);
+						final File chosen = ij1Helper().openDialog("Open", file);
+						if (chosen != null) {
+							chosenFile[0] = chosen;
 						}
 					}
 				}
 			});
 		}
-		catch (InterruptedException e) {
+		catch (final InterruptedException e) {
 			legacyService.handleException(e);
 		}
-		catch (InvocationTargetException e) {
+		catch (final InvocationTargetException e) {
 			legacyService.handleException(e);
 		}
 		return chosenFile[0];
@@ -328,4 +330,23 @@ public class LegacyUI extends AbstractUserInterface implements SwingUI {
 	public boolean requiresEDT() {
 		return true;
 	}
+
+	// -- Helper methods --
+
+	private JMenuBar createConsoleMenu() {
+		final JMenuBar menuBar = new JMenuBar();
+		final JMenu edit = new JMenu("Edit");
+		menuBar.add(edit);
+		final JMenuItem editClear = new JMenuItem("Clear");
+		editClear.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				getConsolePane().clear();
+			}
+		});
+		edit.add(editClear);
+		return menuBar;
+	}
+
 }

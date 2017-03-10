@@ -2,7 +2,7 @@
  * #%L
  * ImageJ software for multidimensional image processing and analysis.
  * %%
- * Copyright (C) 2009 - 2014 Board of Regents of the University of
+ * Copyright (C) 2009 - 2017 Board of Regents of the University of
  * Wisconsin-Madison, Broad Institute of MIT and Harvard, and Max Planck
  * Institute of Molecular Cell Biology and Genetics.
  * %%
@@ -94,7 +94,7 @@ public class ShutdownTest {
 
 		// tweak the legacy hooks to record IJ1's Quit thread
 		LegacyInjector.installHooks(Thread.currentThread().getContextClassLoader(),
-			new DefaultLegacyHooks(context.service(DefaultLegacyService.class)) {
+			new DefaultLegacyHooks(context.service(LegacyService.class)) {
 			@Override
 			public boolean disposing() {
 				synchronized (quitThread) {
@@ -109,7 +109,7 @@ public class ShutdownTest {
 		assertNotNull(IJ.getInstance());
 
 		// verify that the legacy layer is active
-		assertNotNull(DefaultLegacyService.getInstance());
+		assertNotNull(LegacyService.getInstance());
 
 		// verify that there is no IJ1 Quit thread
 		assertNull(quitThread[0]);
@@ -146,7 +146,7 @@ public class ShutdownTest {
 		assertNull(IJ.getInstance());
 
 		// verify that the legacy layer has been disposed
-		assertNull(DefaultLegacyService.getInstance());
+		assertNull(LegacyService.getInstance());
 	}
 
 	/** Tests {@link LegacyService#dispose()}. */
@@ -156,7 +156,7 @@ public class ShutdownTest {
 		assertNotNull(IJ.getInstance());
 
 		// verify that the legacy layer is active
-		assertNotNull(DefaultLegacyService.getInstance());
+		assertNotNull(LegacyService.getInstance());
 
 		// dispose the legacy service
 		context.service(LegacyService.class).dispose();
@@ -165,7 +165,7 @@ public class ShutdownTest {
 		assertNull(IJ.getInstance());
 
 		// verify that the legacy layer is inactive
-		assertNull(DefaultLegacyService.getInstance());
+		assertNull(LegacyService.getInstance());
 	}
 
 	/** Tests {@link LegacyUI#dispose()}. */
@@ -175,7 +175,7 @@ public class ShutdownTest {
 		assertNotNull(IJ.getInstance());
 
 		// verify that the legacy layer is active
-		assertNotNull(DefaultLegacyService.getInstance());
+		assertNotNull(LegacyService.getInstance());
 
 		// dispose the legacy user interface
 		final UserInterface legacyUI =
@@ -186,7 +186,7 @@ public class ShutdownTest {
 		assertNull(IJ.getInstance());
 
 		// verify that the legacy layer is still active
-		assertNotNull(DefaultLegacyService.getInstance());
+		assertNotNull(LegacyService.getInstance());
 	}
 
 }

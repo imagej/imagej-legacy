@@ -2,7 +2,7 @@
  * #%L
  * ImageJ software for multidimensional image processing and analysis.
  * %%
- * Copyright (C) 2009 - 2014 Board of Regents of the University of
+ * Copyright (C) 2009 - 2017 Board of Regents of the University of
  * Wisconsin-Madison, Broad Institute of MIT and Harvard, and Max Planck
  * Institute of Molecular Cell Biology and Genetics.
  * %%
@@ -30,11 +30,13 @@
  */
 package net.imagej.legacy;
 
+import java.awt.GraphicsEnvironment;
 import java.util.LinkedList;
 import java.util.WeakHashMap;
 
 import org.scijava.console.AbstractConsoleArgument;
 import org.scijava.console.ConsoleArgument;
+import org.scijava.log.LogService;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 
@@ -93,7 +95,10 @@ import org.scijava.plugin.Plugin;
 public abstract class LegacyCommandline extends AbstractConsoleArgument {
 
 	@Parameter
-	protected DefaultLegacyService legacyService;
+	protected LegacyService legacyService;
+
+	@Parameter
+	protected LogService log;
 
 	private static class Flag extends WeakHashMap<LegacyService, Boolean> {
 		public boolean isActive(final LegacyService service) {
@@ -105,6 +110,11 @@ public abstract class LegacyCommandline extends AbstractConsoleArgument {
 
 	protected IJ1Helper ij1Helper() {
 		return legacyService.getIJ1Helper();
+	}
+
+	protected boolean isBatchMode() {
+		final Boolean b = batchMode.get(legacyService);
+		return b != null && b.booleanValue();
 	}
 
 	protected void handleBatchOption(final LinkedList<String> args) {
@@ -151,7 +161,7 @@ public abstract class LegacyCommandline extends AbstractConsoleArgument {
 			final String path = args.removeFirst(); // "file-name"
 
 			handleBatchOption(args);
-			ij1Helper().openImage(path);
+			ij1Helper().openImage(path, !GraphicsEnvironment.isHeadless() && !isBatchMode());
 			handleBatchExit(args);
 		}
 
@@ -194,10 +204,10 @@ public abstract class LegacyCommandline extends AbstractConsoleArgument {
 		public void handle(LinkedList<String> args) {
 			if (!supports(args)) return;
 
+			handleBatchOption(args);
 			args.removeFirst(); // -batch or -batch-no-exit
 
-			handleBatchOption(args);
-			if (args.size() > 1) {
+			if (args.size() > 0) {
 				final String path = args.removeFirst();
 				final String arg = args.isEmpty() ? "" : args.removeFirst();
 				ij1Helper().runMacroFile(path, arg);
@@ -274,7 +284,7 @@ public abstract class LegacyCommandline extends AbstractConsoleArgument {
 			final String ijPath = args.removeFirst();
 
 			handleBatchOption(args);
-			legacyService.log().error("Skipping unsupported option -ijpath: " + ijPath);
+			log.error("Skipping unsupported option -ijpath: " + ijPath);
 			handleBatchExit(args);
 		}
 	}
@@ -295,7 +305,7 @@ public abstract class LegacyCommandline extends AbstractConsoleArgument {
 			final String option = args.removeFirst();
 
 			handleBatchOption(args);
-			legacyService.log().error("Skipping unsupported option " + option);
+			log.error("Skipping unsupported option " + option);
 			handleBatchExit(args);
 		}
 	}

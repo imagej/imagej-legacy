@@ -2,7 +2,7 @@
  * #%L
  * ImageJ software for multidimensional image processing and analysis.
  * %%
- * Copyright (C) 2009 - 2014 Board of Regents of the University of
+ * Copyright (C) 2009 - 2017 Board of Regents of the University of
  * Wisconsin-Madison, Broad Institute of MIT and Harvard, and Max Planck
  * Institute of Molecular Cell Biology and Genetics.
  * %%
@@ -54,24 +54,17 @@ public class LegacyApplicationFrame extends AbstractLegacyAdapter implements
 
 	@Override
 	public void setLocation(final int x, final int y) {
-		final Frame ij = helper().getIJ();
-		if (ij != null) {
-			ij.setLocation(x, y);
-		}
+		helper().setLocation(x, y);
 	}
 
 	@Override
 	public int getLocationX() {
-		final Frame ij = helper().getIJ();
-		if (ij == null) return 0;
-		return ij.getX();
+		return helper().getX();
 	}
 
 	@Override
 	public int getLocationY() {
-		final Frame ij = helper().getIJ();
-		if (ij == null) return 0;
-		return ij.getY();
+		return helper().getY();
 	}
 
 	@Override
@@ -81,10 +74,7 @@ public class LegacyApplicationFrame extends AbstractLegacyAdapter implements
 
 	@Override
 	public void setVisible(final boolean visible) {
-		final Frame ij = helper().getIJ();
-		if (ij != null) {
-			ij.setVisible(visible);
-		}
+		helper().setVisible(visible);
 	}
 
 	@Override

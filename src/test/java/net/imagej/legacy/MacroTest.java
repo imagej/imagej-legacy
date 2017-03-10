@@ -2,7 +2,7 @@
  * #%L
  * ImageJ software for multidimensional image processing and analysis.
  * %%
- * Copyright (C) 2009 - 2014 Board of Regents of the University of
+ * Copyright (C) 2009 - 2017 Board of Regents of the University of
  * Wisconsin-Madison, Broad Institute of MIT and Harvard, and Max Planck
  * Institute of Molecular Cell Biology and Genetics.
  * %%
@@ -70,12 +70,12 @@ public class MacroTest {
 			assertTrue(analyze.mkdirs());
 
 			final File addArguments = new File(analyze, "Add_Arguments.ijm");
-			final FileWriter writer = new FileWriter(addArguments);
-			writer.write("a = getNumber('a', 0); b = getNumber('b', 0);\n" +
-				"result = a + b;\n" +
-				"path = call('java.lang.System.getProperty', 'imagej.dir') + '/result.txt';\n" +
-				"File.append('The result is ' + result, path);\n");
-			writer.close();
+			try (final FileWriter writer = new FileWriter(addArguments)) {
+				writer.write("a = getNumber('a', 0); b = getNumber('b', 0);\n" +
+					"result = a + b;\n" +
+					"path = call('java.lang.System.getProperty', 'imagej.dir') + '/result.txt';\n" +
+					"File.append('The result is ' + result, path);\n");
+			}
 
 			final Context context = new Context();
 			// Prevent the test class from loading the ij.IJ class
@@ -149,24 +149,23 @@ public class MacroTest {
 
 	private String readFile(final File file) throws IOException {
 		final ByteArrayOutputStream out = new ByteArrayOutputStream((int) file.length());
-		final FileInputStream in = new FileInputStream(file);
-		final byte[] buffer = new byte[16384];
-		for (;;) {
-			int count = in.read(buffer);
-			if (count < 0) break;
-			out.write(buffer, 0, count);
+		try (final FileInputStream in = new FileInputStream(file)) {
+			final byte[] buffer = new byte[16384];
+			for (;;) {
+				int count = in.read(buffer);
+				if (count < 0) break;
+				out.write(buffer, 0, count);
+			}
 		}
-		in.close();
-		out.close();
 		return new String(out.toString("UTF-8"));
 	}
 
 	private void writeFile(final File file, final String... lines) throws IOException {
-		final FileWriter writer = new FileWriter(file);
-		for (final String line : lines) {
-			writer.write(line);
-			writer.write("\n");
+		try (final FileWriter writer = new FileWriter(file)) {
+			for (final String line : lines) {
+				writer.write(line);
+				writer.write("\n");
+			}
 		}
-		writer.close();
 	}
 }

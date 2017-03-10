@@ -2,7 +2,7 @@
  * #%L
  * ImageJ software for multidimensional image processing and analysis.
  * %%
- * Copyright (C) 2009 - 2014 Board of Regents of the University of
+ * Copyright (C) 2009 - 2017 Board of Regents of the University of
  * Wisconsin-Madison, Broad Institute of MIT and Harvard, and Max Planck
  * Institute of Molecular Cell Biology and Genetics.
  * %%
@@ -33,14 +33,13 @@ package net.imagej.legacy.plugin;
 
 import java.io.File;
 
-import net.imagej.ui.swing.script.TextEditor;
-
 import org.scijava.Context;
 import org.scijava.Priority;
 import org.scijava.event.EventHandler;
 import org.scijava.platform.event.AppQuitEvent;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
+import org.scijava.ui.swing.script.TextEditor;
 
 /**
  * The default {@link LegacyEditor} plugin.

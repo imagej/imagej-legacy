@@ -2,7 +2,7 @@
  * #%L
  * ImageJ software for multidimensional image processing and analysis.
  * %%
- * Copyright (C) 2009 - 2014 Board of Regents of the University of
+ * Copyright (C) 2009 - 2017 Board of Regents of the University of
  * Wisconsin-Madison, Broad Institute of MIT and Harvard, and Max Planck
  * Institute of Molecular Cell Biology and Genetics.
  * %%
@@ -427,7 +427,7 @@ public class ColorTableHarmonizer implements DisplayHarmonizer {
 
 	/** Creates a list of ColorTables from an ImagePlus. */
 	private List<ColorTable> colorTablesFromImagePlus(final ImagePlus imp) {
-		final List<ColorTable> colorTables = new ArrayList<ColorTable>();
+		final List<ColorTable> colorTables = new ArrayList<>();
 		final LUT[] luts = imp.getLuts();
 		if (luts == null) { // not a CompositeImage
 			if (imp.getType() == ImagePlus.COLOR_RGB) {

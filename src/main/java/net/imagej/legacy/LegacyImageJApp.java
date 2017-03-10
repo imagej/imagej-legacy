@@ -2,7 +2,7 @@
  * #%L
  * ImageJ software for multidimensional image processing and analysis.
  * %%
- * Copyright (C) 2009 - 2014 Board of Regents of the University of
+ * Copyright (C) 2009 - 2017 Board of Regents of the University of
  * Wisconsin-Madison, Broad Institute of MIT and Harvard, and Max Planck
  * Institute of Molecular Cell Biology and Genetics.
  * %%
@@ -33,7 +33,6 @@ package net.imagej.legacy;
 
 import org.scijava.app.AbstractApp;
 import org.scijava.app.App;
-import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 
 /**
@@ -47,8 +46,8 @@ public class LegacyImageJApp extends AbstractApp {
 
 	public static final String NAME = "ImageJ1";
 
-	@Parameter
-	private DefaultLegacyService legacyService;
+	private LegacyService legacyService;
+	private IJ1Helper ij1Helper;
 
 	@Override
 	public String getGroupId() {
@@ -62,24 +61,41 @@ public class LegacyImageJApp extends AbstractApp {
 
 	@Override
 	public String getVersion() {
-		return legacyService.getLegacyVersion();
+		initFields();
+		return legacyService == null ? //
+			super.getVersion() : legacyService.getVersion();
 	}
 
 	// -- AppEventService methods --
 
 	@Override
 	public void about() {
-		legacyService.getIJ1Helper().appAbout();
+		initFields();
+		if (ij1Helper != null) ij1Helper.appAbout();
 	}
 
 	@Override
 	public void prefs() {
-		legacyService.getIJ1Helper().appPrefs();
+		initFields();
+		if (ij1Helper != null) ij1Helper.appPrefs();
 	}
 
 	@Override
 	public void quit() {
-		legacyService.getIJ1Helper().appQuit();
+		initFields();
+		if (ij1Helper != null) ij1Helper.appQuit();
 	}
 
+	// -- Helper methods --
+
+	/**
+	 * Populates the {@link #legacyService} and {@link #ij1Helper} fields as
+	 * appropriate.
+	 */
+	private void initFields() {
+		if (ij1Helper != null) return; // already initialized
+		legacyService = context().getService(LegacyService.class);
+		if (legacyService == null) return; // no legacy service
+		ij1Helper = legacyService.getIJ1Helper();
+	}
 }

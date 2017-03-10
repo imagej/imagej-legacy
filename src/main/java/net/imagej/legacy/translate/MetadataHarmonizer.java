@@ -2,7 +2,7 @@
  * #%L
  * ImageJ software for multidimensional image processing and analysis.
  * %%
- * Copyright (C) 2009 - 2014 Board of Regents of the University of
+ * Copyright (C) 2009 - 2017 Board of Regents of the University of
  * Wisconsin-Madison, Broad Institute of MIT and Harvard, and Max Planck
  * Institute of Molecular Cell Biology and Genetics.
  * %%
@@ -34,9 +34,9 @@ package net.imagej.legacy.translate;
 import ij.ImagePlus;
 import ij.measure.Calibration;
 import net.imagej.Dataset;
-import net.imglib2.meta.Axes;
-import net.imglib2.meta.CalibratedAxis;
-import net.imglib2.meta.axis.LinearAxis;
+import net.imagej.axis.Axes;
+import net.imagej.axis.CalibratedAxis;
+import net.imagej.axis.LinearAxis;
 
 /**
  * Synchronizes metadata bidirectionally between a {@link Dataset} and an

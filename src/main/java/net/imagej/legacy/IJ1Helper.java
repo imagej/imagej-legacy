@@ -2,7 +2,7 @@
  * #%L
  * ImageJ software for multidimensional image processing and analysis.
  * %%
- * Copyright (C) 2009 - 2014 Board of Regents of the University of
+ * Copyright (C) 2009 - 2017 Board of Regents of the University of
  * Wisconsin-Madison, Broad Institute of MIT and Harvard, and Max Planck
  * Institute of Molecular Cell Biology and Genetics.
  * %%
@@ -37,15 +37,20 @@ import ij.ImageJ;
 import ij.ImagePlus;
 import ij.Macro;
 import ij.Menus;
+import ij.Prefs;
 import ij.WindowManager;
 import ij.gui.ImageWindow;
 import ij.gui.Toolbar;
+import ij.io.DirectoryChooser;
+import ij.io.OpenDialog;
 import ij.io.Opener;
+import ij.io.SaveDialog;
 import ij.macro.Interpreter;
 import ij.plugin.Commands;
 import ij.plugin.PlugIn;
 import ij.plugin.filter.PlugInFilter;
 import ij.plugin.filter.PlugInFilterRunner;
+import ij.plugin.frame.Recorder;
 
 import java.awt.Component;
 import java.awt.EventQueue;
@@ -54,11 +59,13 @@ import java.awt.Image;
 import java.awt.Menu;
 import java.awt.MenuBar;
 import java.awt.MenuItem;
+import java.awt.Panel;
 import java.awt.Window;
 import java.awt.image.ImageProducer;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.ArrayList;
@@ -70,6 +77,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.Callable;
 
 import javax.swing.SwingUtilities;
 
@@ -94,22 +102,22 @@ import org.scijava.util.ClassUtils;
 /**
  * A helper class to interact with ImageJ 1.x.
  * <p>
- * The DefaultLegacyService needs to patch ImageJ 1.x's classes before they are
- * loaded. Unfortunately, this is tricky: if the DefaultLegacyService already
- * uses those classes, it is a matter of luck whether we can get the patches in
- * before those classes are loaded.
+ * The LegacyService needs to patch ImageJ 1.x's classes before they are loaded.
+ * Unfortunately, this is tricky: if the LegacyService already uses those
+ * classes, it is a matter of luck whether we can get the patches in before
+ * those classes are loaded.
  * </p>
  * <p>
  * Therefore, we put as much interaction with ImageJ 1.x as possible into this
- * class and keep a reference to it in the DefaultLegacyService.
+ * class and keep a reference to it in the LegacyService.
  * </p>
- * 
+ *
  * @author Johannes Schindelin
  */
 public class IJ1Helper extends AbstractContextual {
 
 	/** A reference to the legacy service, just in case we need it. */
-	private final DefaultLegacyService legacyService;
+	private final LegacyService legacyService;
 
 	@Parameter
 	private LogService log;
@@ -117,7 +125,7 @@ public class IJ1Helper extends AbstractContextual {
 	/** Whether we are in the process of forcibly shutting down ImageJ1. */
 	private boolean disposing;
 
-	public IJ1Helper(final DefaultLegacyService legacyService) {
+	public IJ1Helper(final LegacyService legacyService) {
 		setContext(legacyService.getContext());
 		this.legacyService = legacyService;
 	}
@@ -130,16 +138,18 @@ public class IJ1Helper extends AbstractContextual {
 		}
 		if (ij1 != null) {
 			// NB: *Always* call System.exit(0) when quitting:
+			//
 			// - In the case of batch mode, the JVM needs to terminate at the
-			//   conclusion of the macro/script, regardless of the actions performed
-			//   by that macro/script.
+			// conclusion of the macro/script, regardless of the actions performed
+			// by that macro/script.
+			//
 			// - In the case of GUI mode, the JVM needs to terminate when the user
-			//   quits the program because ImageJ1 has many plugins which do not
-			//   properly clean up their resources. This is a vicious cycle:
-			//   ImageJ1's main method sets exitWhenQuitting to true, which has
-			//   historically masked the problems with these plugins. So we have
-			//   little choice but to continue this tradition, at least with the
-			//   legacy ImageJ1 user interface.
+			// quits the program because ImageJ1 has many plugins which do not
+			// properly clean up their resources. This is a vicious cycle:
+			// ImageJ1's main method sets exitWhenQuitting to true, which has
+			// historically masked the problems with these plugins. So we have
+			// little choice but to continue this tradition, at least with the
+			// legacy ImageJ1 user interface.
 			ij1.exitWhenQuitting(true);
 
 			// make sure that the Event Dispatch Thread's class loader is set
@@ -159,7 +169,7 @@ public class IJ1Helper extends AbstractContextual {
 			// set icon and title of main window (which are instantiated before the
 			// initializer is called)
 			try {
-				final LegacyHooks hooks =
+				final LegacyHooks hooks = //
 					(LegacyHooks) IJ.class.getField("_hooks").get(null);
 				ij1.setTitle(hooks.getAppName());
 				final URL iconURL = hooks.getIconURL();
@@ -186,13 +196,13 @@ public class IJ1Helper extends AbstractContextual {
 			}
 
 			// FIXME: handle window location via LegacyUI
-			// This is necessary because the ImageJ 1.x window will not set its location
-			// if created with mode NO_SHOW, which is exactly how it is created right
-			// now by the legacy layer. This is a work-around by ensuring the preferred
-			// (e.g. saved and loaded) location is current at the time the IJ1Helper
-			// is initialized. Ideally we would like to handle positioning via
-			// the LegacyUI though, so that we can restore positions on secondary
-			// monitors and such.
+			// This is necessary because the ImageJ 1.x window will not set its
+			// location if created with mode NO_SHOW, which is exactly how it is
+			// created right now by the legacy layer. This is a work-around by
+			// ensuring the preferred (e.g. saved and loaded) location is current at
+			// the time the IJ1Helper is initialized. Ideally we would like to handle
+			// positioning via the LegacyUI though, so that we can restore positions
+			// on secondary monitors and such.
 			ij1.setLocation(ij1.getPreferredLocation());
 		}
 	}
@@ -205,17 +215,18 @@ public class IJ1Helper extends AbstractContextual {
 	 */
 	public synchronized void dispose() {
 		final ImageJ ij = IJ.getInstance();
-		if (ij == null) return; // no ImageJ1 to dispose
-		if (ij.quitting()) return; // ImageJ1 is already on its way out
+		if (ij != null && ij.quitting()) return; // IJ1 is already on its way out
 
 		disposing = true;
 
 		closeImageWindows();
 		disposeNonImageWindows();
 
-		// quit legacy ImageJ on the same thread
-		ij.exitWhenQuitting(false); // do *not* quit the JVM!
-		ij.run();
+		if (ij != null) {
+			// quit legacy ImageJ on the same thread
+			ij.exitWhenQuitting(false); // do *not* quit the JVM!
+			ij.run();
+		}
 		disposing = false;
 	}
 
@@ -235,9 +246,19 @@ public class IJ1Helper extends AbstractContextual {
 		return ij.isVisible();
 	}
 
+	/**
+	 * Determines whether <it>Edit>Options>Misc...>Run single instance
+	 * listener</it> is set.
+	 *
+	 * @return true if <it>Run single instance listener</it> is set
+	 */
+	public boolean isRMIEnabled() {
+		return Prefs.runSocketListener;
+	}
+
 	private boolean batchMode;
 
-	void setBatchMode(boolean batch) {
+	void setBatchMode(final boolean batch) {
 		Interpreter.batchMode = batch;
 		batchMode = batch;
 	}
@@ -247,13 +268,21 @@ public class IJ1Helper extends AbstractContextual {
 			final Method cleanup = IJ.class.getDeclaredMethod("cleanup");
 			cleanup.setAccessible(true);
 			cleanup.invoke(null);
-		} catch (Throwable t) {
+		}
+		catch (final Throwable t) {
 			t.printStackTrace();
 			log.error(t);
 		}
 	}
 
-	public void setVisible(boolean toggle) {
+	/**
+	 * Sets {@link WindowManager} {@code checkForDuplicateName} field.
+	 */
+	public void setCheckNameDuplicates(final boolean checkDuplicates) {
+		WindowManager.checkForDuplicateName = checkDuplicates;
+	}
+
+	public void setVisible(final boolean toggle) {
 		if (batchMode) return;
 		final ImageJ ij = IJ.getInstance();
 		if (ij != null) {
@@ -279,11 +308,11 @@ public class IJ1Helper extends AbstractContextual {
 		else WindowManager.setCurrentWindow(activeImagePlus.getWindow());
 	}
 
-	public void setKeyDown(int keyCode) {
+	public void setKeyDown(final int keyCode) {
 		IJ.setKeyDown(keyCode);
 	}
 
-	public void setKeyUp(int keyCode) {
+	public void setKeyUp(final int keyCode) {
 		IJ.setKeyUp(keyCode);
 	}
 
@@ -306,10 +335,10 @@ public class IJ1Helper extends AbstractContextual {
 				if (version != null) return version.toString();
 			}
 		}
-		catch (NoSuchFieldException exc) {
+		catch (final NoSuchFieldException exc) {
 			log.error(exc);
 		}
-		catch (IllegalAccessException exc) {
+		catch (final IllegalAccessException exc) {
 			log.error(exc);
 		}
 		return "Unknown";
@@ -319,11 +348,11 @@ public class IJ1Helper extends AbstractContextual {
 		return IJ.isMacintosh();
 	}
 
-	public void setStatus(String message) {
+	public void setStatus(final String message) {
 		IJ.showStatus(message);
 	}
 
-	public void setProgress(int val, int max) {
+	public void setProgress(final int val, final int max) {
 		IJ.showProgress(val, max);
 	}
 
@@ -331,22 +360,72 @@ public class IJ1Helper extends AbstractContextual {
 		return Toolbar.getInstance();
 	}
 
-	public ImageJ getIJ() {
+	public Panel getStatusBar() {
+		if (!hasInstance()) return null;
+		return IJ.getInstance().getStatusBar();
+	}
+
+	public Frame getIJ() {
 		if (hasInstance()) {
 			return IJ.getInstance();
 		}
 		return null;
 	}
 
+	public void setLocation(final int x, final int y) {
+		if (!hasInstance()) return;
+		IJ.getInstance().setLocation(x, y);
+	}
+
+	public int getX() {
+		if (!hasInstance()) return 0;
+		return IJ.getInstance().getX();
+	}
+
+	public int getY() {
+		if (!hasInstance()) return 0;
+		return IJ.getInstance().getY();
+	}
+
+	public boolean isWindowClosed(final Frame window) {
+		if (window instanceof ImageWindow) {
+			return ((ImageWindow) window).isClosed();
+		}
+		return false;
+	}
+
+	public boolean quitting() {
+		if (hasInstance()) return IJ.getInstance().quitting();
+		return false;
+	}
+
+	public int[] getIDList() {
+		return WindowManager.getIDList();
+	}
+
+	public ImagePlus getImage(final int imageID) {
+		return WindowManager.getImage(imageID);
+	}
+
+	/**
+	 * Returns {@link ImagePlus#getTitle()} if the object is an {@link ImagePlus},
+	 * otherwise null.
+	 */
+	public static String getTitle(final Object o) {
+		return o instanceof ImagePlus ? ((ImagePlus) o).getTitle() : null;
+	}
+
 	public ClassLoader getClassLoader() {
 		return IJ.getClassLoader();
 	}
 
-	public void showMessage(String title, String message) {
+	public void showMessage(final String title, final String message) {
 		IJ.showMessage(title, message);
 	}
 
-	public boolean showMessageWithCancel(String title, String message) {
+	public boolean showMessageWithCancel(final String title,
+		final String message)
+	{
 		return IJ.showMessageWithCancel(title, message);
 	}
 
@@ -355,11 +434,11 @@ public class IJ1Helper extends AbstractContextual {
 	}
 
 	public void updateRecentMenu(final String path) {
-		Menu menu = Menus.getOpenRecentMenu();
+		final Menu menu = Menus.getOpenRecentMenu();
 		if (menu == null) return;
-		int n = menu.getItemCount();
+		final int n = menu.getItemCount();
 		int index = -1;
-		for (int i=0; i<n; i++) {
+		for (int i = 0; i < n; i++) {
 			if (menu.getItem(i).getLabel().equals(path)) {
 				index = i;
 				break;
@@ -373,7 +452,7 @@ public class IJ1Helper extends AbstractContextual {
 		}
 		// not found, so replace oldest
 		else if (index < 0) {
-			int count = menu.getItemCount();
+			final int count = menu.getItemCount();
 			if (count >= Menus.MAX_OPEN_RECENT_ITEMS) {
 				menu.remove(count - 1);
 			}
@@ -386,54 +465,153 @@ public class IJ1Helper extends AbstractContextual {
 	}
 
 	/**
+	 * Opens an image and adds the path to the <it>File>Open Recent</it> menu.
+	 *
+	 * @param file the image to open
+	 */
+	public static void openAndAddToRecent(final File file) {
+		new Opener().openAndAddToRecent(file.getAbsolutePath());
+	}
+
+	/**
+	 * Records an option in ImageJ 1.x's macro recorder, <em>safely</em>.
+	 * <p>
+	 * Both the key and the value will be escaped to avoid problems. This behavior
+	 * differs from direct calls to {@link Recorder#recordOption(String, String)},
+	 * which do not escape either string.
+	 * </p>
+	 *
+	 * @param key the name of the option
+	 * @param value the value of the option
+	 */
+	public void recordOption(final String key, final String value) {
+		Recorder.recordOption(escape(key), escape(value));
+	}
+
+	/**
+	 * Determines whether we're running inside a macro right now.
+	 *
+	 * @return whether we're running a macro right now.
+	 */
+	public boolean isMacro() {
+		return IJ.isMacro();
+	}
+
+	/**
 	 * Gets a macro parameter of type <i>boolean</i>.
-	 * 
-	 * @param label
-	 *            the name of the macro parameter
-	 * @param defaultValue
-	 *            the default value
+	 *
+	 * @param label the name of the macro parameter
+	 * @param defaultValue the default value
 	 * @return the boolean value
 	 */
-	public static boolean getMacroParameter(String label, boolean defaultValue) {
+	public boolean getMacroParameter(final String label,
+		final boolean defaultValue)
+	{
 		return getMacroParameter(label) != null || defaultValue;
 	}
 
 	/**
 	 * Gets a macro parameter of type <i>double</i>.
-	 * 
-	 * @param label
-	 *            the name of the macro parameter
-	 * @param defaultValue
-	 *            the default value
+	 *
+	 * @param label the name of the macro parameter
+	 * @param defaultValue the default value
 	 * @return the double value
 	 */
-	public static double getMacroParameter(String label, double defaultValue) {
-		String value = Macro.getValue(Macro.getOptions(), label, null);
+	public double getMacroParameter(final String label,
+		final double defaultValue)
+	{
+		final String value = Macro.getValue(getOptions(), label, null);
 		return value != null ? Double.parseDouble(value) : defaultValue;
 	}
 
 	/**
 	 * Gets a macro parameter of type {@link String}.
-	 * 
-	 * @param label
-	 *            the name of the macro parameter
-	 * @param defaultValue
-	 *            the default value
+	 *
+	 * @param label the name of the macro parameter
+	 * @param defaultValue the default value
 	 * @return the value
 	 */
-	public static String getMacroParameter(String label, String defaultValue) {
-		return Macro.getValue(Macro.getOptions(), label, defaultValue);
+	public String getMacroParameter(final String label,
+		final String defaultValue)
+	{
+		return Macro.getValue(getOptions(), label, defaultValue);
 	}
 
 	/**
 	 * Gets a macro parameter of type {@link String}.
-	 * 
-	 * @param label
-	 *            the name of the macro parameter
+	 *
+	 * @param label the name of the macro parameter
 	 * @return the value, <code>null</code> if the parameter was not specified
 	 */
-	public static String getMacroParameter(String label) {
-		return Macro.getValue(Macro.getOptions(), label, null);
+	public String getMacroParameter(final String label) {
+		return Macro.getValue(getOptions(), label, null);
+	}
+
+	/** Returns the active macro {@link Interpreter}. */
+	public static Object getInterpreter() {
+		return Interpreter.getInstance();
+	}
+
+	/**
+	 * Gets the value of the specified variable, from the given macro
+	 * {@link Interpreter}.
+	 * 
+	 * @param interpreter The macro {@link Interpreter} to query.
+	 * @return The list of variables in {@code key\tvalue} form, as given by
+	 *         {@link Interpreter#getVariables()}.
+	 * @throws ClassCastException if the given interpreter is not an
+	 *           {@link Interpreter}.
+	 */
+	public String[] getVariables(final Object interpreter) {
+		return ((Interpreter) interpreter).getVariables();
+	}
+
+	/**
+	 * Gets the value of the specified variable, from the given macro
+	 * {@link Interpreter}.
+	 * 
+	 * @param interpreter The macro {@link Interpreter} to query.
+	 * @param name The name of the variable to retrieve.
+	 * @return The value of the requested variable, as either a {@link String}, a
+	 *         {@link Double} or {@code null}.
+	 * @throws ClassCastException if the given interpreter is not an
+	 *           {@link Interpreter}.
+	 */
+	public Object getVariable(final Object interpreter, final String name) {
+		final Interpreter interp = (Interpreter) interpreter;
+
+		// might be a string
+		final String sValue = interp.getStringVariable(name);
+		if (sValue != null) return sValue;
+
+		// probably a number
+		final double nValue = interp.getVariable2(name);
+		if (!Double.isNaN(nValue)) return nValue;
+
+		return null;
+	}
+
+	/** Returns true if the object is an instance of {@link ImagePlus}. */
+	public boolean isImagePlus(final Object o) {
+		return o instanceof ImagePlus;
+	}
+
+	/** Returns true if the class is assignable to {@link ImagePlus}. */
+	public boolean isImagePlus(final Class<?> c) {
+		return ImagePlus.class.isAssignableFrom(c);
+	}
+
+	/**
+	 * Gets the ID of the given {@link ImagePlus} object. If the given object is
+	 * not an {@link ImagePlus}, throws {@link IllegalArgumentException}.
+	 *
+	 * @param o The {@link ImagePlus} whose ID is needed.
+	 * @return The value of {@link ImagePlus#getID()}.
+	 * @see #isImagePlus(Object)
+	 * @throws ClassCastException if the given object is not an {@link ImagePlus}.
+	 */
+	public int getImageID(final Object o) {
+		return ((ImagePlus) o).getID();
 	}
 
 	/** Gets the SciJava application context linked to the ImageJ 1.x instance. */
@@ -449,7 +627,7 @@ public class IJ1Helper extends AbstractContextual {
 		final Object o = IJ.runPlugIn("org.scijava.Context", "");
 		if (o == null) return null;
 		if (!(o instanceof Context)) {
-			throw new IllegalStateException("Unexpected type of context: " +
+			throw new IllegalStateException("Unexpected type of context: " + //
 				o.getClass().getName());
 		}
 		return (Context) o;
@@ -465,15 +643,15 @@ public class IJ1Helper extends AbstractContextual {
 	 * </p>
 	 * <p>
 	 * This class implements the same functionality as the MacAdapter, but in a
-	 * way that is compatible with ImageJ 2's platform service.
+	 * way that is compatible with the SciJava platform service.
 	 * </p>
 	 * <p>
 	 * Note that the {@link AppAboutEvent}, {@link AppPreferencesEvent} and
-	 * {@link AppQuitEvent} are handled separately, by the
-	 * {@link LegacyAppEventService}. See also {@link IJ1Helper#appAbout},
+	 * {@link AppQuitEvent} are handled separately, indirectly, by the
+	 * {@link LegacyImageJApp}. See also {@link IJ1Helper#appAbout},
 	 * {@link IJ1Helper#appPrefs} and {@link IJ1Helper#appQuit}.
 	 * </p>
-	 * 
+	 *
 	 * @author Johannes Schindelin
 	 */
 	private static class LegacyEventDelegator extends AbstractContextual {
@@ -487,20 +665,22 @@ public class IJ1Helper extends AbstractContextual {
 		@EventHandler
 		private void onEvent(final AppOpenFilesEvent event) {
 			if (isLegacyMode()) {
-				final List<File> files = new ArrayList<File>(event.getFiles());
+				final List<File> files = new ArrayList<>(event.getFiles());
 				for (final File file : files) {
-					new Opener().openAndAddToRecent(file.getAbsolutePath());
+					openAndAddToRecent(file);
 				}
 			}
 		}
 
 		private boolean isLegacyMode() {
-			// We call setContext() indirectly from DefaultLegacyService#initialize,
+			// We call setContext() indirectly from LegacyService#initialize,
 			// therefore legacyService might still be null at this point even if the
 			// context knows a legacy service now.
 			if (legacyService == null) {
 				final Context context = getContext();
-				if (context != null) legacyService = context.getService(LegacyService.class);
+				if (context != null) {
+					legacyService = context.getService(LegacyService.class);
+				}
 			}
 			return legacyService != null && legacyService.isLegacyMode();
 		}
@@ -512,38 +692,41 @@ public class IJ1Helper extends AbstractContextual {
 	public static void subscribeEvents(final Context context) {
 		if (context == null) {
 			eventDelegator = null;
-		} else {
+		}
+		else {
 			eventDelegator = new LegacyEventDelegator();
 			eventDelegator.setContext(context);
 		}
 	}
 
-	static void run(Class<?> c) {
+	static void run(final Class<?> c) {
 		IJ.resetEscape();
 		if (PlugIn.class.isAssignableFrom(c)) {
 			try {
 				final PlugIn plugin = (PlugIn) c.newInstance();
 				plugin.run("");
-			} catch (Exception e) {
-				throw e instanceof RuntimeException ? (RuntimeException) e
-						: new RuntimeException(e);
+			}
+			catch (final Exception e) {
+				throw e instanceof RuntimeException ? //
+					(RuntimeException) e : new RuntimeException(e);
 			}
 			return;
 		}
 		if (PlugInFilter.class.isAssignableFrom(c)) {
 			try {
 				final PlugInFilter plugin = (PlugInFilter) c.newInstance();
-				ImagePlus image = WindowManager.getCurrentImage();
+				final ImagePlus image = WindowManager.getCurrentImage();
 				if (image != null && image.isLocked()) {
-					if (!IJ.showMessageWithCancel("Unlock image?", "The image '" + image.getTitle()
-							+ "'appears to be locked... Unlock?"))
-						return;
+					final String msg = "The image '" + //
+						image.getTitle() + "' appears to be locked... Unlock?";
+					if (!IJ.showMessageWithCancel("Unlock image?", msg)) return;
 					image.unlock();
 				}
 				new PlugInFilterRunner(plugin, c.getName(), "");
-			} catch (Exception e) {
+			}
+			catch (final Exception e) {
 				throw e instanceof RuntimeException ? (RuntimeException) e
-						: new RuntimeException(e);
+					: new RuntimeException(e);
 			}
 			return;
 		}
@@ -557,20 +740,21 @@ public class IJ1Helper extends AbstractContextual {
 	 */
 	public synchronized void addMenuItems() {
 		if (menuInitialized) return;
-		final Map<String, ModuleInfo> modules =
+		final Map<String, ModuleInfo> modules = //
 			legacyService.getScriptsAndNonLegacyCommands();
 		@SuppressWarnings("unchecked")
 		final Hashtable<String, String> ij1Commands = Menus.getCommands();
-		final ImageJ ij1 = getIJ();
+		final ImageJ ij1 = hasInstance() ? IJ.getInstance() : null;
 		final IJ1MenuWrapper wrapper = ij1 == null ? null : new IJ1MenuWrapper(ij1);
 		class Item implements Comparable<Item> {
+
 			private double weight;
 			private MenuPath path;
 			private String name, identifier;
 			private ModuleInfo info;
 
 			@Override
-			public int compareTo(Item o) {
+			public int compareTo(final Item o) {
 				if (weight != o.weight) return Double.compare(weight, o.weight);
 				return compare(path, o.path);
 			}
@@ -588,7 +772,7 @@ public class IJ1Helper extends AbstractContextual {
 				return 0;
 			}
 		}
-		final List<Item> items = new ArrayList<Item>();
+		final List<Item> items = new ArrayList<>();
 		for (final Entry<String, ModuleInfo> entry : modules.entrySet()) {
 			final String key = entry.getKey();
 			final ModuleInfo info = entry.getValue();
@@ -608,9 +792,9 @@ public class IJ1Helper extends AbstractContextual {
 		Collections.sort(items);
 		for (final Item item : items) {
 			if (ij1Commands.containsKey(item.name)) {
-				log.info("Overriding " + item.name
-					+ "; identifier: " + item.identifier
-					+ "; jar: " + ClassUtils.getLocation(item.info.getDelegateClassName()));
+				log.info("Overriding " + item.name + //
+					"; identifier: " + item.identifier + //
+					"; jar: " + ClassUtils.getLocation(item.info.getDelegateClassName()));
 				if (wrapper != null) try {
 					wrapper.create(item.path, true);
 				}
@@ -635,10 +819,11 @@ public class IJ1Helper extends AbstractContextual {
 	 * {@link MenuBar}.
 	 */
 	private static class IJ1MenuWrapper {
+
 		final ImageJ ij1;
 		final MenuBar menuBar = Menus.getMenuBar();
-		final Map<String, Menu> structure = new HashMap<String, Menu>();
-		final Set<Menu> separators = new HashSet<Menu>();
+		final MenuCache menuCache = new MenuCache();
+		final Set<Menu> separators = new HashSet<>();
 
 		private IJ1MenuWrapper(final ImageJ ij1) {
 			this.ij1 = ij1;
@@ -647,15 +832,15 @@ public class IJ1Helper extends AbstractContextual {
 		/**
 		 * Creates a {@link MenuItem} matching the structure of the provided path.
 		 * Expected path structure is:
-		 * <p>
-		 * <ul>Level1 > Level2 > ... > Leaf entry</ul>
-		 * </p>
+		 * <ul>
+		 * <li>Level1 > Level2 > ... > Leaf entry</li>
+		 * </ul>
 		 * <p>
 		 * For example, a valid path would be:
 		 * </p>
-		 * <p>
-		 * <ul>Edit > Options > ImageJ2 plugins > Discombobulator</ul>
-		 * </p>
+		 * <ul>
+		 * <li>Edit > Options > ImageJ2 plugins > Discombobulator</li>
+		 * </ul>
 		 */
 		private MenuItem create(final MenuPath path, final boolean reuseExisting) {
 			// Find the menu structure where we can insert our command.
@@ -686,29 +871,27 @@ public class IJ1Helper extends AbstractContextual {
 		/**
 		 * Helper method to look up special cases for menu weighting
 		 */
-		private int getIndex(Menu menu, String label) {
-					// Place export sub-menu after import sub-menu
+		private int getIndex(final Menu menu, final String label) {
+			// Place export sub-menu after import sub-menu
 			if (menu.getLabel().equals("File") && label.equals("Export")) {
-				for (int i=0; i<menu.getItemCount(); i++) {
+				for (int i = 0; i < menu.getItemCount(); i++) {
 					final MenuItem menuItem = menu.getItem(i);
 					if (menuItem.getLabel().equals("Import")) return i + 1;
 				}
 			}
 
-			//TODO pass and use actual command weight from IJ2.. maybe?
+			// TODO pass and use actual command weight from IJ2.. maybe?
 			// No special case: append to end of menu
 			return menu.getItemCount();
 		}
 
-		/**
-		 * Recursive helper method to builds the final {@link Menu} structure.
-		 */
-		private Menu getParentMenu(final MenuPath menuPath, int depth) {
+		/** Recursive helper method to build the final {@link Menu} structure. */
+		private Menu getParentMenu(final MenuPath menuPath, final int depth) {
 			final MenuEntry currentItem = menuPath.get(depth);
 			final String currentLabel = currentItem.getName();
 			// Check to see if we already know the menu associated with the desired
 			// label/path
-			final Menu cached = structure.get(currentLabel);
+			final Menu cached = menuCache.get(menuPath, depth);
 			if (cached != null) return cached;
 
 			// We are at the root of the menu, so see if we have a matching menu
@@ -716,7 +899,7 @@ public class IJ1Helper extends AbstractContextual {
 				// Special case check the help menu
 				if ("Help".equals(currentLabel)) {
 					final Menu menu = menuBar.getHelpMenu();
-					structure.put(currentLabel, menu);
+					menuCache.put(menuPath, depth, menu);
 					return menu;
 				}
 				// Check the other menus of the menu bar to see if our desired label
@@ -724,14 +907,14 @@ public class IJ1Helper extends AbstractContextual {
 				for (int i = 0; i < menuBar.getMenuCount(); i++) {
 					final Menu menu = menuBar.getMenu(i);
 					if (currentLabel.equals(menu.getLabel())) {
-						structure.put(currentLabel, menu);
+						menuCache.put(menuPath, depth, menu);
 						return menu;
 					}
 				}
 				// Didn't find a match so we have to create a new menu entry
 				final Menu menu = new Menu(currentLabel);
 				menuBar.add(menu);
-				structure.put(currentLabel, menu);
+				menuCache.put(menuPath, depth, menu);
 				return menu;
 			}
 			final Menu parent = getParentMenu(menuPath, depth - 1);
@@ -743,12 +926,12 @@ public class IJ1Helper extends AbstractContextual {
 					if (item instanceof Menu) {
 						// Found a menu entry that matches our desired label, so return
 						final Menu menu = (Menu) item;
-						structure.put(currentLabel, menu);
+						menuCache.put(menuPath, depth, menu);
 						return menu;
 					}
 					// Found a match but it was an existing non-menu item, so our menu
 					// structure is invalid.
-					//TODO consider mangling the IJ2 menu name instead...
+					// TODO consider mangling the IJ2 menu name instead...
 					throw new IllegalArgumentException("Not a menu: " + currentLabel);
 				}
 			}
@@ -761,19 +944,35 @@ public class IJ1Helper extends AbstractContextual {
 			final Menu menu = new Menu(currentLabel);
 			parent.insert(menu, getIndex(parent, menu.getLabel()));
 
-			structure.put(currentLabel, menu);
+			menuCache.put(menuPath, depth, menu);
 			return menu;
 		}
 
 	}
 
-	/**
-	 * Evaluates the specified macro.
-	 * 
-	 * @param macro the macro to evaluate
-	 * @return the return value
-	 */
-	public String runMacro(final String macro) {
+	private static class MenuCache {
+
+		private final Map<String, Menu> map = new HashMap<>();
+
+		public void put(final MenuPath menuPath, final int depth, final Menu menu) {
+			map.put(key(menuPath, depth), menu);
+		}
+
+		public Menu get(final MenuPath menuPath, final int depth) {
+			return map.get(key(menuPath, depth));
+		}
+
+		private String key(final MenuPath menuPath, final int depth) {
+			final StringBuilder sb = new StringBuilder();
+			for (int i = 0; i <= depth; i++) {
+				sb.append(menuPath.get(i).getName());
+				sb.append("\n"); // NB: an unambiguous separator
+			}
+			return sb.toString();
+		}
+	}
+
+	private <T> T runMacroFriendly(final Callable<T> call) {
 		if (EventQueue.isDispatchThread()) {
 			throw new IllegalStateException("Cannot run macro from the EDT!");
 		}
@@ -782,50 +981,109 @@ public class IJ1Helper extends AbstractContextual {
 		try {
 			// to make getOptions() work
 			if (!name.startsWith("Run$_")) thread.setName("Run$_" + name);
-			return IJ.runMacro(macro);
+			// to make Macro.abort() work
+			if (!name.endsWith("Macro$")) thread.setName(thread.getName() + "Macro$");
+			return call.call();
+		}
+		catch (final RuntimeException e) {
+			throw e;
+		}
+		catch (final Exception e) {
+			throw new RuntimeException(e);
 		}
 		finally {
 			thread.setName(name);
+			// HACK: Try to null out the ij.macro.Interpreter, just in case.
+			// See: http://fiji.sc/bugzilla/show_bug.cgi?id=1266
+			try {
+				final Method m = Interpreter.class.getDeclaredMethod("setInstance",
+					Interpreter.class);
+				m.setAccessible(true);
+				m.invoke(null, new Object[] { null });
+			}
+			catch (final NoSuchMethodException | IllegalAccessException
+					| InvocationTargetException exc)
+			{
+				log.error(exc);
+			}
 		}
 	}
 
 	/**
+	 * Evaluates the specified command.
+	 *
+	 * @param command the command to execute
+	 */
+	public void run(final String command) {
+		runMacroFriendly(new Callable<Void>() {
+
+			@Override
+			public Void call() throws Exception {
+				IJ.run(command);
+				return null;
+			}
+		});
+	}
+
+	/**
 	 * Evaluates the specified macro.
-	 * 
+	 *
+	 * @param macro the macro to evaluate
+	 * @return the return value
+	 */
+	public String runMacro(final String macro) {
+		return runMacroFriendly(new Callable<String>() {
+
+			@Override
+			public String call() throws Exception {
+				return IJ.runMacro(macro);
+			}
+		});
+	}
+
+	/**
+	 * Evaluates the specified macro.
+	 *
 	 * @param path the macro file to evaluate
 	 * @param arg the macro argument
 	 * @return the return value
 	 */
 	public String runMacroFile(final String path, final String arg) {
-		if (EventQueue.isDispatchThread()) {
-			throw new IllegalStateException("Cannot run macro from the EDT!");
-		}
-		final Thread thread = Thread.currentThread();
-		final String name = thread.getName();
-		try {
-			// to make getOptions() work
-			if (!name.startsWith("Run$_")) thread.setName("Run$_" + name);
-			return IJ.runMacroFile(path, arg);
-		}
-		finally {
-			thread.setName(name);
-		}
+		return runMacroFriendly(new Callable<String>() {
+
+			@Override
+			public String call() throws Exception {
+				return IJ.runMacroFile(path, arg);
+			}
+		});
 	}
 
 	/**
 	 * Opens an image using ImageJ 1.x.
-	 * 
+	 *
 	 * @param path the image file to open
 	 * @return the image
 	 */
 	public Object openImage(final String path) {
-		return IJ.openImage(path);
+		return openImage(path, false);
+	}
+
+	/**
+	 * Opens an image using ImageJ 1.x.
+	 *
+	 * @param path the image file to open
+	 * @return the image
+	 */
+	public Object openImage(final String path, final boolean show) {
+		final ImagePlus imp = IJ.openImage(path);
+		if (show && imp != null) imp.show();
+		return imp;
 	}
 
 	/**
 	 * Opens a path using ImageJ 1.x, bypassing the (javassisted) IJ utility
 	 * class.
-	 * 
+	 *
 	 * @param path the image file to open
 	 */
 	public void openPathDirectly(final String path) {
@@ -834,7 +1092,7 @@ public class IJ1Helper extends AbstractContextual {
 
 	/**
 	 * Enables or disables ImageJ 1.x' debug mode.
-	 * 
+	 *
 	 * @param debug whether to show debug messages or not
 	 */
 	public void setDebugMode(final boolean debug) {
@@ -843,17 +1101,17 @@ public class IJ1Helper extends AbstractContextual {
 
 	/**
 	 * Delegate exception handling to ImageJ 1.x.
-	 * 
+	 *
 	 * @param e the exception to handle
 	 */
-	public void handleException(Throwable e) {
+	public void handleException(final Throwable e) {
 		IJ.handleException(e);
-		
+
 	}
 
 	/**
 	 * Ask ImageJ 1.x whether it thinks whether the Shift key is held down.
-	 * 
+	 *
 	 * @return whether the Shift key is considered <i>down</i>
 	 */
 	public boolean shiftKeyDown() {
@@ -862,16 +1120,17 @@ public class IJ1Helper extends AbstractContextual {
 
 	/**
 	 * Delegates to ImageJ 1.x' {@link Macro#getOptions()} function.
-	 * 
+	 *
 	 * @return the macro options, or null
 	 */
-	public Object getOptions() {
-		return Macro.getOptions();
+	public String getOptions() {
+		final String options = Macro.getOptions();
+		return options == null ? "" : options;
 	}
 
 	/**
 	 * Delegates to ImageJ 1.x' {@link Macro#setOptions(String)} function.
-	 * 
+	 *
 	 * @param options the macro options, or null to reset
 	 */
 	public void setOptions(final String options) {
@@ -892,6 +1151,89 @@ public class IJ1Helper extends AbstractContextual {
 		}
 	}
 
+	/** Sets OpenDialog's default directory */
+	public void setDefaultDirectory(final File directory) {
+		OpenDialog.setDefaultDirectory(directory.getPath());
+	}
+
+	/** Uses ImageJ 1.x' OpenDialog */
+	public File openDialog(final String title) {
+		return openDialog(title, null);
+	}
+
+	/** Uses ImageJ 1.x' OpenDialog */
+	public File openDialog(final String title, final File file) {
+		final String defaultDir = file == null ? null : file.getParent();
+		final String defaultName = file == null ? null : file.getName();
+		final OpenDialog openDialog = //
+			new OpenDialog(title, defaultDir, defaultName);
+		final String directory = openDialog.getDirectory();
+
+		// NB: As a side effect, ImageJ1 normally appends the selected
+		// file as a macro parameter when the getFileName() is called!
+		// We need to suppress that problematic behavior here; see:
+		// https://github.com/scijava/scijava-common/issues/235
+		final boolean recording = Recorder.record;
+		Recorder.record = false;
+		final String fileName = openDialog.getFileName();
+		Recorder.record = recording;
+
+		if (directory != null && fileName != null) {
+			return new File(directory, fileName);
+		}
+		return null;
+	}
+
+	/** Uses ImageJ 1.x' SaveDialog */
+	public File saveDialog(final String title, final File file,
+		final String extension)
+	{
+		// Use ImageJ1's SaveDialog.
+		final String defaultName;
+		if (file == null) defaultName = null;
+		else {
+			final int dotIndex = file.getName().indexOf('.');
+			defaultName = dotIndex > 0 ? //
+				file.getName().substring(0, dotIndex) : file.getName();
+		}
+		final SaveDialog saveDialog = new SaveDialog(title, defaultName, extension);
+		final String directory = saveDialog.getDirectory();
+
+		// NB: As a side effect, ImageJ1 normally appends the selected
+		// file as a macro parameter when the getFileName() is called!
+		// We need to suppress that problematic behavior here; see:
+		// https://github.com/scijava/scijava-common/issues/235
+		final boolean recording = Recorder.record;
+		Recorder.record = false;
+		final String fileName = saveDialog.getFileName();
+		Recorder.record = recording;
+
+		if (directory != null && fileName != null) {
+			return new File(directory, fileName);
+		}
+		return null;
+	}
+
+	/** Chooses a directory using ImageJ 1.x' directory chooser. */
+	public String getDirectory(final String title, final File file) {
+		if (file != null) {
+			final String defaultDir = //
+				file.isDirectory() ? file.getPath() : file.getParent();
+			if (defaultDir != null) DirectoryChooser.setDefaultDirectory(defaultDir);
+		}
+
+		// NB: As a side effect, ImageJ1 normally appends the selected
+		// directory as a macro parameter when getDirectory() is called!
+		// We need to suppress that problematic behavior here; see:
+		// https://github.com/scijava/scijava-common/issues/235
+		final boolean recording = Recorder.record;
+		Recorder.record = false;
+		final String directory = new DirectoryChooser(title).getDirectory();
+		Recorder.record = recording;
+
+		return directory;
+	}
+
 	/** Handles display of the ImageJ 1.x preferences. */
 	public void appPrefs() {
 		if (legacyService.isLegacyMode()) {
@@ -905,6 +1247,7 @@ public class IJ1Helper extends AbstractContextual {
 	private void closeImageWindows() {
 		// TODO: Consider using ThreadService#invoke to simplify this logic.
 		final Runnable run = new Runnable() {
+
 			@Override
 			public void run() {
 				// close out all image windows, without dialog prompts
@@ -940,7 +1283,7 @@ public class IJ1Helper extends AbstractContextual {
 	 * {@link WindowManager#getNonImageWindows()}.
 	 */
 	private void disposeNonImageFrames() {
-		for (Frame frame : WindowManager.getNonImageWindows()) {
+		for (final Frame frame : WindowManager.getNonImageWindows()) {
 			frame.dispose();
 		}
 	}
@@ -960,7 +1303,7 @@ public class IJ1Helper extends AbstractContextual {
 	private void disposeOtherNonImageWindows() {
 		// NB: As of v1.49b, getNonImageTitles is not restricted to Frames,
 		// so we can use it to iterate through the available windows.
-		for (String title : WindowManager.getNonImageTitles()) {
+		for (final String title : WindowManager.getNonImageTitles()) {
 			final Window window = WindowManager.getWindow(title);
 			// NB: We can NOT set these windows as active and run the Commands
 			// plugin with argument "close", because the default behavior is to
@@ -969,6 +1312,24 @@ public class IJ1Helper extends AbstractContextual {
 			WindowManager.removeWindow(window);
 			window.dispose();
 		}
+	}
+
+	/** Escapes the given string according to the Java language specification. */
+	private String escape(final String s) {
+		// NB: It would be nice to use the StringEscapeUtils.escapeJava method of
+		// Apache Commons Lang, but we eschew it for now to avoid the dependency.
+
+		// escape quotes and backslashes
+		String escaped = s.replaceAll("([\"\\\\])", "\\\\$1");
+
+		// escape special characters
+		escaped = escaped.replaceAll("\b", "\\\\b");
+		escaped = escaped.replaceAll("\n", "\\\\n");
+		escaped = escaped.replaceAll("\t", "\\\\t");
+		escaped = escaped.replaceAll("\f", "\\\\f");
+		escaped = escaped.replaceAll("\r", "\\\\r");
+
+		return escaped;
 	}
 
 }

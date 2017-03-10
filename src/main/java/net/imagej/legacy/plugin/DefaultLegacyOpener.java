@@ -2,7 +2,7 @@
  * #%L
  * ImageJ software for multidimensional image processing and analysis.
  * %%
- * Copyright (C) 2009 - 2014 Board of Regents of the University of
+ * Copyright (C) 2009 - 2017 Board of Regents of the University of
  * Wisconsin-Madison, Broad Institute of MIT and Harvard, and Max Planck
  * Institute of Molecular Cell Biology and Genetics.
  * %%
@@ -40,8 +40,9 @@ import java.io.IOException;
 import java.util.concurrent.Future;
 
 import net.imagej.Dataset;
+import net.imagej.display.DefaultImageDisplay;
 import net.imagej.display.ImageDisplay;
-import net.imagej.legacy.DefaultLegacyService;
+import net.imagej.legacy.LegacyService;
 import net.imagej.legacy.IJ1Helper;
 import net.imagej.legacy.ImageJ2Options;
 import net.imagej.legacy.LegacyImageMap;
@@ -76,7 +77,7 @@ import org.scijava.service.Service;
 @Plugin(type = LegacyOpener.class, priority = Priority.LOW_PRIORITY)
 public class DefaultLegacyOpener implements LegacyOpener {
 
-	private DefaultLegacyService legacyService;
+	private LegacyService legacyService;
 	private DisplayService displayService;
 	private ModuleService moduleService;
 	private CommandService commandService;
@@ -92,7 +93,7 @@ public class DefaultLegacyOpener implements LegacyOpener {
 		final Context c = IJ1Helper.getLegacyContext();
 		ImagePlus imp = null;
 
-		legacyService = getCached(legacyService, DefaultLegacyService.class, c);
+		legacyService = getCached(legacyService, LegacyService.class, c);
 		displayService = getCached(displayService, DisplayService.class, c);
 		moduleService = getCached(moduleService, ModuleService.class, c);
 		commandService = getCached(commandService, CommandService.class, c);
@@ -146,16 +147,27 @@ public class DefaultLegacyOpener implements LegacyOpener {
 				final Dataset d = (Dataset) data;
 
 				if (displayResult) {
-					final ImageDisplay imageDisplay =
-						(ImageDisplay) displayService.createDisplay(d);
+
+					// --- HACK ---
+					// We should be using the DisplayService here, which would
+					// publish a DisplayCreatedEvent. However right now that
+					// causes deadlock issues due to the EventBus sharing the AWT EDT.
+					// If the ThreadService is converted to using its own off-EDT dedicated
+					// EventBus we can go back to the DisplayService mechanism.
+					// See https://github.com/scijava/scijava-common/issues/144
+
+					final ImageDisplay imageDisplay = new DefaultImageDisplay();
+					imageDisplay.setContext(c);
+					imageDisplay.display(d);
 
 					final LegacyImageMap imageMap = legacyService.getImageMap();
-					imp = imageMap.lookupImagePlus(imageDisplay);
-					if (imp == null) {
-						// we're in headless mode
-						imp = imageMap.registerDisplay(imageDisplay);
-						imp.show();
-					}
+					imp = imageMap.registerDisplay(imageDisplay);
+					imp.setTitle(d.getName());
+					imp.show();
+					// --- HACK ---
+					// We're not leaning on the IJ1 Framework as much so we have
+					// to reset this field after calling show, which sets it false.
+					legacyService.getIJ1Helper().setCheckNameDuplicates(true);
 
 					legacyService.getIJ1Helper().updateRecentMenu(
 						((Dataset) data).getImgPlus().getSource());
@@ -164,6 +176,8 @@ public class DefaultLegacyOpener implements LegacyOpener {
 					// Register the dataset, without creating a display
 					imp = legacyService.getImageMap().registerDataset(d);
 				}
+				// TODO remove usage of SCIFIO classes after migrating ImageMetadata
+				// framework to imagej-common
 				// Set information about how this dataset was opened.
 				String loadingInfo = "";
 				App app = appService.getApp(SCIFIOApp.NAME);

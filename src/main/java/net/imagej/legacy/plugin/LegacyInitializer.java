@@ -2,7 +2,7 @@
  * #%L
  * ImageJ software for multidimensional image processing and analysis.
  * %%
- * Copyright (C) 2009 - 2014 Board of Regents of the University of
+ * Copyright (C) 2009 - 2017 Board of Regents of the University of
  * Wisconsin-Madison, Broad Institute of MIT and Harvard, and Max Planck
  * Institute of Molecular Cell Biology and Genetics.
  * %%
@@ -52,7 +52,7 @@ import org.scijava.ui.UIService;
 public class LegacyInitializer implements Runnable {
 
 	private final static ThreadLocal<Class<?>> semaphore =
-			new ThreadLocal<Class<?>>();
+			new ThreadLocal<>();
 
 	@Override
 	public void run() {

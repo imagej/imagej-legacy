@@ -2,7 +2,7 @@
  * #%L
  * ImageJ software for multidimensional image processing and analysis.
  * %%
- * Copyright (C) 2009 - 2014 Board of Regents of the University of
+ * Copyright (C) 2009 - 2017 Board of Regents of the University of
  * Wisconsin-Madison, Broad Institute of MIT and Harvard, and Max Planck
  * Institute of Molecular Cell Biology and Genetics.
  * %%
@@ -36,7 +36,6 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import org.scijava.ItemVisibility;
 import org.scijava.app.AppService;
 import org.scijava.command.Interactive;
 import org.scijava.display.DisplayService;
@@ -70,48 +69,33 @@ public class ImageJ2Options extends OptionsPlugin implements Interactive {
 
 	// -- Fields --
 
-	// TODO: Use <html> and <br> to put the following warning into a single
-	// parameter. There seems to be a bug with at the moment, though...
-
-	@Parameter(visibility = ItemVisibility.MESSAGE)
-	private final String warning1 =
-		"These options enable beta ImageJ2 functionality.";
-
-	@Parameter(visibility = ItemVisibility.MESSAGE)
-	private final String warning2 =
-		"You can turn them on for testing, but they are still buggy,";
-
-	@Parameter(visibility = ItemVisibility.MESSAGE)
-	private final String warning3 =
-		"and have not yet been optimized for performance.";
-
-	@Parameter(label = "Enable ImageJ2 data structures",
-		description = "<html>Whether to synchronize ImageJ 1.x and ImageJ2 data "
-			+ "structures.<br>When enabled, commands that use the ImageJ2 API "
-			+ "(net.imagej)<br>will function, but with an impact on performance "
-			+ "and stability.", callback = "run")
-	private boolean syncEnabled = false;
-
 	/**
 	 * If true, the <a href="http://imagej.net/SciJava_Common">SciJava Common</a>
 	 * {@link IOService} will be used to handle {@code File > Open} IJ1 calls.
 	 * This system leverages the <a href="http://imagej.net/SCIFIO">SCIFIO</a>
 	 * library to open image files.
 	 */
-	@Parameter(
-		label = "Use SCIFIO when opening files",
-		description = "<html>Whether to use ImageJ2's file I/O mechanism when "
-			+ "opening files.<br>Image files will be opened using the SCIFIO library "
-			+ "(SCientific Image<br>Format Input and Output), which provides truly "
-			+ "extensible support for<br>reading and writing image file formats.",
+	@Parameter(label = "Use SCIFIO when opening files (BETA!)",
+		description = "<html>Whether to use ImageJ2's file I/O mechanism when " +
+			"opening files.<br>Image files will be opened using the SCIFIO library " +
+			"(SCientific Image<br>Format Input and Output), which provides truly " +
+			"extensible support for<br>reading and writing image file formats.",
 		callback = "run")
 	private boolean sciJavaIO = false;
+
+	@Parameter(label = "SciJava log level",
+		description = "<html>Log level for SciJava",
+		initializer = "initializeLogLevel", //
+		callback = "setLogLevel", //
+		choices = { "ERROR", "WARN", "INFO", "DEBUG", "TRACE" }, //
+		persist = false)
+	private String logLevel;
 
 	@Parameter(label = "What is ImageJ2?", persist = false, callback = "help")
 	private Button help;
 
 	@Parameter
-	private DefaultLegacyService legacyService;
+	private LegacyService legacyService;
 
 	@Parameter(required = false)
 	private WelcomeService welcomeService;
@@ -149,8 +133,24 @@ public class ImageJ2Options extends OptionsPlugin implements Interactive {
 
 	// -- Option accessors --
 
+	/**
+	 * Gets whether to synchronize ImageJ 1.x and ImageJ2 data structures.
+	 * <p>
+	 * This is an experimental feature that proactively syncs objects between IJ1
+	 * (e.g., {@link ij.ImagePlus}) and IJ2 (e.g., {@link net.imagej.Dataset})
+	 * data structures.
+	 * </p>
+	 * <p>
+	 * <b>Warning:</b> this feature currently has serious bugs, and enabling it
+	 * will have a serious impact on performance and stability!
+	 * </p>
+	 * <p>
+	 * If you need to enable it for testing or development purposes, do so by
+	 * setting the {@code imagej.legacy.sync} system property.
+	 * </p>
+	 */
 	public boolean isSyncEnabled() {
-		return syncEnabled;
+		return Boolean.getBoolean("imagej.legacy.sync");
 	}
 
 	public boolean isSciJavaIO() {
@@ -207,5 +207,57 @@ public class ImageJ2Options extends OptionsPlugin implements Interactive {
 		else {
 			System.err.println(message);
 		}
+	}
+
+	@SuppressWarnings("unused")
+	private void initializeLogLevel() {
+		logLevel = parseLogLevel(log.getLevel());
+	}
+
+	@SuppressWarnings("unused")
+	private void setLogLevel() {
+		log.setLevel(parseLogLevel(logLevel));
+	}
+
+	/**
+	 * Parses a log level from a {@code String}.
+	 * 
+	 * @param level
+	 * @return the {@code int} associated with the level
+	 */
+	private int parseLogLevel(final String level) {
+		switch (level) {
+			case "NONE": return LogService.NONE;
+			case "ERROR": return LogService.ERROR;
+			case "WARN": return LogService.WARN;
+			case "INFO": return LogService.INFO;
+			case "DEBUG": return LogService.DEBUG;
+			case "TRACE": return LogService.TRACE;
+		}
+
+		return LogService.WARN;
+	}
+
+	/**
+	 * Parses a log level from an {@code int}.
+	 * 
+	 * @param level
+	 * @return the {@code String} associated with the level
+	 */
+	private String parseLogLevel(int level) {
+		if (level == LogService.NONE)
+			return "NONE";
+		if (level == LogService.ERROR)
+			return "ERROR";
+		if (level == LogService.WARN)
+			return "WARN";
+		if (level == LogService.INFO)
+			return "INFO";
+		if (level == LogService.DEBUG)
+			return "DEBUG";
+		if (level == LogService.TRACE)
+			return "TRACE";
+
+		return "" + level;
 	}
 }

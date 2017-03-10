@@ -2,7 +2,7 @@
  * #%L
  * ImageJ software for multidimensional image processing and analysis.
  * %%
- * Copyright (C) 2009 - 2014 Board of Regents of the University of
+ * Copyright (C) 2009 - 2017 Board of Regents of the University of
  * Wisconsin-Madison, Broad Institute of MIT and Harvard, and Max Planck
  * Institute of Molecular Cell Biology and Genetics.
  * %%
@@ -35,10 +35,10 @@ import ij.ImagePlus;
 import ij.WindowManager;
 import ij.macro.Interpreter;
 import net.imagej.Dataset;
+import net.imagej.axis.Axes;
+import net.imagej.axis.AxisType;
 import net.imglib2.img.basictypeaccess.PlanarAccess;
-import net.imglib2.meta.Axes;
-import net.imglib2.meta.AxisType;
-import net.imglib2.meta.IntervalUtils;
+import net.imglib2.util.Intervals;
 import net.imglib2.type.numeric.RealType;
 
 /**
@@ -123,7 +123,7 @@ public class LegacyUtils {
 		final int zIndex = ds.dimensionIndex(Axes.Z);
 		final int cIndex = ds.dimensionIndex(Axes.CHANNEL);
 
-		final long[] dims = IntervalUtils.getDims(ds);
+		final long[] dims = Intervals.dimensionsAsLongArray(ds);
 
 		final long xCount = xIndex < 0 ? 1 : dims[xIndex];
 		final long yCount = yIndex < 0 ? 1 : dims[yIndex];

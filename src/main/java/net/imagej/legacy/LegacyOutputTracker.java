@@ -2,7 +2,7 @@
  * #%L
  * ImageJ software for multidimensional image processing and analysis.
  * %%
- * Copyright (C) 2009 - 2014 Board of Regents of the University of
+ * Copyright (C) 2009 - 2017 Board of Regents of the University of
  * Wisconsin-Madison, Broad Institute of MIT and Harvard, and Max Planck
  * Institute of Molecular Cell Biology and Genetics.
  * %%
@@ -64,7 +64,7 @@ public class LegacyOutputTracker {
 	 * {@link ThreadGroup}.
 	 */
 	private static HashMap<ThreadGroup, DefaultOutputTracker> trackers =
-		new HashMap<ThreadGroup, DefaultOutputTracker>();
+		new HashMap<>();
 
 	private static OutputTracker nullTracker = new NullOutputTracker();
 	
@@ -257,13 +257,13 @@ public class LegacyOutputTracker {
 		 * Used to provide the list of output {@link ImagePlus}es associated with a
 		 * {@link LegacyCommand}'s {@link ThreadGroup}.
 		 */
-		private Set<ImagePlus> outputs = new HashSet<ImagePlus>();
+		private Set<ImagePlus> outputs = new HashSet<>();
 
 		/**
 		 * Used to provide the list of closed {@link ImagePlus}es associated with a
 		 * {@link LegacyCommand}'s {@link ThreadGroup}.
 		 */
-		private Set<ImagePlus> closed = new HashSet<ImagePlus>();
+		private Set<ImagePlus> closed = new HashSet<>();
 
 		// -- instance public interface --
 

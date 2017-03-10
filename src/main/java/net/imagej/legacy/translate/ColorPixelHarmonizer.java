@@ -2,7 +2,7 @@
  * #%L
  * ImageJ software for multidimensional image processing and analysis.
  * %%
- * Copyright (C) 2009 - 2014 Board of Regents of the University of
+ * Copyright (C) 2009 - 2017 Board of Regents of the University of
  * Wisconsin-Madison, Broad Institute of MIT and Harvard, and Max Planck
  * Institute of Molecular Cell Biology and Genetics.
  * %%
@@ -34,11 +34,11 @@ package net.imagej.legacy.translate;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.process.ImageProcessor;
-import io.scif.util.FormatTools;
 import net.imagej.Dataset;
+import net.imagej.axis.Axes;
 import net.imglib2.RandomAccess;
-import net.imglib2.meta.Axes;
 import net.imglib2.type.numeric.RealType;
+import net.imglib2.util.IntervalIndexer;
 
 /**
  * Supports bidirectional synchronization between color {@link ImagePlus}es and
@@ -222,10 +222,14 @@ public class ColorPixelHarmonizer implements DataHarmonizer {
 	private void updatePosition(RandomAccess<? extends RealType<?>> accessor,
 		long[] lengths, int index, int start)
 	{
-		long[] values = FormatTools.rasterToPosition(lengths, index);
-		for (int i=0; i<lengths.length; i++) {
-			int dim = i + start;
-			accessor.setPosition(values[i], dim);
+		// IntervalIndexer throws an exception if given an empty array.
+		if (lengths.length > 0) {
+			long[] position = new long[lengths.length];
+			IntervalIndexer.indexToPosition(index, lengths, position);
+			for (int i=0; i<lengths.length; i++) {
+				int dim = i + start;
+				accessor.setPosition(position[i], dim);
+			}
 		}
 	}
 }
