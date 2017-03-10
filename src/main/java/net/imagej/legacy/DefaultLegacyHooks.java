@@ -294,7 +294,7 @@ public class DefaultLegacyHooks extends LegacyHooks {
 		if (editor == null) return false;
 		if (path.indexOf("://") > 0) return false;
 		// if it has no extension, do not open it in the legacy editor
-		if (!path.matches(".*\\.[0-9A-Za-z]{1,4}")) return false;
+		if (!path.matches(".*\\.[0-9A-Za-z]+")) return false;
 		if (stackTraceContains(getClass().getName() + ".openInEditor(")) return false;
 		final File file = new File(path);
 		if (!file.exists()) return false;
