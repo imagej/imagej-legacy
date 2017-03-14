@@ -55,6 +55,11 @@ public class IJ1MacroLanguage extends AbstractScriptLanguage {
 	private LegacyService legacyService;
 
 	@Override
+	public List<String> getNames() {
+		return Arrays.asList("ij1", "imagej1");
+	}
+
+	@Override
 	public List<String> getExtensions() {
 		return Arrays.asList("ijm");
 	}
