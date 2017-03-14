@@ -46,6 +46,7 @@ import net.imagej.legacy.IJ1Helper;
 import org.scijava.module.ModuleItem;
 import org.scijava.script.AbstractScriptEngine;
 import org.scijava.script.ScriptModule;
+import org.scijava.util.ArrayUtils;
 
 /**
  * A JSR-223-compliant script engine for the ImageJ 1.x macro language.
@@ -54,6 +55,44 @@ import org.scijava.script.ScriptModule;
  * @author Curtis Rueden
  */
 public class IJ1MacroEngine extends AbstractScriptEngine {
+
+	private static final String[] RESERVED_WORDS = { "Array", "Dialog", "Ext",
+		"File", "Fit", "IJ", "List", "Overlay", "PI", "Plot", "Roi", "Stack",
+		"String", "abs", "acos", "asin", "atan", "atan2", "autoUpdate", "beep",
+		"bitDepth", "calibrate", "call", "changeValues", "charCodeAt", "close",
+		"cos", "d2s", "doCommand", "doWand", "drawLine", "drawOval", "drawRect",
+		"drawString", "dump", "endsWith", "eval", "exec", "exit", "exp", "fill",
+		"fillOval", "fillRect", "floodFill", "floor", "fromCharCode", "getArgument",
+		"getBoolean", "getBoundingRect", "getCursorLoc", "getDateAndTime",
+		"getDimensions", "getDirectory", "getDisplayedArea", "getFileList",
+		"getFontList", "getHeight", "getHistogram", "getImageID", "getImageInfo",
+		"getInfo", "getLine", "getList", "getLocationAndSize", "getLut",
+		"getMetadata", "getMinAndMax", "getNumber", "getPixel", "getPixelSize",
+		"getProfile", "getRawStatistics", "getResult", "getResultLabel",
+		"getResultString", "getSelectionBounds", "getSelectionCoordinates",
+		"getSliceNumber", "getStatistics", "getString", "getStringWidth",
+		"getThreshold", "getTime", "getTitle", "getValue", "getVersion",
+		"getVoxelSize", "getWidth", "getZoom", "imageCalculator", "indexOf", "is",
+		"isActive", "isKeyDown", "isNaN", "isOpen", "lastIndexOf", "lengthOf",
+		"lineTo", "log", "makeArrow", "makeEllipse", "makeLine", "makeOval",
+		"makePoint", "makePolygon", "makeRectangle", "makeSelection", "makeText",
+		"matches", "maxOf", "minOf", "moveTo", "nImages", "nResults", "nSlices",
+		"newArray", "newImage", "newMenu", "open", "parseFloat", "parseInt", "pow",
+		"print", "random", "rename", "replace", "requires", "reset",
+		"resetMinAndMax", "resetThreshold", "restoreSettings", "roiManager",
+		"round", "run", "runMacro", "save", "saveAs", "saveSettings",
+		"screenHeight", "screenWidth", "selectImage", "selectWindow",
+		"selectionContains", "selectionName", "selectionType", "setAutoThreshold",
+		"setBackgroundColor", "setBatchMode", "setColor", "setFont",
+		"setForegroundColor", "setJustification", "setKeyDown", "setLineWidth",
+		"setLocation", "setLut", "setMetadata", "setMinAndMax", "setOption",
+		"setPasteMode", "setPixel", "setRGBWeights", "setResult",
+		"setSelectionLocation", "setSelectionName", "setSlice", "setThreshold",
+		"setTool", "setVoxelSize", "setZCoordinate", "setupUndo", "showMessage",
+		"showMessageWithCancel", "showProgress", "showStatus", "showText", "sin",
+		"snapshot", "split", "sqrt", "startsWith", "substring", "tan", "toBinary",
+		"toHex", "toLowerCase", "toScaled", "toString", "toUnscaled", "toUpperCase",
+		"toolID", "updateDisplay", "updateResults", "wait", "waitForUser" };
 
 	private final IJ1Helper ij1Helper;
 	private ScriptModule module;
@@ -158,7 +197,10 @@ public class IJ1MacroEngine extends AbstractScriptEngine {
 	private void appendVar(final StringBuilder pre, //
 		final String key, final Object value)
 	{
-		if (key.matches(".*[^a-zA-Z0-9_].*")) return; // illegal identifier
+		// check for illegal identifiers
+		if (ArrayUtils.contains(RESERVED_WORDS, key)) return;
+		if (key.matches(".*[^a-zA-Z0-9_].*")) return;
+
 		if (value == null) return;
 		final Object v;
 		if (ij1Helper.isImagePlus(value)) {
