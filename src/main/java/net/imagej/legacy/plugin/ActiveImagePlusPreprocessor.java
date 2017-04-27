@@ -93,7 +93,7 @@ public class ActiveImagePlusPreprocessor extends AbstractPreprocessorPlugin {
 		final String impInput = getSingleInput(module, ImagePlus.class);
 		if (impInput != null) {
 			module.setInput(impInput, imp);
-			module.setResolved(impInput, true);
+			module.resolveInput(impInput);
 		}
 
 		// assign active ImageStack to single ImageStack input
@@ -102,7 +102,7 @@ public class ActiveImagePlusPreprocessor extends AbstractPreprocessorPlugin {
 			final ImageStack imageStack = imp.getStack();
 			if (imageStack != null) {
 				module.setInput(stackInput, imageStack);
-				module.setResolved(stackInput, true);
+				module.resolveInput(stackInput);
 			}
 		}
 
@@ -112,7 +112,7 @@ public class ActiveImagePlusPreprocessor extends AbstractPreprocessorPlugin {
 		if (ipInput != null) {
 			if (ip != null) {
 				module.setInput(ipInput, ip);
-				module.setResolved(ipInput, true);
+				module.resolveInput(ipInput);
 			}
 		}
 	}

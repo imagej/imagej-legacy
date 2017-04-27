@@ -80,7 +80,7 @@ public class MacroPreprocessor extends AbstractPreprocessorPlugin {
 			}
 			final Object converted = convertService.convert(value, type);
 			module.setInput(name, converted);
-			module.setResolved(name, true);
+			module.resolveInput(name);
 		}
 	}
 
