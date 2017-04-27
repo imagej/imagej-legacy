@@ -71,8 +71,8 @@ public class MergedRgbVirtualStack extends VirtualStack {
 	 * Constructs a MergedRgbVirtualStack from a {@link Dataset}. The Dataset must
 	 * return true when querying isRGBMerged(). Thus the data must have 3 channels
 	 * and be backed by unsigned 8-bit data. Additional checking is done for
-	 * validity of total plane count (<= Integer.MAX_VALUE) and the size of the
-	 * planes (also <= Integer.MAX_VALUE).
+	 * validity of total plane count (&lt;= {@link Integer#MAX_VALUE}) and the
+	 * size of the planes (also &lt;= {@link Integer#MAX_VALUE}).
 	 * 
 	 * @param ds The merged color Dataset to wrap
 	 */
@@ -173,7 +173,7 @@ public class MergedRgbVirtualStack extends VirtualStack {
 	@Override
 	public void addSlice(String sliceLabel, Object pixels) {}
 
-	/** Deletes the specified slice, were 1<=n<=nslices. */
+	/** Deletes the specified slice, where {@code 1<=n<=nslices}. */
 	@Override
 	public void deleteSlice(final int n) {}
 
@@ -188,14 +188,17 @@ public class MergedRgbVirtualStack extends VirtualStack {
 	@Override
 	public void update(final ImageProcessor ip) {}
 
-	/** Returns the pixel array for the specified slice, were 1<=n<=nslices. */
+	/**
+	 * Returns the pixel array for the specified slice, where
+	 * {@code 1<=n<=nslices}.
+	 */
 	@Override
 	public Object getPixels(final int n) {
 		return getProcessor(n).getPixels();
 	}
 
 	/**
-	 * Assigns a pixel array to the specified slice, were 1<=n<=nslices.
+	 * Assigns a pixel array to the specified slice, where {@code 1<=n<=nslices}.
 	 */
 	@Override
 	public void setPixels(final Object pixels, final int n) {}
@@ -222,9 +225,9 @@ public class MergedRgbVirtualStack extends VirtualStack {
 	}
 
 	/**
-	 * Returns the label of the specified slice, were 1<=n<=nslices. Returns null
-	 * if the slice does not have a label. For DICOM and FITS stacks, labels may
-	 * contain header information.
+	 * Returns the label of the specified slice, where {@code 1<=n<=nslices}.
+	 * Returns null if the slice does not have a label. For DICOM and FITS stacks,
+	 * labels may contain header information.
 	 */
 	@Override
 	public String getSliceLabel(final int n) {
@@ -241,7 +244,7 @@ public class MergedRgbVirtualStack extends VirtualStack {
 		return getSliceLabel(n);
 	}
 
-	/** Sets the label of the specified slice, were 1<=n<=nslices. */
+	/** Sets the label of the specified slice, where {@code 1<=n<=nslices}. */
 	@Override
 	public void setSliceLabel(final String label, final int n) {}
 

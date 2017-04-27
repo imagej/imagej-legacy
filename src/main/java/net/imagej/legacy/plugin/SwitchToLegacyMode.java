@@ -31,7 +31,6 @@
 
 package net.imagej.legacy.plugin;
 
-import net.imagej.app.ImageJApp;
 import net.imagej.legacy.LegacyService;
 
 import org.scijava.command.Command;
@@ -42,9 +41,7 @@ import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 
 /**
- * An extension of {@link ImageJApp} that provides the legacy ImageJ 1.x version
- * (in parentheses) in addition to the regular ImageJ version, when
- * {@link #getVersion()} is called.
+ * A command to switch between legacy and modern UI modes.
  * 
  * @author Johannes Schindelin
  */

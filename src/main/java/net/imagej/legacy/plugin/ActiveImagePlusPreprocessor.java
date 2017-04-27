@@ -36,6 +36,7 @@ import ij.ImageStack;
 import ij.WindowManager;
 import ij.process.ImageProcessor;
 
+import net.imagej.Dataset;
 import net.imagej.display.process.ActiveDatasetPreprocessor;
 import net.imagej.legacy.LegacyService;
 
@@ -48,9 +49,9 @@ import org.scijava.module.process.PreprocessorPlugin;
 import org.scijava.plugin.Plugin;
 
 /**
- * TODO: this class can be removed once {@link Dataset} and {@link ImagePlus} conversion
- * is done properly via wrapping. Until that point, it needs to run before the
- * {@link ActiveDatasetPreprocessor}.
+ * TODO: this class can be removed once {@link Dataset} and {@link ImagePlus}
+ * conversion is done properly via wrapping. Until that point, it needs to run
+ * before the {@link ActiveDatasetPreprocessor}.
  * <p>
  * Assigns the active {@link ImagePlus} when there is one single unresolved
  * {@link ImagePlus} parameter. Hence, rather than a dialog prompting the user

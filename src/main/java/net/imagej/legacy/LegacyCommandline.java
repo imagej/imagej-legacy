@@ -46,49 +46,48 @@ import org.scijava.plugin.Plugin;
  * documentation:
  * <dl>
  * <dt>"file-name"</dt>
- * <dd>Opens a file<br />
- * Example 1: blobs.tif<br />
- * Example 2: /Users/wayne/images/blobs.tif<br />
- * Example 3: e81*.tif<br />
+ * <dd>Opens a file<br>
+ * Example 1: blobs.tif<br>
+ * Example 2: /Users/wayne/images/blobs.tif<br>
+ * Example 3: e81*.tif<br>
  * </dd>
  * <dt>-macro path [arg]</dt>
  * <dd>Runs a macro or script (JavaScript, BeanShell or Python), passing an
  * optional string argument, which the macro or script can be retrieve using the
  * getArgument() function. The macro or script is assumed to be in the
- * ImageJ/macros folder if 'path' is not a full directory path.<br />
- * Example 1: -macro analyze.ijm<br />
- * Example 2: -macro script.js /Users/wayne/images/stack1<br />
- * Example 2: -macro script.py '1.2 2.4 3.8'<br />
+ * ImageJ/macros folder if 'path' is not a full directory path.<br>
+ * Example 1: -macro analyze.ijm<br>
+ * Example 2: -macro script.js /Users/wayne/images/stack1<br>
+ * Example 2: -macro script.py '1.2 2.4 3.8'<br>
  * </dd>
  * <dt>-batch path [arg]</dt>
  * <dd>Runs a macro or script (JavaScript, BeanShell or Python) in batch (no
  * GUI) mode, passing it an optional argument. ImageJ exits when the macro
  * finishes.</dd>
  * <dt>-eval "macro code"</dt>
- * <dd>Evaluates macro code<br />
- * Example 1: -eval "print('Hello, world');"<br />
- * Example 2: -eval "return getVersion();"<br />
+ * <dd>Evaluates macro code<br>
+ * Example 1: -eval "print('Hello, world');"<br>
+ * Example 2: -eval "return getVersion();"<br>
  * </dd>
  * <dt>-run command</dt>
- * <dd>Runs an ImageJ menu command<br />
+ * <dd>Runs an ImageJ menu command<br>
  * Example: -run "About ImageJ..."</dd>
  * <dt>-ijpath path</dt>
- * <dd>Specifies the path to the directory containing the plugins directory<br />
- * Example: -ijpath /Applications/ImageJ<br />
+ * <dd>Specifies the path to the directory containing the plugins directory<br>
+ * Example: -ijpath /Applications/ImageJ<br>
  * </dd>
  * <dt>-port&lt;n&gt;</dt>
  * <dd>Specifies the port ImageJ uses to determine if another instance is
- * running<br />
- * Example 1: -port1 (use default port address + 1)<br />
- * Example 2: -port2 (use default port address + 2)<br />
- * Example 3: -port0 (don't check for another instance)<br />
+ * running<br>
+ * Example 1: -port1 (use default port address + 1)<br>
+ * Example 2: -port2 (use default port address + 2)<br>
+ * Example 3: -port0 (don't check for another instance)<br>
  * </dd>
  * <dt>-debug</dt>
  * <dd>Runs ImageJ in debug mode</dd>
  * <dt>-batch-no-exit</dt>
  * <dd>Runs ImageJ in batch mode and disallows exiting the VM when done</dd>
  * </dl>
- * </pre>
  * 
  * @author Johannes Schindelin
  */

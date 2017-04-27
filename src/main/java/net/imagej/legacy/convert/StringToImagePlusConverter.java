@@ -44,13 +44,14 @@ import org.scijava.plugin.Plugin;
  * <p>
  * This converter exists to make ImageJ 1.x macro calls to SciJava modules work
  * better with {@link ImagePlus} inputs&mdash;e.g.:
+ * </p>
  * 
  * <pre>
  * run(&quot;Print Title&quot;, &quot;imp=blobs.gif name=Jan&quot;);
  * </pre>
- * 
- * The converter enables string fragments like <code>imp=blobs.gif</code> or
- * <code>imp=-2</code> to properly resolve to the associated {@link ImagePlus}.
+ * <p>
+ * The converter enables string fragments like {@code imp=blobs.gif} or
+ * {@code imp=-2} to properly resolve to the associated {@link ImagePlus}.
  * </p>
  * <p>
  * Note that unlike most other classes in the ImageJ Legacy project, this one

@@ -247,10 +247,10 @@ public class IJ1Helper extends AbstractContextual {
 	}
 
 	/**
-	 * Determines whether <it>Edit>Options>Misc...>Run single instance
-	 * listener</it> is set.
+	 * Determines whether <i>Edit&gt;Options&gt;Misc...&gt;Run single instance
+	 * listener</i> is set.
 	 *
-	 * @return true if <it>Run single instance listener</it> is set
+	 * @return true if <i>Run single instance listener</i> is set
 	 */
 	public boolean isRMIEnabled() {
 		return Prefs.runSocketListener;
@@ -465,7 +465,7 @@ public class IJ1Helper extends AbstractContextual {
 	}
 
 	/**
-	 * Opens an image and adds the path to the <it>File>Open Recent</it> menu.
+	 * Opens an image and adds the path to the <i>File&gt;Open Recent</i> menu.
 	 *
 	 * @param file the image to open
 	 */
