@@ -33,6 +33,7 @@ package net.imagej.legacy.translate;
 
 import ij.ImagePlus;
 import ij.ImageStack;
+
 import net.imagej.Dataset;
 import net.imagej.display.ImageDisplay;
 import net.imagej.display.ImageDisplayService;

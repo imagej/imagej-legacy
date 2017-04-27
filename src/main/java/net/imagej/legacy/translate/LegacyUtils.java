@@ -34,12 +34,13 @@ package net.imagej.legacy.translate;
 import ij.ImagePlus;
 import ij.WindowManager;
 import ij.macro.Interpreter;
+
 import net.imagej.Dataset;
 import net.imagej.axis.Axes;
 import net.imagej.axis.AxisType;
 import net.imglib2.img.basictypeaccess.PlanarAccess;
-import net.imglib2.util.Intervals;
 import net.imglib2.type.numeric.RealType;
+import net.imglib2.util.Intervals;
 
 /**
  * A bag of static methods used throughout the translation layer

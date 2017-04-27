@@ -31,14 +31,15 @@
 
 package net.imagej.legacy;
 
-import static org.junit.Assume.assumeTrue;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
+import static org.junit.Assume.assumeTrue;
+
+import ij.IJ;
 
 import java.awt.GraphicsEnvironment;
 
-import ij.IJ;
 import net.imagej.legacy.ui.LegacyUI;
 import net.imagej.patcher.LegacyInjector;
 

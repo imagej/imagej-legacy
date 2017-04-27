@@ -34,6 +34,7 @@ package net.imagej.legacy.translate;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.process.ImageProcessor;
+
 import net.imagej.Dataset;
 import net.imagej.axis.Axes;
 import net.imglib2.RandomAccess;

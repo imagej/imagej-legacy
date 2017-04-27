@@ -34,6 +34,7 @@ package net.imagej.legacy.translate;
 import ij.IJ;
 import ij.plugin.filter.Analyzer;
 import ij.text.TextWindow;
+
 import net.imagej.table.DefaultResultsTable;
 import net.imagej.table.ResultsTable;
 import net.imagej.table.Table;

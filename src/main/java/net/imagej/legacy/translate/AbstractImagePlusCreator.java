@@ -37,6 +37,7 @@ import ij.ImageStack;
 import ij.VirtualStack;
 import ij.io.FileInfo;
 import ij.measure.Calibration;
+
 import io.scif.ImageMetadata;
 import io.scif.MetaTable;
 import io.scif.Metadata;

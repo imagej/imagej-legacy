@@ -33,9 +33,11 @@ package net.imagej.legacy.translate;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotSame;
+
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.process.ByteProcessor;
+
 import net.imagej.Extents;
 import net.imagej.Position;
 import net.imagej.axis.Axes;

@@ -32,6 +32,7 @@
 package net.imagej.legacy.display;
 
 import ij.ImagePlus;
+
 import net.imagej.Data;
 import net.imagej.Dataset;
 import net.imagej.display.ImageDisplay;

@@ -33,6 +33,7 @@ package net.imagej.legacy.translate;
 
 import ij.CompositeImage;
 import ij.ImagePlus;
+
 import net.imagej.Dataset;
 
 /**

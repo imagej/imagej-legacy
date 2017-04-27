@@ -32,6 +32,7 @@
 package net.imagej.legacy.plugin;
 
 import ij.ImagePlus;
+
 import io.scif.Metadata;
 import io.scif.app.SCIFIOApp;
 import io.scif.img.SCIFIOImgPlus;
@@ -42,10 +43,10 @@ import java.util.concurrent.Future;
 import net.imagej.Dataset;
 import net.imagej.display.DefaultImageDisplay;
 import net.imagej.display.ImageDisplay;
-import net.imagej.legacy.LegacyService;
 import net.imagej.legacy.IJ1Helper;
 import net.imagej.legacy.ImageJ2Options;
 import net.imagej.legacy.LegacyImageMap;
+import net.imagej.legacy.LegacyService;
 
 import org.scijava.Cancelable;
 import org.scijava.Context;

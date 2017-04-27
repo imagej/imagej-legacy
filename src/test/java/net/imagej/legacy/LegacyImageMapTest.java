@@ -32,8 +32,10 @@
 package net.imagej.legacy;
 
 import static org.junit.Assert.assertTrue;
+
 import ij.ImagePlus;
 import ij.gui.NewImage;
+
 import net.imagej.Dataset;
 import net.imagej.DatasetService;
 import net.imagej.ImgPlus;

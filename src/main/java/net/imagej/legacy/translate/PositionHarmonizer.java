@@ -32,6 +32,7 @@
 package net.imagej.legacy.translate;
 
 import ij.ImagePlus;
+
 import net.imagej.axis.Axes;
 import net.imagej.axis.AxisType;
 import net.imagej.display.ImageDisplay;

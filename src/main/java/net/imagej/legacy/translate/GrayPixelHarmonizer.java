@@ -34,16 +34,17 @@ package net.imagej.legacy.translate;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.process.ImageProcessor;
+
 import net.imagej.Dataset;
 import net.imagej.axis.Axes;
 import net.imagej.axis.AxisType;
 import net.imagej.space.SpaceUtils;
 import net.imglib2.RandomAccess;
-import net.imglib2.util.Intervals;
 import net.imglib2.type.logic.BitType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.integer.ShortType;
 import net.imglib2.util.IntervalIndexer;
+import net.imglib2.util.Intervals;
 
 /**
  * Supports bidirectional synchronization between {@link ImagePlus}es and gray

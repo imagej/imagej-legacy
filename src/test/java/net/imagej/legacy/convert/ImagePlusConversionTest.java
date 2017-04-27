@@ -33,6 +33,10 @@ package net.imagej.legacy.convert;
 
 import static org.junit.Assert.assertEquals;
 
+import ij.IJ;
+import ij.ImagePlus;
+import ij.process.ImageProcessor;
+
 import net.imagej.Dataset;
 import net.imagej.DatasetService;
 import net.imagej.axis.Axes;
@@ -49,10 +53,6 @@ import org.junit.Test;
 import org.scijava.Context;
 import org.scijava.convert.ConvertService;
 import org.scijava.display.DisplayService;
-
-import ij.IJ;
-import ij.ImagePlus;
-import ij.process.ImageProcessor;
 
 /**
  * Tests the converters of the {@link net.imagej.legacy.convert} package.

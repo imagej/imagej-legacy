@@ -89,7 +89,6 @@ import org.scijava.ui.UserInterface;
 import org.scijava.ui.swing.script.TextEditor;
 import org.scijava.ui.viewer.DisplayWindow;
 import org.scijava.util.AppUtils;
-import org.scijava.util.FileUtils;
 
 /**
  * Service for working with legacy ImageJ 1.x.

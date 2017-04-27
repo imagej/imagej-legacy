@@ -33,6 +33,7 @@ package net.imagej.legacy.plugin;
 
 import ij.ImagePlus;
 import ij.process.ByteProcessor;
+
 import net.imagej.legacy.LegacyOutputTracker;
 
 import org.scijava.command.Command;

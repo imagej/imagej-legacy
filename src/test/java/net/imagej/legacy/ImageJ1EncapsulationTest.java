@@ -33,6 +33,12 @@ package net.imagej.legacy;
 
 import java.net.URL;
 
+import net.imagej.patcher.LegacyInjector;
+
+import org.junit.Test;
+import org.scijava.util.ClassUtils;
+import org.scijava.util.FileUtils;
+
 import javassist.ClassPool;
 import javassist.CtClass;
 import javassist.CtConstructor;
@@ -48,11 +54,6 @@ import javassist.expr.Instanceof;
 import javassist.expr.MethodCall;
 import javassist.expr.NewArray;
 import javassist.expr.NewExpr;
-import net.imagej.patcher.LegacyInjector;
-
-import org.junit.Test;
-import org.scijava.util.ClassUtils;
-import org.scijava.util.FileUtils;
 
 /**
  * Verifies that ImageJ 1.x classes are used only via the {@link IJ1Helper} class.

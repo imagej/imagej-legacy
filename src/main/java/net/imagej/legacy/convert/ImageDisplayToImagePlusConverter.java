@@ -31,6 +31,8 @@
 
 package net.imagej.legacy.convert;
 
+import ij.ImagePlus;
+
 import java.lang.reflect.Type;
 import java.util.Collection;
 
@@ -45,8 +47,6 @@ import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 import org.scijava.util.ConversionUtils;
 import org.scijava.util.GenericUtils;
-
-import ij.ImagePlus;
 
 /**
  * {@link Converter} implementation for converting {@link ImageDisplay} to an

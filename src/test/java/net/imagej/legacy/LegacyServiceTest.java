@@ -34,7 +34,9 @@ package net.imagej.legacy;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assume.assumeTrue;
+
 import ij.IJ;
+
 import net.imagej.patcher.LegacyInjector;
 
 import org.junit.After;
