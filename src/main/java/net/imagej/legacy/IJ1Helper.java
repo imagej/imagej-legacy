@@ -1189,14 +1189,27 @@ public class IJ1Helper extends AbstractContextual {
 		final String extension)
 	{
 		// Use ImageJ1's SaveDialog.
-		final String defaultName;
-		if (file == null) defaultName = null;
+		final String defaultName, defaultExtension;
+		if (file == null) {
+			defaultName = null;
+			defaultExtension = extension;
+		}
 		else {
 			final int dotIndex = file.getName().indexOf('.');
-			defaultName = dotIndex > 0 ? //
-				file.getName().substring(0, dotIndex) : file.getName();
+			if (dotIndex > 0) {
+				// split filename from extension
+				defaultName = file.getName().substring(0, dotIndex);
+				defaultExtension = extension == null ? //
+					file.getName().substring(dotIndex) : extension;
+			}
+			else {
+				// file had no extension
+				defaultName = file.getName();
+				defaultExtension = extension;
+			}
 		}
-		final SaveDialog saveDialog = new SaveDialog(title, defaultName, extension);
+		final SaveDialog saveDialog = //
+			new SaveDialog(title, defaultName, defaultExtension);
 		final String directory = saveDialog.getDirectory();
 
 		// NB: As a side effect, ImageJ1 normally appends the selected
