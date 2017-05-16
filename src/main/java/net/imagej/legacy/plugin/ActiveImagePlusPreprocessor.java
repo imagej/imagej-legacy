@@ -42,9 +42,7 @@ import net.imagej.legacy.LegacyService;
 
 import org.scijava.Priority;
 import org.scijava.module.Module;
-import org.scijava.module.ModuleItem;
-import org.scijava.module.ModuleService;
-import org.scijava.module.process.AbstractPreprocessorPlugin;
+import org.scijava.module.process.AbstractSingleInputPreprocessor;
 import org.scijava.module.process.PreprocessorPlugin;
 import org.scijava.plugin.Plugin;
 
@@ -71,11 +69,11 @@ import org.scijava.plugin.Plugin;
  * 
  * @author Curtis Rueden
  */
-@Plugin(type = PreprocessorPlugin.class, priority = Priority.VERY_HIGH_PRIORITY + 1)
-public class ActiveImagePlusPreprocessor extends AbstractPreprocessorPlugin {
-
-	// TODO: Reconcile with ActiveDisplayPreprocessor and ActiveImageProcessor.
-	// Share common superclass?
+@Plugin(type = PreprocessorPlugin.class,
+	priority = Priority.VERY_HIGH_PRIORITY + 1)
+public class ActiveImagePlusPreprocessor extends
+	AbstractSingleInputPreprocessor
+{
 
 	// -- ModuleProcessor methods --
 
@@ -116,16 +114,4 @@ public class ActiveImagePlusPreprocessor extends AbstractPreprocessorPlugin {
 			}
 		}
 	}
-
-	// -- Helper methods --
-
-	private String getSingleInput(final Module module, final Class<?> type) {
-		final ModuleService moduleService =
-			getContext().getService(ModuleService.class);
-		if (moduleService == null) return null;
-		final ModuleItem<?> item = moduleService.getSingleInput(module, type);
-		if (item == null || !item.isAutoFill()) return null;
-		return item.getName();
-	}
-
 }
