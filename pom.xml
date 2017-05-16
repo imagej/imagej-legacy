@@ -216,5 +216,10 @@ Institute of Molecular Cell Biology and Genetics.</license.copyrightOwners>
 			<artifactId>junit</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.scijava</groupId>
+			<artifactId>scripting-groovy</artifactId>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 </project>
