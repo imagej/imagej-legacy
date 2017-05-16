@@ -46,6 +46,7 @@ import ij.io.OpenDialog;
 import ij.io.Opener;
 import ij.io.SaveDialog;
 import ij.macro.Interpreter;
+import ij.measure.ResultsTable;
 import ij.plugin.Commands;
 import ij.plugin.PlugIn;
 import ij.plugin.filter.PlugInFilter;
@@ -238,6 +239,7 @@ public class IJ1Helper extends AbstractContextual {
 	/** Add name aliases for ImageJ1 classes to the ScriptService. */
 	public void addAliases(final ScriptService scriptService) {
 		scriptService.addAlias(ImagePlus.class);
+		scriptService.addAlias(ResultsTable.class);
 	}
 
 	public boolean isVisible() {
