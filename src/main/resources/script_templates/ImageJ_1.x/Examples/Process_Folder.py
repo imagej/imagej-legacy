@@ -14,6 +14,7 @@ def run():
   srcDir = srcFile.getAbsolutePath()
   dstDir = dstFile.getAbsolutePath()
   for root, directories, filenames in os.walk(srcDir):
+    filenames.sort();
     for filename in filenames:
       # Check for file extension
       if not filename.endswith(ext):
