@@ -52,6 +52,7 @@ import ij.plugin.PlugIn;
 import ij.plugin.filter.PlugInFilter;
 import ij.plugin.filter.PlugInFilterRunner;
 import ij.plugin.frame.Recorder;
+import ij.plugin.frame.RoiManager;
 
 import java.awt.Component;
 import java.awt.EventQueue;
@@ -240,6 +241,7 @@ public class IJ1Helper extends AbstractContextual {
 	public void addAliases(final ScriptService scriptService) {
 		scriptService.addAlias(ImagePlus.class);
 		scriptService.addAlias(ResultsTable.class);
+		scriptService.addAlias(RoiManager.class);
 	}
 
 	public boolean isVisible() {

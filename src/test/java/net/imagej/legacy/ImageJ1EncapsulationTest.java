@@ -105,6 +105,7 @@ public class ImageJ1EncapsulationTest {
 					className.startsWith(net.imagej.legacy.plugin.LegacyCommand.class.getName()) ||
 					className.startsWith(net.imagej.legacy.plugin.LegacyInitializer.class.getName()) ||
 					className.startsWith(net.imagej.legacy.plugin.ResultsTablePreprocessor.class.getName()) ||
+					className.startsWith(net.imagej.legacy.plugin.RoiManagerPreprocessor.class.getName()) ||
 					className.startsWith(net.imagej.legacy.translate.AbstractDisplayCreator.class.getName()) ||
 					className.startsWith(net.imagej.legacy.translate.AbstractImagePlusCreator.class.getName()) ||
 					className.startsWith(net.imagej.legacy.translate.ColorDisplayCreator.class.getName()) ||
