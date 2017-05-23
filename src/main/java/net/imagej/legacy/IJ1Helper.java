@@ -135,7 +135,7 @@ public class IJ1Helper extends AbstractContextual {
 	public void initialize() {
 		// initialize legacy ImageJ application
 		final ImageJ ij1 = IJ.getInstance();
-		if (Menus.getCommands() == null) {
+		if (getCommands() == null) {
 			IJ.runPlugIn("ij.IJ.init", "");
 		}
 		if (ij1 != null) {
@@ -739,6 +739,16 @@ public class IJ1Helper extends AbstractContextual {
 
 	private boolean menuInitialized;
 
+	@SuppressWarnings("unchecked")
+	public Hashtable<String, String> getCommands() {
+		return Menus.getCommands();
+	}
+
+	public MenuBar getMenuBar() {
+		final ImageJ ij1 = hasInstance() ? IJ.getInstance() : null;
+		return ij1 == null ? null : ij1.getMenuBar();
+	}
+
 	/**
 	 * Adds legacy-compatible scripts and commands to the ImageJ1 menu structure.
 	 */
@@ -746,8 +756,7 @@ public class IJ1Helper extends AbstractContextual {
 		if (menuInitialized) return;
 		final Map<String, ModuleInfo> modules = //
 			legacyService.getScriptsAndNonLegacyCommands();
-		@SuppressWarnings("unchecked")
-		final Hashtable<String, String> ij1Commands = Menus.getCommands();
+		final Hashtable<String, String> ij1Commands = getCommands();
 		final ImageJ ij1 = hasInstance() ? IJ.getInstance() : null;
 		final IJ1MenuWrapper wrapper = ij1 == null ? null : new IJ1MenuWrapper(ij1);
 		class Item implements Comparable<Item> {
