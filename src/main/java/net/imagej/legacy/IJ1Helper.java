@@ -64,6 +64,7 @@ import java.awt.MenuBar;
 import java.awt.MenuItem;
 import java.awt.Panel;
 import java.awt.Window;
+import java.awt.event.KeyEvent;
 import java.awt.image.ImageProducer;
 import java.io.File;
 import java.io.IOException;
@@ -755,6 +756,11 @@ public class IJ1Helper extends AbstractContextual {
 		return Menus.getCommands();
 	}
 
+	@SuppressWarnings("unchecked")
+	public Hashtable<Integer, String> getShortcuts() {
+		return Menus.getShortcuts();
+	}
+
 	public MenuBar getMenuBar() {
 		final ImageJ ij1 = hasInstance() ? IJ.getInstance() : null;
 		return ij1 == null ? null : ij1.getMenuBar();
@@ -1301,6 +1307,33 @@ public class IJ1Helper extends AbstractContextual {
 		// add the search bar
 		searchBar = new SearchBar(getContext(), (Window) imagej);
 		panel.add(searchBar);
+
+		// disable the old Command Finder's shortcut
+		nullShortcut("Plugins", "Utilities", "Find Commands...");
+		getShortcuts().put(KeyEvent.VK_L, "Focus Search Bar");
+	}
+
+	private void nullShortcut(final String menuLabel, final String subMenuLabel,
+		final String itemLabel)
+	{
+		final MenuBar menuBar = getMenuBar();
+		for (int m = 0; m < menuBar.getMenuCount(); m++) {
+			final Menu menu = menuBar.getMenu(m);
+			if (!menuLabel.equals(menu.getLabel())) continue;
+			for (int s = 0; s < menu.getItemCount(); s++) {
+				final MenuItem ms = menu.getItem(s);
+				if (!(ms instanceof Menu)) continue;
+				final Menu subMenu = (Menu) ms;
+				if (!subMenuLabel.equals(subMenu.getLabel())) continue;
+				for (int i = 0; i < subMenu.getItemCount(); i++) {
+					final MenuItem mi = subMenu.getItem(i);
+					if (!itemLabel.equals(mi.getLabel())) continue;
+					subMenu.remove(i);
+					mi.setShortcut(null);
+					subMenu.insert(mi, i);
+				}
+			}
+		}
 	}
 
 	/** Closes all image windows on the event dispatch thread. */
