@@ -55,6 +55,7 @@ import ij.plugin.frame.Recorder;
 import ij.plugin.frame.RoiManager;
 
 import java.awt.Component;
+import java.awt.Container;
 import java.awt.EventQueue;
 import java.awt.Frame;
 import java.awt.Image;
@@ -84,7 +85,9 @@ import java.util.concurrent.Callable;
 import javax.swing.SwingUtilities;
 
 import net.imagej.display.ImageDisplay;
+import net.imagej.legacy.ui.SearchBar;
 import net.imagej.patcher.LegacyHooks;
+import net.miginfocom.swing.MigLayout;
 
 import org.scijava.AbstractContextual;
 import org.scijava.Context;
@@ -124,6 +127,9 @@ public class IJ1Helper extends AbstractContextual {
 	@Parameter
 	private LogService log;
 
+	/** Search bar in the main window. */
+	private SearchBar searchBar;
+
 	/** Whether we are in the process of forcibly shutting down ImageJ1. */
 	private boolean disposing;
 
@@ -135,6 +141,7 @@ public class IJ1Helper extends AbstractContextual {
 	public void initialize() {
 		// initialize legacy ImageJ application
 		final ImageJ ij1 = IJ.getInstance();
+		addSearchBar(ij1);
 		if (getCommands() == null) {
 			IJ.runPlugIn("ij.IJ.init", "");
 		}
@@ -367,6 +374,10 @@ public class IJ1Helper extends AbstractContextual {
 	public Panel getStatusBar() {
 		if (!hasInstance()) return null;
 		return IJ.getInstance().getStatusBar();
+	}
+
+	public SearchBar getSearchBar() {
+		return searchBar;
 	}
 
 	public Frame getIJ() {
@@ -1268,6 +1279,29 @@ public class IJ1Helper extends AbstractContextual {
 	}
 
 	// -- Helper methods --
+
+	/** Adds a search bar to the main image frame. */
+	private void addSearchBar(final Object imagej) {
+		if (!(imagej instanceof Window)) return; // NB: Avoid headless issues.
+
+		final Component[] ijc = ((Container) imagej).getComponents();
+		if (ijc.length < 2) return;
+		final Component ijc1 = ijc[1];
+		if (!(ijc1 instanceof Container)) return;
+
+		// rebuild the main panel (status label + progress bar)
+		final Container panel = (Container) ijc1;
+		final Component[] pc = panel.getComponents();
+		panel.removeAll();
+		panel.setLayout(new MigLayout("fillx, insets 0", "[0:0]p![p!]"));
+		for (final Component c : pc) {
+			panel.add(c);
+		}
+
+		// add the search bar
+		searchBar = new SearchBar(getContext(), (Window) imagej);
+		panel.add(searchBar);
+	}
 
 	/** Closes all image windows on the event dispatch thread. */
 	private void closeImageWindows() {
