@@ -205,6 +205,7 @@ public final class LegacyService extends AbstractService implements
 	// -- LegacyService methods --
 
 	/** Gets the LogService associated with this LegacyService. */
+	@Override
 	public LogService log() {
 		return log;
 	}
