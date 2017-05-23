@@ -51,7 +51,6 @@ import net.imagej.legacy.command.LegacyCommand;
 import net.imagej.legacy.ui.LegacyUI;
 import net.imagej.patcher.LegacyEnvironment;
 import net.imagej.patcher.LegacyInjector;
-import net.imagej.threshold.ThresholdService;
 import net.imagej.ui.viewer.image.ImageDisplayViewer;
 
 import org.scijava.Identifiable;
@@ -181,7 +180,8 @@ public final class LegacyService extends AbstractService implements
 	private PluginService pluginService;
 
 	@Parameter(required = false)
-	private ThresholdService thresholdService;
+	@SuppressWarnings("deprecation")
+	private net.imagej.threshold.ThresholdService thresholdService;
 
 	/** Mapping between modern and legacy image data structures. */
 	private LegacyImageMap imageMap;
