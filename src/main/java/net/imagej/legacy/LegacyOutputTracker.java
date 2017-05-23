@@ -37,7 +37,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
-import net.imagej.legacy.plugin.LegacyCommand;
+import net.imagej.legacy.command.LegacyCommand;
 
 /**
  * <p>

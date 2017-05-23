@@ -47,7 +47,7 @@ import net.imagej.ImageJService;
 import net.imagej.display.ImageDisplay;
 import net.imagej.display.ImageDisplayService;
 import net.imagej.display.OverlayService;
-import net.imagej.legacy.plugin.LegacyCommand;
+import net.imagej.legacy.command.LegacyCommand;
 import net.imagej.legacy.ui.LegacyUI;
 import net.imagej.patcher.LegacyEnvironment;
 import net.imagej.patcher.LegacyInjector;

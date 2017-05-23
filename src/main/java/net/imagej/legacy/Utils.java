@@ -31,7 +31,7 @@
 
 package net.imagej.legacy;
 
-import net.imagej.legacy.plugin.LegacyThreadGroup;
+import net.imagej.legacy.command.LegacyThreadGroup;
 
 /**
  * Static utility methods used in the {@link net.imagej.legacy} package.

@@ -90,6 +90,7 @@ public class ImageJ1EncapsulationTest {
 					className.startsWith(net.imagej.legacy.LegacyOutputTracker.class.getName()) ||
 					className.startsWith(net.imagej.legacy.OptionsSynchronizer.class.getName()) ||
 					className.startsWith(net.imagej.legacy.SwitchToModernMode.class.getName()) ||
+					className.startsWith(net.imagej.legacy.command.LegacyCommand.class.getName()) ||
 					className.startsWith(net.imagej.legacy.convert.DatasetToImagePlusConverter.class.getName()) ||
 					className.startsWith(net.imagej.legacy.convert.ImageDisplayToImagePlusConverter.class.getName()) ||
 					className.startsWith(net.imagej.legacy.convert.ImagePlusToDatasetConverter.class.getName()) ||
@@ -102,7 +103,6 @@ public class ImageJ1EncapsulationTest {
 					className.startsWith(net.imagej.legacy.plugin.ActiveImagePlusPreprocessor.class.getName()) ||
 					className.startsWith(net.imagej.legacy.plugin.DefaultLegacyOpener.class.getName()) ||
 					className.startsWith(net.imagej.legacy.plugin.IJ1MacroEngine.class.getName()) ||
-					className.startsWith(net.imagej.legacy.plugin.LegacyCommand.class.getName()) ||
 					className.startsWith(net.imagej.legacy.plugin.LegacyInitializer.class.getName()) ||
 					className.startsWith(net.imagej.legacy.plugin.ResultsTablePreprocessor.class.getName()) ||
 					className.startsWith(net.imagej.legacy.plugin.RoiManagerPreprocessor.class.getName()) ||

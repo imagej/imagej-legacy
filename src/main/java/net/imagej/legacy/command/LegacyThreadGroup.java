@@ -29,7 +29,7 @@
  * #L%
  */
 
-package net.imagej.legacy.plugin;
+package net.imagej.legacy.command;
 
 import net.imagej.legacy.LegacyService;
 
