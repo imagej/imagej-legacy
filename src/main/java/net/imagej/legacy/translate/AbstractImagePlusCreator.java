@@ -190,7 +190,6 @@ public abstract class AbstractImagePlusCreator extends AbstractContextual
 					stack.setSliceLabel(fileInfo.sliceLabels[i], i + 1);
 				}
 			}
-System.err.println(1);
 		}
 		imp.setFileInfo(fileInfo);
 
