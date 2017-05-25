@@ -65,7 +65,7 @@ import org.scijava.widget.Button;
 	@Menu(label = MenuConstants.EDIT_LABEL, weight = MenuConstants.EDIT_WEIGHT,
 		mnemonic = MenuConstants.EDIT_MNEMONIC), @Menu(label = "Options"),
 	@Menu(label = "ImageJ2...") }, attrs = { @Attr(name = "legacy-only") })
-public class ImageJ2Options extends OptionsPlugin implements Interactive {
+public class ImageJ2Options extends OptionsPlugin {
 
 	// -- Fields --
 
