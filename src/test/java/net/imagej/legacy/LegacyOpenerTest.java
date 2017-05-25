@@ -84,6 +84,10 @@ public class LegacyOpenerTest {
 				script.run("pauls-macro.ijm", macro, true).get();
 			final Integer numResults = (Integer) module.getOutput("numResults");
 			assertNotNull(numResults);
+			// NB: If this test is failing on your system, with numResults == 10,
+			// it is because you have enabled the "Use SCIFIO when opening files"
+			// option in Edit > Options > ImageJ2. On fresh systems, this option
+			// is off; the value returned by ImageJ 1.x's built-in behavior is 3.
 			assertEquals(3, (int) numResults);
 		}
 		finally {
