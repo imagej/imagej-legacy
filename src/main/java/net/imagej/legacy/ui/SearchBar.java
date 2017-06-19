@@ -31,6 +31,8 @@
 
 package net.imagej.legacy.ui;
 
+import ij.gui.Toolbar;
+
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Window;
@@ -208,7 +210,11 @@ public class SearchBar extends JTextField {
 			dialog.dispose();
 			dialog = null;
 		}
-		setText("");
+		if (!getText().isEmpty()) setText("");
+		else {
+			// lose the focus!
+			Toolbar.getInstance().requestFocus();
+		}
 	}
 
 	// -- Helper classes --
