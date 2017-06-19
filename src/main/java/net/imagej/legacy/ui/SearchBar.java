@@ -62,6 +62,7 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 
+import net.imagej.legacy.IJ1Helper;
 import net.imagej.legacy.LegacyService;
 import net.miginfocom.swing.MigLayout;
 
@@ -208,7 +209,16 @@ public class SearchBar extends JTextField {
 			dialog.dispose();
 			dialog = null;
 		}
-		setText("");
+		if (!getText().isEmpty()) setText("");
+		else {
+			// lose the focus!
+			final LegacyService legacyService = //
+					context.getService(LegacyService.class);
+			if (legacyService != null) {
+				final IJ1Helper ij1Helper = legacyService.getIJ1Helper();
+				if (ij1Helper != null) ij1Helper.getToolBar().requestFocus();
+			}
+		}
 	}
 
 	// -- Helper classes --
