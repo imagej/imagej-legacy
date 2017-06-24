@@ -236,7 +236,7 @@ public class SearchBar extends JTextField {
 		public CommandFinder(final String baseDir) {
 			commands = buildCommands();
 
-			setPreferredSize(new Dimension(800, 600));
+			setPreferredSize(new Dimension(800, 300));
 
 			commandsList = new JTable(20, CommandTableModel.COLUMN_COUNT);
 			commandsList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
