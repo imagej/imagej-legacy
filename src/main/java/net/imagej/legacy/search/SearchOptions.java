@@ -30,34 +30,64 @@
 
 package net.imagej.legacy.search;
 
-import net.imagej.legacy.LegacyService;
-
-import org.scijava.Priority;
-import org.scijava.command.Command;
+import org.scijava.menu.MenuConstants;
+import org.scijava.options.OptionsPlugin;
+import org.scijava.plugin.Attr;
 import org.scijava.plugin.Menu;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
-import org.scijava.ui.swing.search.SwingSearchBar;
+import org.scijava.ui.UIService;
+import org.scijava.widget.ChoiceWidget;
 
 /**
- * Command which focuses the ImageJ search bar.
- * <p>
- * This overrides the old ImageJ 1.x Command Finder plugin.
- * </p>
- *
+ * Options relevant to the ImageJ search bar.
+ * 
  * @author Curtis Rueden
  */
-@Plugin(type = Command.class, menu = { @Menu(label = "Plugins"), @Menu(
-	label = "Utilities"), @Menu(label = "Focus Search Bar",
-		accelerator = "meta L") }, priority = Priority.HIGH)
-public class FocusSearchBar implements Command {
+@Plugin(type = OptionsPlugin.class, label = "Search Options", menu = {
+	@Menu(label = MenuConstants.EDIT_LABEL, weight = MenuConstants.EDIT_WEIGHT,
+		mnemonic = MenuConstants.EDIT_MNEMONIC), @Menu(label = "Options"),
+	@Menu(label = "Search...") }, attrs = { @Attr(name = "legacy-only") })
+public class SearchOptions extends OptionsPlugin {
 
 	@Parameter
-	private LegacyService legacyService;
+	private UIService uiService;
+
+	// -- Fields --
+
+	@Parameter(label = "Search bar style", choices = { "None", "Mini", "Full" },
+		style = ChoiceWidget.RADIO_BUTTON_HORIZONTAL_STYLE)
+	private String style = "Mini";
+
+	@Parameter(label = "Embed search results in main window")
+	private boolean embedded;
+
+	@Parameter(label = "Override Command Finder shortcut")
+	private boolean overrideShortcut;
+
+	// -- Option accessors --
+
+	public boolean isSearchBarEnabled() {
+		return !"None".equals(style);
+	}
+
+	public boolean isSearchBarFull() {
+		return "Full".equals(style);
+	}
+
+	public boolean isSearchPanelEmbedded() {
+		return embedded;
+	}
+
+	public boolean isShortcutOverridden() {
+		return overrideShortcut;
+	}
+
+	// -- Runnable methods --
 
 	@Override
 	public void run() {
-		final SwingSearchBar searchBar = legacyService.getIJ1Helper().getSearchBar();
-		if (searchBar != null) searchBar.activate();
+		super.run();
+		uiService.showDialog("Please restart ImageJ for the changes to take effect.");
 	}
 }

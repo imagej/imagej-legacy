@@ -73,6 +73,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -86,7 +87,7 @@ import java.util.concurrent.Callable;
 import javax.swing.SwingUtilities;
 
 import net.imagej.display.ImageDisplay;
-import net.imagej.legacy.ui.SearchBar;
+import net.imagej.legacy.search.SearchOptions;
 import net.imagej.patcher.LegacyHooks;
 import net.miginfocom.swing.MigLayout;
 
@@ -102,7 +103,9 @@ import org.scijava.platform.event.AppOpenFilesEvent;
 import org.scijava.platform.event.AppPreferencesEvent;
 import org.scijava.platform.event.AppQuitEvent;
 import org.scijava.plugin.Parameter;
+import org.scijava.prefs.PrefService;
 import org.scijava.script.ScriptService;
+import org.scijava.ui.swing.search.SwingSearchBar;
 import org.scijava.util.ClassUtils;
 
 /**
@@ -129,7 +132,7 @@ public class IJ1Helper extends AbstractContextual {
 	private LogService log;
 
 	/** Search bar in the main window. */
-	private SearchBar searchBar;
+	private SwingSearchBar searchBar;
 
 	/** Whether we are in the process of forcibly shutting down ImageJ1. */
 	private boolean disposing;
@@ -377,7 +380,7 @@ public class IJ1Helper extends AbstractContextual {
 		return IJ.getInstance().getStatusBar();
 	}
 
-	public SearchBar getSearchBar() {
+	public SwingSearchBar getSearchBar() {
 		return searchBar;
 	}
 
@@ -1290,6 +1293,24 @@ public class IJ1Helper extends AbstractContextual {
 	private void addSearchBar(final Object imagej) {
 		if (!(imagej instanceof Window)) return; // NB: Avoid headless issues.
 
+		// Retrieve user preferences.
+		boolean fullBar = false, embedded = false, overrideShortcut = true;
+		// HACK: We cannot use OptionsService here, because it will create
+		// all the OptionsPlugin instances before needed services are ready.
+		// While this is indicative of a design issue with OptionsService and
+		// maybe SciJava Common's application framework in general, the best we
+		// can do here is to extract the persisted options in a lower-level way.
+		final PrefService prefService = //
+			getContext().getService(PrefService.class);
+		if (prefService != null) {
+			final String style = prefService.get(SearchOptions.class, "style");
+			if ("None".equals(style)) return; // search disabled
+			fullBar = "Full".equals(style);
+			embedded = prefService.getBoolean(SearchOptions.class, "embedded", false);
+			overrideShortcut = prefService.getBoolean(SearchOptions.class,
+				"overrideShortcut", true);
+		}
+
 		final Component[] ijc = ((Container) imagej).getComponents();
 		if (ijc.length < 2) return;
 		final Component ijc1 = ijc[1];
@@ -1300,17 +1321,65 @@ public class IJ1Helper extends AbstractContextual {
 		final Component[] pc = panel.getComponents();
 		panel.removeAll();
 		panel.setLayout(new MigLayout("fillx, insets 0", "[0:0]p![p!]"));
-		for (final Component c : pc) {
-			panel.add(c);
+
+		if (fullBar) { // FULL mode
+			for (int i = 0; i < pc.length; i++) {
+				panel.add(pc[i], i == pc.length - 1 ? "wrap" : "");
+			}
+		}
+		else { // MINI mode
+			Arrays.stream(pc).forEach(panel::add);
 		}
 
 		// add the search bar
-		searchBar = new SearchBar(getContext(), (Window) imagej);
-		panel.add(searchBar);
+		if (embedded) { // EMBEDDED mode
+			searchBar = new SwingSearchBar(getContext()) {
+				@Override
+				protected void showPanel(final Container p) {
+					getParent().add(p, "south,height 300!", //
+						getParent().getComponentCount() - 1);
+					getParent().doLayout();
+					getParent().revalidate();
+					SwingUtilities.getWindowAncestor(this).pack();
+					getParent().repaint();
+					EventQueue.invokeLater(() -> {
+						p.setVisible(true);
+						try {
+							Thread.sleep(100);
+						}
+						catch (final InterruptedException exc) {}
+						requestFocusInWindow();
+					});
+				}
 
-		// disable the old Command Finder's shortcut
-		nullShortcut("Plugins", "Utilities", "Find Commands...");
-		getShortcuts().put(KeyEvent.VK_L, "Focus Search Bar");
+				@Override
+				protected void hidePanel(final Container p) {
+					getParent().remove(p);
+					getParent().revalidate();
+					getParent().repaint();
+					final Window w = SwingUtilities.getWindowAncestor(this);
+					w.revalidate();
+					w.pack();
+					w.repaint();
+				}
+			};
+		}
+		else { // DIALOG mode
+			searchBar = new SwingSearchBar(getContext());
+		}
+
+		if (fullBar) { // FULL mode
+			panel.add(searchBar, "south");
+		}
+		else { // MINI mode
+			panel.add(searchBar);
+		}
+
+		if (overrideShortcut) {
+			// disable the old Command Finder's shortcut
+			nullShortcut("Plugins", "Utilities", "Find Commands...");
+			getShortcuts().put(KeyEvent.VK_L, "Focus Search Bar");
+		}
 	}
 
 	private void nullShortcut(final String menuLabel, final String subMenuLabel,
@@ -1329,7 +1398,8 @@ public class IJ1Helper extends AbstractContextual {
 					final MenuItem mi = subMenu.getItem(i);
 					if (!itemLabel.equals(mi.getLabel())) continue;
 					subMenu.remove(i);
-					mi.setShortcut(null);
+					mi.deleteShortcut();
+					mi.setLabel(mi.getLabel()+" ");
 					subMenu.insert(mi, i);
 				}
 			}

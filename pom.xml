@@ -142,6 +142,8 @@ Institute of Molecular Cell Biology and Genetics.</license.copyrightOwners>
 
 		<!-- NB: Deploy releases to the ImageJ Maven repository. -->
 		<releaseProfiles>deploy-to-imagej</releaseProfiles>
+
+		<scijava-search.version>0.2.0</scijava-search.version>
 	</properties>
 
 	<repositories>
@@ -194,6 +196,11 @@ Institute of Molecular Cell Biology and Genetics.</license.copyrightOwners>
 		<dependency>
 			<groupId>org.scijava</groupId>
 			<artifactId>scijava-common</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.scijava</groupId>
+			<artifactId>scijava-search</artifactId>
+			<version>${scijava-search.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.scijava</groupId>
