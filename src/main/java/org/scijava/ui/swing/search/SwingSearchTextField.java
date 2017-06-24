@@ -29,7 +29,7 @@
  * #L%
  */
 
-package net.imagej.legacy.ui;
+package org.scijava.ui.swing.search;
 
 import ij.gui.Toolbar;
 
@@ -54,11 +54,14 @@ import org.scijava.plugin.Parameter;
 import org.scijava.ui.swing.search.SwingSearchPanel;
 
 /**
- * Swing-based search bar for the main ImageJ window.
+ * Swing-based {@link JTextField} which functions as an entry point for search.
+ * <p>
+ * Pops up a {@link SwingSearchPanel} on demand when something is typed.
+ * </p>
  *
  * @author Curtis Rueden
  */
-public class SearchBar extends JTextField {
+public class SwingSearchTextField extends JTextField {
 
 	private static final String DEFAULT_MESSAGE = "Click here to search";
 
@@ -75,7 +78,7 @@ public class SearchBar extends JTextField {
 	private JDialog dialog;
 	private SwingSearchPanel searchPanel;
 
-	public SearchBar(final Context context, final Window parent) {
+	public SwingSearchTextField(final Context context, final Window parent) {
 		super(DEFAULT_MESSAGE, 12);
 		this.parent = parent;
 		context.inject(this);
@@ -189,12 +192,7 @@ public class SearchBar extends JTextField {
 		if (!getText().isEmpty()) setText("");
 		else {
 			// lose the focus!
-			loseFocus();
-//			Toolbar.getInstance().requestFocus();
+			Toolbar.getInstance().requestFocus();
 		}
-	}
-
-	public void loseFocus() {
-		// NB: Default action: do nothing.
 	}
 }
