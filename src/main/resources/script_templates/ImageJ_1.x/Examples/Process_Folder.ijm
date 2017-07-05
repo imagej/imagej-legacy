@@ -26,6 +26,6 @@ function processFolder(input) {
 function processFile(input, output, file) {
 	// Do the processing here by adding your own code.
 	// Leave the print statements until things work, then remove them.
-	print("Processing: " + input + file);
+	print("Processing: " + input + File.separator + file);
 	print("Saving to: " + output);
 }
