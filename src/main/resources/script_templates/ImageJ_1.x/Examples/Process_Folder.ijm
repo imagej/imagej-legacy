@@ -1,10 +1,10 @@
-// @File(label = "Input directory", style = "directory") input
-// @File(label = "Output directory", style = "directory") output
-// @String(label = "File suffix", value = ".tif") suffix
-
 /*
  * Macro template to process multiple images in a folder
  */
+
+#@ File (label = "Input directory", style = "directory") input
+#@ File (label = "Output directory", style = "directory") output
+#@ String (label = "File suffix", value = ".tif") suffix
 
 // See also Process_Folder.py for a version of this code
 // in the Python scripting language.
