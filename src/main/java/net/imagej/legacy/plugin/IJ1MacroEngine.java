@@ -34,6 +34,7 @@ package net.imagej.legacy.plugin;
 import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
+import java.lang.reflect.Array;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map.Entry;
@@ -202,20 +203,30 @@ public class IJ1MacroEngine extends AbstractScriptEngine {
 		if (key.matches(".*[^a-zA-Z0-9_].*")) return;
 
 		if (value == null) return;
-		final Object v;
-		if (ij1Helper.isImagePlus(value)) {
-			v = ij1Helper.getImageID(value);
+		pre.append(key).append(" = ").append(varValue(value, true)).append(";\n");
+	}
+
+	private String varValue(final Object v, final boolean top) {
+		if (top && v.getClass().isArray()) {
+			// NB: ImageJ 1.x only supports 1-dimensional arrays.
+			final StringBuilder sb = new StringBuilder();
+			for (int i = 0; i < Array.getLength(v); i++) {
+				if (i > 0) sb.append(", ");
+				sb.append(varValue(Array.get(v, i), false));
+			}
+			return "newArray(" + sb.toString() + ")";
 		}
-		else if (value instanceof File) {
-			v = ((File) value).getAbsolutePath();
+		else if (ij1Helper.isImagePlus(v)) {
+			return varValue(ij1Helper.getImageID(v), false);
 		}
-		else v = value;
-		if (v instanceof Number || v instanceof Boolean) {
-			pre.append(key).append(" = ").append(v).append(";\n");
+		else if (v instanceof File) {
+			return varValue(((File) v).getAbsolutePath(), false);
+		}
+		else if (v instanceof Number || v instanceof Boolean) {
+			return v.toString();
 		}
 		else {
-			final String quoted = quote(v.toString());
-			pre.append(key).append(" = \"").append(quoted).append("\";\n");
+			return "\"" + quote(v.toString()) + "\"";
 		}
 	}
 
