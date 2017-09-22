@@ -34,9 +34,11 @@ package net.imagej.legacy.ui;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.io.FileFilter;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -73,6 +75,7 @@ import org.scijava.ui.swing.console.SwingConsolePane;
 import org.scijava.ui.swing.sdi.SwingSDIUI;
 import org.scijava.ui.viewer.DisplayViewer;
 import org.scijava.ui.viewer.DisplayWindow;
+import org.scijava.widget.FileListWidget;
 import org.scijava.widget.FileWidget;
 
 /**
@@ -83,7 +86,7 @@ import org.scijava.widget.FileWidget;
  * @author Mark Hiner
  */
 @Plugin(type = UserInterface.class, name = LegacyUI.NAME,
-	priority = Priority.HIGH_PRIORITY)
+	priority = Priority.HIGH)
 public class LegacyUI extends AbstractUserInterface implements SwingUI {
 
 	public static final String NAME = "legacy";
@@ -307,6 +310,59 @@ public class LegacyUI extends AbstractUserInterface implements SwingUI {
 			legacyService.handleException(e);
 		}
 		return chosenFile[0];
+	}
+
+	@Override
+	public File[] chooseFiles(final File parent, final File[] files, final FileFilter filter, final String style) {
+		final File[][] result = new File[1][];
+		try {
+			// NB: Show JFileChooser on the EDT to avoid deadlocks
+			threadService.invoke(() -> {
+				final JFileChooser chooser = new JFileChooser(parent);
+				chooser.setMultiSelectionEnabled(true);
+				if (style != null && style.equals(FileListWidget.FILES_AND_DIRECTORIES)) {
+					chooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+				}
+				else if (style != null && style.equals(FileListWidget.DIRECTORIES_ONLY)) {
+					chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+				}
+				else {
+					chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+				}
+				chooser.setSelectedFiles(files);
+				// add the possibility to filter by images and for common spreadsheet formats:
+				//chooser.addChoosableFileFilter(new FileNameExtensionFilter("All supported formats", formatService.getSuffixes()));
+				//chooser.addChoosableFileFilter(new FileNameExtensionFilter("Table data", "csv", "tsv", "xls", " xlsx", "txt"));
+				if (filter != null) {
+					javax.swing.filechooser.FileFilter fileFilter = new javax.swing.filechooser.FileFilter() {
+
+						@Override
+						public String getDescription() {
+							// return filter.toString();
+							return "Custom filter"; // TODO get better description
+						}
+
+						@Override
+						public boolean accept(File f) {
+							if (filter.accept(f)) return true;
+							// directories should always be displayed
+							// independent from selection mode
+							return f.isDirectory();
+						}
+					};
+					chooser.setFileFilter(fileFilter);
+					chooser.setAcceptAllFileFilterUsed(false);
+				}
+				int rval = chooser.showOpenDialog(ij1Helper.getIJ());
+				if (rval == JFileChooser.APPROVE_OPTION) {
+					result[0] = chooser.getSelectedFiles();
+				}
+			});
+		}
+		catch (final InvocationTargetException | InterruptedException exc) {
+			legacyService.handleException(exc);
+		}
+		return result[0];
 	}
 
 	@Override
