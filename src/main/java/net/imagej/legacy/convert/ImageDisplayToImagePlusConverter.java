@@ -35,7 +35,9 @@ import ij.ImagePlus;
 
 import java.lang.reflect.Type;
 import java.util.Collection;
+import java.util.List;
 
+import net.imagej.DatasetService;
 import net.imagej.display.ImageDisplay;
 import net.imagej.legacy.LegacyService;
 
@@ -64,6 +66,9 @@ public class ImageDisplayToImagePlusConverter extends
 
 	@Parameter(required = false)
 	private ObjectService objectService;
+
+	@Parameter(required = false)
+	private DatasetService datasetService;
 
 	// -- Converter methods --
 
@@ -106,7 +111,12 @@ public class ImageDisplayToImagePlusConverter extends
 	@Override
 	public void populateInputCandidates(final Collection<Object> objects) {
 		if (objectService == null) return;
-		objects.addAll(objectService.getObjects(ImageDisplay.class));
+		List<ImageDisplay> imageDisplays = objectService.getObjects(ImageDisplay.class);
+		for (ImageDisplay imageDisplay : imageDisplays) {
+			if (datasetService.getDatasets(imageDisplay).isEmpty()) {
+				objects.add(imageDisplay);
+			}
+		}
 	}
 
 	@Override

@@ -36,9 +36,14 @@ import ij.WindowManager;
 
 import java.util.Collection;
 
+import net.imagej.DatasetService;
+import net.imagej.display.ImageDisplay;
+import net.imagej.legacy.LegacyService;
+
 import org.scijava.convert.AbstractConverter;
 import org.scijava.convert.ConvertService;
 import org.scijava.convert.Converter;
+import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 import org.scijava.widget.ObjectWidget;
 import org.scijava.widget.WidgetModel;
@@ -66,6 +71,12 @@ public class ImageTitleToImagePlusConverter extends
 	AbstractConverter<ImageTitleToImagePlusConverter.ImageTitle, ImagePlus>
 {
 
+	@Parameter(required = false)
+	private DatasetService datasetService;
+
+	@Parameter(required = false)
+	private LegacyService legacyService;
+
 	// -- Converter methods --
 
 	@Override
@@ -80,7 +91,14 @@ public class ImageTitleToImagePlusConverter extends
 		if (imageIDs == null) return;
 		for (final int imageID : imageIDs) {
 			final ImagePlus imp = WindowManager.getImage(imageID);
-			if (imp != null) objects.add(new ImageTitle(imp));
+			if (imp != null) {
+				ImageTitle imageTitle = new ImageTitle(imp);
+				// Prefer a Dataset if it is available (don't add to objects)
+				ImageDisplay imageDisplay = legacyService.getImageMap().lookupDisplay(imp);
+				if(datasetService.getDatasets(imageDisplay).isEmpty()) {
+					objects.add(imageTitle);
+				}
+			}
 		}
 	}
 
