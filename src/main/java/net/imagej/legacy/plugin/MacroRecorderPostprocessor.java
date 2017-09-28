@@ -48,7 +48,7 @@ import org.scijava.plugin.Plugin;
  * 
  * @author Curtis Rueden
  */
-@Plugin(type = PostprocessorPlugin.class, priority = Priority.VERY_LOW_PRIORITY)
+@Plugin(type = PostprocessorPlugin.class, priority = Priority.VERY_LOW)
 public class MacroRecorderPostprocessor extends AbstractPostprocessorPlugin {
 
 	@Parameter(required = false)

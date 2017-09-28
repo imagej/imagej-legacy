@@ -45,7 +45,7 @@ import org.scijava.plugin.Plugin;
  * 
  * @author Jan Eglinger
  */
-@Plugin(type = PreprocessorPlugin.class, priority = Priority.VERY_HIGH_PRIORITY)
+@Plugin(type = PreprocessorPlugin.class, priority = Priority.VERY_HIGH)
 public class RoiManagerPreprocessor extends AbstractSingleInputPreprocessor {
 
 	// -- ModuleProcessor methods --

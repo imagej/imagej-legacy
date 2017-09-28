@@ -54,7 +54,7 @@ import org.scijava.util.GenericUtils;
  *
  * @author Curtis Rueden
  */
-@Plugin(type = Converter.class, priority = Priority.LOW_PRIORITY)
+@Plugin(type = Converter.class, priority = Priority.LOW)
 public class ImageDisplayToImagePlusConverter extends
 	AbstractConverter<ImageDisplay, ImagePlus>
 {

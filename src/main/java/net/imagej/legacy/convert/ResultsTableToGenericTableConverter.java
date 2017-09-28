@@ -45,7 +45,7 @@ import ij.measure.ResultsTable;
  *
  * @author Alison Walter
  */
-@Plugin(type = Converter.class, priority = Priority.LOW_PRIORITY)
+@Plugin(type = Converter.class, priority = Priority.LOW)
 public class ResultsTableToGenericTableConverter extends
 	AbstractConverter<ResultsTable, GenericTable>
 {

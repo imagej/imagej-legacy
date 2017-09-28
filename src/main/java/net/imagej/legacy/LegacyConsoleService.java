@@ -49,7 +49,7 @@ import org.scijava.service.AbstractService;
 import org.scijava.service.Service;
 import org.scijava.service.ServiceIndex;
 
-@Plugin(type = Service.class, priority = Priority.HIGH_PRIORITY)
+@Plugin(type = Service.class, priority = Priority.HIGH)
 public class LegacyConsoleService extends AbstractService implements ConsoleService {
 
 	@Parameter

@@ -58,7 +58,7 @@ import org.scijava.ui.viewer.DisplayWindow;
  * 
  * @author Mark Hiner
  */
-@Plugin(type = DisplayViewer.class, priority = Priority.HIGH_PRIORITY)
+@Plugin(type = DisplayViewer.class, priority = Priority.HIGH)
 public class LegacyImageDisplayViewer extends AbstractImageDisplayViewer
 	implements LegacyDisplayViewer
 {

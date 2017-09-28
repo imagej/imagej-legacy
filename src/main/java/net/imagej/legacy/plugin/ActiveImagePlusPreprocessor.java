@@ -70,7 +70,7 @@ import org.scijava.plugin.Plugin;
  * @author Curtis Rueden
  */
 @Plugin(type = PreprocessorPlugin.class,
-	priority = Priority.VERY_HIGH_PRIORITY + 1)
+	priority = Priority.VERY_HIGH + 1)
 public class ActiveImagePlusPreprocessor extends
 	AbstractSingleInputPreprocessor
 {

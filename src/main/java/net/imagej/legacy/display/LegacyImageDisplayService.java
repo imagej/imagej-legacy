@@ -74,7 +74,7 @@ import org.scijava.service.ServiceIndex;
  *
  * @author Mark Hiner
  */
-@Plugin(type = Service.class, priority = Priority.HIGH_PRIORITY)
+@Plugin(type = Service.class, priority = Priority.HIGH)
 public class LegacyImageDisplayService extends AbstractService implements
 	ImageDisplayService
 {

@@ -58,7 +58,7 @@ import org.scijava.util.GenericUtils;
  *
  * @author Mark Hiner
  */
-@Plugin(type = Converter.class, priority = Priority.LOW_PRIORITY)
+@Plugin(type = Converter.class, priority = Priority.LOW)
 public class DatasetToImagePlusConverter extends
 	AbstractConverter<Dataset, ImagePlus>
 {

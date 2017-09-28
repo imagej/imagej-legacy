@@ -51,7 +51,7 @@ import org.scijava.ui.swing.script.TextEditor;
  * 
  * @author Johannes Schindelin
  */
-@Plugin(type = LegacyEditor.class, priority = Priority.LOW_PRIORITY)
+@Plugin(type = LegacyEditor.class, priority = Priority.LOW)
 public class DefaultLegacyEditor implements LegacyEditor {
 
 	@Parameter

@@ -111,7 +111,7 @@ import org.scijava.util.AppUtils;
  * @author Johannes Schindelin
  * @author Mark Hiner
  */
-@Plugin(type = Service.class, priority = Priority.NORMAL_PRIORITY + 1)
+@Plugin(type = Service.class, priority = Priority.NORMAL + 1)
 public final class LegacyService extends AbstractService implements
 	ImageJService
 {

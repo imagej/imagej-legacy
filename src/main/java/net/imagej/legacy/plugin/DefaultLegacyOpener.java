@@ -75,7 +75,7 @@ import org.scijava.service.Service;
  * 
  * @author Mark Hiner
  */
-@Plugin(type = LegacyOpener.class, priority = Priority.LOW_PRIORITY)
+@Plugin(type = LegacyOpener.class, priority = Priority.LOW)
 public class DefaultLegacyOpener implements LegacyOpener {
 
 	private LegacyService legacyService;
