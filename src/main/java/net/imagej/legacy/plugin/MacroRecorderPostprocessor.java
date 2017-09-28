@@ -58,12 +58,11 @@ public class MacroRecorderPostprocessor extends AbstractPostprocessorPlugin {
 
 	@Override
 	public void process(final Module module) {
+		if (legacyService == null) return;
 		final IJ1Helper ij1Helper = legacyService.getIJ1Helper();
 		if (ij1Helper == null) return;
-		if (ij1Helper.isMacro()) {
-			// do not record parameters while in macro mode
-			return;
-		}
+		if (ij1Helper.isMacro()) return; // do not record while in macro mode
+
 		for (final ModuleItem<?> input : module.getInfo().inputs()) {
 			final String name = input.getName();
 			final Object value = module.getInput(name);
