@@ -46,8 +46,7 @@ import org.scijava.module.Module;
  * The {@link MacroRecorderPreprocessor} populates this structure with the set
  * of pre-resolved inputs for its module. The {@link MacroRecorderPostprocessor}
  * then accesses this same set so that it can record only those input values
- * that were still unresolved at that point in the preprocessing chain. It is
- * assumed that these two processors will run on the same thread.
+ * that were still unresolved at that point in the preprocessing chain.
  * </p>
  */
 public final class MacroRecorderExcludedInputs {
