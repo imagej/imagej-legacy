@@ -31,59 +31,40 @@
 
 package net.imagej.legacy.plugin;
 
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
+import java.util.WeakHashMap;
 
-import net.imagej.legacy.IJ1Helper;
-import net.imagej.legacy.LegacyService;
-
-import org.scijava.Priority;
 import org.scijava.module.Module;
-import org.scijava.module.ModuleItem;
-import org.scijava.module.process.AbstractPostprocessorPlugin;
-import org.scijava.module.process.PostprocessorPlugin;
-import org.scijava.plugin.Parameter;
-import org.scijava.plugin.Plugin;
 
 /**
- * Registers the module's final input values with ImageJ 1.x's macro recorder.
- * In IJ1 terms, this makes all SciJava modules macro recordable!
- * 
- * @author Curtis Rueden
+ * Globally accessible data structure that stores, for each {@link Module}
+ * instance, the set of "pre-resolved" module inputs.
+ * <p>
+ * The {@link MacroRecorderPreprocessor} populates this structure with the set
+ * of pre-resolved inputs for its module. The {@link MacroRecorderPostprocessor}
+ * then accesses this same set so that it can record only those input values
+ * that were still unresolved at that point in the preprocessing chain. It is
+ * assumed that these two processors will run on the same thread.
+ * </p>
  */
-@Plugin(type = PostprocessorPlugin.class, priority = Priority.VERY_LOW)
-public class MacroRecorderPostprocessor extends AbstractPostprocessorPlugin {
+public final class MacroRecorderExcludedInputs {
 
-	@Parameter(required = false)
-	private LegacyService legacyService;
-
-	// -- ModuleProcessor methods --
-
-	@Override
-	public void process(final Module module) {
-		if (legacyService == null) return;
-		final IJ1Helper ij1Helper = legacyService.getIJ1Helper();
-		if (ij1Helper == null) return;
-		if (ij1Helper.isMacro()) return; // do not record while in macro mode
-
-		final Set<String> excludedInputs = //
-			MacroRecorderExcludedInputs.retrieve(module);
-
-		for (final ModuleItem<?> input : module.getInfo().inputs()) {
-			final String name = input.getName();
-			if (excludedInputs != null && excludedInputs.contains(name)) continue;
-			final Object value = module.getInput(name);
-			if (value != null) ij1Helper.recordOption(name, toString(value));
-		}
+	private MacroRecorderExcludedInputs() {
+		// Prevent instantiation of utility class.
 	}
 
-	// -- Helper methods --
+	private static final Map<Module, Set<String>> EI_MAP =
+		Collections.synchronizedMap(new WeakHashMap<>());
 
-	private String toString(final Object value) {
-		// if object is an ImagePlus, use its title as the string representation
-		final String title = IJ1Helper.getTitle(value);
-		if (title != null) return title;
-
-		return value.toString();
+	public static Set<String> create(final Module module) {
+		return EI_MAP.computeIfAbsent(module, key -> new HashSet<>());
 	}
 
+	/** Obtains the cached set of excluded inputs, remove it from the . */
+	public static Set<String> retrieve(final Module module) {
+		return EI_MAP.remove(module);
+	}
 }

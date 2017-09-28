@@ -39,19 +39,32 @@ import net.imagej.legacy.LegacyService;
 import org.scijava.Priority;
 import org.scijava.module.Module;
 import org.scijava.module.ModuleItem;
-import org.scijava.module.process.AbstractPostprocessorPlugin;
-import org.scijava.module.process.PostprocessorPlugin;
+import org.scijava.module.process.AbstractPreprocessorPlugin;
+import org.scijava.module.process.PreprocessorPlugin;
+import org.scijava.module.process.ServicePreprocessor;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 
 /**
- * Registers the module's final input values with ImageJ 1.x's macro recorder.
- * In IJ1 terms, this makes all SciJava modules macro recordable!
+ * Remembers which inputs are resolved extremely early in the preprocessing
+ * chain. These inputs will be excluded from IJ1 macro recording by the
+ * {@link MacroRecorderPostprocessor}.
+ * <p>
+ * In particular, we want to exclude {@link org.scijava.service.Service} and
+ * {@link org.scijava.Context} parameters, which make no sense to include in
+ * recorded macro strings. Such parameters are always populated by the
+ * {@link ServicePreprocessor} with {@code 2 * VERY_HIGH} priority. As such,
+ * this preprocessor runs at priority {@code VERY_HIGH + 1}: sooner than
+ * {@code VERY_HIGH} priority processors, but after the
+ * {@link ServicePreprocessor}. This behavior allows other such "pre-resolved"
+ * parameters to be excluded from recorded macros in an extensible way, while
+ * retaining parameters that get resolved later in the preprocessing chain.
+ * </p>
  * 
  * @author Curtis Rueden
  */
-@Plugin(type = PostprocessorPlugin.class, priority = Priority.VERY_LOW)
-public class MacroRecorderPostprocessor extends AbstractPostprocessorPlugin {
+@Plugin(type = PreprocessorPlugin.class, priority = Priority.VERY_HIGH + 1)
+public class MacroRecorderPreprocessor extends AbstractPreprocessorPlugin {
 
 	@Parameter(required = false)
 	private LegacyService legacyService;
@@ -63,27 +76,14 @@ public class MacroRecorderPostprocessor extends AbstractPostprocessorPlugin {
 		if (legacyService == null) return;
 		final IJ1Helper ij1Helper = legacyService.getIJ1Helper();
 		if (ij1Helper == null) return;
-		if (ij1Helper.isMacro()) return; // do not record while in macro mode
+		if (ij1Helper.isMacro()) return;
 
 		final Set<String> excludedInputs = //
-			MacroRecorderExcludedInputs.retrieve(module);
+			MacroRecorderExcludedInputs.create(module);
 
 		for (final ModuleItem<?> input : module.getInfo().inputs()) {
 			final String name = input.getName();
-			if (excludedInputs != null && excludedInputs.contains(name)) continue;
-			final Object value = module.getInput(name);
-			if (value != null) ij1Helper.recordOption(name, toString(value));
+			if (module.isInputResolved(name)) excludedInputs.add(name);
 		}
 	}
-
-	// -- Helper methods --
-
-	private String toString(final Object value) {
-		// if object is an ImagePlus, use its title as the string representation
-		final String title = IJ1Helper.getTitle(value);
-		if (title != null) return title;
-
-		return value.toString();
-	}
-
 }
