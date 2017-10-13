@@ -28,6 +28,21 @@ import org.scijava.module.ModuleInfo;
  */
 public class SwingSearchPanel extends JPanel {
 
+	// START HERE - study and mimic spotlight
+	// Maybe SearchService should return List<SearchResults>
+	// and SearchResults should be a List<SearchResult> (or SearchItem)
+	// along with its own nice toString() for the category.
+	// Want two panes:
+	// left side is list of categorized results
+	// - Probably want to impose a limit on number of results per category.
+	// - Want to add a scrollbar to this pane
+	// - each item in each category has an icon
+	// - each category is labeled from SearchResults#toString
+	// right side is detail view of the selected item
+	// - highlight an item and it shows the details including properties
+	// - can use arrow keys, or mouse over (that is different than spotlight)
+	// - press enter on an item and 
+	// 
 	protected final JTable searchResultsTable;
 	protected final SearchTableModel tableModel;
 

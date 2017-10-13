@@ -32,15 +32,19 @@
 package org.scijava.search.tmp;
 
 import java.awt.BorderLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
+import javax.swing.JSplitPane;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.WindowConstants;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 
 import org.scijava.Context;
 import org.scijava.command.Command;
@@ -62,16 +66,31 @@ public class SearchMe implements Command {
 		JPanel p = new JPanel();
 		f.setContentPane(p);
 		final JTextField textField = new JTextField();
-		textField.addActionListener(new ActionListener() {
+		textField.getDocument().addDocumentListener(new DocumentListener() {
 
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				JPopupMenu menu = new JPopupMenu("Hello");
+			public void popup() {
+				final JPopupMenu menu = new JPopupMenu("Hello");
+				menu.add(new JLabel("<html><span style=\"color: #000000; background: #ddffff\">Animals</span>"));
 				menu.add(new JMenuItem("Dog"));
 				menu.add(new JMenuItem("Cat"));
+				menu.add(new JLabel("<html><span style=\"color: #000000; background: #ddffff\">Plants</span>"));
+				menu.add(new JMenuItem("Tree"));
+				menu.add(new JMenuItem("Shrub"));
+
 				menu.show(textField, 0, textField.getHeight());
+
+//				final JSplitPane pane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+//				pane.setLeftComponent(menu);
+//				pane.setRightComponent(new JTextArea("Lorem ipsum Lorem ipsum Lorem ipsum\nLorem ipsum Lorem ipsum Lorem ipsum\nLorem ipsum Lorem ipsum Lorem ipsum\nLorem ipsum Lorem ipsum Lorem ipsum\nLorem ipsum Lorem ipsum Lorem ipsum\n"));
+//
+//				final JPopupMenu outer = new JPopupMenu("Bye");
+//				outer.add(pane);
+//				outer.show(textField, 0, textField.getHeight());
 			}
-			
+
+			@Override public void insertUpdate(DocumentEvent e) { popup(); }
+			@Override public void removeUpdate(DocumentEvent e) { popup(); }
+			@Override public void changedUpdate(DocumentEvent e) { popup(); }
 		});
 		p.setLayout(new BorderLayout());
 		p.add(textField, BorderLayout.CENTER);
