@@ -40,6 +40,7 @@ import ij.Menus;
 import ij.Prefs;
 import ij.WindowManager;
 import ij.gui.ImageWindow;
+import ij.gui.Overlay;
 import ij.gui.Toolbar;
 import ij.io.DirectoryChooser;
 import ij.io.OpenDialog;
@@ -254,6 +255,7 @@ public class IJ1Helper extends AbstractContextual {
 	/** Add name aliases for ImageJ1 classes to the ScriptService. */
 	public void addAliases(final ScriptService scriptService) {
 		scriptService.addAlias(ImagePlus.class);
+		scriptService.addAlias("IJ1Overlay", Overlay.class);
 		scriptService.addAlias(ResultsTable.class);
 		scriptService.addAlias(RoiManager.class);
 	}
