@@ -84,7 +84,7 @@ public class ImagePlusToDatasetConverter extends
 
 	@Override
 	public boolean canConvert(final Class<?> src, final Class<?> dest) {
-		if (legacyService == null) return false;
+		if (noLegacy()) return false;
 		return legacyService.getIJ1Helper().isImagePlus(src) &&
 			ConversionUtils.canCast(dest, Dataset.class);
 	}
@@ -107,7 +107,7 @@ public class ImagePlusToDatasetConverter extends
 	@SuppressWarnings("unchecked")
 	@Override
 	public <T> T convert(final Object src, final Class<T> dest) {
-		if (legacyService == null || imageDisplayService == null) {
+		if (noLegacy() || imageDisplayService == null) {
 			throw new UnsupportedOperationException();
 		}
 
@@ -121,7 +121,7 @@ public class ImagePlusToDatasetConverter extends
 
 	@Override
 	public void populateInputCandidates(final Collection<Object> objects) {
-		if (legacyService == null) return;
+		if (noLegacy()) return;
 
 		final IJ1Helper ij1Helper = legacyService.getIJ1Helper();
 
@@ -146,5 +146,12 @@ public class ImagePlusToDatasetConverter extends
 	@Override
 	public Class<ImagePlus> getInputType() {
 		return ImagePlus.class;
+	}
+
+	// -- Helper methods --
+
+	private boolean noLegacy() {
+		return legacyService == null || legacyService.getIJ1Helper() == null ||
+			legacyService.getImageMap() == null;
 	}
 }
