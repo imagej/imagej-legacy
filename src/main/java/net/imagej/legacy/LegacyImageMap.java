@@ -511,7 +511,12 @@ public class LegacyImageMap extends AbstractContextual {
 		final Display<?> display = event.getDisplay();
 		if (display instanceof ImageDisplay) {
 			final ImagePlus mappedImagePlus = lookupImagePlus((ImageDisplay) event.getDisplay());
-			if (mappedImagePlus != null) mappedImagePlus.updateAndDraw();
+			if (mappedImagePlus != null) {
+				final Harmonizer harmonizer =
+						new Harmonizer(legacyService.getContext(), imageTranslator);
+				harmonizer.updateLegacyImage((ImageDisplay) display, mappedImagePlus);
+				mappedImagePlus.updateAndDraw();
+			}
 		}
 	}
 }
