@@ -31,11 +31,10 @@
 
 package org.scijava.search;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.scijava.plugin.SingletonService;
+import org.scijava.plugin.PluginService;
 import org.scijava.service.SciJavaService;
 
 /**
@@ -43,26 +42,24 @@ import org.scijava.service.SciJavaService;
  *
  * @author Curtis Rueden
  */
-public interface SearchService extends SingletonService<Searcher>,
-	SciJavaService
-{
+public interface SearchService extends SciJavaService {
 
-	default List<SearchResult> search(final String text, final boolean fuzzy) {
-		final List<SearchResult> results = new ArrayList<>();
-		for (final Searcher searcher : getInstances()) {
-			results.addAll(searcher.search(text, fuzzy));
-		}
-		return results;
+	/**
+	 * Gets the service responsible for discovering and managing this service's
+	 * plugins.
+	 */
+	default PluginService pluginService() {
+		return context().getService(PluginService.class);
+	}
+
+	/** Begin an asynchronous, multi-threaded search operation. */
+	default SearchOperation search(final SearchListener... callbacks) {
+		return new SearchOperation(callbacks);
 	}
 
 	default List<SearchAction> actions(final SearchResult result) {
 		return pluginService().createInstancesOfType(SearchActionFactory.class)
 			.stream().filter(factory -> factory.supports(result)).map(
 				factory -> factory.create(result)).collect(Collectors.toList());
-	}
-
-	@Override
-	default Class<Searcher> getPluginType() {
-		return Searcher.class;
 	}
 }

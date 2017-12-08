@@ -31,8 +31,8 @@
 
 package org.scijava.search;
 
-import org.scijava.plugin.AbstractSingletonService;
 import org.scijava.plugin.Plugin;
+import org.scijava.service.AbstractService;
 import org.scijava.service.Service;
 
 /**
@@ -41,8 +41,8 @@ import org.scijava.service.Service;
  * @author Curtis Rueden
  */
 @Plugin(type = Service.class)
-public class DefaultSearchService extends AbstractSingletonService<Searcher>
-	implements SearchService
+public class DefaultSearchService extends AbstractService implements
+	SearchService
 {
 	// NB: No implementation needed.
 }

@@ -57,6 +57,12 @@ public class ModuleSearcher implements Searcher {
 	private ModuleService moduleService;
 
 	@Override
+	public String title() {
+		// NB: A misnomer, but it's the term users are familiar with.
+		return "Commands";
+	}
+
+	@Override
 	public List<SearchResult> search(final String text, final boolean fuzzy) {
 		return moduleService.getModules().stream().filter(info -> 
 			matches(info, text)
@@ -75,8 +81,4 @@ public class ModuleSearcher implements Searcher {
 		// Probably put it in the SearchService itself, and make an API toggle.
 		return actual.toLowerCase().matches(".*" + desired + ".*");
 	}
-
-	// -- Helper classes --
-
-
 }
