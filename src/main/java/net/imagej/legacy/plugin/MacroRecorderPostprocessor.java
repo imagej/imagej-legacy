@@ -36,6 +36,7 @@ import java.util.Set;
 import net.imagej.legacy.IJ1Helper;
 import net.imagej.legacy.LegacyService;
 
+import org.scijava.ItemVisibility;
 import org.scijava.Priority;
 import org.scijava.module.Module;
 import org.scijava.module.ModuleItem;
@@ -71,9 +72,15 @@ public class MacroRecorderPostprocessor extends AbstractPostprocessorPlugin {
 		for (final ModuleItem<?> input : module.getInfo().inputs()) {
 			final String name = input.getName();
 			if (excludedInputs != null && excludedInputs.contains(name)) continue;
+			if (excludedFromRecording(input.getVisibility())) continue;
 			final Object value = module.getInput(name);
 			if (value != null) ij1Helper.recordOption(name, toString(value));
 		}
+	}
+
+	private boolean excludedFromRecording(final ItemVisibility visibility) {
+		return visibility == ItemVisibility.INVISIBLE ||
+			visibility == ItemVisibility.MESSAGE;
 	}
 
 	// -- Helper methods --
