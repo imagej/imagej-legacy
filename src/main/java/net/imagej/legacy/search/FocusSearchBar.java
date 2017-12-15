@@ -48,7 +48,7 @@ import org.scijava.plugin.Plugin;
  */
 @Plugin(type = Command.class, menu = { @Menu(label = "Plugins"), @Menu(
 	label = "Utilities"), @Menu(label = "Focus Search Bar",
-		accelerator = "meta L") }, priority = Priority.HIGH_PRIORITY)
+		accelerator = "meta L") }, priority = Priority.HIGH)
 public class FocusSearchBar implements Command {
 
 	@Parameter
