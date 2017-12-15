@@ -28,7 +28,7 @@
  * #L%
  */
 
-package net.imagej.legacy.ui;
+package net.imagej.legacy.search;
 
 import net.imagej.legacy.LegacyService;
 
