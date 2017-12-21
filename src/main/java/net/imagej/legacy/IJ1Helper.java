@@ -1294,7 +1294,8 @@ public class IJ1Helper extends AbstractContextual {
 		if (!(imagej instanceof Window)) return; // NB: Avoid headless issues.
 
 		// Retrieve user preferences.
-		boolean fullBar = false, embedded = false, overrideShortcut = true;
+		boolean fullBar = false, embedded = false;
+		boolean overrideShortcut = true, mouseoverEnabled = false;
 		int resultLimit = 8;
 		// HACK: We cannot use OptionsService here, because it will create
 		// all the OptionsPlugin instances before needed services are ready.
@@ -1311,6 +1312,8 @@ public class IJ1Helper extends AbstractContextual {
 				embedded);
 			overrideShortcut = prefService.getBoolean(SearchOptions.class,
 				"overrideShortcut", overrideShortcut);
+			mouseoverEnabled = prefService.getBoolean(SearchOptions.class,
+				"mouseoverEnabled", mouseoverEnabled);
 			resultLimit = prefService.getInt(SearchOptions.class, "resultLimit",
 				resultLimit);
 		}
@@ -1371,6 +1374,7 @@ public class IJ1Helper extends AbstractContextual {
 		else { // DIALOG mode
 			searchBar = new SwingSearchBar(getContext());
 		}
+		searchBar.setMouseoverEnabled(mouseoverEnabled);
 		searchBar.setResultLimit(resultLimit);
 
 		if (fullBar) { // FULL mode

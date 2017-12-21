@@ -65,6 +65,9 @@ public class SearchOptions extends OptionsPlugin {
 	@Parameter(label = "Override Command Finder shortcut")
 	private boolean overrideShortcut = true;
 
+	@Parameter(label = "Select search results on mouseover")
+	private boolean mouseoverEnabled;
+
 	@Parameter(label = "Maximum number of results per category")
 	private int resultLimit = 8;
 
@@ -84,6 +87,10 @@ public class SearchOptions extends OptionsPlugin {
 
 	public boolean isShortcutOverridden() {
 		return overrideShortcut;
+	}
+
+	public boolean isMouseoverEnabled() {
+		return mouseoverEnabled;
 	}
 
 	public int getResultLimit() {
