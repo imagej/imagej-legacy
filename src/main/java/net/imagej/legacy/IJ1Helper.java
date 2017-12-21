@@ -1295,6 +1295,7 @@ public class IJ1Helper extends AbstractContextual {
 
 		// Retrieve user preferences.
 		boolean fullBar = false, embedded = false, overrideShortcut = true;
+		int resultLimit = 8;
 		// HACK: We cannot use OptionsService here, because it will create
 		// all the OptionsPlugin instances before needed services are ready.
 		// While this is indicative of a design issue with OptionsService and
@@ -1306,9 +1307,12 @@ public class IJ1Helper extends AbstractContextual {
 			final String style = prefService.get(SearchOptions.class, "style");
 			if ("None".equals(style)) return; // search disabled
 			fullBar = "Full".equals(style);
-			embedded = prefService.getBoolean(SearchOptions.class, "embedded", false);
+			embedded = prefService.getBoolean(SearchOptions.class, "embedded",
+				embedded);
 			overrideShortcut = prefService.getBoolean(SearchOptions.class,
-				"overrideShortcut", true);
+				"overrideShortcut", overrideShortcut);
+			resultLimit = prefService.getInt(SearchOptions.class, "resultLimit",
+				resultLimit);
 		}
 
 		final Component[] ijc = ((Container) imagej).getComponents();
@@ -1367,6 +1371,7 @@ public class IJ1Helper extends AbstractContextual {
 		else { // DIALOG mode
 			searchBar = new SwingSearchBar(getContext());
 		}
+		searchBar.setResultLimit(resultLimit);
 
 		if (fullBar) { // FULL mode
 			panel.add(searchBar, "south");

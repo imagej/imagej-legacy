@@ -65,6 +65,9 @@ public class SearchOptions extends OptionsPlugin {
 	@Parameter(label = "Override Command Finder shortcut")
 	private boolean overrideShortcut = true;
 
+	@Parameter(label = "Maximum number of results per category")
+	private int resultLimit = 8;
+
 	// -- Option accessors --
 
 	public boolean isSearchBarEnabled() {
@@ -81,6 +84,10 @@ public class SearchOptions extends OptionsPlugin {
 
 	public boolean isShortcutOverridden() {
 		return overrideShortcut;
+	}
+
+	public int getResultLimit() {
+		return resultLimit;
 	}
 
 	// -- Runnable methods --
