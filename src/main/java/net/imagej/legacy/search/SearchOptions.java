@@ -63,7 +63,7 @@ public class SearchOptions extends OptionsPlugin {
 	private boolean embedded;
 
 	@Parameter(label = "Override Command Finder shortcut")
-	private boolean overrideShortcut;
+	private boolean overrideShortcut = true;
 
 	// -- Option accessors --
 
