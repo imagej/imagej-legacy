@@ -68,7 +68,7 @@ public class SearchOptions extends OptionsPlugin {
 	@Parameter(label = "Select search results on mouseover")
 	private boolean mouseoverEnabled;
 
-	@Parameter(label = "Maximum number of results per category")
+	@Parameter(label = "Maximum number of results per category", min = "1")
 	private int resultLimit = 8;
 
 	// -- Option accessors --
