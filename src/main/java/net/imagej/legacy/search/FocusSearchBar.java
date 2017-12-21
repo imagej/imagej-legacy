@@ -49,7 +49,7 @@ import org.scijava.ui.swing.search.SwingSearchBar;
  */
 @Plugin(type = Command.class, menu = { @Menu(label = "Plugins"), @Menu(
 	label = "Utilities"), @Menu(label = "Focus Search Bar",
-		accelerator = "meta L") }, priority = Priority.HIGH)
+		accelerator = "meta L") }, priority = Priority.HIGH, enabled = false)
 public class FocusSearchBar implements Command {
 
 	@Parameter
