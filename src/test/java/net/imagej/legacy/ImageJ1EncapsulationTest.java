@@ -87,7 +87,6 @@ public class ImageJ1EncapsulationTest {
 					/* TODO: At least some of them should not need to access ImageJ 1.x classes directly! */
 					className.startsWith(net.imagej.legacy.DefaultLegacyHooks.class.getName()) ||
 					className.startsWith(net.imagej.legacy.LegacyImageMap.class.getName()) ||
-					className.startsWith(net.imagej.legacy.LegacyOutputTracker.class.getName()) ||
 					className.startsWith(net.imagej.legacy.OptionsSynchronizer.class.getName()) ||
 					className.startsWith(net.imagej.legacy.SwitchToModernMode.class.getName()) ||
 					className.startsWith(net.imagej.legacy.command.LegacyCommand.class.getName()) ||
