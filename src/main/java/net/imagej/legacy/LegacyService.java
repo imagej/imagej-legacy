@@ -670,7 +670,7 @@ public final class LegacyService extends AbstractService implements
 			"This context's LegacyService is inactive");
 	}
 
-	private TextEditor openScriptInTextEditor(final ScriptInfo script) {
+	public TextEditor openScriptInTextEditor(final ScriptInfo script) {
 		final TextEditor editor = new TextEditor(getContext());
 
 		final File scriptFile = getScriptFile(script);
