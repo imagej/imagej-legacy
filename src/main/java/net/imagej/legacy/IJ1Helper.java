@@ -95,9 +95,12 @@ import org.scijava.AbstractContextual;
 import org.scijava.Context;
 import org.scijava.MenuEntry;
 import org.scijava.MenuPath;
+import org.scijava.command.CommandInfo;
+import org.scijava.command.CommandService;
 import org.scijava.event.EventHandler;
 import org.scijava.log.LogService;
 import org.scijava.module.ModuleInfo;
+import org.scijava.module.ModuleService;
 import org.scijava.platform.event.AppAboutEvent;
 import org.scijava.platform.event.AppOpenFilesEvent;
 import org.scijava.platform.event.AppPreferencesEvent;
@@ -1376,6 +1379,25 @@ public class IJ1Helper extends AbstractContextual {
 		}
 		searchBar.setMouseoverEnabled(mouseoverEnabled);
 		searchBar.setResultLimit(resultLimit);
+
+		// add toolbar buttons
+		// NB: Unfortunately, the gear (\u2699) does not appear on MacOS.
+		searchBar.addButton("...", "Configure search preferences", ae -> {
+			final CommandService commandService = //
+				getContext().getService(CommandService.class);
+			if (commandService == null) return;
+			final ModuleService moduleService = //
+				getContext().getService(ModuleService.class);
+			if (moduleService == null) return;
+			final CommandInfo searchOptions = //
+				commandService.getCommand(SearchOptions.class);
+			if (searchOptions == null) return;
+			moduleService.run(searchOptions, true);
+		});
+		if (embedded) {
+			searchBar.addButton("\u2715", "Close the search results pane",
+				ae -> searchBar.close());
+		}
 
 		if (fullBar) { // FULL mode
 			panel.add(searchBar, "south");
