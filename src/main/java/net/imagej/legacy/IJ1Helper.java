@@ -55,7 +55,6 @@ import ij.plugin.frame.Recorder;
 import ij.plugin.frame.RoiManager;
 
 import java.awt.Component;
-import java.awt.Container;
 import java.awt.EventQueue;
 import java.awt.Frame;
 import java.awt.Image;
@@ -64,7 +63,6 @@ import java.awt.MenuBar;
 import java.awt.MenuItem;
 import java.awt.Panel;
 import java.awt.Window;
-import java.awt.event.KeyEvent;
 import java.awt.image.ImageProducer;
 import java.io.File;
 import java.io.IOException;
@@ -73,7 +71,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -87,28 +84,22 @@ import java.util.concurrent.Callable;
 import javax.swing.SwingUtilities;
 
 import net.imagej.display.ImageDisplay;
-import net.imagej.legacy.search.SearchOptions;
+import net.imagej.legacy.search.SearchBarHacker;
 import net.imagej.patcher.LegacyHooks;
-import net.miginfocom.swing.MigLayout;
 
 import org.scijava.AbstractContextual;
 import org.scijava.Context;
 import org.scijava.MenuEntry;
 import org.scijava.MenuPath;
-import org.scijava.command.CommandInfo;
-import org.scijava.command.CommandService;
 import org.scijava.event.EventHandler;
 import org.scijava.log.LogService;
 import org.scijava.module.ModuleInfo;
-import org.scijava.module.ModuleService;
 import org.scijava.platform.event.AppAboutEvent;
 import org.scijava.platform.event.AppOpenFilesEvent;
 import org.scijava.platform.event.AppPreferencesEvent;
 import org.scijava.platform.event.AppQuitEvent;
 import org.scijava.plugin.Parameter;
-import org.scijava.prefs.PrefService;
 import org.scijava.script.ScriptService;
-import org.scijava.ui.swing.search.SwingSearchBar;
 import org.scijava.util.ClassUtils;
 
 /**
@@ -135,7 +126,7 @@ public class IJ1Helper extends AbstractContextual {
 	private LogService log;
 
 	/** Search bar in the main window. */
-	private SwingSearchBar searchBar;
+	private Object searchBar;
 
 	/** Whether we are in the process of forcibly shutting down ImageJ1. */
 	private boolean disposing;
@@ -148,7 +139,16 @@ public class IJ1Helper extends AbstractContextual {
 	public void initialize() {
 		// initialize legacy ImageJ application
 		final ImageJ ij1 = IJ.getInstance();
-		addSearchBar(ij1);
+
+		// add the quick search bar
+		try {
+			searchBar = new SearchBarHacker(getContext()).addSearchBar(ij1, this);
+		}
+		catch (final Throwable t) {
+			// NB: Do not let this crash ImageJ on startup!
+			log.error(t);
+		}
+
 		if (getCommands() == null) {
 			IJ.runPlugIn("ij.IJ.init", "");
 		}
@@ -383,7 +383,7 @@ public class IJ1Helper extends AbstractContextual {
 		return IJ.getInstance().getStatusBar();
 	}
 
-	public SwingSearchBar getSearchBar() {
+	public Object getSearchBar() {
 		return searchBar;
 	}
 
@@ -1291,151 +1291,6 @@ public class IJ1Helper extends AbstractContextual {
 	}
 
 	// -- Helper methods --
-
-	/** Adds a search bar to the main image frame. */
-	private void addSearchBar(final Object imagej) {
-		if (!(imagej instanceof Window)) return; // NB: Avoid headless issues.
-
-		// Retrieve user preferences.
-		boolean fullBar = false, embedded = false;
-		boolean overrideShortcut = true, mouseoverEnabled = false;
-		int resultLimit = 8;
-		// HACK: We cannot use OptionsService here, because it will create
-		// all the OptionsPlugin instances before needed services are ready.
-		// While this is indicative of a design issue with OptionsService and
-		// maybe SciJava Common's application framework in general, the best we
-		// can do here is to extract the persisted options in a lower-level way.
-		final PrefService prefService = //
-			getContext().getService(PrefService.class);
-		if (prefService != null) {
-			final String style = prefService.get(SearchOptions.class, "style");
-			if ("None".equals(style)) return; // search disabled
-			fullBar = "Full".equals(style);
-			embedded = prefService.getBoolean(SearchOptions.class, "embedded",
-				embedded);
-			overrideShortcut = prefService.getBoolean(SearchOptions.class,
-				"overrideShortcut", overrideShortcut);
-			mouseoverEnabled = prefService.getBoolean(SearchOptions.class,
-				"mouseoverEnabled", mouseoverEnabled);
-			resultLimit = prefService.getInt(SearchOptions.class, "resultLimit",
-				resultLimit);
-		}
-
-		final Component[] ijc = ((Container) imagej).getComponents();
-		if (ijc.length < 2) return;
-		final Component ijc1 = ijc[1];
-		if (!(ijc1 instanceof Container)) return;
-
-		// rebuild the main panel (status label + progress bar)
-		final Container panel = (Container) ijc1;
-		final Component[] pc = panel.getComponents();
-		panel.removeAll();
-		panel.setLayout(new MigLayout("fillx, insets 0", "[0:0]p![p!]"));
-
-		if (fullBar) { // FULL mode
-			for (int i = 0; i < pc.length; i++) {
-				panel.add(pc[i], i == pc.length - 1 ? "wrap" : "");
-			}
-		}
-		else { // MINI mode
-			Arrays.stream(pc).forEach(panel::add);
-		}
-
-		// add the search bar
-		if (embedded) { // EMBEDDED mode
-			searchBar = new SwingSearchBar(getContext()) {
-				@Override
-				protected void showPanel(final Container p) {
-					getParent().add(p, "south,height 300!", //
-						getParent().getComponentCount() - 1);
-					getParent().doLayout();
-					getParent().revalidate();
-					SwingUtilities.getWindowAncestor(this).pack();
-					getParent().repaint();
-					EventQueue.invokeLater(() -> {
-						p.setVisible(true);
-						try {
-							Thread.sleep(100);
-						}
-						catch (final InterruptedException exc) {}
-						requestFocusInWindow();
-					});
-				}
-
-				@Override
-				protected void hidePanel(final Container p) {
-					getParent().remove(p);
-					getParent().revalidate();
-					getParent().repaint();
-					final Window w = SwingUtilities.getWindowAncestor(this);
-					w.revalidate();
-					w.pack();
-					w.repaint();
-				}
-			};
-		}
-		else { // DIALOG mode
-			searchBar = new SwingSearchBar(getContext());
-		}
-		searchBar.setMouseoverEnabled(mouseoverEnabled);
-		searchBar.setResultLimit(resultLimit);
-
-		// add toolbar buttons
-		// NB: Unfortunately, the gear (\u2699) does not appear on MacOS.
-		searchBar.addButton("...", "Configure search preferences", ae -> {
-			final CommandService commandService = //
-				getContext().getService(CommandService.class);
-			if (commandService == null) return;
-			final ModuleService moduleService = //
-				getContext().getService(ModuleService.class);
-			if (moduleService == null) return;
-			final CommandInfo searchOptions = //
-				commandService.getCommand(SearchOptions.class);
-			if (searchOptions == null) return;
-			moduleService.run(searchOptions, true);
-		});
-		if (embedded) {
-			searchBar.addButton("\u2715", "Close the search results pane",
-				ae -> searchBar.close());
-		}
-
-		if (fullBar) { // FULL mode
-			panel.add(searchBar, "south");
-		}
-		else { // MINI mode
-			panel.add(searchBar);
-		}
-
-		if (overrideShortcut) {
-			// disable the old Command Finder's shortcut
-			nullShortcut("Plugins", "Utilities", "Find Commands...");
-			getShortcuts().put(KeyEvent.VK_L, "Focus Search Bar");
-		}
-	}
-
-	private void nullShortcut(final String menuLabel, final String subMenuLabel,
-		final String itemLabel)
-	{
-		final MenuBar menuBar = getMenuBar();
-		for (int m = 0; m < menuBar.getMenuCount(); m++) {
-			final Menu menu = menuBar.getMenu(m);
-			if (!menuLabel.equals(menu.getLabel())) continue;
-			for (int s = 0; s < menu.getItemCount(); s++) {
-				final MenuItem ms = menu.getItem(s);
-				if (!(ms instanceof Menu)) continue;
-				final Menu subMenu = (Menu) ms;
-				if (!subMenuLabel.equals(subMenu.getLabel())) continue;
-				for (int i = 0; i < subMenu.getItemCount(); i++) {
-					final MenuItem mi = subMenu.getItem(i);
-					if (!itemLabel.equals(mi.getLabel())) continue;
-					subMenu.remove(i);
-					mi.deleteShortcut();
-					mi.setLabel(mi.getLabel()+" ");
-					subMenu.insert(mi, i);
-				}
-			}
-		}
-	}
 
 	/** Closes all image windows on the event dispatch thread. */
 	private void closeImageWindows() {

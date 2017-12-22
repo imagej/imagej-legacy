@@ -57,7 +57,8 @@ public class FocusSearchBar implements Command {
 
 	@Override
 	public void run() {
-		final SwingSearchBar searchBar = legacyService.getIJ1Helper().getSearchBar();
-		if (searchBar != null) searchBar.activate();
+		final Object searchBar = legacyService.getIJ1Helper().getSearchBar();
+		if (!(searchBar instanceof SwingSearchBar)) return;
+		((SwingSearchBar) searchBar).activate();
 	}
 }

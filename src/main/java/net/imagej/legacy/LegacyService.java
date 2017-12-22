@@ -82,7 +82,6 @@ import org.scijava.plugin.Plugin;
 import org.scijava.plugin.PluginService;
 import org.scijava.script.ScriptInfo;
 import org.scijava.script.ScriptService;
-import org.scijava.search.SearchService;
 import org.scijava.service.AbstractService;
 import org.scijava.service.Service;
 import org.scijava.ui.ApplicationFrame;
@@ -181,9 +180,6 @@ public final class LegacyService extends AbstractService implements
 
 	@Parameter(required = false)
 	private PluginService pluginService;
-
-	@Parameter(required = false)
-	private SearchService searchService;
 
 	@Parameter(required = false)
 	@SuppressWarnings("deprecation")
