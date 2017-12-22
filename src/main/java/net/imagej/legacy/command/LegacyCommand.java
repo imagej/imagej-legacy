@@ -32,6 +32,7 @@
 package net.imagej.legacy.command;
 
 import ij.IJ;
+import ij.Macro;
 
 import org.scijava.command.Command;
 import org.scijava.plugin.Parameter;
@@ -54,6 +55,13 @@ public class LegacyCommand implements Command {
 
 	@Override
 	public void run() {
-		IJ.runPlugIn(className, arg);
+		try {
+			IJ.runPlugIn(className, arg);
+		}
+		catch (final RuntimeException exc) {
+			// HACK: Suppress ImageJ 1.x "macro canceled" exceptions.
+			if (Macro.MACRO_CANCELED.equals(exc.getMessage())) return;
+			throw exc;
+		}
 	}
 }
