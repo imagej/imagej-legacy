@@ -30,6 +30,7 @@
 
 package net.imagej.legacy.search;
 
+import org.scijava.ItemVisibility;
 import org.scijava.menu.MenuConstants;
 import org.scijava.options.OptionsPlugin;
 import org.scijava.plugin.Attr;
@@ -70,6 +71,12 @@ public class SearchOptions extends OptionsPlugin {
 
 	@Parameter(label = "Maximum number of results per category", min = "1")
 	private int resultLimit = 8;
+
+	@Parameter(visibility = ItemVisibility.MESSAGE)
+	private final String protip = "<html><b>Search Tips:</b><ul>" +
+		"<li>Start a search with <code>!</code> to run a code snippet in any language.</li>" +
+		"<li>Start a search with <code>#!js</code> to run a JavaScript code snippet.</li>" +
+		"</ul>";
 
 	// -- Option accessors --
 
