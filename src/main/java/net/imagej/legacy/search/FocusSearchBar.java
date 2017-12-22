@@ -1,20 +1,19 @@
 /*
  * #%L
- * ImageJ software for multidimensional image processing and analysis.
+ * SciJava UI components for Java Swing.
  * %%
- * Copyright (C) 2009 - 2017 Board of Regents of the University of
- * Wisconsin-Madison, Broad Institute of MIT and Harvard, and Max Planck
- * Institute of Molecular Cell Biology and Genetics.
+ * Copyright (C) 2010 - 2017 Board of Regents of the University of
+ * Wisconsin-Madison.
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright notice,
  *    this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
  *    and/or other materials provided with the distribution.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -29,39 +28,37 @@
  * #L%
  */
 
-package net.imagej.legacy;
+package net.imagej.legacy.search;
 
-import net.imagej.legacy.command.LegacyThreadGroup;
+import net.imagej.legacy.LegacyService;
+
+import org.scijava.Priority;
+import org.scijava.command.Command;
+import org.scijava.plugin.Menu;
+import org.scijava.plugin.Parameter;
+import org.scijava.plugin.Plugin;
+import org.scijava.ui.swing.search.SwingSearchBar;
 
 /**
- * Static utility methods used in the {@link net.imagej.legacy} package.
- * 
- * @author Barry DeZonia
+ * Command which focuses the ImageJ search bar.
+ * <p>
+ * This overrides the old ImageJ 1.x Command Finder plugin.
+ * </p>
+ *
+ * @author Curtis Rueden
  */
-public class Utils {
+@Plugin(type = Command.class, menu = { @Menu(label = "Plugins"), @Menu(
+	label = "Utilities"), @Menu(label = "Focus Search Bar",
+		accelerator = "meta L") }, priority = Priority.HIGH, enabled = false)
+public class FocusSearchBar implements Command {
 
-	/**
-	 * Returns true if the given thread is in any way a child of a
-	 * {@link LegacyThreadGroup}. Returns false otherwise.
-	 */
-	public static boolean isLegacyThread(Thread t) {
-		return findLegacyThreadGroup(t) != null;
+	@Parameter
+	private LegacyService legacyService;
+
+	@Override
+	public void run() {
+		final Object searchBar = legacyService.getIJ1Helper().getSearchBar();
+		if (!(searchBar instanceof SwingSearchBar)) return;
+		((SwingSearchBar) searchBar).activate();
 	}
-
-	/**
-	 * If the given thread is not derived from a LegacyCommand returns null. Else
-	 * it returns the ThreadGroup at the base of the LegacyCommand.
-	 */
-	public static LegacyThreadGroup findLegacyThreadGroup(Thread t) {
-		for (ThreadGroup group = t.getThreadGroup(); group != null; group = group.getParent()) {
-			if (group instanceof LegacyThreadGroup) return (LegacyThreadGroup)group;
-		}
-		return null;
-	}
-
-	@Deprecated
-	public static boolean isLegacyMode(final LegacyService legacyService) {
-		return legacyService == null || legacyService.isLegacyMode();
-	}
-
 }

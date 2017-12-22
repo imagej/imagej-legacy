@@ -37,7 +37,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 import org.scijava.app.AppService;
-import org.scijava.command.Interactive;
 import org.scijava.display.DisplayService;
 import org.scijava.io.IOService;
 import org.scijava.log.LogService;
@@ -93,9 +92,6 @@ public class ImageJ2Options extends OptionsPlugin {
 
 	@Parameter(label = "What is ImageJ2?", persist = false, callback = "help")
 	private Button help;
-
-	@Parameter
-	private LegacyService legacyService;
 
 	@Parameter(required = false)
 	private WelcomeService welcomeService;

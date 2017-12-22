@@ -187,7 +187,6 @@ public class DefaultLegacyHooks extends LegacyHooks {
 	public void unregisterImage(final Object o) {
 		final ImagePlus image = (ImagePlus) o;
 		if (image == null) return;
-		LegacyOutputTracker.removeOutput(image);
 		legacyService.log().debug("unregister legacy image: " + image);
 		try {
 			final ImageDisplay disp =

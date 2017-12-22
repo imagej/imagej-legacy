@@ -29,39 +29,22 @@
  * #L%
  */
 
-package net.imagej.legacy.command;
+package net.imagej.legacy;
 
-import ij.IJ;
-import ij.Macro;
+import net.imagej.legacy.ui.LegacyUI;
 
-import org.scijava.command.Command;
-import org.scijava.plugin.Parameter;
+import org.scijava.Context;
+import org.scijava.ui.UIService;
 
 /**
- * Executes an ImageJ v1.x command.
+ * Launches ImageJ with the legacy UI.
  * 
  * @author Curtis Rueden
- * @author Barry DeZonia
  */
-public class LegacyCommand implements Command {
+public class Main {
 
-	@Parameter
-	private String className;
-
-	@Parameter
-	private String arg;
-
-	// -- Runnable methods --
-
-	@Override
-	public void run() {
-		try {
-			IJ.runPlugIn(className, arg);
-		}
-		catch (final RuntimeException exc) {
-			// HACK: Suppress ImageJ 1.x "macro canceled" exceptions.
-			if (Macro.MACRO_CANCELED.equals(exc.getMessage())) return;
-			throw exc;
-		}
+	public static void main(String[] args) {
+		final Context context = new Context();
+		context.service(UIService.class).showUI(LegacyUI.NAME);
 	}
 }

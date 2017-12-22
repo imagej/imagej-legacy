@@ -84,6 +84,7 @@ import java.util.concurrent.Callable;
 import javax.swing.SwingUtilities;
 
 import net.imagej.display.ImageDisplay;
+import net.imagej.legacy.search.SearchBarHacker;
 import net.imagej.patcher.LegacyHooks;
 
 import org.scijava.AbstractContextual;
@@ -124,6 +125,9 @@ public class IJ1Helper extends AbstractContextual {
 	@Parameter
 	private LogService log;
 
+	/** Search bar in the main window. */
+	private Object searchBar;
+
 	/** Whether we are in the process of forcibly shutting down ImageJ1. */
 	private boolean disposing;
 
@@ -135,6 +139,16 @@ public class IJ1Helper extends AbstractContextual {
 	public void initialize() {
 		// initialize legacy ImageJ application
 		final ImageJ ij1 = IJ.getInstance();
+
+		// add the quick search bar
+		try {
+			searchBar = new SearchBarHacker(getContext()).addSearchBar(ij1, this);
+		}
+		catch (final Throwable t) {
+			// NB: Do not let this crash ImageJ on startup!
+			log.error(t);
+		}
+
 		if (getCommands() == null) {
 			IJ.runPlugIn("ij.IJ.init", "");
 		}
@@ -367,6 +381,10 @@ public class IJ1Helper extends AbstractContextual {
 	public Panel getStatusBar() {
 		if (!hasInstance()) return null;
 		return IJ.getInstance().getStatusBar();
+	}
+
+	public Object getSearchBar() {
+		return searchBar;
 	}
 
 	public Frame getIJ() {
@@ -742,6 +760,11 @@ public class IJ1Helper extends AbstractContextual {
 	@SuppressWarnings("unchecked")
 	public Hashtable<String, String> getCommands() {
 		return Menus.getCommands();
+	}
+
+	@SuppressWarnings("unchecked")
+	public Hashtable<Integer, String> getShortcuts() {
+		return Menus.getShortcuts();
 	}
 
 	public MenuBar getMenuBar() {

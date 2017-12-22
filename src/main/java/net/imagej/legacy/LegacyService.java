@@ -39,6 +39,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Future;
 
@@ -48,6 +49,7 @@ import net.imagej.display.ImageDisplay;
 import net.imagej.display.ImageDisplayService;
 import net.imagej.display.OverlayService;
 import net.imagej.legacy.command.LegacyCommand;
+import net.imagej.legacy.command.LegacyCommandFinder;
 import net.imagej.legacy.ui.LegacyUI;
 import net.imagej.patcher.LegacyEnvironment;
 import net.imagej.patcher.LegacyInjector;
@@ -485,7 +487,14 @@ public final class LegacyService extends AbstractService implements
 			scriptService.addScriptDirectory(plugins, new MenuPath("Plugins"));
 		}
 
+		// wrap ImageJ 1.x commands as SciJava modules
+		final List<CommandInfo> ij1Commands = //
+			new LegacyCommandFinder(this).findCommands();
+
 		ij1Helper.addMenuItems();
+
+		// register ImageJ 1.x modules with the module service.
+		moduleService.addModules(ij1Commands);
 	}
 
 	// -- Disposable methods --
@@ -661,7 +670,7 @@ public final class LegacyService extends AbstractService implements
 			"This context's LegacyService is inactive");
 	}
 
-	private TextEditor openScriptInTextEditor(final ScriptInfo script) {
+	public TextEditor openScriptInTextEditor(final ScriptInfo script) {
 		final TextEditor editor = new TextEditor(getContext());
 
 		final File scriptFile = getScriptFile(script);

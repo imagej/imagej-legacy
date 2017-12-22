@@ -29,27 +29,60 @@
  * #L%
  */
 
-package net.imagej.legacy.command;
+package net.imagej.legacy.search;
 
-import net.imagej.legacy.LegacyService;
+import java.io.IOException;
+import java.net.URL;
+
+import org.scijava.log.LogService;
+import org.scijava.module.ModuleInfo;
+import org.scijava.platform.PlatformService;
+import org.scijava.plugin.Parameter;
+import org.scijava.plugin.Plugin;
+import org.scijava.search.DefaultSearchAction;
+import org.scijava.search.SearchAction;
+import org.scijava.search.SearchActionFactory;
+import org.scijava.search.SearchResult;
+import org.scijava.search.module.ModuleSearchResult;
 
 /**
- * TODO
- * 
- * @author Johannes Schindelin
+ * Search action for getting help on a SciJava module.
+ *
+ * @author Curtis Rueden
  */
-public class LegacyThreadGroup extends ThreadGroup {
+@Plugin(type = SearchActionFactory.class)
+public class HelpSearchActionFactory implements SearchActionFactory {
 
-	private static final String GROUP_NAME = "IJ1 legacy group";
-	private final LegacyService legacyService;
+	@Parameter
+	private PlatformService platformService;
 
-	public LegacyThreadGroup(final LegacyService legacyService) {
-		super(GROUP_NAME);
-		this.legacyService = legacyService;
+	@Parameter
+	private LogService log;
+
+	@Override
+	public boolean supports(final SearchResult result) {
+		return result instanceof ModuleSearchResult;
 	}
 
-	public LegacyService getLegacyService() {
-		return legacyService;
+	@Override
+	public SearchAction create(final SearchResult result) {
+		return new DefaultSearchAction("Help", false, //
+			() -> help(((ModuleSearchResult) result)));
 	}
 
+	private void help(final ModuleSearchResult result) {
+		// HACK: For now, convert the module title into a wiki URL.
+		// In future, we need to add a url field to @Plugin for
+		// embedding the URL associated with that specific plugin.
+		final ModuleInfo info = result.info();
+		final String title = info.getTitle();
+		final String url = "https://imagej.net/" + //
+			title.replaceAll("[^a-zA-Z0-9_-]", "_");
+		try {
+			platformService.open(new URL(url));
+		}
+		catch (final IOException exc) {
+			log.error(exc);
+		}
+	}
 }
