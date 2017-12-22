@@ -62,7 +62,7 @@ public class SearchOptions extends OptionsPlugin {
 	@Parameter(label = "Embed search results in main window")
 	private boolean embedded;
 
-	@Parameter(label = "Override Command Finder shortcut")
+	@Parameter(label = "Pressing L focuses the search bar")
 	private boolean overrideShortcut = true;
 
 	@Parameter(label = "Select search results on mouseover")
