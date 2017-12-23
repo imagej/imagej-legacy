@@ -144,6 +144,7 @@ Institute of Molecular Cell Biology and Genetics.</license.copyrightOwners>
 
 		<scijava-common.version>2.69.0</scijava-common.version>
 		<scijava-search.version>0.2.0</scijava-search.version>
+		<scijava-ui-swing.version>0.9.5</scijava-ui-swing.version>
 	</properties>
 
 	<repositories>
