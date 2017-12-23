@@ -51,9 +51,6 @@ import org.scijava.widget.ChoiceWidget;
 	@Menu(label = "Search...") }, attrs = { @Attr(name = "legacy-only") })
 public class SearchOptions extends OptionsPlugin {
 
-	@Parameter
-	private UIService uiService;
-
 	// -- Fields --
 
 	@Parameter(label = "Search bar style", choices = { "None", "Mini", "Full" },
@@ -109,6 +106,10 @@ public class SearchOptions extends OptionsPlugin {
 	@Override
 	public void run() {
 		super.run();
-		uiService.showDialog("Please restart ImageJ for the changes to take effect.");
+		final UIService uiService = getContext().getService(UIService.class);
+		if (uiService != null) {
+			uiService.showDialog(
+				"Please restart ImageJ for the changes to take effect.");
+		}
 	}
 }
