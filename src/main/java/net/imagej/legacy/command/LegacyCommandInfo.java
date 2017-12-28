@@ -29,14 +29,15 @@
  * #L%
  */
 
-package net.imagej.legacy;
+package net.imagej.legacy.command;
 
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 
-import org.scijava.AbstractUIDetails;
-import org.scijava.Identifiable;
-import org.scijava.Locatable;
-import org.scijava.Versioned;
+import org.scijava.MenuPath;
+import org.scijava.command.Command;
+import org.scijava.command.CommandInfo;
 import org.scijava.util.ClassUtils;
 import org.scijava.util.Manifest;
 
@@ -45,23 +46,61 @@ import org.scijava.util.Manifest;
  *
  * @author Curtis Rueden
  */
-public class LegacyPlugInInfo extends AbstractUIDetails implements
-	Identifiable, Locatable, Versioned
-{
+public class LegacyCommandInfo extends CommandInfo {
 
-	private final Class<?> clazz;
+	private static final String LEGACY_PLUGIN_ICON = "/icons/legacy.png";
+
+	private final String className;
+	private final String arg;
+	private final ClassLoader classLoader;
 	private final String id;
 
-	public LegacyPlugInInfo(final String className, final String arg,
-		final ClassLoader classLoader)
+	private Class<?> ij1Class;
+
+	public LegacyCommandInfo(final MenuPath menuPath,
+		final String className, final String arg, final ClassLoader classLoader)
 	{
-		try {
-			clazz = classLoader.loadClass(className);
+		super(LegacyCommand.class);
+		this.className = className;
+		this.arg = arg;
+		this.classLoader = classLoader;
+
+		// HACK: Make LegacyCommands a subtype of regular Commands.
+		@SuppressWarnings({ "rawtypes", "unchecked" })
+		final Class<Command> legacyCommandClass = (Class) LegacyCommand.class;
+		setPluginType(legacyCommandClass);
+
+		final Map<String, Object> presets = new HashMap<>();
+		presets.put("className", className);
+		presets.put("arg", arg);
+		setPresets(presets);
+
+		if (menuPath != null) {
+			setMenuPath(menuPath);
+
+			// flag legacy command with special icon
+			setIconPath(LEGACY_PLUGIN_ICON);
 		}
-		catch (final ClassNotFoundException exc) {
-			throw new IllegalArgumentException(exc);
-		}
-		id = "legacy:" + className + (appendArg(className, arg) ? "?" + arg : "");
+
+		id = "legacy:" + className + (appendArg() ? "(\"" + arg + "\")" : "");
+	}
+
+	// -- LegacyCommandInfo methods --
+
+	/** Gets the name of the class backing this legacy command. */
+	public String getLegacyClassName() {
+		return className;
+	}
+
+	/** Gets the {@code arg} portion of the legacy command, if any. */
+	public String getArg() {
+		return arg;
+	}
+
+	/** Gets the class backing this legacy command, loading it as needed. */
+	public Class<?> loadLegacyClass() {
+		if (ij1Class == null) initCommandClass();
+		return ij1Class;
 	}
 
 	// -- Identifiable methods --
@@ -75,7 +114,9 @@ public class LegacyPlugInInfo extends AbstractUIDetails implements
 
 	@Override
 	public String getLocation() {
-		final URL url = ClassUtils.getLocation(clazz);
+		final Class<?> c = loadLegacyClass();
+		if (c == null) return "<unknown>";
+		final URL url = ClassUtils.getLocation(c);
 		return url == null ? null : url.toExternalForm();
 	}
 
@@ -83,7 +124,9 @@ public class LegacyPlugInInfo extends AbstractUIDetails implements
 
 	@Override
 	public String getVersion() {
-		final Manifest m = Manifest.getManifest(clazz);
+		final Class<?> c = loadLegacyClass();
+		if (c == null) return "<unknown>";
+		final Manifest m = Manifest.getManifest(c);
 		return m == null ? null : m.getImplementationVersion();
 	}
 
@@ -99,7 +142,7 @@ public class LegacyPlugInInfo extends AbstractUIDetails implements
 	 * privacy.
 	 * </p>
 	 */
-	private boolean appendArg(final String className, final String arg) {
+	private boolean appendArg() {
 		if (arg == null || arg.isEmpty()) return false; // no need
 		if (className.equals("ij.plugin.Animator")) return true;
 		if (className.equals("ij.plugin.Commands")) return true;
@@ -109,4 +152,8 @@ public class LegacyPlugInInfo extends AbstractUIDetails implements
 		return false;
 	}
 
+	private synchronized void initCommandClass() {
+		if (ij1Class != null) return;
+		ij1Class = ClassUtils.loadClass(className, classLoader, true);
+	}
 }

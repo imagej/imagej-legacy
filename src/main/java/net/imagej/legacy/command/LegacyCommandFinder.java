@@ -2,7 +2,7 @@
  * #%L
  * ImageJ software for multidimensional image processing and analysis.
  * %%
- * Copyright (C) 2009 - 2014 Board of Regents of the University of
+ * Copyright (C) 2009 - 2017 Board of Regents of the University of
  * Wisconsin-Madison, Broad Institute of MIT and Harvard, and Max Planck
  * Institute of Molecular Cell Biology and Genetics.
  * %%
@@ -45,7 +45,6 @@ import net.imagej.legacy.LegacyService;
 
 import org.scijava.MenuEntry;
 import org.scijava.MenuPath;
-import org.scijava.command.Command;
 import org.scijava.command.CommandInfo;
 import org.scijava.input.Accelerator;
 import org.scijava.input.InputModifiers;
@@ -64,8 +63,6 @@ import org.scijava.input.KeyCode;
  */
 public class LegacyCommandFinder {
 
-	private static final String LEGACY_PLUGIN_ICON = "/icons/legacy.png";
-
 	private final LegacyService legacyService;
 
 	public LegacyCommandFinder(final LegacyService legacyService) {
@@ -77,8 +74,10 @@ public class LegacyCommandFinder {
 		final Map<String, MenuPath> menuTable = parseMenus();
 		final Hashtable<String, String> commands = //
 			legacyService.getIJ1Helper().getCommands();
+		final ClassLoader classLoader = //
+			legacyService.getIJ1Helper().getClassLoader();
 		for (final String key : commands.keySet()) {
-			final CommandInfo pe = createEntry(key, commands, menuTable);
+			final CommandInfo pe = createEntry(key, commands, menuTable, classLoader);
 			if (pe != null) infos.add(pe);
 		}
 		legacyService.log().debug("Found " + infos.size() + " legacy plugins.");
@@ -89,7 +88,8 @@ public class LegacyCommandFinder {
 
 	private CommandInfo createEntry(final Object key,
 		final Hashtable<String, String> commands,
-		final Map<String, MenuPath> menuTable)
+		final Map<String, MenuPath> menuTable,
+		final ClassLoader classLoader)
 	{
 		final String ij1PluginString = commands.get(key).toString();
 
@@ -98,7 +98,8 @@ public class LegacyCommandFinder {
 		final String className = parsePluginClass(ij1PluginString);
 		final String arg = parseArg(ij1PluginString);
 
-		final CommandInfo ci = new LegacyCommandInfo(menuPath, className, arg);
+		final CommandInfo ci = //
+			new LegacyCommandInfo(menuPath, className, arg, classLoader);
 		return ci;
 	}
 
@@ -167,46 +168,5 @@ public class LegacyCommandFinder {
 		final int quote2 = ij1PluginString.indexOf("\"", quote + 1);
 		if (quote2 < 0) return ij1PluginString.substring(quote + 1);
 		return ij1PluginString.substring(quote + 1, quote2);
-	}
-
-	// -- Helper classes --
-
-	/** Subclass of {@link CommandInfo} for legacy ImageJ 1.x commands. */
-	private static class LegacyCommandInfo extends CommandInfo {
-
-		private final String className;
-		private final String arg;
-
-		public LegacyCommandInfo(final MenuPath menuPath,
-			final String className, final String arg)
-		{
-			super(LegacyCommand.class);
-			this.className = className;
-			this.arg = arg;
-
-			// HACK: Make LegacyCommands a subtype of regular Commands.
-			@SuppressWarnings({ "rawtypes", "unchecked" })
-			final Class<Command> legacyCommandClass = (Class) LegacyCommand.class;
-			setPluginType(legacyCommandClass);
-
-			final Map<String, Object> presets = new HashMap<>();
-			presets.put("className", className);
-			presets.put("arg", arg);
-			setPresets(presets);
-
-			if (menuPath != null) {
-				setMenuPath(menuPath);
-
-				// flag legacy command with special icon
-				setIconPath(LEGACY_PLUGIN_ICON);
-			}
-		}
-
-		@Override
-		public String getIdentifier() {
-			return arg == null || arg.isEmpty() ? //
-				"legacy:" + className : //
-				"legacy:" + className + "(\"" + arg + "\")";
-		}
 	}
 }
