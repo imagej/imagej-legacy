@@ -48,7 +48,7 @@ import org.scijava.widget.ChoiceWidget;
 @Plugin(type = OptionsPlugin.class, label = "Search Options", menu = {
 	@Menu(label = MenuConstants.EDIT_LABEL, weight = MenuConstants.EDIT_WEIGHT,
 		mnemonic = MenuConstants.EDIT_MNEMONIC), @Menu(label = "Options"),
-	@Menu(label = "Search...") }, attrs = { @Attr(name = "legacy-only") })
+	@Menu(label = "Search Bar...") }, attrs = { @Attr(name = "legacy-only") })
 public class SearchOptions extends OptionsPlugin {
 
 	// -- Fields --
