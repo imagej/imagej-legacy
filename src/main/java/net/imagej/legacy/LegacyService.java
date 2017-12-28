@@ -286,7 +286,8 @@ public final class LegacyService extends AbstractService implements
 		final ModuleInfo info = legacyCompatible.get(key);
 		if (info == null) return null;
 		if (info instanceof CommandInfo) try {
-			return commandService.run((CommandInfo) info, true).get();
+			final Future<?> future = commandService.run((CommandInfo) info, true);
+			return future == null ? null : future.get();
 		}
 		catch (final Exception e) {
 			if (e instanceof RuntimeException) throw (RuntimeException) e;
