@@ -81,7 +81,7 @@ public class LegacyCommandFinder {
 			final CommandInfo pe = createEntry(key, commands, menuTable);
 			if (pe != null) infos.add(pe);
 		}
-		legacyService.log().info("Found " + infos.size() + " legacy plugins.");
+		legacyService.log().debug("Found " + infos.size() + " legacy plugins.");
 		return infos;
 	}
 
