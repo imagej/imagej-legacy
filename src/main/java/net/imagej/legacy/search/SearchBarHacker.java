@@ -207,7 +207,6 @@ public class SearchBarHacker {
 					if (!itemLabel.equals(mi.getLabel())) continue;
 					subMenu.remove(i);
 					mi.deleteShortcut();
-					mi.setLabel(mi.getLabel()+" ");
 					subMenu.insert(mi, i);
 				}
 			}
