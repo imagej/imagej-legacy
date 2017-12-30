@@ -42,6 +42,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Future;
+import java.util.stream.Collectors;
 
 import net.imagej.DatasetService;
 import net.imagej.ImageJService;
@@ -487,6 +488,13 @@ public final class LegacyService extends AbstractService implements
 			if (scripts.exists()) scriptService.addScriptDirectory(scripts);
 			scriptService.addScriptDirectory(plugins, new MenuPath("Plugins"));
 		}
+
+		// remove modules blacklisted from the legacy UI
+		final List<ModuleInfo> noLegacyModules = //
+			moduleService.getModules().stream() //
+				.filter(info -> info.is("no-legacy")) //
+				.collect(Collectors.toList());
+		moduleService.removeModules(noLegacyModules);
 
 		// wrap ImageJ 1.x commands as SciJava modules
 		final List<CommandInfo> ij1Commands = //
