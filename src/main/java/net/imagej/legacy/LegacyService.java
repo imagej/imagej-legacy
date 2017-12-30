@@ -51,6 +51,7 @@ import net.imagej.display.ImageDisplayService;
 import net.imagej.display.OverlayService;
 import net.imagej.legacy.command.LegacyCommand;
 import net.imagej.legacy.command.LegacyCommandFinder;
+import net.imagej.legacy.command.LegacyCommandInfo;
 import net.imagej.legacy.ui.LegacyUI;
 import net.imagej.patcher.LegacyEnvironment;
 import net.imagej.patcher.LegacyInjector;
@@ -661,7 +662,12 @@ public final class LegacyService extends AbstractService implements
 		final Accelerator acc = Accelerator.create(accelerator);
 		if (acc == null) return false;
 		final ModuleInfo module = moduleService.getModuleForAccelerator(acc);
-		if (module == null || module.is("no-legacy")) return false;
+
+		// NB: ImageJ 1.x handles its own keyboard shortcuts.
+		// We need to ignore legacy commands to avoid duplicate execution.
+		// See: https://github.com/imagej/imagej1/issues/50
+		if (module == null || module instanceof LegacyCommandInfo) return false;
+
 		moduleService.run(module, true);
 		return true;
 	}
