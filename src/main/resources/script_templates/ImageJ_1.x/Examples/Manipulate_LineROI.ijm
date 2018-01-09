@@ -56,7 +56,7 @@ function rotatePoint(theta,x,y,h,w){
 	y2 = (x1*sin(theta))+(y1*cos(theta));
 	// Translate back to imageJ coordinates
 	x2 = x2 + (w/2); 
-	y2 = (w/2)-y2;
+	y2 = (h/2)-y2;
 	point = newArray(x2,y2);
 	return point;
 }
