@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.scijava</groupId>
 		<artifactId>pom-scijava</artifactId>
-		<version>17.1.1</version>
+		<version>19.1.1</version>
 		<relativePath />
 	</parent>
 
@@ -142,9 +142,7 @@ Institute of Molecular Cell Biology and Genetics.</license.copyrightOwners>
 		<!-- NB: Deploy releases to the ImageJ Maven repository. -->
 		<releaseProfiles>deploy-to-imagej</releaseProfiles>
 
-		<scijava-common.version>2.69.0</scijava-common.version>
 		<scijava-search.version>0.4.0</scijava-search.version>
-		<scijava-ui-swing.version>0.9.5</scijava-ui-swing.version>
 	</properties>
 
 	<repositories>
