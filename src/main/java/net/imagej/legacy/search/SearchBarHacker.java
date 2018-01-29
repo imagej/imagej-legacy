@@ -79,8 +79,7 @@ public class SearchBarHacker {
 		// While this is indicative of a design issue with OptionsService and
 		// maybe SciJava Common's application framework in general, the best we
 		// can do here is to extract the persisted options in a lower-level way.
-		final PrefService prefService = //
-			context.getService(PrefService.class);
+		final PrefService prefService = context.getService(PrefService.class);
 		if (prefService != null) {
 			final String style = prefService.get(SearchOptions.class, "style");
 			if ("None".equals(style)) return null; // search disabled
