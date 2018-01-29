@@ -63,6 +63,9 @@ public class SearchOptions extends OptionsPlugin {
 	@Parameter(label = "Pressing L focuses the search bar")
 	private boolean overrideShortcut = true;
 
+	@Parameter(label = "Close search results when performing default action")
+	private boolean closeOnDefaultAction = true;
+
 	@Parameter(label = "Select search results on mouseover")
 	private boolean mouseoverEnabled;
 
@@ -91,6 +94,10 @@ public class SearchOptions extends OptionsPlugin {
 
 	public boolean isShortcutOverridden() {
 		return overrideShortcut;
+	}
+
+	public boolean isSearchPanelClosedByDefaultAction() {
+		return closeOnDefaultAction;
 	}
 
 	public boolean isMouseoverEnabled() {

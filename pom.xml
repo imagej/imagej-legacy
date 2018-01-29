@@ -11,7 +11,7 @@
 
 	<groupId>net.imagej</groupId>
 	<artifactId>imagej-legacy</artifactId>
-	<version>0.28.2-SNAPSHOT</version>
+	<version>0.29.0-SNAPSHOT</version>
 
 	<name>ImageJ Legacy Bridge</name>
 	<description>The legacy component enables backward compatibility with the legacy version of ImageJ (1.x). It contains the code necessary to translate ImageJ images into ImageJ1 format and back, so that legacy plugins can be executed faithfully.</description>
@@ -143,7 +143,7 @@ Institute of Molecular Cell Biology and Genetics.</license.copyrightOwners>
 		<releaseProfiles>deploy-to-imagej</releaseProfiles>
 
 		<scijava-common.version>2.69.0</scijava-common.version>
-		<scijava-search.version>0.2.0</scijava-search.version>
+		<scijava-search.version>0.4.0</scijava-search.version>
 		<scijava-ui-swing.version>0.9.5</scijava-ui-swing.version>
 	</properties>
 

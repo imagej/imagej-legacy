@@ -51,6 +51,7 @@ import org.scijava.command.CommandInfo;
 import org.scijava.command.CommandService;
 import org.scijava.module.ModuleService;
 import org.scijava.prefs.PrefService;
+import org.scijava.search.SearchAction;
 import org.scijava.ui.swing.search.SwingSearchBar;
 
 /**
@@ -114,10 +115,26 @@ public class SearchBarHacker {
 			Arrays.stream(pc).forEach(panel::add);
 		}
 
+		// Define a subclass that closes on default action as appropriate.
+		class LegacySearchBar extends SwingSearchBar {
+			public LegacySearchBar() { super(context); }
+
+			@Override
+			protected void runAction(final SearchAction action,
+				final boolean isDefault)
+			{
+				super.runAction(action, isDefault);
+				if (!isDefault || prefService == null) return;
+				final boolean closeOnDefaultAction = prefService.getBoolean(
+					SearchOptions.class, "closeOnDefaultAction", true);
+				if (closeOnDefaultAction) reset();
+			}
+		}
+
 		// add the search bar
 		final SwingSearchBar searchBar;
 		if (embedded) { // EMBEDDED mode
-			searchBar = new SwingSearchBar(context) {
+			searchBar = new LegacySearchBar() {
 				@Override
 				protected void showPanel(final Container p) {
 					getParent().add(p, "south,height 300!", //
@@ -149,7 +166,7 @@ public class SearchBarHacker {
 			};
 		}
 		else { // DIALOG mode
-			searchBar = new SwingSearchBar(context);
+			searchBar = new LegacySearchBar();
 		}
 		searchBar.setMouseoverEnabled(mouseoverEnabled);
 		searchBar.setResultLimit(resultLimit);
