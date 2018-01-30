@@ -36,6 +36,8 @@ import java.util.Set;
 import net.imagej.legacy.IJ1Helper;
 import net.imagej.legacy.LegacyService;
 
+import org.scijava.MenuEntry;
+import org.scijava.MenuPath;
 import org.scijava.Priority;
 import org.scijava.module.Module;
 import org.scijava.module.ModuleItem;
@@ -78,6 +80,8 @@ public class MacroRecorderPreprocessor extends AbstractPreprocessorPlugin {
 		if (ij1Helper == null) return;
 		if (ij1Helper.isMacro()) return;
 
+		ij1Helper.startRecording(menuLabel(module));
+
 		final Set<String> excludedInputs = //
 			MacroRecorderExcludedInputs.create(module);
 
@@ -85,5 +89,16 @@ public class MacroRecorderPreprocessor extends AbstractPreprocessorPlugin {
 			final String name = input.getName();
 			if (module.isInputResolved(name)) excludedInputs.add(name);
 		}
+	}
+
+	// -- Helper methods --
+
+	private String menuLabel(final Module module) {
+		final MenuPath menuPath = module.getInfo().getMenuPath();
+		if (menuPath != null) {
+			final MenuEntry menuLeaf = menuPath.getLeaf();
+			if (menuLeaf != null) return menuLeaf.getName();
+		}
+		return module.getInfo().getTitle();
 	}
 }

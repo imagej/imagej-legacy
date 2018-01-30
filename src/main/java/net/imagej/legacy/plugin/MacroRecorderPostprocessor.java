@@ -76,6 +76,8 @@ public class MacroRecorderPostprocessor extends AbstractPostprocessorPlugin {
 			final Object value = module.getInput(name);
 			if (value != null) ij1Helper.recordOption(name, toString(value));
 		}
+
+		ij1Helper.finishRecording();
 	}
 
 	private boolean excludedFromRecording(final ItemVisibility visibility) {
