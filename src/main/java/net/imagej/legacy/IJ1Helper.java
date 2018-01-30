@@ -507,6 +507,7 @@ public class IJ1Helper extends AbstractContextual {
 	 * @param value the value of the option
 	 */
 	public void recordOption(final String key, final String value) {
+		if (!Recorder.record) return;
 		Recorder.recordOption(escape(key), escape(value));
 	}
 
