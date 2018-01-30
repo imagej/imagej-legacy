@@ -511,6 +511,26 @@ public class IJ1Helper extends AbstractContextual {
 	}
 
 	/**
+	 * Begins recording of a command.
+	 * 
+	 * @see Recorder#setCommand(String)
+	 */
+	public void startRecording(final String command) {
+		if (!Recorder.record) return;
+		Recorder.setCommand(command);
+	}
+
+	/**
+	 * Completes recording of a command.
+	 * 
+	 * @see Recorder#saveCommand()
+	 */
+	public void finishRecording() {
+		if (!Recorder.record) return;
+		Recorder.saveCommand();
+	}
+
+	/**
 	 * Determines whether we're running inside a macro right now.
 	 *
 	 * @return whether we're running a macro right now.
