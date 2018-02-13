@@ -37,9 +37,13 @@ import ij.io.FileInfo;
 import net.imagej.Dataset;
 import net.imagej.axis.AxisType;
 import net.imagej.display.ImageDisplay;
+import net.imagej.display.ImageDisplayService;
 import net.imagej.legacy.LegacyImageMap;
 
 import org.scijava.AbstractContextual;
+import org.scijava.Context;
+import org.scijava.display.DisplayService;
+import org.scijava.plugin.Parameter;
 
 /**
  * Abstract superclass for DisplayCreator implementations. Ensures
@@ -49,6 +53,30 @@ import org.scijava.AbstractContextual;
  */
 public abstract class AbstractDisplayCreator extends AbstractContextual
 {
+
+	@Parameter
+	private ImageDisplayService imageDisplayService;
+
+	private final ColorTableHarmonizer colorTableHarmonizer;
+	private final MetadataHarmonizer metadataHarmonizer;
+	private final CompositeHarmonizer compositeHarmonizer;
+	private final OverlayHarmonizer overlayHarmonizer;
+	private final PositionHarmonizer positionHarmonizer;
+	private final NameHarmonizer nameHarmonizer;
+
+	@Parameter
+	private DisplayService displayService;
+
+	public AbstractDisplayCreator( final Context context )
+	{
+		setContext(context);
+		nameHarmonizer = new NameHarmonizer();
+		metadataHarmonizer = new MetadataHarmonizer();
+		overlayHarmonizer = new OverlayHarmonizer(context);
+		positionHarmonizer = new PositionHarmonizer();
+		compositeHarmonizer = new CompositeHarmonizer();
+		colorTableHarmonizer = new ColorTableHarmonizer(imageDisplayService);
+	}
 
 	public ImageDisplay createDisplay(final ImagePlus imp) {
 
@@ -86,6 +114,25 @@ public abstract class AbstractDisplayCreator extends AbstractContextual
 		}
 		ds.getImgPlus().setSource(source);
 		return ds;
+	}
+
+	protected ImageDisplay harmonizeExceptPixels( ImagePlus imp, Dataset ds )
+	{
+		metadataHarmonizer.updateDataset(ds, imp);
+		compositeHarmonizer.updateDataset(ds, imp);
+
+		// CTR FIXME - add imageDisplayService.createImageDisplay method?
+		// returns null if it cannot find an ImageDisplay-compatible display?
+		final ImageDisplay display =
+			(ImageDisplay) displayService.createDisplay(ds.getName(), ds);
+
+		colorTableHarmonizer.updateDisplay(display, imp);
+		// NB - correct thresholding behavior requires overlay harmonization after
+		// color table harmonization
+		overlayHarmonizer.updateDisplay(display, imp);
+		positionHarmonizer.updateDisplay(display, imp);
+		nameHarmonizer.updateDisplay(display, imp);
+		return display;
 	}
 
 	/**

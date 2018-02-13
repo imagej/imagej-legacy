@@ -54,18 +54,6 @@ public class ColorDisplayCreator extends AbstractDisplayCreator
 	// -- instance variables --
 
 	private final ColorPixelHarmonizer pixelHarmonizer;
-	private final ColorTableHarmonizer colorTableHarmonizer;
-	private final MetadataHarmonizer metadataHarmonizer;
-	private final CompositeHarmonizer compositeHarmonizer;
-	private final OverlayHarmonizer overlayHarmonizer;
-	private final PositionHarmonizer positionHarmonizer;
-	private final NameHarmonizer nameHarmonizer;
-	
-	@Parameter
-	private ImageDisplayService imageDisplayService;
-
-	@Parameter
-	private DisplayService displayService;
 
 	@Parameter
 	private DatasetService datasetService;
@@ -77,14 +65,8 @@ public class ColorDisplayCreator extends AbstractDisplayCreator
 	// -- constructor --
 
 	public ColorDisplayCreator(final Context context) {
-		setContext(context);
+		super( context );
 		pixelHarmonizer = new ColorPixelHarmonizer();
-		colorTableHarmonizer = new ColorTableHarmonizer(imageDisplayService);
-		metadataHarmonizer = new MetadataHarmonizer();
-		compositeHarmonizer = new CompositeHarmonizer();
-		overlayHarmonizer = new OverlayHarmonizer(context);
-		positionHarmonizer = new PositionHarmonizer();
-		nameHarmonizer = new NameHarmonizer();
 	}
 
 	// -- AbstractDisplayCreator methods --
@@ -95,21 +77,8 @@ public class ColorDisplayCreator extends AbstractDisplayCreator
 	{
 		final Dataset ds = getDataset(imp, preferredOrder);
 		pixelHarmonizer.updateDataset(ds, imp);
-		metadataHarmonizer.updateDataset(ds, imp);
-		compositeHarmonizer.updateDataset(ds, imp);
+		final ImageDisplay display = harmonizeExceptPixels( imp, ds );
 
-		// CTR FIXME - add imageDisplayService.createImageDisplay method?
-		// returns null if it cannot find an ImageDisplay-compatible display?
-		final ImageDisplay display =
-			(ImageDisplay) displayService.createDisplay(ds.getName(), ds);
-
-		colorTableHarmonizer.updateDisplay(display, imp);
-		// NB - correct thresholding behavior requires overlay harmonization after
-		// color table harmonization
-		overlayHarmonizer.updateDisplay(display, imp);
-		positionHarmonizer.updateDisplay(display, imp);
-		nameHarmonizer.updateDisplay(display, imp);
-		
 		return display;
 	}
 

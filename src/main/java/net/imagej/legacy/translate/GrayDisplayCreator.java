@@ -61,19 +61,7 @@ public class GrayDisplayCreator extends AbstractDisplayCreator
 	// -- instance variables --
 
 	private final GrayPixelHarmonizer pixelHarmonizer;
-	private final ColorTableHarmonizer colorTableHarmonizer;
-	private final MetadataHarmonizer metadataHarmonizer;
-	private final CompositeHarmonizer compositeHarmonizer;
 	private final PlaneHarmonizer planeHarmonizer;
-	private final OverlayHarmonizer overlayHarmonizer;
-	private final PositionHarmonizer positionHarmonizer;
-	private final NameHarmonizer nameHarmonizer;
-
-	@Parameter
-	private ImageDisplayService imageDisplayService;
-
-	@Parameter
-	private DisplayService displayService;
 
 	@Parameter
 	private DatasetService datasetService;
@@ -88,16 +76,9 @@ public class GrayDisplayCreator extends AbstractDisplayCreator
 	// -- constructor --
 
 	public GrayDisplayCreator(final Context context) {
-		setContext(context);
+		super(context);
 		pixelHarmonizer = new GrayPixelHarmonizer();
-		colorTableHarmonizer =
-			new ColorTableHarmonizer(imageDisplayService);
-		metadataHarmonizer = new MetadataHarmonizer();
-		compositeHarmonizer = new CompositeHarmonizer();
 		planeHarmonizer = new PlaneHarmonizer(log);
-		overlayHarmonizer = new OverlayHarmonizer(context);
-		positionHarmonizer = new PositionHarmonizer();
-		nameHarmonizer = new NameHarmonizer();
 	}
 
 	// -- AbstractDisplayCreator methods --
@@ -134,19 +115,7 @@ public class GrayDisplayCreator extends AbstractDisplayCreator
 	{
 		final Dataset ds = getDataset(imp, preferredOrder);
 		setDatasetGrayDataFromColorImp(ds, imp);
-		metadataHarmonizer.updateDataset(ds, imp);
-		compositeHarmonizer.updateDataset(ds, imp);
-
-		// CTR FIXME
-		final ImageDisplay display =
-			(ImageDisplay) displayService.createDisplay(ds.getName(), ds);
-
-		colorTableHarmonizer.updateDisplay(display, imp);
-		// NB - correct thresholding behavior requires overlay harmonization after
-		// color table harmonization
-		overlayHarmonizer.updateDisplay(display, imp);
-		positionHarmonizer.updateDisplay(display, imp);
-		nameHarmonizer.updateDisplay(display, imp);
+		final ImageDisplay display = harmonizeExceptPixels( imp, ds );
 
 		return display;
 	}
@@ -155,19 +124,7 @@ public class GrayDisplayCreator extends AbstractDisplayCreator
 		final AxisType[] preferredOrder)
 	{
 		Dataset ds = getDataset(imp, preferredOrder);
-		metadataHarmonizer.updateDataset(ds, imp);
-		compositeHarmonizer.updateDataset(ds, imp);
-
-		// CTR FIXME
-		final ImageDisplay display =
-			(ImageDisplay) displayService.createDisplay(ds.getName(), ds);
-
-		colorTableHarmonizer.updateDisplay(display, imp);
-		// NB - correct thresholding behavior requires overlay harmonization after
-		// color table harmonization
-		overlayHarmonizer.updateDisplay(display, imp);
-		positionHarmonizer.updateDisplay(display, imp);
-		nameHarmonizer.updateDisplay(display, imp);
+		final ImageDisplay display = harmonizeExceptPixels( imp, ds );
 
 		return display;
 	}
