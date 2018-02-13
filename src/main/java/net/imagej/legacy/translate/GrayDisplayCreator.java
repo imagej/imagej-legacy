@@ -104,22 +104,19 @@ public class GrayDisplayCreator extends AbstractDisplayCreator
 
 	@Override
 	protected Dataset makeDataset(ImagePlus imp, AxisType[] preferredOrder) {
-		Dataset ds;
 		if (imp.getType() == ImagePlus.COLOR_RGB) {
-			ds = makeGrayDatasetFromColorImp(imp, preferredOrder);
-		}
-		else if (preferredOrder[0] == Axes.X && preferredOrder[1] == Axes.Y &&
-			!imp.getCalibration().isSigned16Bit() &&
-			!(imp.getStack() instanceof VirtualStack))
-		{
-			ds = makeExactDataset(imp, preferredOrder);
-			planeHarmonizer.updateDataset(ds, imp);
+			return makeGrayDatasetFromColorImp(imp, preferredOrder);
 		}
 		else {
-			ds = makeExactDataset(imp, preferredOrder);
-			pixelHarmonizer.updateDataset(ds, imp);
+			Dataset ds = makeExactDataset(imp, preferredOrder);
+			if (preferredOrder[0] == Axes.X && preferredOrder[1] == Axes.Y &&
+					!imp.getCalibration().isSigned16Bit() &&
+					!(imp.getStack() instanceof VirtualStack))
+				planeHarmonizer.updateDataset(ds, imp);
+			else
+				pixelHarmonizer.updateDataset(ds, imp);
+			return ds;
 		}
-		return ds;
 	}
 
 	@Override
