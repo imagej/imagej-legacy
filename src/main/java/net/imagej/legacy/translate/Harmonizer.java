@@ -113,18 +113,7 @@ public class Harmonizer extends AbstractContextual {
 		updateLegacyImage(final ImageDisplay display, final ImagePlus imp)
 	{
 		final Dataset ds = imageDisplayService.getActiveDataset(display);
-		/*
-		boolean binaryTypeChange = false;
-		if (imp.getBitDepth() == 8) {
-			if (ds.getType() instanceof BitType) {
-				binaryTypeChange = !LegacyUtils.isBinary(imp);
-			}
-			else if (ds.getType() instanceof UnsignedByteType) {
-				binaryTypeChange = LegacyUtils.isBinary(imp);
-			}
-		}
-		*/
-		if (!imagePlusIsNearestType(ds, imp) /* || binaryTypeChange */) {
+		if ( !imagePlusIsNearestType(ds, imp) ) {
 			rebuildImagePlusData(display, imp);
 		}
 		else {
@@ -192,11 +181,6 @@ public class Harmonizer extends AbstractContextual {
 			bitDepthMap.put(imp, imp.getBitDepth());
 		}
 		boolean typeChanged = imp.getBitDepth() != oldBitDepth;
-		/* boolean isBinaryImp = LegacyUtils.isBinary(imp);
-		if (!typeChanged) {
-			typeChanged = sameBitDepthTypeChange(ds, imp, isBinaryImp);
-		}
-		*/
 		if ((typeChanged) || (!dimensionsCompatible(ds, imp))) {
 			rebuildDatasetData(ds, imp);
 		}
@@ -277,49 +261,6 @@ public class Harmonizer extends AbstractContextual {
 		return impType == ImagePlus.GRAY32;
 	}
 
-	///**
-	// * Changes the shape of an existing {@link Dataset} to match that of an
-	// * {@link ImagePlus}. Assumes that the Dataset type is correct. Does not set
-	// * the data values or change the metadata.
-	// */
-	/* NB - this had some use at one time. But it is kind of broken in that it
-	 * assumes new number of dims == original Dataset dim count. Similarly for
-	 * axes and calibration. So this is wrong as it is. We could put code in place
-	 * to figure new dims, axes, and calibration from existing dataset and
-	 * imageplus but then we already have rebuildDatasetData() and might as well
-	 * just use it.
-	// assumes the data type of the given Dataset is fine as is
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	private void reshapeDataset(final Dataset ds, final ImagePlus imp) {
-		final long[] newDims = ds.getDims();
-		final double[] cal = new double[newDims.length];
-		ds.calibration(cal);
-		final int xIndex = ds.dimensionIndex(Axes.X);
-		final int yIndex = ds.dimensionIndex(Axes.Y);
-		final int cIndex = ds.dimensionIndex(Axes.CHANNEL);
-		final int zIndex = ds.dimensionIndex(Axes.Z);
-		final int tIndex = ds.dimensionIndex(Axes.TIME);
-		if (xIndex >= 0) newDims[xIndex] = imp.getWidth();
-		if (yIndex >= 0) newDims[yIndex] = imp.getHeight();
-		if (cIndex >= 0) {
-			if (imp.getType() == ImagePlus.COLOR_RGB) {
-				newDims[cIndex] = 3 * imp.getNChannels();
-			}
-			else newDims[cIndex] = imp.getNChannels();
-		}
-		if (zIndex >= 0) newDims[zIndex] = imp.getNSlices();
-		if (tIndex >= 0) newDims[tIndex] = imp.getNFrames();
-		final ImgFactory factory = ds.getImgPlus().factory();
-		final Img<?> img = factory.create(newDims, ds.getType());
-		final ImgPlus<?> imgPlus =
-			new ImgPlus(img, ds.getName(), ds.getAxes(), cal);
-		if ((ds.getCompositeChannelCount() > 1) && (cIndex >= 0)) {
-			imgPlus.setCompositeChannelCount((int) newDims[cIndex]);
-		}
-		ds.setImgPlus((ImgPlus<? extends RealType<?>>) imgPlus);
-	}
-	*/
-	
 	/**
 	 * Determines whether a {@link Dataset} and an {@link ImagePlus} have
 	 * compatible dimensionality.
@@ -395,32 +336,6 @@ public class Harmonizer extends AbstractContextual {
 		tmpDisplay.close();
 	}
 	
-	/*
-	// Detect type changes when bit depth matches but sign or content incompatible
-	private boolean sameBitDepthTypeChange(Dataset ds, ImagePlus imp, boolean isBinaryImp) {
-		boolean typeChanged = false;
-		if (imp.getBitDepth() == 8) {
-			if (ds.getType() instanceof BitType) {
-				typeChanged = !isBinaryImp;
-			}
-			else if (ds.getType() instanceof UnsignedByteType) {
-				typeChanged = isBinaryImp;
-			}
-		}
-		else if (imp.getBitDepth() == 16) {
-			boolean isSigned16Imp = imp.getCalibration().isSigned16Bit();
-			if (ds.getType() instanceof ShortType) {
-				typeChanged = !isSigned16Imp;
-			}
-			else if (ds.getType() instanceof UnsignedShortType) {
-				typeChanged = isSigned16Imp;
-			}
-		}
-		
-		return typeChanged;
-	}
-	*/
-
 	// NOTE: to propagate a VirtualStack's first plane pixel changes we save it
 	// early in the harmonization process and refer to it later. This code is part
 	// of that process
@@ -439,5 +354,4 @@ public class Harmonizer extends AbstractContextual {
 			grayPixelHarmonizer.savePlane(pos, plane);
 		}
 	}
-
 }
