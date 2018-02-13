@@ -116,7 +116,7 @@ public class GrayDisplayCreator extends AbstractDisplayCreator
 			planeHarmonizer.updateDataset(ds, imp);
 		}
 		else {
-			ds = makeGrayDatasetFromGrayImp(imp, preferredOrder);
+			ds = makeExactDataset(imp, preferredOrder);
 			pixelHarmonizer.updateDataset(ds, imp);
 		}
 		return ds;
@@ -286,41 +286,6 @@ public class GrayDisplayCreator extends AbstractDisplayCreator
 		final boolean signed = isSigned(imp);
 		final boolean floating = isFloating(imp);
 		final boolean virtual = imp.getStack().isVirtual();
-		final Dataset ds =
-			datasetService.create(dims, name, axes, bitsPerPixel, signed, floating,
-				virtual);
-
-		DatasetUtils.initColorTables(ds);
-
-		return ds;
-	}
-
-	/**
-	 * Makes a gray {@link Dataset} from a gray {@link ImagePlus}. Assumes it will
-	 * never be given a color RGB Imageplus. Does not populate the data of the
-	 * returned Dataset. That is left to other utility methods. Does not set
-	 * metadata of Dataset.
-	 */
-	private Dataset makeGrayDatasetFromGrayImp(final ImagePlus imp,
-		final AxisType[] preferredOrder)
-	{
-		final int x = imp.getWidth();
-		final int y = imp.getHeight();
-		final int c = imp.getNChannels();
-		final int z = imp.getNSlices();
-		final int t = imp.getNFrames();
-
-		final int[] inputDims = new int[] { x, y, c, z, t };
-		final AxisType[] axes = LegacyUtils.orderedAxes(preferredOrder, inputDims);
-		final long[] dims = LegacyUtils.orderedDims(axes, inputDims);
-		final String name = imp.getTitle();
-
-		final int bitsPerPixel = imp.getBitDepth();
-		final boolean signed = isSigned(imp);
-		final boolean floating = isFloating(imp);
-
-		final boolean virtual = imp.getStack().isVirtual();
-
 		final Dataset ds =
 			datasetService.create(dims, name, axes, bitsPerPixel, signed, floating,
 				virtual);
