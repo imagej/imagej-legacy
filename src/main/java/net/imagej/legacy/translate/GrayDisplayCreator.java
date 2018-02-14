@@ -32,20 +32,26 @@
 package net.imagej.legacy.translate;
 
 import ij.ImagePlus;
-import ij.VirtualStack;
-import ij.process.ImageProcessor;
 
 import net.imagej.Dataset;
 import net.imagej.DatasetService;
+import net.imagej.ImgPlus;
 import net.imagej.axis.Axes;
 import net.imagej.axis.AxisType;
+import net.imagej.axis.DefaultLinearAxis;
 import net.imagej.display.ImageDisplay;
-import net.imagej.display.ImageDisplayService;
-import net.imglib2.RandomAccess;
-import net.imglib2.type.numeric.RealType;
+import net.imglib2.RandomAccessibleInterval;
+import net.imglib2.converter.Converters;
+import net.imglib2.img.Img;
+import net.imglib2.img.ImgView;
+import net.imglib2.img.VirtualStackAdapter;
+import net.imglib2.img.display.imagej.ImgPlusViews;
+import net.imglib2.img.planar.PlanarImgFactory;
+import net.imglib2.type.numeric.ARGBType;
 
+import net.imglib2.type.numeric.integer.UnsignedByteType;
+import net.imglib2.view.Views;
 import org.scijava.Context;
-import org.scijava.display.DisplayService;
 import org.scijava.log.LogService;
 import org.scijava.plugin.Parameter;
 
@@ -89,14 +95,7 @@ public class GrayDisplayCreator extends AbstractDisplayCreator
 			return makeGrayDatasetFromColorImp(imp, preferredOrder);
 		}
 		else {
-			Dataset ds = makeExactDataset(imp, preferredOrder);
-			if (preferredOrder[0] == Axes.X && preferredOrder[1] == Axes.Y &&
-					!imp.getCalibration().isSigned16Bit() &&
-					!(imp.getStack() instanceof VirtualStack))
-				planeHarmonizer.updateDataset(ds, imp);
-			else
-				pixelHarmonizer.updateDataset(ds, imp);
-			return ds;
+			return makeExactDataset(imp, preferredOrder);
 		}
 	}
 
@@ -114,7 +113,6 @@ public class GrayDisplayCreator extends AbstractDisplayCreator
 		final AxisType[] preferredOrder)
 	{
 		final Dataset ds = getDataset(imp, preferredOrder);
-		setDatasetGrayDataFromColorImp(ds, imp);
 		final ImageDisplay display = harmonizeExceptPixels( imp, ds );
 
 		return display;
@@ -140,83 +138,23 @@ public class GrayDisplayCreator extends AbstractDisplayCreator
 	private Dataset makeGrayDatasetFromColorImp(final ImagePlus imp,
 		final AxisType[] preferredOrder)
 	{
-		final int x = imp.getWidth();
-		final int y = imp.getHeight();
-		final int c = imp.getNChannels();
-		final int z = imp.getNSlices();
-		final int t = imp.getNFrames();
-
-		if (imp.getType() != ImagePlus.COLOR_RGB) {
-			throw new IllegalArgumentException("this method designed for "
-				+ "creating a gray Dataset from a multichannel RGB ImagePlus");
-		}
-
-		final int[] inputDims = new int[] { x, y, c * 3, z, t };
-		final AxisType[] axes = LegacyUtils.orderedAxes(preferredOrder, inputDims);
-		final long[] dims = LegacyUtils.orderedDims(axes, inputDims);
-		final String name = imp.getTitle();
-		final int bitsPerPixel = 8;
-		final boolean signed = false;
-		final boolean floating = false;
-		final boolean virtual = imp.getStack().isVirtual();
-		final Dataset ds =
-			datasetService.create(dims, name, axes, bitsPerPixel, signed, floating,
-				virtual);
-
+		ImgPlus<ARGBType> colored = VirtualStackAdapter.wrapRGBA( imp );
+		final Dataset ds = datasetService.create( splitColorChannels(colored) );
 		DatasetUtils.initColorTables(ds);
-
 		return ds;
 	}
 
-	/**
-	 * Assigns the data values of a gray {@link Dataset} from a paired
-	 * multichannel color {@link ImagePlus}. Assumes the Dataset and ImagePlus
-	 * have compatible dimensions. Gets values via {@link ImageProcessor}::get().
-	 * Does not change the Dataset's metadata.
-	 */
-	private void setDatasetGrayDataFromColorImp(final Dataset ds,
-		final ImagePlus imp)
-	{
-		final int xIndex = ds.dimensionIndex(Axes.X);
-		final int yIndex = ds.dimensionIndex(Axes.Y);
-		final int cIndex = ds.dimensionIndex(Axes.CHANNEL);
-		final int zIndex = ds.dimensionIndex(Axes.Z);
-		final int tIndex = ds.dimensionIndex(Axes.TIME);
-		final int x = imp.getWidth();
-		final int y = imp.getHeight();
-		final int c = imp.getNChannels();
-		final int z = imp.getNSlices();
-		final int t = imp.getNFrames();
-		int imagejPlaneNumber = 1;
-		final RandomAccess<? extends RealType<?>> accessor =
-			ds.getImgPlus().randomAccess();
-		for (int ti = 0; ti < t; ti++) {
-			if (tIndex >= 0) accessor.setPosition(ti, tIndex);
-			for (int zi = 0; zi < z; zi++) {
-				if (zIndex >= 0) accessor.setPosition(zi, zIndex);
-				for (int ci = 0; ci < c; ci++) {
-					final ImageProcessor proc =
-						imp.getStack().getProcessor(imagejPlaneNumber++);
-					for (int yi = 0; yi < y; yi++) {
-						accessor.setPosition(yi, yIndex);
-						for (int xi = 0; xi < x; xi++) {
-							accessor.setPosition(xi, xIndex);
-							final int value = proc.get(xi, yi);
-							final int rValue = (value >> 16) & 0xff;
-							final int gValue = (value >> 8) & 0xff;
-							final int bValue = (value >> 0) & 0xff;
-							accessor.setPosition(ci * 3 + 0, cIndex);
-							accessor.get().setReal(rValue);
-							accessor.setPosition(ci * 3 + 1, cIndex);
-							accessor.get().setReal(gValue);
-							accessor.setPosition(ci * 3 + 2, cIndex);
-							accessor.get().setReal(bValue);
-						}
-					}
-				}
-			}
-		}
-		ds.update();
+	private ImgPlus<UnsignedByteType> splitColorChannels(ImgPlus<ARGBType> input) {
+		Img<ARGBType> colored = input.getImg();
+		RandomAccessibleInterval<UnsignedByteType> colorStack = Views.stack(
+				Converters.argbChannel( colored, 1 ),
+				Converters.argbChannel( colored, 2 ),
+				Converters.argbChannel( colored, 3 ) );
+		ImgPlus<UnsignedByteType> result = new ImgPlus<>(ImgView.wrap(colorStack, new PlanarImgFactory<>()), input.getName());
+		int lastAxis = colored.numDimensions();
+		for (int i = 0; i < lastAxis; i++) result.setAxis(input.axis(i).copy(), i);
+		result.setAxis(new DefaultLinearAxis(Axes.CHANNEL), lastAxis);
+		return ImgPlusViews.moveAxis(result, lastAxis, 2);
 	}
 
 	/**
@@ -227,25 +165,9 @@ public class GrayDisplayCreator extends AbstractDisplayCreator
 	private Dataset makeExactDataset(final ImagePlus imp,
 		final AxisType[] preferredOrder)
 	{
-		final int x = imp.getWidth();
-		final int y = imp.getHeight();
-		final int c = imp.getNChannels();
-		final int z = imp.getNSlices();
-		final int t = imp.getNFrames();
-		final int[] inputDims = new int[] { x, y, c, z, t };
-		final AxisType[] axes = LegacyUtils.orderedAxes(preferredOrder, inputDims);
-		final long[] dims = LegacyUtils.orderedDims(axes, inputDims);
-		final String name = imp.getTitle();
-		final int bitsPerPixel = imp.getBitDepth();
-		final boolean signed = isSigned(imp);
-		final boolean floating = isFloating(imp);
-		final boolean virtual = imp.getStack().isVirtual();
-		final Dataset ds =
-			datasetService.create(dims, name, axes, bitsPerPixel, signed, floating,
-				virtual);
-
+		ImgPlus imgPlus = VirtualStackAdapter.wrap(imp);
+		final Dataset ds = datasetService.create(imgPlus);
 		DatasetUtils.initColorTables(ds);
-
 		return ds;
 	}
 
