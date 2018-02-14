@@ -51,13 +51,6 @@ import org.scijava.plugin.Parameter;
 public class ColorDisplayCreator extends AbstractDisplayCreator
 {
 
-	// -- instance variables --
-
-	private final ColorPixelHarmonizer pixelHarmonizer;
-
-	@Parameter
-	private DatasetService datasetService;
-
 	// NB - OverlayHarmonizer required because IJ1 plugins can hatch displays
 	// while avoiding the Harmonizer. Not required in the Display->ImagePlus
 	// direction as Harmonizer always catches that case.
@@ -66,7 +59,6 @@ public class ColorDisplayCreator extends AbstractDisplayCreator
 
 	public ColorDisplayCreator(final Context context) {
 		super( context );
-		pixelHarmonizer = new ColorPixelHarmonizer();
 	}
 
 	// -- AbstractDisplayCreator methods --
@@ -76,7 +68,6 @@ public class ColorDisplayCreator extends AbstractDisplayCreator
 		final AxisType[] preferredOrder)
 	{
 		final Dataset ds = getDataset(imp, preferredOrder);
-		pixelHarmonizer.updateDataset(ds, imp);
 		final ImageDisplay display = harmonizeExceptPixels( imp, ds );
 
 		return display;
@@ -93,38 +84,14 @@ public class ColorDisplayCreator extends AbstractDisplayCreator
 	protected Dataset makeDataset(final ImagePlus imp,
 		final AxisType[] preferredOrder)
 	{
-		final int x = imp.getWidth();
-		final int y = imp.getHeight();
 		final int c = imp.getNChannels();
-		final int z = imp.getNSlices();
-		final int t = imp.getNFrames();
-
-		if (imp.getType() != ImagePlus.COLOR_RGB) {
-			throw new IllegalArgumentException(
-				"can't make a color Dataset from a nonRGB ImagePlus");
-		}
-
 		if (c != 1) {
 			throw new IllegalArgumentException(
 				"can't make a color Dataset from a multichannel ColorProcessor stack");
 		}
 
-		final int[] inputDims = new int[] { x, y, 3, z, t };
-		final AxisType[] axes = LegacyUtils.orderedAxes(preferredOrder, inputDims);
-		final long[] dims = LegacyUtils.orderedDims(axes, inputDims);
-		final String name = imp.getTitle();
-		final int bitsPerPixel = 8;
-		final boolean signed = false;
-		final boolean floating = false;
-		final boolean virtual = imp.getStack().isVirtual();
-		final Dataset ds =
-			datasetService.create(dims, name, axes, bitsPerPixel, signed, floating,
-				virtual);
-
+		Dataset ds = makeGrayDatasetFromColorImp( imp, preferredOrder );
 		ds.setRGBMerged(true);
-
-		DatasetUtils.initColorTables(ds);
-
 		return ds;
 	}
 }

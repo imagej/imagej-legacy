@@ -32,11 +32,8 @@
 package net.imagej.legacy.translate;
 
 import ij.ImagePlus;
-
 import net.imagej.Dataset;
-import net.imagej.DatasetService;
 import net.imagej.ImgPlus;
-import net.imagej.axis.Axes;
 import net.imagej.axis.AxisType;
 import net.imagej.axis.DefaultLinearAxis;
 import net.imagej.display.ImageDisplay;
@@ -51,6 +48,7 @@ import net.imglib2.type.numeric.ARGBType;
 
 import net.imglib2.type.numeric.integer.UnsignedByteType;
 import net.imglib2.view.Views;
+import net.imglib2.img.VirtualStackAdapter;
 import org.scijava.Context;
 import org.scijava.log.LogService;
 import org.scijava.plugin.Parameter;
@@ -68,9 +66,6 @@ public class GrayDisplayCreator extends AbstractDisplayCreator
 
 	private final GrayPixelHarmonizer pixelHarmonizer;
 	private final PlaneHarmonizer planeHarmonizer;
-
-	@Parameter
-	private DatasetService datasetService;
 
 	@Parameter
 	private LogService log;
@@ -125,36 +120,6 @@ public class GrayDisplayCreator extends AbstractDisplayCreator
 		final ImageDisplay display = harmonizeExceptPixels( imp, ds );
 
 		return display;
-	}
-
-	/**
-	 * Makes a gray {@link Dataset} from a Color {@link ImagePlus} whose channel
-	 * count > 1. The Dataset will have isRgbMerged() false, 3 times as many
-	 * channels as the input ImagePlus, and bitsperPixel == 8. Does not populate
-	 * the data of the returned Dataset. That is left to other utility methods.
-	 * Does not set metadata of Dataset. Throws exceptions if input ImagePlus is
-	 * not RGB.
-	 */
-	private Dataset makeGrayDatasetFromColorImp(final ImagePlus imp,
-		final AxisType[] preferredOrder)
-	{
-		ImgPlus<ARGBType> colored = VirtualStackAdapter.wrapRGBA( imp );
-		final Dataset ds = datasetService.create( splitColorChannels(colored) );
-		DatasetUtils.initColorTables(ds);
-		return ds;
-	}
-
-	private ImgPlus<UnsignedByteType> splitColorChannels(ImgPlus<ARGBType> input) {
-		Img<ARGBType> colored = input.getImg();
-		RandomAccessibleInterval<UnsignedByteType> colorStack = Views.stack(
-				Converters.argbChannel( colored, 1 ),
-				Converters.argbChannel( colored, 2 ),
-				Converters.argbChannel( colored, 3 ) );
-		ImgPlus<UnsignedByteType> result = new ImgPlus<>(ImgView.wrap(colorStack, new PlanarImgFactory<>()), input.getName());
-		int lastAxis = colored.numDimensions();
-		for (int i = 0; i < lastAxis; i++) result.setAxis(input.axis(i).copy(), i);
-		result.setAxis(new DefaultLinearAxis(Axes.CHANNEL), lastAxis);
-		return ImgPlusViews.moveAxis(result, lastAxis, 2);
 	}
 
 	/**
