@@ -63,16 +63,6 @@ public class ColorDisplayCreator extends AbstractDisplayCreator
 
 	// -- AbstractDisplayCreator methods --
 
-	@Override
-	protected ImageDisplay makeDisplay(final ImagePlus imp,
-		final AxisType[] preferredOrder)
-	{
-		final Dataset ds = getDataset(imp, preferredOrder);
-		final ImageDisplay display = harmonizeExceptPixels( imp, ds );
-
-		return display;
-	}
-
 	/**
 	 * Makes a color {@link Dataset} from an {@link ImagePlus}. Color Datasets
 	 * have isRgbMerged() true, channels == 3, and bitsperPixel == 8. Does not

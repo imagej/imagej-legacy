@@ -71,33 +71,7 @@ public class GrayDisplayCreator extends AbstractDisplayCreator
 		}
 	}
 
-	@Override
-	protected ImageDisplay makeDisplay(ImagePlus imp, AxisType[] preferredOrder) {
-		if (imp.getType() == ImagePlus.COLOR_RGB) {
-			return colorCase(imp, preferredOrder);
-		}
-		return grayCase(imp, preferredOrder);
-	}
-
 	// -- private interface --
-
-	private ImageDisplay colorCase(final ImagePlus imp,
-		final AxisType[] preferredOrder)
-	{
-		final Dataset ds = getDataset(imp, preferredOrder);
-		final ImageDisplay display = harmonizeExceptPixels( imp, ds );
-
-		return display;
-	}
-
-	private ImageDisplay grayCase(final ImagePlus imp,
-		final AxisType[] preferredOrder)
-	{
-		Dataset ds = getDataset(imp, preferredOrder);
-		final ImageDisplay display = harmonizeExceptPixels( imp, ds );
-
-		return display;
-	}
 
 	/**
 	 * Makes a planar {@link Dataset} whose dimensions match a given
