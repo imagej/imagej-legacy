@@ -155,74 +155,6 @@ public class LegacyUtils {
 	}
 
 	/**
-	 * Makes a set of axes in a preferred order. The preferred order may not
-	 * include all 5 default axes. This method always returns axes populated with
-	 * X, Y, and any other nontrivial dimensions. Output axes are filled in the
-	 * preferred order and then unspecified axes of nontrivial dimension are
-	 * concatenated in default order
-	 */
-	static AxisType[] orderedAxes(final AxisType[] preferredOrder,
-		final int[] fullDimensions)
-	{
-		int dimCount = 0;
-		for (int i = 0; i < fullDimensions.length; i++) {
-			if (defaultAxes[i] == Axes.X || defaultAxes[i] == Axes.Y ||
-//				defaultAxes[i] == Axes.CHANNEL ||
-				getDim(defaultAxes[i], fullDimensions) > 1)
-			{
-				dimCount++;
-			}
-		}
-		final AxisType[] axes = new AxisType[dimCount];
-		int index = 0;
-		for (final AxisType axis : preferredOrder) {
-			for (final AxisType other : defaultAxes) {
-				if (axis == other) {
-					if (axis == Axes.X || axis == Axes.Y ||
-//						axis == Axes.CHANNEL ||
-						getDim(axis, fullDimensions) > 1)
-					{
-						axes[index++] = axis;
-					}
-					break;
-				}
-			}
-		}
-		for (final AxisType axis : defaultAxes) {
-			boolean present = false;
-			for (final AxisType other : preferredOrder) {
-				if (axis == other) {
-					present = true;
-					break;
-				}
-			}
-			if (!present) {
-				if (axis == Axes.X || axis == Axes.Y ||
-//					axis == Axes.CHANNEL ||
-					getDim(axis, fullDimensions) > 1)
-				{
-					axes[index++] = axis;
-				}
-			}
-		}
-		return axes;
-	}
-
-	/**
-	 * makes a set of dimensions in a given Axis order. Assumes that all
-	 * nontrivial dimensions have already been prescreened to be included
-	 */
-	static long[] orderedDims(final AxisType[] axes, final int[] fullDimensions)
-	{
-		final long[] orderedDims = new long[axes.length];
-		int index = 0;
-		for (final AxisType axis : axes) {
-			orderedDims[index++] = getDim(axis, fullDimensions);
-		}
-		return orderedDims;
-	}
-
-	/**
 	 * tests that a given {@link Dataset} can be represented as a color
 	 * {@link ImagePlus}. Some of this test maybe overkill if by definition
 	 * rgbMerged can only be true if channels == 3 and type = ubyte are also true.
@@ -360,19 +292,6 @@ public class LegacyUtils {
 	}
 	
 	// -- private helper methods --
-
-	/**
-	 * Gets a dimension for a given axis from a list of dimensions in XYCZT order.
-	 */
-	private static int getDim(final AxisType axis, final int[] fullDimensions) {
-		if (axis == Axes.X) return fullDimensions[0];
-		else if (axis == Axes.Y) return fullDimensions[1];
-		else if (axis == Axes.CHANNEL) return fullDimensions[2];
-		else if (axis == Axes.Z) return fullDimensions[3];
-		else if (axis == Axes.TIME) return fullDimensions[4];
-		else throw new IllegalArgumentException(
-			"incompatible dimension type specified");
-	}
 
 	/** Returns true if a {@link Dataset} is backed by {@link PlanarAccess}. */
 	private static boolean ij1StorageCompatible(final Dataset ds) {

@@ -35,23 +35,10 @@ import ij.ImagePlus;
 import net.imagej.Dataset;
 import net.imagej.ImgPlus;
 import net.imagej.axis.AxisType;
-import net.imagej.axis.DefaultLinearAxis;
 import net.imagej.display.ImageDisplay;
-import net.imglib2.RandomAccessibleInterval;
-import net.imglib2.converter.Converters;
-import net.imglib2.img.Img;
-import net.imglib2.img.ImgView;
 import net.imglib2.img.VirtualStackAdapter;
-import net.imglib2.img.display.imagej.ImgPlusViews;
-import net.imglib2.img.planar.PlanarImgFactory;
-import net.imglib2.type.numeric.ARGBType;
 
-import net.imglib2.type.numeric.integer.UnsignedByteType;
-import net.imglib2.view.Views;
-import net.imglib2.img.VirtualStackAdapter;
 import org.scijava.Context;
-import org.scijava.log.LogService;
-import org.scijava.plugin.Parameter;
 
 /**
  * Creates {@link ImageDisplay}s containing gray data values from
@@ -62,14 +49,6 @@ import org.scijava.plugin.Parameter;
 public class GrayDisplayCreator extends AbstractDisplayCreator
 {
 
-	// -- instance variables --
-
-	private final GrayPixelHarmonizer pixelHarmonizer;
-	private final PlaneHarmonizer planeHarmonizer;
-
-	@Parameter
-	private LogService log;
-
 	// NB - OverlayHarmonizer required because IJ1 plugins can hatch displays
 	// while avoiding the Harmonizer. Not required in the Display->ImagePlus
 	// direction as Harmonizer always catches that case.
@@ -78,8 +57,6 @@ public class GrayDisplayCreator extends AbstractDisplayCreator
 
 	public GrayDisplayCreator(final Context context) {
 		super(context);
-		pixelHarmonizer = new GrayPixelHarmonizer();
-		planeHarmonizer = new PlaneHarmonizer(log);
 	}
 
 	// -- AbstractDisplayCreator methods --
@@ -135,22 +112,4 @@ public class GrayDisplayCreator extends AbstractDisplayCreator
 		DatasetUtils.initColorTables(ds);
 		return ds;
 	}
-
-	/** Returns true if an {@link ImagePlus} is of type GRAY32. */
-	private boolean isGray32PixelType(final ImagePlus imp) {
-		final int type = imp.getType();
-		return type == ImagePlus.GRAY32;
-	}
-
-	/** Returns true if an {@link ImagePlus} is backed by a signed type. */
-	private boolean isSigned(final ImagePlus imp) {
-		if (imp.getCalibration().isSigned16Bit()) return true;
-		return isGray32PixelType(imp);
-	}
-
-	/** Returns true if an {@link ImagePlus} is backed by a floating type. */
-	private boolean isFloating(final ImagePlus imp) {
-		return isGray32PixelType(imp);
-	}
-
 }
