@@ -35,11 +35,25 @@ import ij.ImagePlus;
 import ij.io.FileInfo;
 
 import net.imagej.Dataset;
+import net.imagej.DatasetService;
+import net.imagej.ImgPlus;
+import net.imagej.axis.Axes;
 import net.imagej.axis.AxisType;
+import net.imagej.axis.DefaultLinearAxis;
 import net.imagej.display.ImageDisplay;
 import net.imagej.display.ImageDisplayService;
 import net.imagej.legacy.LegacyImageMap;
 
+import net.imglib2.RandomAccessibleInterval;
+import net.imglib2.converter.Converters;
+import net.imglib2.img.Img;
+import net.imglib2.img.ImgView;
+import net.imglib2.img.VirtualStackAdapter;
+import net.imglib2.img.display.imagej.ImgPlusViews;
+import net.imglib2.img.planar.PlanarImgFactory;
+import net.imglib2.type.numeric.ARGBType;
+import net.imglib2.type.numeric.integer.UnsignedByteType;
+import net.imglib2.view.Views;
 import org.scijava.AbstractContextual;
 import org.scijava.Context;
 import org.scijava.display.DisplayService;
@@ -53,6 +67,9 @@ import org.scijava.plugin.Parameter;
  */
 public abstract class AbstractDisplayCreator extends AbstractContextual
 {
+
+	@Parameter
+	protected DatasetService datasetService;
 
 	@Parameter
 	private ImageDisplayService imageDisplayService;
@@ -146,4 +163,34 @@ public abstract class AbstractDisplayCreator extends AbstractContextual
 	 */
 	protected abstract ImageDisplay makeDisplay(final ImagePlus imp,
 		final AxisType[] preferredOrder);
+
+	/**
+	 * Makes a gray {@link Dataset} from a Color {@link ImagePlus} whose channel
+	 * count > 1. The Dataset will have isRgbMerged() false, 3 times as many
+	 * channels as the input ImagePlus, and bitsperPixel == 8. Does not populate
+	 * the data of the returned Dataset. That is left to other utility methods.
+	 * Does not set metadata of Dataset. Throws exceptions if input ImagePlus is
+	 * not RGB.
+	 */
+	protected Dataset makeGrayDatasetFromColorImp(final ImagePlus imp,
+			final AxisType[] preferredOrder)
+	{
+		ImgPlus<ARGBType> colored = VirtualStackAdapter.wrapRGBA( imp );
+		final Dataset ds = datasetService.create( splitColorChannels(colored) );
+		DatasetUtils.initColorTables(ds);
+		return ds;
+	}
+
+	private ImgPlus<UnsignedByteType> splitColorChannels(ImgPlus<ARGBType> input) {
+		Img<ARGBType> colored = input.getImg();
+		RandomAccessibleInterval<UnsignedByteType> colorStack = Views.stack(
+				Converters.argbChannel( colored, 1 ),
+				Converters.argbChannel( colored, 2 ),
+				Converters.argbChannel( colored, 3 ) );
+		ImgPlus<UnsignedByteType> result = new ImgPlus<>(ImgView.wrap(colorStack, new PlanarImgFactory<>()), input.getName());
+		int lastAxis = colored.numDimensions();
+		for (int i = 0; i < lastAxis; i++) result.setAxis(input.axis(i).copy(), i);
+		result.setAxis(new DefaultLinearAxis(Axes.CHANNEL), lastAxis);
+		return ImgPlusViews.moveAxis(result, lastAxis, 2);
+	}
 }
