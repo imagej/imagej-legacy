@@ -144,6 +144,7 @@ Institute of Molecular Cell Biology and Genetics.</license.copyrightOwners>
 
 		<scijava-common.version>2.73.1</scijava-common.version>
 		<imagej-common.version>0.26.1</imagej-common.version>
+		<imglib2-ij.version>2.0.0-beta-41</imglib2-ij.version>
 	</properties>
 
 	<repositories>
