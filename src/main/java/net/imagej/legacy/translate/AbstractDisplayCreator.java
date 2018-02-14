@@ -161,8 +161,10 @@ public abstract class AbstractDisplayCreator extends AbstractContextual
 	/**
 	 * @return An {@link ImageDisplay} created from the given {@link ImagePlus}
 	 */
-	protected abstract ImageDisplay makeDisplay(final ImagePlus imp,
-		final AxisType[] preferredOrder);
+	private ImageDisplay makeDisplay( ImagePlus imp, AxisType[] preferredOrder ) {
+		Dataset ds = getDataset(imp, preferredOrder);
+		return harmonizeExceptPixels( imp, ds );
+	}
 
 	/**
 	 * Makes a gray {@link Dataset} from a Color {@link ImagePlus} whose channel
