@@ -62,6 +62,7 @@ import net.imglib2.view.Views;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.scijava.Context;
 
@@ -168,7 +169,7 @@ public class GrayDisplayCreatorTest
 	{
 		int width = 2, height = 1, channels = 2;
 		ImagePlus image = SubClass.createColorImagePlus( width, height, channels, 1, 1, new int[][] { { 0x010203, 0x040506 }, { 0x070809, 0x0a0b0c } } );
-		RandomAccessibleInterval< UnsignedByteType > expected = ArrayImgs.unsignedBytes( new byte[]{1,4,2,5,3,6,7,10,8,11,9,12}, width, height, channels * 3 );
+		RandomAccessibleInterval< UnsignedByteType > expected = ArrayImgs.unsignedBytes( new byte[]{1,4,2,5,3,6,7,10,8,11,9,12}, width, height, 3, channels );
 		SubClass.testConversion( context, expected, image );
 	}
 
@@ -191,6 +192,7 @@ public class GrayDisplayCreatorTest
 		SubClass.testConversion( context, expected, image );
 	}
 
+	@Ignore("not supported, only needed for anyway broken transition between modern and legacy mode")
 	@Test
 	public void testAxesOrder()
 	{
