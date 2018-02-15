@@ -33,10 +33,8 @@ package net.imagej.legacy.translate;
 
 import ij.ImagePlus;
 import net.imagej.Dataset;
-import net.imagej.ImgPlus;
 import net.imagej.axis.AxisType;
 import net.imagej.display.ImageDisplay;
-import net.imglib2.img.VirtualStackAdapter;
 
 import org.scijava.Context;
 
@@ -69,21 +67,5 @@ public class GrayDisplayCreator extends AbstractDisplayCreator
 		else {
 			return makeExactDataset(imp, preferredOrder);
 		}
-	}
-
-	// -- private interface --
-
-	/**
-	 * Makes a planar {@link Dataset} whose dimensions match a given
-	 * {@link ImagePlus}. Assumes it will never be called with
-	 * any kind of color ImagePlus. Does not set metadata of Dataset.
-	 */
-	private Dataset makeExactDataset(final ImagePlus imp,
-		final AxisType[] preferredOrder)
-	{
-		ImgPlus imgPlus = VirtualStackAdapter.wrap(imp);
-		final Dataset ds = datasetService.create(imgPlus);
-		DatasetUtils.initColorTables(ds);
-		return ds;
 	}
 }

@@ -195,4 +195,18 @@ public abstract class AbstractDisplayCreator extends AbstractContextual
 		result.setAxis(new DefaultLinearAxis(Axes.CHANNEL), lastAxis);
 		return ImgPlusViews.moveAxis(result, lastAxis, 2);
 	}
+
+	/**
+	 * Makes a planar {@link Dataset} whose dimensions match a given
+	 * {@link ImagePlus}. Assumes it will never be called with
+	 * any kind of color ImagePlus. Does not set metadata of Dataset.
+	 */
+	protected Dataset makeExactDataset(final ImagePlus imp,
+			final AxisType[] preferredOrder)
+	{
+		ImgPlus imgPlus = VirtualStackAdapter.wrap(imp);
+		final Dataset ds = datasetService.create(imgPlus);
+		DatasetUtils.initColorTables(ds);
+		return ds;
+	}
 }
