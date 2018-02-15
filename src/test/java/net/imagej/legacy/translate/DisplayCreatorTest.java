@@ -64,11 +64,11 @@ import java.util.stream.Stream;
 import static org.junit.Assert.assertEquals;
 
 /**
- * Tests {@link GrayDisplayCreator}.
+ * Tests {@link DisplayCreator}.
  *
  * @author Matthias Arzt
  */
-public class GrayDisplayCreatorTest
+public class DisplayCreatorTest
 {
 	static {
 		LegacyInjector.preinit();
@@ -80,7 +80,7 @@ public class GrayDisplayCreatorTest
 
 		private static Dataset toDataset( ImagePlus image )
 		{
-			ImageDisplay display = new GrayDisplayCreator( context ).createDisplay( image );
+			ImageDisplay display = new DisplayCreator( context ).createDisplay( image );
 			return ( Dataset ) display.getActiveView().getData();
 		}
 
@@ -187,7 +187,7 @@ public class GrayDisplayCreatorTest
 		byte[][] pixels = IntStream.range(0, z * c).mapToObj( i -> randomBytes( x * y ) ).toArray(byte[][]::new);
 		ImagePlus image = SubClass.createByteImagePlus( x, y, c, z, 1, pixels );
 		RandomAccessibleInterval< UnsignedByteType > expected = Views.permute( ArrayImgs.unsignedBytes( concat( pixels ), x, y, c, z ), 2, 3);
-		ImageDisplay display = new GrayDisplayCreator( SubClass.context ).createDisplay( image, new AxisType[]{ Axes.X, Axes.Y, Axes.Z, Axes.CHANNEL } );
+		ImageDisplay display = new DisplayCreator( SubClass.context ).createDisplay( image, new AxisType[]{ Axes.X, Axes.Y, Axes.Z, Axes.CHANNEL } );
 		Dataset dataset = ( Dataset ) display.getActiveView().getData();
 		assertEquals( (( RandomAccessibleInterval< ? extends RealType< ? > > ) expected).randomAccess().get().getClass(), dataset.getType().getClass() );
 		assertEquals(Arrays.asList( Axes.X, Axes.Y, Axes.Z, Axes.CHANNEL ), getAxes( dataset ));
@@ -225,7 +225,7 @@ public class GrayDisplayCreatorTest
 	}
 
 	private static byte[] concat(byte[]... arrays) {
-		return Stream.of(arrays).reduce( new byte[0], GrayDisplayCreatorTest::addAll );
+		return Stream.of(arrays).reduce( new byte[0], DisplayCreatorTest::addAll );
 	}
 
 	public static byte[] addAll( final byte[] a, byte[] b )

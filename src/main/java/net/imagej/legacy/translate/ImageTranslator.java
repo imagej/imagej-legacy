@@ -54,8 +54,7 @@ import org.scijava.plugin.Parameter;
 public class ImageTranslator extends AbstractContextual
 {
 
-	private final ColorDisplayCreator colorDisplayCreator;
-	private final GrayDisplayCreator grayDisplayCreator;
+	private final DisplayCreator displayCreator;
 	private final ImagePlusCreator colorImagePlusCreator;
 	private final ImagePlusCreator grayImagePlusCreator;
 
@@ -68,8 +67,7 @@ public class ImageTranslator extends AbstractContextual
 		final Context context = legacyService.getContext();
 		context.inject(this);
 		this.legacyService = legacyService;
-		colorDisplayCreator = new ColorDisplayCreator(context);
-		grayDisplayCreator = new GrayDisplayCreator(context);
+		displayCreator = new DisplayCreator(context);
 		colorImagePlusCreator = new ColorImagePlusCreator(context);
 		grayImagePlusCreator = new GrayImagePlusCreator(context);
 	}
@@ -90,12 +88,7 @@ public class ImageTranslator extends AbstractContextual
 	public ImageDisplay createDisplay(final ImagePlus imp,
 		final AxisType[] preferredOrder)
 	{
-
-		if ((imp.getType() == ImagePlus.COLOR_RGB) && (imp.getNChannels() == 1)) {
-			return colorDisplayCreator.createDisplay(imp, preferredOrder);
-		}
-
-		return grayDisplayCreator.createDisplay(imp, preferredOrder);
+		return displayCreator.createDisplay(imp, preferredOrder);
 	}
 
 	/**
