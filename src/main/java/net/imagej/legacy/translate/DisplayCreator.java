@@ -68,7 +68,7 @@ import org.scijava.plugin.Parameter;
 public class DisplayCreator extends AbstractContextual
 {
 	@Parameter
-	protected DatasetService datasetService;
+	private DatasetService datasetService;
 
 	@Parameter
 	private ImageDisplayService imageDisplayService;
@@ -152,38 +152,28 @@ public class DisplayCreator extends AbstractContextual
 	}
 
 	protected Dataset makeDataset(ImagePlus imp, AxisType[] preferredOrder) {
+		ImgPlus imgPlus = toImgPlus( imp, preferredOrder );
+		final Dataset ds = datasetService.create( imgPlus );
+		DatasetUtils.initColorTables(ds);
+		ds.setRGBMerged( imp.getType() == ImagePlus.COLOR_RGB && imp.getNChannels() == 1);
+		return ds;
+	}
+
+	private ImgPlus toImgPlus( ImagePlus imp, AxisType[] preferredOrder )
+	{
+		return wrap( imp );
+	}
+
+	private ImgPlus< ? > wrap( ImagePlus imp )
+	{
 		if (imp.getType() == ImagePlus.COLOR_RGB) {
-			return makeGrayDatasetFromColorImp(imp, preferredOrder);
+			ImgPlus<ARGBType> colored = VirtualStackAdapter.wrapRGBA( imp );
+			// TODO: This special treatment of Img<ARGBType> is wrongly placed.
+			return splitColorChannels(colored);
 		}
 		else {
-			return makeExactDataset(imp, preferredOrder);
+			return VirtualStackAdapter.wrap( imp );
 		}
-	}
-
-	/**
-	 * @return An {@link ImageDisplay} created from the given {@link ImagePlus}
-	 */
-	private ImageDisplay makeDisplay( ImagePlus imp, AxisType[] preferredOrder ) {
-		Dataset ds = getDataset(imp, preferredOrder);
-		return harmonizeExceptPixels( imp, ds );
-	}
-
-	/**
-	 * Makes a gray {@link Dataset} from a Color {@link ImagePlus} whose channel
-	 * count > 1. The Dataset will have isRgbMerged() false, 3 times as many
-	 * channels as the input ImagePlus, and bitsperPixel == 8. Does not populate
-	 * the data of the returned Dataset. That is left to other utility methods.
-	 * Does not set metadata of Dataset. Throws exceptions if input ImagePlus is
-	 * not RGB.
-	 */
-	protected Dataset makeGrayDatasetFromColorImp(final ImagePlus imp,
-			final AxisType[] preferredOrder)
-	{
-		ImgPlus<ARGBType> colored = VirtualStackAdapter.wrapRGBA( imp );
-		final Dataset ds = datasetService.create( splitColorChannels(colored) );
-		DatasetUtils.initColorTables(ds);
-		ds.setRGBMerged(imp.getNChannels() == 1);
-		return ds;
 	}
 
 	private ImgPlus<UnsignedByteType> splitColorChannels(ImgPlus<ARGBType> input) {
@@ -200,16 +190,10 @@ public class DisplayCreator extends AbstractContextual
 	}
 
 	/**
-	 * Makes a planar {@link Dataset} whose dimensions match a given
-	 * {@link ImagePlus}. Assumes it will never be called with
-	 * any kind of color ImagePlus. Does not set metadata of Dataset.
+	 * @return An {@link ImageDisplay} created from the given {@link ImagePlus}
 	 */
-	protected Dataset makeExactDataset(final ImagePlus imp,
-			final AxisType[] preferredOrder)
-	{
-		ImgPlus imgPlus = VirtualStackAdapter.wrap(imp);
-		final Dataset ds = datasetService.create(imgPlus);
-		DatasetUtils.initColorTables(ds);
-		return ds;
+	private ImageDisplay makeDisplay( ImagePlus imp, AxisType[] preferredOrder ) {
+		Dataset ds = getDataset(imp, preferredOrder);
+		return harmonizeExceptPixels( imp, ds );
 	}
 }

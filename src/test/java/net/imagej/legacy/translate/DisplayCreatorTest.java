@@ -151,6 +151,7 @@ public class DisplayCreatorTest
 		SubClass.testConversion(expected, ip);
 	}
 
+	@Ignore("The tested functionality, shouldn't be provided by DefaultDisplayCreator. Instead Dataset would present a Img<ARGBType> as Img<RealType>.")
 	@Test
 	public void testColorStackWrapping() throws ExecutionException, InterruptedException
 	{
