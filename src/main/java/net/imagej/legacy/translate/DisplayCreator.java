@@ -108,28 +108,28 @@ public class DisplayCreator extends AbstractContextual
 	/**
 	 * @return A {@link Dataset} appropriate for the given {@link ImagePlus}
 	 */
-	protected Dataset getDataset(final ImagePlus imp,
-		final AxisType[] preferredOrder)
+	private Dataset getDataset( final ImagePlus imp,
+			final AxisType[] preferredOrder )
 	{
 		final Dataset ds = makeDataset(imp, preferredOrder);
 		ds.getProperties().put(LegacyImageMap.IMP_KEY, imp);
+		return ds;
+	}
+
+	private String makeSource( ImagePlus imp )
+	{
 		final FileInfo fileInfo = imp.getOriginalFileInfo();
-		String source = "";
 		if (fileInfo == null) {
 			// If no original file info, just use the title. This may be the case
 			// when an ImagePlus is created as the output of a command.
-			source = imp.getTitle();
+			return imp.getTitle();
 		}
 		else {
-			if (fileInfo.url == null || fileInfo.url.isEmpty()) {
-				source = fileInfo.directory + fileInfo.fileName;
-			}
-			else {
-				source = fileInfo.url;
-			}
+			if (fileInfo.url == null || fileInfo.url.isEmpty())
+				return fileInfo.directory + fileInfo.fileName;
+			else
+				return fileInfo.url;
 		}
-		ds.getImgPlus().setSource(source);
-		return ds;
 	}
 
 	protected ImageDisplay harmonizeExceptPixels( ImagePlus imp, Dataset ds )
@@ -161,7 +161,9 @@ public class DisplayCreator extends AbstractContextual
 
 	private ImgPlus toImgPlus( ImagePlus imp, AxisType[] preferredOrder )
 	{
-		return wrap( imp );
+		ImgPlus imgPlus = wrap( imp );
+		imgPlus.setSource( makeSource( imp ) );
+		return imgPlus;
 	}
 
 	private ImgPlus< ? > wrap( ImagePlus imp )
