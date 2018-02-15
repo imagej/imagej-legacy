@@ -180,6 +180,7 @@ public abstract class AbstractDisplayCreator extends AbstractContextual
 		ImgPlus<ARGBType> colored = VirtualStackAdapter.wrapRGBA( imp );
 		final Dataset ds = datasetService.create( splitColorChannels(colored) );
 		DatasetUtils.initColorTables(ds);
+		ds.setRGBMerged(imp.getNChannels() == 1);
 		return ds;
 	}
 

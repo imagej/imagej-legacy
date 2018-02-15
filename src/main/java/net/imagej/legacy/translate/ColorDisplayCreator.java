@@ -74,14 +74,6 @@ public class ColorDisplayCreator extends AbstractDisplayCreator
 	protected Dataset makeDataset(final ImagePlus imp,
 		final AxisType[] preferredOrder)
 	{
-		final int c = imp.getNChannels();
-		if (c != 1) {
-			throw new IllegalArgumentException(
-				"can't make a color Dataset from a multichannel ColorProcessor stack");
-		}
-
-		Dataset ds = makeGrayDatasetFromColorImp( imp, preferredOrder );
-		ds.setRGBMerged(true);
-		return ds;
+		return makeGrayDatasetFromColorImp( imp, preferredOrder );
 	}
 }
