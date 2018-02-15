@@ -60,14 +60,13 @@ import org.scijava.display.DisplayService;
 import org.scijava.plugin.Parameter;
 
 /**
- * Abstract superclass for DisplayCreator implementations. Ensures
- * proper linkage between {@link Dataset} and {@link ImagePlus} instances.
+ * Class to create a {@link Dataset} which is linked to an {@link ImagePlus}.
  *
  * @author Mark Hiner
+ * @author Matthias Arzt
  */
-public abstract class AbstractDisplayCreator extends AbstractContextual
+public class DisplayCreator extends AbstractContextual
 {
-
 	@Parameter
 	protected DatasetService datasetService;
 
@@ -84,7 +83,7 @@ public abstract class AbstractDisplayCreator extends AbstractContextual
 	@Parameter
 	private DisplayService displayService;
 
-	public AbstractDisplayCreator( final Context context )
+	public DisplayCreator( final Context context )
 	{
 		setContext(context);
 		nameHarmonizer = new NameHarmonizer();
@@ -152,11 +151,14 @@ public abstract class AbstractDisplayCreator extends AbstractContextual
 		return display;
 	}
 
-	/**
-	 * @return A {@link Dataset} appropriate for the given {@link ImagePlus}
-	 */
-	protected abstract Dataset makeDataset(final ImagePlus imp,
-		final AxisType[] preferredOrder);
+	protected Dataset makeDataset(ImagePlus imp, AxisType[] preferredOrder) {
+		if (imp.getType() == ImagePlus.COLOR_RGB) {
+			return makeGrayDatasetFromColorImp(imp, preferredOrder);
+		}
+		else {
+			return makeExactDataset(imp, preferredOrder);
+		}
+	}
 
 	/**
 	 * @return An {@link ImageDisplay} created from the given {@link ImagePlus}
