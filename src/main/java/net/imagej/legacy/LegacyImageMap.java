@@ -464,6 +464,11 @@ public class LegacyImageMap extends AbstractContextual {
 				final ImagePlus currImagePlus = WindowManager.getCurrentImage();
 				if (imp == currImagePlus) WindowManager.setTempCurrentImage(null);
 			}
+
+			// Dispose legacy ImageWindow
+			final ImageWindow currentWindow = WindowManager.getCurrentWindow();
+			WindowManager.removeWindow(currentWindow);
+			currentWindow.dispose();
 		}
 	}
 
