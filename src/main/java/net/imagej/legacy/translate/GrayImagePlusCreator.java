@@ -79,10 +79,8 @@ public class GrayImagePlusCreator extends AbstractImagePlusCreator {
 
 	// -- instance variables --
 
-	private final GrayPixelHarmonizer pixelHarmonizer;
 	private final ColorTableHarmonizer colorTableHarmonizer;
 	private final MetadataHarmonizer metadataHarmonizer;
-	private final PlaneHarmonizer planeHarmonizer;
 	private final PositionHarmonizer positionHarmonizer;
 	private final NameHarmonizer nameHarmonizer;
 
@@ -96,10 +94,8 @@ public class GrayImagePlusCreator extends AbstractImagePlusCreator {
 
 	public GrayImagePlusCreator(final Context context) {
 		setContext(context);
-		pixelHarmonizer = new GrayPixelHarmonizer();
 		colorTableHarmonizer = new ColorTableHarmonizer(imageDisplayService);
 		metadataHarmonizer = new MetadataHarmonizer();
-		planeHarmonizer = new PlaneHarmonizer(log);
 		positionHarmonizer = new PositionHarmonizer();
 		nameHarmonizer = new NameHarmonizer();
 	}
@@ -119,17 +115,7 @@ public class GrayImagePlusCreator extends AbstractImagePlusCreator {
 		if (dataset == null) return null;
 		final Img<?> img = dataset.getImgPlus().getImg();
 		ImagePlus imp;
-		if (AbstractCellImg.class.isAssignableFrom(img.getClass())) {
 			imp = makeImagePlus(dataset, createVirtualStack(dataset));
-		}
-		else if (LegacyUtils.datasetIsIJ1Compatible(dataset)) {
-			imp = makeExactImagePlus(dataset);
-			planeHarmonizer.updateLegacyImage(dataset, imp);
-		}
-		else {
-			imp = makeNearestTypeGrayImagePlus(dataset);
-			pixelHarmonizer.updateLegacyImage(dataset, imp);
-		}
 		metadataHarmonizer.updateLegacyImage(dataset, imp);
 
 		populateCalibrationData(imp, dataset);
@@ -147,84 +133,6 @@ public class GrayImagePlusCreator extends AbstractImagePlusCreator {
 	}
 
 	// -- private interface --
-
-	/**
-	 * Makes an {@link ImagePlus} that matches dimensions of a {@link Dataset}.
-	 * The data values of the ImagePlus to be populated later elsewhere.
-	 * 
-	 * @param ds - input Dataset to be shape compatible with
-	 * @param planeMaker - a PlaneMaker to use to make type correct image planes
-	 * @param makeDummyPlanes - save memory by allocating the minimum number of
-	 *          planes for the case that we'll be reassigning the planes
-	 *          immediately.
-	 * @return an ImagePlus whose dimensions are IJ1 compatible with the input
-	 *         Dataset.
-	 */
-	private ImagePlus makeImagePlus(final Dataset ds,
-		final PlaneMaker planeMaker, final boolean makeDummyPlanes)
-	{
-
-		final int[] dimIndices = new int[5];
-		final int[] dimValues = new int[5];
-		LegacyUtils.getImagePlusDims(ds, dimIndices, dimValues);
-
-		final int cCount = dimValues[2];
-		final int zCount = dimValues[3];
-		final int tCount = dimValues[4];
-
-		final ImageStack stack = new ImageStack(dimValues[0], dimValues[1]);
-
-		final Object dummyPlane =
-			makeDummyPlanes ? planeMaker.makePlane(dimValues[0], dimValues[1]) : null;
-
-		for (long t = 0; t < tCount; t++) {
-			for (long z = 0; z < zCount; z++) {
-				for (long c = 0; c < cCount; c++) {
-					Object plane;
-					if (makeDummyPlanes) {
-						plane = dummyPlane;
-					}
-					else {
-						plane = planeMaker.makePlane(dimValues[0], dimValues[1]);
-					}
-					stack.addSlice(null, plane);
-				}
-			}
-		}
-
-		final ImagePlus imp = makeImagePlus(ds, cCount, zCount, tCount, stack);
-		if (ds.getType() instanceof ShortType) markAsSigned16Bit(imp);
-
-		return imp;
-	}
-
-	/**
-	 * Makes an {@link ImagePlus} from a {@link Dataset}. Data is exactly the same
-	 * between them as planes of data are shared by reference. Assumes the Dataset
-	 * can be represented via plane references (thus XYCZT and backed by
-	 * {@link PlanarAccess} and in a type compatible with legacy ImageJ). Does not
-	 * set the metadata of the ImagePlus. Throws an exception if Dataset axis 0 is
-	 * not X or Dataset axis 1 is not Y.
-	 */
-	// TODO - check that Dataset can be represented exactly
-	private ImagePlus makeExactImagePlus(final Dataset ds) {
-		final int[] dimIndices = new int[5];
-		final int[] dimValues = new int[5];
-		LegacyUtils.getImagePlusDims(ds, dimIndices, dimValues);
-		LegacyUtils.assertXYPlanesCorrectlyOriented(dimIndices);
-		return makeImagePlus(ds, getPlaneMaker(ds), true);
-	}
-
-	/**
-	 * Makes an {@link ImagePlus} from a {@link Dataset} whose dimensions match.
-	 * The type of the ImagePlus is a legacy ImageJ type that can best represent
-	 * the data with the least loss of data. Sometimes the legacy and modern types
-	 * are the same type and sometimes they are not. The data values and metadata
-	 * are not assigned. Assumes it will never be sent a color Dataset.
-	 */
-	private ImagePlus makeNearestTypeGrayImagePlus(final Dataset ds) {
-		return makeImagePlus(ds, getPlaneMaker(ds), false);
-	}
 
 	private boolean shouldBeComposite(final ImageDisplay display,
 		final Dataset ds, final ImagePlus imp)
@@ -248,78 +156,6 @@ public class GrayImagePlusCreator extends AbstractImagePlusCreator {
 	// this configuration even valid. If so then what to do for translation?
 	private CompositeImage makeCompositeImage(final ImagePlus imp) {
 		return new CompositeImage(imp, CompositeImage.COMPOSITE);
-	}
-
-	/**
-	 * Updates an {@link ImagePlus} so that legacy ImageJ treats it as a signed 16
-	 * bit image
-	 */
-	private void markAsSigned16Bit(final ImagePlus imp) {
-		final Calibration cal = imp.getCalibration();
-		cal.setSigned16BitCalibration();
-	}
-
-	/**
-	 * Finds the best {@link PlaneMaker} for a given {@link Dataset}. The best
-	 * PlaneMaker is the one that makes planes in the type that can best represent
-	 * the Dataset's data values in legacy ImageJ.
-	 */
-	private PlaneMaker getPlaneMaker(final Dataset ds) {
-		final boolean signed = ds.isSigned();
-		final boolean integer = ds.isInteger();
-		final int bitsPerPixel = ds.getType().getBitsPerPixel();
-		if (bitsPerPixel <= 8) {
-			if (!signed && integer) return new BytePlaneMaker();
-		}
-		else if (bitsPerPixel <= 16) {
-			if (integer) return new ShortPlaneMaker();
-		}
-		return new FloatPlaneMaker();
-	}
-
-	/** Helper class to simplify the making of planes of different type data. */
-	private interface PlaneMaker {
-
-		Object makePlane(int w, int h);
-	}
-
-	/** Makes planes of bytes given width & height. */
-	private class BytePlaneMaker implements PlaneMaker {
-
-		public BytePlaneMaker() {
-			// nothing to do
-		}
-
-		@Override
-		public Object makePlane(final int w, final int h) {
-			return new byte[w * h];
-		}
-	}
-
-	/** Makes planes of shorts given width & height. */
-	private class ShortPlaneMaker implements PlaneMaker {
-
-		public ShortPlaneMaker() {
-			// nothing to do
-		}
-
-		@Override
-		public Object makePlane(final int w, final int h) {
-			return new short[w * h];
-		}
-	}
-
-	/** Makes planes of floats given width & height. */
-	private class FloatPlaneMaker implements PlaneMaker {
-
-		public FloatPlaneMaker() {
-			// nothing to do
-		}
-
-		@Override
-		public Object makePlane(final int w, final int h) {
-			return new float[w * h];
-		}
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
