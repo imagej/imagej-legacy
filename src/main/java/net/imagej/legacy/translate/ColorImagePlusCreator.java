@@ -67,7 +67,6 @@ public class ColorImagePlusCreator extends AbstractImagePlusCreator
 
 	// -- instance variables --
 
-	private final ColorPixelHarmonizer pixelHarmonizer;
 	private final MetadataHarmonizer metadataHarmonizer;
 	private final PositionHarmonizer positionHarmonizer;
 	private final NameHarmonizer nameHarmonizer;
@@ -80,7 +79,6 @@ public class ColorImagePlusCreator extends AbstractImagePlusCreator
 
 	public ColorImagePlusCreator(final Context context) {
 		setContext(context);
-		pixelHarmonizer = new ColorPixelHarmonizer();
 		metadataHarmonizer = new MetadataHarmonizer();
 		positionHarmonizer = new PositionHarmonizer();
 		nameHarmonizer = new NameHarmonizer();
@@ -105,15 +103,7 @@ public class ColorImagePlusCreator extends AbstractImagePlusCreator
 
 	public ImagePlus createLegacyImage(Dataset ds, ImageDisplay display) {
 		if (ds == null) return null;
-		Img<?> img = ds.getImgPlus().getImg();
-		final ImagePlus imp;
-		if (AbstractCellImg.class.isAssignableFrom(img.getClass())) {
-			imp = cellImgCase(ds);
-		}
-		else {
-			imp = makeColorImagePlus(ds);
-			pixelHarmonizer.updateLegacyImage(ds, imp);
-		}
+		final ImagePlus imp = cellImgCase(ds);
 		metadataHarmonizer.updateLegacyImage(ds, imp);
 
 		populateCalibrationData(imp, ds);
@@ -128,58 +118,11 @@ public class ColorImagePlusCreator extends AbstractImagePlusCreator
 	}
 	// -- private interface --
 
-	/**
-	 * Makes a color {@link ImagePlus} from a color {@link Dataset}. The ImagePlus
-	 * will have the same X, Y, Z, & T dimensions. C will be 1. The data values
-	 * and metadata are not assigned. Throws an exception if the dataset is not
-	 * color compatible.
-	 */
-	private ImagePlus makeColorImagePlus(final Dataset ds) {
-		if (!LegacyUtils.isColorCompatible(ds)) {
-			throw new IllegalArgumentException("Dataset is not color compatible");
-		}
-
-		final int[] dimIndices = new int[5];
-		final int[] dimValues = new int[5];
-		LegacyUtils.getImagePlusDims(ds, dimIndices, dimValues);
-		final int w = dimValues[0];
-		final int h = dimValues[1];
-		final int c = ds.isRGBMerged() ? dimValues[2] / 3 : dimValues[2];
-		final int z = dimValues[3];
-		final int t = dimValues[4];
-
-		final ImageStack stack = new ImageStack(w, h, c * z * t);
-
-		for (int i = 0; i < c * z * t; i++) {
-			if (ds.isRGBMerged()) {
-				stack.setPixels(new int[w * h], i + 1);
-			}
-			else {
-				final RealType<?> type = ds.getImgPlus().firstElement();
-				switch (type.getBitsPerPixel()) {
-					case 8: stack.setPixels(new byte[w * h], i + 1); break;
-					case 16: stack.setPixels(new short[w * h], i + 1); break;
-					case 32:
-						if (type instanceof GenericIntType) stack.setPixels(new int[w * h],
-							i + 1);
-						else if (type instanceof FloatType) stack.setPixels(
-							new float[w * h], i + 1);
-						break;
-					case 64:
-						if (type instanceof LongType) stack.setPixels(new long[w * h],
-							i + 1);
-						else if (type instanceof DoubleType) stack.setPixels(
-							new double[w * h], i + 1);
-						break;
-				}
-			}
-		}
-
-		return makeImagePlus(ds, c, z, t, stack);
-	}
-
 	private ImagePlus cellImgCase(Dataset ds) {
-		return makeImagePlus(ds, new MergedRgbVirtualStack(ds));
+		if(ds.isRGBMerged())
+			return makeImagePlus(ds, new MergedRgbVirtualStack(ds));
+		else
+			return makeImagePlus( ds, new GrayImagePlusCreator( context() ).createVirtualStack( ds ) );
 	}
 
 }

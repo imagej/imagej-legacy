@@ -159,7 +159,7 @@ public class GrayImagePlusCreator extends AbstractImagePlusCreator {
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	private ImageStack createVirtualStack(final Dataset ds) {
+	ImageStack createVirtualStack(final Dataset ds) {
 		return createVirtualStack((ImgPlus) ds.getImgPlus(), ds.isSigned());
 	}
 
