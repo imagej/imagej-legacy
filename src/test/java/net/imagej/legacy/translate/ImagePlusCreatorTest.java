@@ -98,7 +98,7 @@ public class ImagePlusCreatorTest
 
 	@Test
 	public void testColor() {
-		Img< UnsignedByteType > image = ArrayImgs.unsignedBytes(new byte[]{ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 }, 2, 2, 3);
+		Img< UnsignedByteType > image = ArrayImgs.unsignedBytes( byteRange(1, 12), 2, 2, 3);
 		AxisType[] axes = { Axes.X, Axes.Y, Axes.CHANNEL };
 		ImgPlus< UnsignedByteType > imgPlus = new ImgPlus<>( image, "image", axes );
 		ColorImagePlusCreator creator = new ColorImagePlusCreator( context );
@@ -107,11 +107,54 @@ public class ImagePlusCreatorTest
 		ImagePlus imagePlus = creator.createLegacyImage( ds );
 		ImageProcessor processor = imagePlus.getProcessor();
 		assertTrue( processor instanceof ColorProcessor );
-		IntStream.of((int[]) processor.getPixels()).mapToObj( Integer::toHexString ).forEach( System.out::println );
 		assertEquals( 0xff010509, processor.getPixel(0,0) );
 		assertEquals( 0xff02060a, processor.getPixel(1,0) );
 		assertEquals( 0xff03070b, processor.getPixel(0,1) );
 		assertEquals( 0xff04080c, processor.getPixel(1,1) );
+	}
+
+	@Test
+	public void testColor2() {
+		Img< UnsignedByteType > image = ArrayImgs.unsignedBytes( byteRange(1, 12), 2, 1, 3, 2);
+		AxisType[] axes = { Axes.X, Axes.Y, Axes.CHANNEL, Axes.Z };
+		ImgPlus< UnsignedByteType > imgPlus = new ImgPlus<>( image, "image", axes );
+		ColorImagePlusCreator creator = new ColorImagePlusCreator( context );
+		Dataset ds = datasetService.create( imgPlus );
+		ds.setRGBMerged( true );
+		ImagePlus imagePlus = creator.createLegacyImage( ds );
+		ImageProcessor processor = imagePlus.getStack().getProcessor( 1 );
+		assertTrue( processor instanceof ColorProcessor );
+		assertEquals( 0xff010305, processor.getPixel(0,0) );
+		assertEquals( 0xff020406, processor.getPixel(1,0) );
+		processor = imagePlus.getStack().getProcessor( 2 );
+		assertEquals( 0xff07090b, processor.getPixel(0,0) );
+		assertEquals( 0xff080a0c, processor.getPixel(1,0) );
+	}
+
+	@Test
+	public void testColor3() {
+		Img< UnsignedByteType > image = ArrayImgs.unsignedBytes( byteRange(1, 12), 2, 1, 2, 3);
+		AxisType[] axes = { Axes.X, Axes.Y, Axes.Z, Axes.CHANNEL };
+		ImgPlus< UnsignedByteType > imgPlus = new ImgPlus<>( image, "image", axes );
+		ColorImagePlusCreator creator = new ColorImagePlusCreator( context );
+		Dataset ds = datasetService.create( imgPlus );
+		ds.setRGBMerged( true );
+		ImagePlus imagePlus = creator.createLegacyImage( ds );
+		ImageProcessor processor = imagePlus.getStack().getProcessor( 1 );
+		assertTrue( processor instanceof ColorProcessor );
+		assertEquals( 0xff010509, processor.getPixel(0,0) );
+		assertEquals( 0xff02060a, processor.getPixel(1,0) );
+		processor = imagePlus.getStack().getProcessor( 2 );
+		assertEquals( 0xff03070b, processor.getPixel(0,0) );
+		assertEquals( 0xff04080c, processor.getPixel(1,0) );
+	}
+
+	private byte[] byteRange( int from, int to )
+	{
+		byte[] result = new byte[ to - from + 1 ];
+		for ( int i = 0; i < result.length; i++ )
+			result[i] = ( byte ) (from + i);
+		return result;
 	}
 
 	@Test
