@@ -33,7 +33,6 @@ package net.imagej.legacy;
 
 import java.net.URL;
 
-import net.imagej.legacy.translate.ImagePlusCreator;
 import net.imagej.patcher.LegacyInjector;
 
 import org.junit.Test;
@@ -109,11 +108,9 @@ public class ImageJ1EncapsulationTest {
 					className.startsWith(net.imagej.legacy.plugin.LegacyInitializer.class.getName()) ||
 					className.startsWith(net.imagej.legacy.plugin.ResultsTablePreprocessor.class.getName()) ||
 					className.startsWith(net.imagej.legacy.plugin.RoiManagerPreprocessor.class.getName()) ||
-					className.startsWith(net.imagej.legacy.translate.ColorPixelHarmonizer.class.getName()) ||
 					className.startsWith(net.imagej.legacy.translate.ColorTableHarmonizer.class.getName()) ||
 					className.startsWith(net.imagej.legacy.translate.CompositeHarmonizer.class.getName()) ||
 					className.startsWith(net.imagej.legacy.translate.DisplayCreator.class.getName()) ||
-					className.startsWith(net.imagej.legacy.translate.GrayPixelHarmonizer.class.getName()) ||
 					className.startsWith(net.imagej.legacy.translate.Harmonizer.class.getName()) ||
 					className.startsWith(net.imagej.legacy.translate.ImagePlusCreator.class.getName()) ||
 					className.startsWith(net.imagej.legacy.translate.ImagePlusCreatorUtils.class.getName()) ||
@@ -122,7 +119,6 @@ public class ImageJ1EncapsulationTest {
 					className.startsWith(net.imagej.legacy.translate.MetadataHarmonizer.class.getName()) ||
 					className.startsWith(net.imagej.legacy.translate.NameHarmonizer.class.getName()) ||
 					className.startsWith(net.imagej.legacy.translate.OverlayHarmonizer.class.getName()) ||
-					className.startsWith(net.imagej.legacy.translate.PlaneHarmonizer.class.getName()) ||
 					className.startsWith(net.imagej.legacy.translate.PositionHarmonizer.class.getName()) ||
 					className.startsWith(net.imagej.legacy.translate.ResultsTableHarmonizer.class.getName()))
 			{
