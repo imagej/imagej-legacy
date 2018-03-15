@@ -32,21 +32,25 @@
 package net.imagej.legacy.translate;
 
 import ij.ImagePlus;
-import ij.ImageStack;
 
 import net.imagej.Dataset;
+import net.imagej.axis.Axes;
 import net.imagej.display.ImageDisplay;
 import net.imagej.display.ImageDisplayService;
-import net.imglib2.img.Img;
-import net.imglib2.img.cell.AbstractCellImg;
+import net.imglib2.RandomAccessibleInterval;
+import net.imglib2.img.display.imagej.ImageJVirtualStackARGB;
+import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.type.numeric.RealType;
-import net.imglib2.type.numeric.integer.GenericIntType;
-import net.imglib2.type.numeric.integer.LongType;
-import net.imglib2.type.numeric.real.DoubleType;
-import net.imglib2.type.numeric.real.FloatType;
 
+import net.imglib2.view.Views;
+import net.imglib2.view.composite.Composite;
+import net.imglib2.view.composite.CompositeIntervalView;
+import net.imglib2.view.composite.GenericComposite;
 import org.scijava.Context;
 import org.scijava.plugin.Parameter;
+
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 // TODO: virtual stack support is minorly problematic. Imglib has vstack impls
 // but they use 1-pixel to 1-pixel converters. However in IJ2 in this case we
@@ -120,9 +124,31 @@ public class ColorImagePlusCreator extends AbstractImagePlusCreator
 
 	private ImagePlus cellImgCase(Dataset ds) {
 		if(ds.isRGBMerged())
-			return makeImagePlus(ds, new MergedRgbVirtualStack(ds));
+			return makeImagePlus(ds, new ImageJVirtualStackARGB<>( collapseColorAxis( ds ), this::convertToColor ));
 		else
 			return makeImagePlus( ds, new GrayImagePlusCreator( context() ).createVirtualStack( ds ) );
+	}
+
+	private CompositeIntervalView< RealType< ? >, ? extends GenericComposite< RealType< ? > > > collapseColorAxis( Dataset ds )
+	{
+		return Views.collapse( makeChannelLastDimension( ds ) );
+	}
+
+	private RandomAccessibleInterval< RealType< ? > > makeChannelLastDimension( Dataset ds )
+	{
+		int channel = ds.dimensionIndex( Axes.CHANNEL );
+		return ( channel == ds.numDimensions() - 1 ) ? ds :
+				Views.stack( IntStream.of(0,1,2).mapToObj( i -> Views.hyperSlice( ds, channel, i ) ).collect( Collectors.toList() ) );
+	}
+
+	private void convertToColor( Composite<RealType<?>> in, ARGBType out )
+	{
+		out.set( ARGBType.rgba( toByte( in.get( 0 ) ), toByte( in.get( 1 ) ), toByte( in.get( 2 ) ), 255) );
+	}
+
+	private int toByte( RealType<?> realType )
+	{
+		return (int) realType.getRealFloat();
 	}
 
 }
