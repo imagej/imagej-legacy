@@ -33,6 +33,7 @@ package net.imagej.legacy.translate;
 
 import ij.ImagePlus;
 
+import ij.ImageStack;
 import net.imagej.Dataset;
 import net.imagej.axis.Axes;
 import net.imagej.display.ImageDisplay;
@@ -47,6 +48,7 @@ import net.imglib2.view.composite.Composite;
 import net.imglib2.view.composite.CompositeIntervalView;
 import net.imglib2.view.composite.GenericComposite;
 import org.scijava.Context;
+import org.scijava.log.LogService;
 import org.scijava.plugin.Parameter;
 
 import java.util.stream.Collectors;
@@ -66,29 +68,29 @@ import java.util.stream.IntStream;
  * 
  * @author Barry DeZonia
  */
-public class ColorImagePlusCreator extends AbstractImagePlusCreator
-{
+public class ColorImagePlusCreator extends AbstractImagePlusCreator {
 
 	// -- instance variables --
 
+	private final ColorTableHarmonizer colorTableHarmonizer;
 	private final MetadataHarmonizer metadataHarmonizer;
 	private final PositionHarmonizer positionHarmonizer;
 	private final NameHarmonizer nameHarmonizer;
-	private final ColorTableHarmonizer colorTableHarmonizer;
 
 	@Parameter
 	private ImageDisplayService imageDisplayService;
+
+	@Parameter
+	private LogService log;
 
 	// -- public interface --
 
 	public ColorImagePlusCreator(final Context context) {
 		setContext(context);
+		colorTableHarmonizer = new ColorTableHarmonizer(imageDisplayService);
 		metadataHarmonizer = new MetadataHarmonizer();
 		positionHarmonizer = new PositionHarmonizer();
 		nameHarmonizer = new NameHarmonizer();
-		colorTableHarmonizer =
-			new ColorTableHarmonizer(context.getService(ImageDisplayService.class));
-
 	}
 	
 	/**
@@ -105,28 +107,32 @@ public class ColorImagePlusCreator extends AbstractImagePlusCreator
 		return createLegacyImage(ds, null);
 	}
 
-	public ImagePlus createLegacyImage(Dataset ds, ImageDisplay display) {
-		if (ds == null) return null;
-		final ImagePlus imp = cellImgCase(ds);
-		metadataHarmonizer.updateLegacyImage(ds, imp);
+	public ImagePlus createLegacyImage(final Dataset dataset,
+		final ImageDisplay display)
+	{
+		if (dataset == null) return null;
+		final ImagePlus imp = makeImagePlus( dataset, createVirtualStack( dataset ) );
+		metadataHarmonizer.updateLegacyImage(dataset, imp);
 
-		populateCalibrationData(imp, ds);
+		populateCalibrationData(imp, dataset);
 
 		if (display != null) {
+			colorTableHarmonizer.updateLegacyImage(display, imp);
 			positionHarmonizer.updateLegacyImage(display, imp);
 			nameHarmonizer.updateLegacyImage(display, imp);
-			colorTableHarmonizer.updateLegacyImage(display, imp);
 		}
 
 		return imp;
 	}
+
 	// -- private interface --
 
-	private ImagePlus cellImgCase(Dataset ds) {
+	private ImageStack createVirtualStack( Dataset ds )
+	{
 		if(ds.isRGBMerged())
-			return makeImagePlus(ds, new ImageJVirtualStackARGB<>( collapseColorAxis( ds ), this::convertToColor ));
+			return new ImageJVirtualStackARGB<>( collapseColorAxis( ds ), this::convertToColor );
 		else
-			return makeImagePlus( ds, new GrayImagePlusCreator( context() ).createVirtualStack( ds ) );
+			return new GrayImagePlusCreator( context() ).createVirtualStack( ds );
 	}
 
 	private CompositeIntervalView< RealType< ? >, ? extends GenericComposite< RealType< ? > > > collapseColorAxis( Dataset ds )
