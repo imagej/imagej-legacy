@@ -50,16 +50,12 @@ import net.imagej.display.ImageDisplay;
 import net.imagej.display.ImageDisplayService;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.converter.Converter;
-import net.imglib2.img.Img;
-import net.imglib2.img.basictypeaccess.PlanarAccess;
-import net.imglib2.img.cell.AbstractCellImg;
 import net.imglib2.img.display.imagej.ImageJVirtualStack;
 import net.imglib2.img.display.imagej.ImageJVirtualStackFloat;
 import net.imglib2.img.display.imagej.ImageJVirtualStackUnsignedByte;
 import net.imglib2.img.display.imagej.ImageJVirtualStackUnsignedShort;
 import net.imglib2.transform.integer.MixedTransform;
 import net.imglib2.type.numeric.RealType;
-import net.imglib2.type.numeric.integer.ShortType;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
 import net.imglib2.type.numeric.real.FloatType;
@@ -113,9 +109,7 @@ public class GrayImagePlusCreator extends AbstractImagePlusCreator {
 		final ImageDisplay display)
 	{
 		if (dataset == null) return null;
-		final Img<?> img = dataset.getImgPlus().getImg();
-		ImagePlus imp;
-			imp = makeImagePlus(dataset, createVirtualStack(dataset));
+		ImagePlus imp = makeImagePlus(dataset, createVirtualStack(dataset));
 		metadataHarmonizer.updateLegacyImage(dataset, imp);
 
 		populateCalibrationData(imp, dataset);
