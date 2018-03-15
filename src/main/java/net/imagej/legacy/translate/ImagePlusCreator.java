@@ -38,6 +38,8 @@ import ij.measure.Calibration;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import net.imagej.Dataset;
 import net.imagej.ImgPlus;
@@ -51,10 +53,12 @@ import net.imagej.display.ImageDisplayService;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.converter.Converter;
 import net.imglib2.img.display.imagej.ImageJVirtualStack;
+import net.imglib2.img.display.imagej.ImageJVirtualStackARGB;
 import net.imglib2.img.display.imagej.ImageJVirtualStackFloat;
 import net.imglib2.img.display.imagej.ImageJVirtualStackUnsignedByte;
 import net.imglib2.img.display.imagej.ImageJVirtualStackUnsignedShort;
 import net.imglib2.transform.integer.MixedTransform;
+import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
@@ -62,16 +66,20 @@ import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.view.MixedTransformView;
 import net.imglib2.view.Views;
 
+import net.imglib2.view.composite.Composite;
+import net.imglib2.view.composite.CompositeIntervalView;
+import net.imglib2.view.composite.GenericComposite;
 import org.scijava.Context;
 import org.scijava.log.LogService;
 import org.scijava.plugin.Parameter;
 
 /**
- * Creates {@link ImagePlus}es from {@link ImageDisplay}s containing gray data.
+ * Creates {@link ImagePlus}es from {@link ImageDisplay}.
  * 
  * @author Barry DeZonia
+ * @author Matthias Arzt
  */
-public class GrayImagePlusCreator extends AbstractImagePlusCreator {
+public class ImagePlusCreator extends AbstractImagePlusCreator {
 
 	// -- instance variables --
 
@@ -88,7 +96,7 @@ public class GrayImagePlusCreator extends AbstractImagePlusCreator {
 
 	// -- public interface --
 
-	public GrayImagePlusCreator(final Context context) {
+	public ImagePlusCreator(final Context context) {
 		setContext(context);
 		colorTableHarmonizer = new ColorTableHarmonizer(imageDisplayService);
 		metadataHarmonizer = new MetadataHarmonizer();
@@ -153,8 +161,11 @@ public class GrayImagePlusCreator extends AbstractImagePlusCreator {
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	ImageStack createVirtualStack(final Dataset ds) {
-		return createVirtualStack((ImgPlus) ds.getImgPlus(), ds.isSigned());
+	private ImageStack createVirtualStack(final Dataset ds) {
+		if(ds.isRGBMerged())
+			return new ImageJVirtualStackARGB<>( collapseColorAxis( ds ), this::convertToColor );
+		else
+			return createVirtualStack((ImgPlus) ds.getImgPlus(), ds.isSigned());
 	}
 
 	private <T extends RealType<T>> ImageStack createVirtualStack(
@@ -269,6 +280,28 @@ public class GrayImagePlusCreator extends AbstractImagePlusCreator {
 			output.setReal(val);
 		}
 
+	}
+
+	private CompositeIntervalView< RealType< ? >, ? extends GenericComposite< RealType< ? > > > collapseColorAxis( Dataset ds )
+	{
+		return Views.collapse( makeChannelLastDimension( ds ) );
+	}
+
+	private RandomAccessibleInterval< RealType< ? > > makeChannelLastDimension( Dataset ds )
+	{
+		int channel = ds.dimensionIndex( Axes.CHANNEL );
+		return ( channel == ds.numDimensions() - 1 ) ? ds :
+				Views.stack( IntStream.of(0,1,2).mapToObj( i -> Views.hyperSlice( ds, channel, i ) ).collect( Collectors.toList() ) );
+	}
+
+	private void convertToColor( Composite<RealType<?>> in, ARGBType out )
+	{
+		out.set( ARGBType.rgba( toByte( in.get( 0 ) ), toByte( in.get( 1 ) ), toByte( in.get( 2 ) ), 255) );
+	}
+
+	private int toByte( RealType<?> realType )
+	{
+		return (int) realType.getRealFloat();
 	}
 
 }
