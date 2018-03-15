@@ -36,12 +36,10 @@ import ij.ImagePlus;
 import net.imagej.Dataset;
 import net.imagej.axis.AxisType;
 import net.imagej.display.ImageDisplay;
-import net.imagej.display.ImageDisplayService;
 import net.imagej.legacy.LegacyService;
 
 import org.scijava.AbstractContextual;
 import org.scijava.Context;
-import org.scijava.plugin.Parameter;
 
 /**
  * Combines {@link DisplayCreator} and {@link ImagePlusCreator}.
@@ -53,19 +51,12 @@ public class ImageTranslator extends AbstractContextual
 {
 
 	private final DisplayCreator displayCreator;
-	private final ImagePlusCreator grayImagePlusCreator;
-
-	private final LegacyService legacyService;
-
-	@Parameter
-	private ImageDisplayService imageDisplayService;
+	private final ImagePlusCreator imagePlusCreator;
 
 	public ImageTranslator(final LegacyService legacyService) {
 		final Context context = legacyService.getContext();
-		context.inject(this);
-		this.legacyService = legacyService;
 		displayCreator = new DisplayCreator(context);
-		grayImagePlusCreator = new ImagePlusCreator(context);
+		imagePlusCreator = new ImagePlusCreator(context);
 	}
 
 	/**
@@ -81,18 +72,16 @@ public class ImageTranslator extends AbstractContextual
 	 * data when possible.
 	 */
 	public ImagePlus createLegacyImage(final ImageDisplay display) {
-		final Dataset ds = imageDisplayService.getActiveDataset(display);
-		return createLegacyImage(ds, display);
+		return imagePlusCreator.createLegacyImage(display);
 	}
 
 	public ImagePlus createLegacyImage(final Dataset ds) {
-		return createLegacyImage(ds, null);
+		return imagePlusCreator.createLegacyImage(ds);
 	}
 
 	public ImagePlus createLegacyImage(final Dataset ds,
 		final ImageDisplay display)
 	{
-		return grayImagePlusCreator.createLegacyImage(ds, display);
+		return imagePlusCreator.createLegacyImage(ds, display);
 	}
-
 }
