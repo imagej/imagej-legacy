@@ -71,17 +71,22 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.scijava.Context;
 
+/**
+ * Tests {@link ImagePlusCreator}
+ *
+ * @author Matthias Arzt
+ */
 public class ImagePlusCreatorTest
 {
 
 	private Context context;
-	private GrayImagePlusCreator creator;
+	private ImagePlusCreator creator;
 	private DatasetService datasetService;
 
 	@Before
 	public void setUp() {
 		context = new Context();
-		creator = new GrayImagePlusCreator( context );
+		creator = new ImagePlusCreator( context );
 		datasetService = context.service( DatasetService.class );
 	}
 
@@ -149,7 +154,7 @@ public class ImagePlusCreatorTest
 		Img< UnsignedByteType > image = ArrayImgs.unsignedBytes( byteRange(1, 12), 2, 2, 3);
 		AxisType[] axes = { Axes.X, Axes.Y, Axes.CHANNEL };
 		ImgPlus< UnsignedByteType > imgPlus = new ImgPlus<>( image, "image", axes );
-		ColorImagePlusCreator creator = new ColorImagePlusCreator( context );
+		ImagePlusCreator creator = new ImagePlusCreator( context );
 		Dataset ds = datasetService.create( imgPlus );
 		ds.setRGBMerged( true );
 		ImagePlus imagePlus = creator.createLegacyImage( ds );
@@ -166,7 +171,7 @@ public class ImagePlusCreatorTest
 		Img< UnsignedByteType > image = ArrayImgs.unsignedBytes( byteRange(1, 12), 2, 1, 3, 2);
 		AxisType[] axes = { Axes.X, Axes.Y, Axes.CHANNEL, Axes.Z };
 		ImgPlus< UnsignedByteType > imgPlus = new ImgPlus<>( image, "image", axes );
-		ColorImagePlusCreator creator = new ColorImagePlusCreator( context );
+		ImagePlusCreator creator = new ImagePlusCreator( context );
 		Dataset ds = datasetService.create( imgPlus );
 		ds.setRGBMerged( true );
 		ImagePlus imagePlus = creator.createLegacyImage( ds );
@@ -184,7 +189,7 @@ public class ImagePlusCreatorTest
 		Img< UnsignedByteType > image = ArrayImgs.unsignedBytes( byteRange(1, 12), 2, 1, 2, 3);
 		AxisType[] axes = { Axes.X, Axes.Y, Axes.Z, Axes.CHANNEL };
 		ImgPlus< UnsignedByteType > imgPlus = new ImgPlus<>( image, "image", axes );
-		ColorImagePlusCreator creator = new ColorImagePlusCreator( context );
+		ImagePlusCreator creator = new ImagePlusCreator( context );
 		Dataset ds = datasetService.create( imgPlus );
 		ds.setRGBMerged( true );
 		ImagePlus imagePlus = creator.createLegacyImage( ds );
@@ -214,7 +219,7 @@ public class ImagePlusCreatorTest
 		imgPlus.setCompositeChannelCount( 7 );
 		Dataset ds = datasetService.create( imgPlus );
 		assertTrue( LegacyUtils.isColorCompatible( ds ) );
-		ColorImagePlusCreator creator = new ColorImagePlusCreator( context );
+		ImagePlusCreator creator = new ImagePlusCreator( context );
 		ImagePlus imagePlus = creator.createLegacyImage( ds );
 		assertTrue( imagePlus instanceof CompositeImage );
 		ImageProcessor processor = imagePlus.getProcessor();
@@ -231,7 +236,7 @@ public class ImagePlusCreatorTest
 		imgPlus.setCompositeChannelCount( 7 );
 		Dataset ds = datasetService.create( imgPlus );
 		assertTrue( LegacyUtils.isColorCompatible( ds ) );
-		ColorImagePlusCreator creator = new ColorImagePlusCreator( context );
+		ImagePlusCreator creator = new ImagePlusCreator( context );
 		ImagePlus imagePlus = creator.createLegacyImage( ds );
 		assertTrue( imagePlus instanceof CompositeImage );
 	}

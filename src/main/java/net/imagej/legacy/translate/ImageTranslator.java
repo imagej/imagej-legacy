@@ -55,8 +55,7 @@ public class ImageTranslator extends AbstractContextual
 {
 
 	private final DisplayCreator displayCreator;
-	private final ColorImagePlusCreator colorImagePlusCreator;
-	private final GrayImagePlusCreator grayImagePlusCreator;
+	private final ImagePlusCreator grayImagePlusCreator;
 
 	private final LegacyService legacyService;
 
@@ -68,8 +67,7 @@ public class ImageTranslator extends AbstractContextual
 		context.inject(this);
 		this.legacyService = legacyService;
 		displayCreator = new DisplayCreator(context);
-		colorImagePlusCreator = new ColorImagePlusCreator(context);
-		grayImagePlusCreator = new GrayImagePlusCreator(context);
+		grayImagePlusCreator = new ImagePlusCreator(context);
 	}
 
 	/**
@@ -96,16 +94,7 @@ public class ImageTranslator extends AbstractContextual
 	public ImagePlus createLegacyImage(final Dataset ds,
 		final ImageDisplay display)
 	{
-		ImagePlus imp = null;
-		if (LegacyUtils.isColorCompatible(ds))
-		{
-			imp = colorImagePlusCreator.createLegacyImage(ds, display);
-		}
-		else {
-			imp = grayImagePlusCreator.createLegacyImage(ds, display);
-		}
-
-		return imp;
+		return grayImagePlusCreator.createLegacyImage(ds, display);
 	}
 
 }
