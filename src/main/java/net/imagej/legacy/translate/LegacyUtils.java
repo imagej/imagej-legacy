@@ -40,8 +40,6 @@ import net.imagej.ImgPlus;
 import net.imagej.axis.Axes;
 import net.imagej.axis.Axis;
 import net.imagej.axis.AxisType;
-import net.imglib2.img.basictypeaccess.PlanarAccess;
-import net.imglib2.type.numeric.RealType;
 import net.imglib2.util.Intervals;
 
 /**
@@ -70,23 +68,6 @@ public class LegacyUtils {
 		final ImagePlus currImagePlus = WindowManager.getCurrentImage();
 		if (imp == currImagePlus) WindowManager.setTempCurrentImage(null);
 		Interpreter.removeBatchModeImage(imp);
-	}
-
-	/**
-	 * Returns true if any of the given Axes cannot be represented in an legacy
-	 * ImageJ ImagePlus.
-	 */
-	static boolean hasNonIJ1Axes(Dataset ds) {
-		for (int i = 0; i < ds.numDimensions(); i++) {
-			AxisType axisType = ds.axis(i).type();
-			if (axisType == Axes.X) continue;
-			if (axisType == Axes.Y) continue;
-			if (axisType == Axes.CHANNEL) continue;
-			if (axisType == Axes.Z) continue;
-			if (axisType == Axes.TIME) continue;
-			return true;
-		}
-		return false;
 	}
 
 	/**
@@ -178,74 +159,6 @@ public class LegacyUtils {
 	}
 
 	/**
-	 * Copies a {@link Dataset}'s dimensions and axis indices into provided
-	 * arrays. The order of dimensions is formatted to be X,Y,C,Z,T. If an axis is
-	 * not present in the Dataset its value is set to 1 and its index is set to
-	 * -1. Combines all non XYZT axis dimensions into multiple C dimensions.
-	 */
-	static void getImagePlusDims(final Dataset dataset,
-		final int[] outputIndices, final int[] outputDims)
-	{
-		// get axis indices
-		final int xIndex = dataset.dimensionIndex(Axes.X);
-		final int yIndex = dataset.dimensionIndex(Axes.Y);
-		final int cIndex = dataset.dimensionIndex(Axes.CHANNEL);
-		final int zIndex = dataset.dimensionIndex(Axes.Z);
-		final int tIndex = dataset.dimensionIndex(Axes.TIME);
-
-		final long xCount = xIndex < 0 ? 1 : dataset.dimension(xIndex);
-		final long yCount = yIndex < 0 ? 1 : dataset.dimension(yIndex);
-		final long zCount = zIndex < 0 ? 1 : dataset.dimension(zIndex);
-		final long tCount = ij1PlaneCount(dataset.getImgPlus(), Axes.TIME);
-		final long cCount = cIndex < 0 ? 1 : dataset.dimension(cIndex);
-
-		// NB - cIndex tells what dimension is channel in Dataset. For a
-		// Dataset that encodes other axes as channels this info is not so
-		// useful. But for Datasets that can be represented exactly it is.
-		// So pass along info but API consumers must be careful to not make
-		// assumptions.
-
-		// set output values : indices
-		outputIndices[0] = xIndex;
-		outputIndices[1] = yIndex;
-		outputIndices[2] = cIndex;
-		outputIndices[3] = zIndex;
-		outputIndices[4] = tIndex;
-
-		// set output values : dimensions
-		outputDims[0] = (int) xCount;
-		outputDims[1] = (int) yCount;
-		outputDims[2] = (int) cCount;
-		outputDims[3] = (int) zCount;
-		outputDims[4] = (int) tCount;
-	}
-
-	/**
-	 * Throws an Exception if the planes of a Dataset are not compatible with
-	 * legacy ImageJ.
-	 */
-	static void assertXYPlanesCorrectlyOriented(final int[] dimIndices) {
-		if (dimIndices[0] != 0) {
-			throw new IllegalArgumentException(
-				"Dataset does not have X as the first axis");
-		}
-		if (dimIndices[1] != 1) {
-			throw new IllegalArgumentException(
-				"Dataset does not have Y as the second axis");
-		}
-	}
-
-	/**
-	 * Returns true if a {@link Dataset} can be represented by reference in legacy
-	 * ImageJ.
-	 */
-	static boolean datasetIsIJ1Compatible(final Dataset ds) {
-		if (ds == null) return true;
-		if (LegacyUtils.hasNonIJ1Axes(ds)) return false;
-		return ij1StorageCompatible(ds) && ij1TypeCompatible(ds);
-	}
-
-	/**
 	 * Fills legacy ImageJ incompatible indices of a position array. The channel
 	 * from legacy ImageJ is rasterized into potentially multiple indices in the
 	 * modern ImageJ image's position array. For instance a modern image with
@@ -292,69 +205,4 @@ public class LegacyUtils {
 		}
 		return ij1Pos;
 	}
-	
-	// -- private helper methods --
-
-	/** Returns true if a {@link Dataset} is backed by {@link PlanarAccess}. */
-	private static boolean ij1StorageCompatible(final Dataset ds) {
-		return ds.getImgPlus().getImg() instanceof PlanarAccess<?>;
-	}
-
-	/**
-	 * Returns true if a {@link Dataset} has a type that can be directly
-	 * represented in an legacy ImageJ ImagePlus.
-	 */
-	private static boolean ij1TypeCompatible(final Dataset ds) {
-		final RealType<?> type = ds.getType();
-		final int bitsPerPix = type.getBitsPerPixel();
-		final boolean integer = ds.isInteger();
-		final boolean signed = ds.isSigned();
-
-		Object plane;
-		if ((bitsPerPix == 8) && !signed && integer) {
-			plane = ds.getPlane(0, false);
-			if (plane != null && plane instanceof byte[]) return true;
-		}
-		else if ((bitsPerPix == 16) && !signed && integer) {
-			plane = ds.getPlane(0, false);
-			if (plane != null && plane instanceof short[]) return true;
-		}
-		else if ((bitsPerPix == 32) && signed && !integer) {
-			plane = ds.getPlane(0, false);
-			if (plane != null && plane instanceof float[]) return true;
-		}
-		return false;
-	}
-
-	/* OLD AND TOO SLOW FOR LARGE VIRTUAL IMAGES
-	 * 
-	 * Determines whether an ImagePlus is an legacy ImageJ binary image (i.e. it
-	 * is unsigned 8 bit data with only values 0 & 255 present)
-	public static boolean isBinary(final ImagePlus imp) {
-		final int numSlices = imp.getStackSize();
-		// don't let degenerate images report themselves as binary
-		if (numSlices == 0) return false;
-		if (numSlices == 1) {
-			final ImageProcessor ip = imp.getProcessor();
-			if (ip == null) return false; // null possible : treat as numeric data
-			return ip.isBinary();
-		}
-		final int slice = imp.getCurrentSlice();
-		final ImageStack stack = imp.getStack();
-		// stack cannot be null here as numSlices > 1
-		//   and in such cases you always get a non-null processor
-		for (int i = 1; i <= numSlices; i++) {
-			final ImageProcessor ip = stack.getProcessor(i);
-			if (!ip.isBinary()) {
-				// fix virtual stack problems
-				stack.getProcessor(slice);
-				return false;
-			}
-		}
-		// fix virtual stack problems
-		stack.getProcessor(slice);
-		return true;
-	}
-	 */
-
 }
