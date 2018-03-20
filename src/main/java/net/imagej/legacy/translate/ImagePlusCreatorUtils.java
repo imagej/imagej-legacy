@@ -55,21 +55,23 @@ import net.imagej.axis.Axes;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
 
-import org.scijava.AbstractContextual;
-
 /**
- * Abstract superclass for ImagePlusCreator implementations. Provides
- * general utility methods.
- * 
+ * Utility class for {@link ImagePlusCreator}.
+ *
  * @author Mark Hiner
+ * @author Matthias Arzt
  */
-public abstract class AbstractImagePlusCreator extends AbstractContextual
+public class ImagePlusCreatorUtils
 {
+
+	private ImagePlusCreatorUtils() {
+		// prevent from instantiation
+	}
 
 	/**
 	 * Sets the {@link Calibration} data on the provided {@link ImagePlus}.
 	 */
-	protected void populateCalibrationData(final ImagePlus imp, final Dataset ds)
+	public static void populateCalibrationData( final ImagePlus imp, final Dataset ds )
 	{
 		final ImgPlus<? extends RealType<?>> imgPlus = ds.getImgPlus();
 
@@ -97,15 +99,15 @@ public abstract class AbstractImagePlusCreator extends AbstractContextual
 		}
 	}
 
-	protected ImagePlus makeImagePlus(Dataset ds, ImageStack stack) {
+	public static ImagePlus makeImagePlus( Dataset ds, ImageStack stack ) {
 		final int[] dimIndices = new int[5];
 		final int[] dimValues = new int[5];
 		LegacyUtils.getImagePlusDims(ds, dimIndices, dimValues);
 		return makeImagePlus(ds, dimValues[2], dimValues[3], dimValues[4], stack);
 	}
 
-	protected ImagePlus makeImagePlus(final Dataset ds, final int c, final int z,
-		final int t, final ImageStack stack)
+	private static ImagePlus makeImagePlus( final Dataset ds, final int c, final int z,
+			final int t, final ImageStack stack )
 	{
 		ImagePlus imp = new ImagePlus(ds.getName(), stack);
 
@@ -211,7 +213,7 @@ public abstract class AbstractImagePlusCreator extends AbstractContextual
 
 	// TODO remove usage of SCIFIO classes after migrating ImageMetadata
 	// framework to imagej-common
-	private String[] getSliceLabels(final Dataset ds) {
+	private static String[] getSliceLabels(final Dataset ds) {
 		final Map<String, Object> properties = ds.getImgPlus().getProperties();
 		if (properties == null) return null;
 		final Object metadata = properties.get("scifio.metadata.image");
@@ -227,7 +229,7 @@ public abstract class AbstractImagePlusCreator extends AbstractContextual
 
 	// TODO remove usage of SCIFIO classes after migrating ImageMetadata
 	// framework to imagej-common
-	private void fillInfo(final ImagePlus imp,
+	private static void fillInfo(final ImagePlus imp,
 		final ImgPlus<? extends RealType<?>> imgPlus)
 	{
 		if (imgPlus instanceof SCIFIOImgPlus) {
@@ -250,7 +252,7 @@ public abstract class AbstractImagePlusCreator extends AbstractContextual
 
 	// TODO remove usage of SCIFIO classes after migrating ImageMetadata
 	// framework to imagej-common
-	private void fillImageInfo(final ImagePlus imp, final Metadata meta) {
+	private static void fillImageInfo(final ImagePlus imp, final Metadata meta) {
 		addInfo(imp, "--- Dataset Information ---");
 		addInfo(imp, "BitsPerPixel = " + meta.get(0).getBitsPerPixel());
 		addInfo(imp, "PixelType = " + meta.get(0).getPixelType());
@@ -274,7 +276,7 @@ public abstract class AbstractImagePlusCreator extends AbstractContextual
 		}
 	}
 
-	private void addInfo(final ImagePlus imp, String newInfo) {
+	private static void addInfo(final ImagePlus imp, String newInfo) {
 		final String info = (String) imp.getProperty("Info");
 		if (info != null) newInfo = info + newInfo;
 		imp.setProperty("Info", newInfo + "\n");
@@ -282,7 +284,7 @@ public abstract class AbstractImagePlusCreator extends AbstractContextual
 
 	// TODO remove usage of SCIFIO classes after migrating ImageMetadata
 	// framework to imagej-common
-	private void fillInfo(final ImagePlus imp, final MetaTable table) {
+	private static void fillInfo(final ImagePlus imp, final MetaTable table) {
 		String info = (String) imp.getProperty("Info");
 		if (info == null) info = "";
 		List<String> keySet = new ArrayList<>(table.keySet());
