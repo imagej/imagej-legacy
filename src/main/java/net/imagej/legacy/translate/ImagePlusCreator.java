@@ -34,7 +34,6 @@ package net.imagej.legacy.translate;
 import ij.CompositeImage;
 import ij.ImagePlus;
 import ij.ImageStack;
-import ij.measure.Calibration;
 
 import java.util.Arrays;
 import java.util.List;
@@ -69,6 +68,7 @@ import net.imglib2.view.Views;
 import net.imglib2.view.composite.Composite;
 import net.imglib2.view.composite.CompositeIntervalView;
 import net.imglib2.view.composite.GenericComposite;
+import org.scijava.AbstractContextual;
 import org.scijava.Context;
 import org.scijava.log.LogService;
 import org.scijava.plugin.Parameter;
@@ -79,7 +79,8 @@ import org.scijava.plugin.Parameter;
  * @author Barry DeZonia
  * @author Matthias Arzt
  */
-public class ImagePlusCreator extends AbstractImagePlusCreator {
+public class ImagePlusCreator extends AbstractContextual
+{
 
 	// -- instance variables --
 
@@ -117,10 +118,10 @@ public class ImagePlusCreator extends AbstractImagePlusCreator {
 		final ImageDisplay display)
 	{
 		if (dataset == null) return null;
-		ImagePlus imp = makeImagePlus(dataset, createVirtualStack(dataset));
+		ImagePlus imp = ImagePlusCreatorUtils.makeImagePlus(dataset, createVirtualStack(dataset));
 		metadataHarmonizer.updateLegacyImage(dataset, imp);
 
-		populateCalibrationData(imp, dataset);
+		ImagePlusCreatorUtils.populateCalibrationData(imp, dataset);
 
 		if (display != null) {
 			if (shouldBeComposite(display, dataset, imp)) {

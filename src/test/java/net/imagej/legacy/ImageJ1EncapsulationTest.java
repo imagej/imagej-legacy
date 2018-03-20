@@ -109,14 +109,14 @@ public class ImageJ1EncapsulationTest {
 					className.startsWith(net.imagej.legacy.plugin.LegacyInitializer.class.getName()) ||
 					className.startsWith(net.imagej.legacy.plugin.ResultsTablePreprocessor.class.getName()) ||
 					className.startsWith(net.imagej.legacy.plugin.RoiManagerPreprocessor.class.getName()) ||
-					className.startsWith(net.imagej.legacy.translate.AbstractImagePlusCreator.class.getName()) ||
 					className.startsWith(net.imagej.legacy.translate.ColorPixelHarmonizer.class.getName()) ||
 					className.startsWith(net.imagej.legacy.translate.ColorTableHarmonizer.class.getName()) ||
 					className.startsWith(net.imagej.legacy.translate.CompositeHarmonizer.class.getName()) ||
-					className.startsWith(ImagePlusCreator.class.getName()) ||
 					className.startsWith(net.imagej.legacy.translate.DisplayCreator.class.getName()) ||
 					className.startsWith(net.imagej.legacy.translate.GrayPixelHarmonizer.class.getName()) ||
 					className.startsWith(net.imagej.legacy.translate.Harmonizer.class.getName()) ||
+					className.startsWith(net.imagej.legacy.translate.ImagePlusCreator.class.getName()) ||
+					className.startsWith(net.imagej.legacy.translate.ImagePlusCreatorUtils.class.getName()) ||
 					className.startsWith(net.imagej.legacy.translate.ImageTranslator.class.getName()) ||
 					className.startsWith(net.imagej.legacy.translate.LegacyUtils.class.getName()) ||
 					className.startsWith(net.imagej.legacy.translate.MetadataHarmonizer.class.getName()) ||
