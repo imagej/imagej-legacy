@@ -117,11 +117,23 @@ public class ImagePlusCreatorUtils
 			final int t, final ImageStack stack )
 	{
 		ImagePlus imp = new ImagePlus(ds.getName(), stack);
-
 		imp.setDimensions(c, z, t);
+		setMetadata( ds, imp );
+		return optionalMakeComposite( ds, imp );
+	}
 
+	private static void setMetadata( Dataset ds, ImagePlus imp )
+	{
 		imp.setOpenAsHyperStack(imp.getNDimensions() > 3);
+		populateCalibrationData(imp, ds);
+		final FileInfo fileInfo = getFileInfo( ds, imp );
+		imp.setFileInfo(fileInfo);
+		setSliceLabels( imp, fileInfo );
+		fillInfo(imp, ds.getImgPlus());
+	}
 
+	private static FileInfo getFileInfo( Dataset ds, ImagePlus imp )
+	{
 		final FileInfo fileInfo = new FileInfo();
 		final String source = ds.getSource();
 		final File file =
@@ -139,30 +151,12 @@ public class ImagePlusCreatorUtils
 		else {
 			fileInfo.url = source;
 		}
-		fileInfo.width = stack.getWidth();
-		fileInfo.height = stack.getHeight();
-		// fileInfo.offset = 0;
-		// fileInfo.nImages = 1;
-		// fileInfo.gapBetweenImages = 0;
-		// fileInfo.whiteIsZero = false;
-		// fileInfo.intelByteOrder = false;
-		// fileInfo.compression = FileInfo.COMPRESSION_NONE;
-		// fileInfo.stripOffsets = null;
-		// fileInfo.stripLengths = null;
-		// fileInfo.rowsPerStrip = 0;
-		// fileInfo.lutSize = 0;
-		// fileInfo.reds = null;
-		// fileInfo.greens = null;
-		// fileInfo.blues = null;
-		// fileInfo.pixels = null;
+		fileInfo.width = imp.getWidth();
+		fileInfo.height = imp.getHeight();
 		fileInfo.debugInfo = ds.toString();
-		// fileInfo.sliceLabels = null;
-		// fileInfo.info = "";
-		// fileInfo.inputStream = null;
-		if (stack instanceof VirtualStack) {
-			fileInfo.virtualStack = (VirtualStack) stack;
+		if (imp.getStack() instanceof VirtualStack ) {
+			fileInfo.virtualStack = (VirtualStack) imp.getStack();
 		}
-		populateCalibrationData(imp, ds);
 		final Calibration calibration = imp.getCalibration();
 		if (calibration != null) {
 			fileInfo.pixelWidth = calibration.pixelWidth;
@@ -174,19 +168,13 @@ public class ImagePlusCreatorUtils
 			fileInfo.valueUnit = calibration.getValueUnit();
 			fileInfo.frameInterval = calibration.frameInterval;
 		}
-		// fileInfo.description = "";
-		// fileInfo.longOffset = 0;
-		// fileInfo.metaDataTypes = null;
-		// fileInfo.metaData = null;
-		// fileInfo.displayRanges = null;
-		// fileInfo.channelLuts = null;
-		// fileInfo.roi = null;
-		// fileInfo.overlay = null;
-		// fileInfo.samplesPerPixel = 1;
-		// fileInfo.openNextDir = null;
-		// fileInfo.openNextName = null;
 
 		fileInfo.sliceLabels = getSliceLabels(ds);
+		return fileInfo;
+	}
+
+	private static void setSliceLabels( ImagePlus imp, FileInfo fileInfo )
+	{
 		if (fileInfo.sliceLabels != null) {
 			if (imp.getStackSize() < 2) {
 				if (fileInfo.sliceLabels.length > 0) {
@@ -194,13 +182,16 @@ public class ImagePlusCreatorUtils
 				}
 			}
 			else {
+				ImageStack stack = imp.getStack();
 				for (int i = 0; i < fileInfo.sliceLabels.length && i < stack.getSize(); i++) {
 					stack.setSliceLabel(fileInfo.sliceLabels[i], i + 1);
 				}
 			}
 		}
-		imp.setFileInfo(fileInfo);
+	}
 
+	private static ImagePlus optionalMakeComposite( Dataset ds, ImagePlus imp )
+	{
 		if (!ds.isRGBMerged()) {
 			/*
 			 * ImageJ 1.x will use a StackWindow *only* if there is more than one channel.
@@ -212,9 +203,6 @@ public class ImagePlusCreatorUtils
 				imp = new CompositeImage(imp, CompositeImage.COMPOSITE);
 			}
 		}
-
-		fillInfo(imp, ds.getImgPlus());
-
 		return imp;
 	}
 
