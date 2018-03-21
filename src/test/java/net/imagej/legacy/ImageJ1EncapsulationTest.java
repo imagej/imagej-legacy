@@ -125,6 +125,7 @@ public class ImageJ1EncapsulationTest {
 					className.startsWith(net.imagej.legacy.convert.roi.PolylineRoiToRealMaskRealIntervalConverter.class.getName()) ||
 					className.startsWith(net.imagej.legacy.convert.roi.PolylineRoiWrapper.class.getName()) ||
 					className.startsWith(net.imagej.legacy.convert.roi.PolylineToPolylineRoiConverter.class.getName()) ||
+					className.startsWith(net.imagej.legacy.convert.roi.RealMaskRealIntervalToImageRoiConverter.class.getName()) ||
 					className.startsWith(net.imagej.legacy.convert.roi.RealPointCollectionToPointRoiConverter.class.getName()) ||
 					className.startsWith(net.imagej.legacy.convert.roi.RoiToBoxConverter.class.getName()) ||
 					className.startsWith(net.imagej.legacy.convert.roi.RoiToMaskIntervalConverter.class.getName()) ||
