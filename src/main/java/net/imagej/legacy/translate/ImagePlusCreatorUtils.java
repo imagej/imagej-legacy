@@ -52,6 +52,7 @@ import java.util.Map;
 import net.imagej.Dataset;
 import net.imagej.ImgPlus;
 import net.imagej.axis.Axes;
+import net.imagej.axis.CalibratedAxis;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
 
@@ -82,19 +83,25 @@ public class ImagePlusCreatorUtils
 		final int tIndex = imgPlus.dimensionIndex(Axes.TIME);
 
 		if (xIndex >= 0) {
-			calibration.pixelWidth = imgPlus.averageScale(xIndex);
-			calibration.setXUnit(imgPlus.axis(xIndex).unit());
+			calibration.pixelWidth = imgPlus.averageScale( xIndex );
+			CalibratedAxis axis = imgPlus.axis( xIndex );
+			calibration.xOrigin = axis.calibratedValue( 0 );
+			calibration.setXUnit( axis.unit());
 		}
 		if (yIndex >= 0) {
-			calibration.pixelHeight = imgPlus.averageScale(yIndex);
-			calibration.setYUnit(imgPlus.axis(yIndex).unit());
+			calibration.pixelHeight = imgPlus.averageScale( yIndex );
+			CalibratedAxis axis = imgPlus.axis( yIndex );
+			calibration.yOrigin = axis.calibratedValue( 0 );
+			calibration.setYUnit( axis.unit());
 		}
 		if (zIndex >= 0) {
-			calibration.pixelDepth = imgPlus.averageScale(zIndex);
-			calibration.setZUnit(imgPlus.axis(zIndex).unit());
+			calibration.pixelDepth = imgPlus.averageScale( zIndex );
+			CalibratedAxis axis = imgPlus.axis( zIndex );
+			calibration.zOrigin = axis.calibratedValue( 0 );
+			calibration.setZUnit( axis.unit());
 		}
 		if (tIndex >= 0) {
-			calibration.frameInterval = imgPlus.averageScale(tIndex);
+			calibration.frameInterval = imgPlus.averageScale( tIndex );
 			calibration.setTimeUnit(imgPlus.axis(tIndex).unit());
 		}
 	}

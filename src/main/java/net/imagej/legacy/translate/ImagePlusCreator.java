@@ -120,9 +120,6 @@ public class ImagePlusCreator extends AbstractContextual
 		if (dataset == null) return null;
 		ImagePlus imp = ImagePlusCreatorUtils.makeImagePlus(dataset, createVirtualStack(dataset));
 		metadataHarmonizer.updateLegacyImage(dataset, imp);
-
-		ImagePlusCreatorUtils.populateCalibrationData(imp, dataset);
-
 		if (display != null) {
 			if (shouldBeComposite(display, dataset, imp)) {
 				imp = makeCompositeImage(imp);
