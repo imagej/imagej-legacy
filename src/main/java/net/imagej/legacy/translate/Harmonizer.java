@@ -275,7 +275,7 @@ public class Harmonizer extends AbstractContextual {
 		final long x = (xIndex < 0) ? 1 : ds.dimension(xIndex);
 		final long y = (yIndex < 0) ? 1 : ds.dimension(yIndex);
 		final long z = (zIndex < 0) ? 1 : ds.dimension(zIndex);
-		final long t = LegacyUtils.ij1PlaneCount(ds, Axes.TIME);
+		final long t = LegacyUtils.ij1PlaneCount(ds.getImgPlus(), Axes.TIME);
 		final long c = (tIndex < 0) ? 1 : ds.dimension(cIndex);
 
 		if (x != imp.getWidth()) return false;

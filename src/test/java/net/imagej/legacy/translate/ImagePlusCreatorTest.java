@@ -14,9 +14,13 @@ import net.imagej.axis.Axes;
 import net.imagej.axis.AxisType;
 import net.imglib2.img.Img;
 import net.imglib2.img.ImgFactory;
+import net.imglib2.img.array.ArrayImg;
 import net.imglib2.img.array.ArrayImgFactory;
 import net.imglib2.img.array.ArrayImgs;
+import net.imglib2.img.basictypeaccess.array.ByteArray;
 import net.imglib2.img.cell.CellImgFactory;
+import net.imglib2.img.display.imagej.PlanarImgToVirtualStack;
+import net.imglib2.img.planar.PlanarImg;
 import net.imglib2.img.planar.PlanarImgFactory;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.RealType;
@@ -34,6 +38,7 @@ import java.util.function.Supplier;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -150,6 +155,28 @@ public class ImagePlusCreatorTest
 		processor = imagePlus.getStack().getProcessor( 2 );
 		assertEquals( 0xff03070b, processor.getPixel(0,0) );
 		assertEquals( 0xff04080c, processor.getPixel(1,0) );
+	}
+
+	@Test
+	public void testPlanarImgWrapping() {
+		PlanarImg< UnsignedByteType, ? > image = new PlanarImgFactory< UnsignedByteType >().create( new long[] { 2, 2, 2 }, new UnsignedByteType() );
+		AxisType[] axes = { Axes.X, Axes.Y, Axes.Z }; // TODO make giving axes superfluous
+		ImgPlus< UnsignedByteType > imgPlus = new ImgPlus<>( image, "image", axes );
+		Dataset ds = datasetService.create( imgPlus );
+		ImagePlus ip = new ImagePlusCreator( context ).createLegacyImage( ds );
+		assertTrue( ip.getStack() instanceof PlanarImgToVirtualStack );
+		assertSame( image.getPlane( 0 ).getCurrentStorageArray(), ip.getStack().getPixels( 1 ));
+	}
+
+	@Test
+	public void test2dArrayImgWrapping() {
+		byte[] buffer = new byte[4];
+		ArrayImg< UnsignedByteType, ByteArray > image = ArrayImgs.unsignedBytes( buffer, 2, 2 );
+		AxisType[] axes = { Axes.X, Axes.Y }; // TODO make giving axes superfluous
+		ImgPlus< UnsignedByteType > imgPlus = new ImgPlus<>( image, "image", axes );
+		Dataset ds = datasetService.create( imgPlus );
+		ImagePlus ip = new ImagePlusCreator( context ).createLegacyImage( ds );
+		assertSame( buffer, ip.getStack().getPixels( 1 ));
 	}
 
 	private byte[] byteRange( int from, int to )

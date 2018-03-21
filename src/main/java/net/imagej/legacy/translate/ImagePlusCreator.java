@@ -33,41 +33,18 @@ package net.imagej.legacy.translate;
 
 import ij.CompositeImage;
 import ij.ImagePlus;
-import ij.ImageStack;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import net.imagej.Dataset;
 import net.imagej.ImgPlus;
-import net.imagej.axis.Axes;
-import net.imagej.axis.AxisType;
-import net.imagej.axis.CalibratedAxis;
 import net.imagej.display.ColorMode;
 import net.imagej.display.DatasetView;
 import net.imagej.display.ImageDisplay;
 import net.imagej.display.ImageDisplayService;
-import net.imglib2.RandomAccessibleInterval;
-import net.imglib2.converter.Converter;
-import net.imglib2.img.display.imagej.ImageJVirtualStack;
-import net.imglib2.img.display.imagej.ImageJVirtualStackARGB;
-import net.imglib2.img.display.imagej.ImageJVirtualStackFloat;
-import net.imglib2.img.display.imagej.ImageJVirtualStackUnsignedByte;
-import net.imglib2.img.display.imagej.ImageJVirtualStackUnsignedShort;
-import net.imglib2.transform.integer.MixedTransform;
-import net.imglib2.type.numeric.ARGBType;
-import net.imglib2.type.numeric.RealType;
-import net.imglib2.type.numeric.integer.UnsignedByteType;
-import net.imglib2.type.numeric.integer.UnsignedShortType;
-import net.imglib2.type.numeric.real.FloatType;
-import net.imglib2.view.MixedTransformView;
-import net.imglib2.view.Views;
 
-import net.imglib2.view.composite.Composite;
-import net.imglib2.view.composite.CompositeIntervalView;
-import net.imglib2.view.composite.GenericComposite;
+import net.imglib2.img.display.imagej.ArrayImgToVirtualStack;
+import net.imglib2.img.display.imagej.ImgToVirtualStack;
+import net.imglib2.img.display.imagej.PlanarImgToVirtualStack;
+import net.imglib2.type.numeric.RealType;
 import org.scijava.AbstractContextual;
 import org.scijava.Context;
 import org.scijava.log.LogService;
@@ -118,7 +95,9 @@ public class ImagePlusCreator extends AbstractContextual
 		final ImageDisplay display)
 	{
 		if (dataset == null) return null;
-		ImagePlus imp = ImagePlusCreatorUtils.makeImagePlus(dataset, createVirtualStack(dataset));
+		ImagePlus imp = createImagePlus( dataset );
+		ImagePlusCreatorUtils.setMetadata( dataset, imp );
+		imp = ImagePlusCreatorUtils.optionalMakeComposite( dataset, imp );
 		metadataHarmonizer.updateLegacyImage(dataset, imp);
 		if (display != null) {
 			if (shouldBeComposite(display, dataset, imp)) {
@@ -130,6 +109,16 @@ public class ImagePlusCreator extends AbstractContextual
 		}
 
 		return imp;
+	}
+
+	private static ImagePlus createImagePlus( Dataset dataset )
+	{
+		ImgPlus< ? extends RealType< ? > > imgPlus = dataset.getImgPlus();
+		if( PlanarImgToVirtualStack.isSupported( imgPlus ) )
+			return PlanarImgToVirtualStack.wrap( imgPlus );
+		if( ArrayImgToVirtualStack.isSupported( imgPlus ) )
+			return ArrayImgToVirtualStack.wrap( imgPlus );
+		return ImgToVirtualStack.wrap( imgPlus, dataset.isRGBMerged() );
 	}
 
 	// -- private interface --
@@ -156,150 +145,6 @@ public class ImagePlusCreator extends AbstractContextual
 	// this configuration even valid. If so then what to do for translation?
 	private CompositeImage makeCompositeImage(final ImagePlus imp) {
 		return new CompositeImage(imp, CompositeImage.COMPOSITE);
-	}
-
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	private ImageStack createVirtualStack(final Dataset ds) {
-		if(ds.isRGBMerged())
-			return new ImageJVirtualStackARGB<>( collapseColorAxis( ds ), this::convertToColor );
-		else
-			return createVirtualStack((ImgPlus) ds.getImgPlus(), ds.isSigned());
-	}
-
-	private <T extends RealType<T>> ImageStack createVirtualStack(
-		final ImgPlus<T> imgPlus, final boolean isSigned)
-	{
-		final RealType<T> type = imgPlus.firstElement();
-		final int bitDepth = type.getBitsPerPixel();
-		// TODO : what about ARGB type's CellImgs? Note also that ARGB is not a
-		// RealType and thus our dataset can't support it directly.
-
-		// ensure image being passed to imglib2-ij has XYCZT dimension order
-		RandomAccessibleInterval<T> rai = ensureXYCZT(imgPlus);
-
-		ImageJVirtualStack stack = null;
-
-		// finally, wrap the XYCZT image as an ImageJ virtual stack
-		if (bitDepth <= 8 && !isSigned) {
-			stack = new ImageJVirtualStackUnsignedByte<>(rai, new ByteConverter<T>());
-		}
-		else if (bitDepth <= 16 && !isSigned) {
-			stack = new ImageJVirtualStackUnsignedShort<>(rai,
-				new ShortConverter<T>());
-		}
-		else { // other types translated as 32-bit float data
-			stack = new ImageJVirtualStackFloat<>(rai, new FloatConverter<T>());
-		}
-
-		// Virtual stacks are writable when backed by a CellCache!
-		stack.setWritable(true);
-
-		return stack;
-	}
-
-	private static final List<AxisType> naturalOrder =
-			Arrays.asList(Axes.X, Axes.Y, Axes.CHANNEL, Axes.Z, Axes.TIME);
-
-	protected <T> RandomAccessibleInterval<T> ensureXYCZT(final ImgPlus<T> imgPlus) {
-		boolean inNaturalOrder = true;
-		final int[] axes = new int[5];
-		final boolean[] matchedDimensions = new boolean[5];
-		final long[] min = new long[5], max = new long[5];
-		for (int d = 0; d < imgPlus.numDimensions(); d++) {
-			final CalibratedAxis axis = imgPlus.axis(d);
-			final int index = naturalOrder.indexOf(axis.type());
-			if (index < 0) {
-				// Axis isn't present. maybe warn instead?
-				throw new IllegalArgumentException("Unsupported axis type: " + axis.type());
-			}
-			axes[d] = index;
-			matchedDimensions[index] = true;
-			min[index] = imgPlus.min(d);
-			max[index] = imgPlus.max(d);
-			if (index != d) inNaturalOrder = false;
-		}
-
-		if (imgPlus.numDimensions() != 5) inNaturalOrder = false;
-		if (inNaturalOrder) return imgPlus;
-
-		RandomAccessibleInterval<T> rai = imgPlus;
-		// pad the image to at least 5D
-		for (int i = 0; i < 5; i++) {
-			if (matchedDimensions[i]) continue;
-			axes[rai.numDimensions()] = i;
-			min[i] = 0;
-			max[i] = 0;
-			rai = Views.addDimension(rai, 0, 0);
-		}
-
-		// permute the axis order to XYCZT...
-		final MixedTransform t = new MixedTransform(rai.numDimensions(), 5);
-		t.setComponentMapping(axes);
-		return Views.interval(new MixedTransformView< >( rai, t ), min, max);
-	}
-
-	private class ByteConverter<S extends RealType<S>> implements
-		Converter<S, UnsignedByteType>
-	{
-
-		@Override
-		public void convert(final S input, final UnsignedByteType output) {
-			double val = input.getRealDouble();
-			if (val < 0) val = 0;
-			else if (val > 255) val = 255;
-			output.setReal(val);
-		}
-
-	}
-
-	private class ShortConverter<S extends RealType<S>> implements
-		Converter<S, UnsignedShortType>
-	{
-
-		@Override
-		public void convert(final S input, final UnsignedShortType output) {
-			double val = input.getRealDouble();
-			if (val < 0) val = 0;
-			else if (val > 65535) val = 65535;
-			output.setReal(val);
-		}
-
-	}
-
-	private class FloatConverter<S extends RealType<S>> implements
-		Converter<S, FloatType>
-	{
-
-		@Override
-		public void convert(final S input, final FloatType output) {
-			double val = input.getRealDouble();
-			if (val < -Float.MAX_VALUE) val = -Float.MAX_VALUE;
-			else if (val > Float.MAX_VALUE) val = Float.MAX_VALUE;
-			output.setReal(val);
-		}
-
-	}
-
-	private CompositeIntervalView< RealType< ? >, ? extends GenericComposite< RealType< ? > > > collapseColorAxis( Dataset ds )
-	{
-		return Views.collapse( makeChannelLastDimension( ds ) );
-	}
-
-	private RandomAccessibleInterval< RealType< ? > > makeChannelLastDimension( Dataset ds )
-	{
-		int channel = ds.dimensionIndex( Axes.CHANNEL );
-		return ( channel == ds.numDimensions() - 1 ) ? ds :
-				Views.stack( IntStream.of(0,1,2).mapToObj( i -> Views.hyperSlice( ds, channel, i ) ).collect( Collectors.toList() ) );
-	}
-
-	private void convertToColor( Composite<RealType<?>> in, ARGBType out )
-	{
-		out.set( ARGBType.rgba( toByte( in.get( 0 ) ), toByte( in.get( 1 ) ), toByte( in.get( 2 ) ), 255) );
-	}
-
-	private int toByte( RealType<?> realType )
-	{
-		return (int) realType.getRealFloat();
 	}
 
 }

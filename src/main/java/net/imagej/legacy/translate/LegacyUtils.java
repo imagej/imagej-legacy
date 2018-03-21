@@ -36,7 +36,9 @@ import ij.WindowManager;
 import ij.macro.Interpreter;
 
 import net.imagej.Dataset;
+import net.imagej.ImgPlus;
 import net.imagej.axis.Axes;
+import net.imagej.axis.Axis;
 import net.imagej.axis.AxisType;
 import net.imglib2.img.basictypeaccess.PlanarAccess;
 import net.imglib2.type.numeric.RealType;
@@ -92,12 +94,12 @@ public class LegacyUtils {
 	 * the axes of a modern ImageJ Dataset. Incompatible modern axes are encoded
 	 * as extra planes in the legacy ImageJ image.
 	 */
-	static long ij1PlaneCount(Dataset ds, final AxisType whiteList) {
+	static long ij1PlaneCount(ImgPlus imgPlus, final AxisType whiteList) {
 		long planeCount = 1;
 		int axisIndex = 0;
-		for (int i = 0; i < ds.numDimensions(); i++) {
-			AxisType axisType = ds.axis(i).type();
-			final long axisSize = ds.dimension(axisIndex++);
+		for ( int i = 0; i < imgPlus.numDimensions(); i++) {
+			Axis axisType = imgPlus.axis(i);
+			final long axisSize = imgPlus.dimension(axisIndex++);
 			// we want to skip the X,Y,C,Z,T axes, unless that axis is the white list.
 			// this will cause planeCount to be the product of the whiteList axis and
 			// all other axes
@@ -129,7 +131,7 @@ public class LegacyUtils {
 		final long xCount = xIndex < 0 ? 1 : dims[xIndex];
 		final long yCount = yIndex < 0 ? 1 : dims[yIndex];
 		final long zCount = zIndex < 0 ? 1 : dims[zIndex];
-		final long tCount = ij1PlaneCount(ds, Axes.TIME);
+		final long tCount = ij1PlaneCount(ds.getImgPlus(), Axes.TIME);
 		final long cCount = cIndex < 0 ? 1 : dims[cIndex];
 		final long ij1ChannelCount = ds.isRGBMerged() ? (cCount / 3) : cCount;
 
@@ -194,7 +196,7 @@ public class LegacyUtils {
 		final long xCount = xIndex < 0 ? 1 : dataset.dimension(xIndex);
 		final long yCount = yIndex < 0 ? 1 : dataset.dimension(yIndex);
 		final long zCount = zIndex < 0 ? 1 : dataset.dimension(zIndex);
-		final long tCount = ij1PlaneCount(dataset, Axes.TIME);
+		final long tCount = ij1PlaneCount(dataset.getImgPlus(), Axes.TIME);
 		final long cCount = cIndex < 0 ? 1 : dataset.dimension(cIndex);
 
 		// NB - cIndex tells what dimension is channel in Dataset. For a
