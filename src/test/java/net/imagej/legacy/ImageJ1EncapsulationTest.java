@@ -102,6 +102,7 @@ public class ImageJ1EncapsulationTest {
 					className.startsWith(net.imagej.legacy.convert.roi.AbstractMaskPredicateToRoiConverter.class.getName()) ||
 					className.startsWith(net.imagej.legacy.convert.roi.AbstractPolygonRoiWrapper.class.getName()) ||
 					className.startsWith(net.imagej.legacy.convert.roi.AbstractRoiToMaskPredicateConverter.class.getName()) ||
+					className.startsWith(net.imagej.legacy.convert.roi.AbstractRoiUnwrapConverter.class.getName()) ||
 					className.startsWith(net.imagej.legacy.convert.roi.BinaryCompositeMaskPredicateToShapeRoiConverter.class.getName()) ||
 					className.startsWith(net.imagej.legacy.convert.roi.BoxToRoiConverter.class.getName()) ||
 					className.startsWith(net.imagej.legacy.convert.roi.DefaultRoiWrapper.class.getName()) ||
@@ -127,6 +128,7 @@ public class ImageJ1EncapsulationTest {
 					className.startsWith(net.imagej.legacy.convert.roi.RealPointCollectionToPointRoiConverter.class.getName()) ||
 					className.startsWith(net.imagej.legacy.convert.roi.RoiToBoxConverter.class.getName()) ||
 					className.startsWith(net.imagej.legacy.convert.roi.RoiToMaskIntervalConverter.class.getName()) ||
+					className.startsWith(net.imagej.legacy.convert.roi.RoiUnwrappers.class.getName()) ||
 					className.startsWith(net.imagej.legacy.convert.roi.RoiWrapper.class.getName()) ||
 					className.startsWith(net.imagej.legacy.convert.roi.ShapeRoiToMaskRealIntervalConverter.class.getName()) ||
 					className.startsWith(net.imagej.legacy.convert.roi.ShapeRoiWrapper.class.getName()) ||
