@@ -37,24 +37,22 @@ import ij.ImageStack;
 import ij.VirtualStack;
 import ij.io.FileInfo;
 import ij.measure.Calibration;
-
 import io.scif.ImageMetadata;
 import io.scif.MetaTable;
 import io.scif.Metadata;
 import io.scif.img.SCIFIOImgPlus;
-
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-
 import net.imagej.Dataset;
 import net.imagej.ImgPlus;
 import net.imagej.axis.Axes;
 import net.imagej.axis.CalibratedAxis;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Utility class for {@link ImagePlusCreator}.
@@ -106,23 +104,7 @@ public class ImagePlusCreatorUtils
 		}
 	}
 
-	public static ImagePlus makeImagePlus( Dataset ds, ImageStack stack ) {
-		final int[] dimIndices = new int[5];
-		final int[] dimValues = new int[5];
-		LegacyUtils.getImagePlusDims(ds, dimIndices, dimValues);
-		return makeImagePlus(ds, dimValues[2], dimValues[3], dimValues[4], stack);
-	}
-
-	private static ImagePlus makeImagePlus( final Dataset ds, final int c, final int z,
-			final int t, final ImageStack stack )
-	{
-		ImagePlus imp = new ImagePlus(ds.getName(), stack);
-		imp.setDimensions(c, z, t);
-		setMetadata( ds, imp );
-		return optionalMakeComposite( ds, imp );
-	}
-
-	private static void setMetadata( Dataset ds, ImagePlus imp )
+	static void setMetadata( Dataset ds, ImagePlus imp )
 	{
 		imp.setOpenAsHyperStack(imp.getNDimensions() > 3);
 		populateCalibrationData(imp, ds);
@@ -190,7 +172,7 @@ public class ImagePlusCreatorUtils
 		}
 	}
 
-	private static ImagePlus optionalMakeComposite( Dataset ds, ImagePlus imp )
+	static ImagePlus optionalMakeComposite( Dataset ds, ImagePlus imp )
 	{
 		if (!ds.isRGBMerged()) {
 			/*
@@ -289,4 +271,5 @@ public class ImagePlusCreatorUtils
 		}
 		imp.setProperty("Info", info);
 	}
+
 }
