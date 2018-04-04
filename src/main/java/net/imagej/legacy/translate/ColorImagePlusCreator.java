@@ -94,18 +94,15 @@ public class ColorImagePlusCreator extends AbstractImagePlusCreator
 	 * Expects input expects input ImageDisplay to have isRgbMerged() set with 3
 	 * channels of unsigned byte data.
 	 */
-	@Override
 	public ImagePlus createLegacyImage(final ImageDisplay display) {
 		final Dataset dataset = imageDisplayService.getActiveDataset(display);
 		return createLegacyImage(dataset, display);
 	}
 
-	@Override
 	public ImagePlus createLegacyImage(Dataset ds) {
 		return createLegacyImage(ds, null);
 	}
 
-	@Override
 	public ImagePlus createLegacyImage(Dataset ds, ImageDisplay display) {
 		if (ds == null) return null;
 		Img<?> img = ds.getImgPlus().getImg();

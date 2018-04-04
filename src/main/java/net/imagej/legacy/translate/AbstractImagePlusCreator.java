@@ -58,13 +58,12 @@ import net.imglib2.type.numeric.integer.UnsignedShortType;
 import org.scijava.AbstractContextual;
 
 /**
- * Abstract superclass for {@link ImagePlusCreator} implementations. Provides
+ * Abstract superclass for ImagePlusCreator implementations. Provides
  * general utility methods.
  * 
  * @author Mark Hiner
  */
 public abstract class AbstractImagePlusCreator extends AbstractContextual
-	implements ImagePlusCreator
 {
 
 	/**

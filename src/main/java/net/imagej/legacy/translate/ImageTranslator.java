@@ -55,8 +55,8 @@ public class ImageTranslator extends AbstractContextual
 {
 
 	private final DisplayCreator displayCreator;
-	private final ImagePlusCreator colorImagePlusCreator;
-	private final ImagePlusCreator grayImagePlusCreator;
+	private final ColorImagePlusCreator colorImagePlusCreator;
+	private final GrayImagePlusCreator grayImagePlusCreator;
 
 	private final LegacyService legacyService;
 

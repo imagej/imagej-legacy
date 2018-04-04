@@ -104,18 +104,15 @@ public class GrayImagePlusCreator extends AbstractImagePlusCreator {
 		nameHarmonizer = new NameHarmonizer();
 	}
 
-	@Override
 	public ImagePlus createLegacyImage(final ImageDisplay display) {
 		final Dataset dataset = imageDisplayService.getActiveDataset(display);
 		return createLegacyImage(dataset, display);
 	}
 
-	@Override
 	public ImagePlus createLegacyImage(final Dataset ds) {
 		return createLegacyImage(ds, null);
 	}
 
-	@Override
 	public ImagePlus createLegacyImage(final Dataset dataset,
 		final ImageDisplay display)
 	{
