@@ -42,22 +42,19 @@ import net.imagej.legacy.LegacyImageMap;
 import org.scijava.AbstractContextual;
 
 /**
- * Abstract superclass for {@link DisplayCreator} implementations. Ensures
+ * Abstract superclass for DisplayCreator implementations. Ensures
  * proper linkage between {@link Dataset} and {@link ImagePlus} instances.
  *
  * @author Mark Hiner
  */
 public abstract class AbstractDisplayCreator extends AbstractContextual
-	implements DisplayCreator
 {
 
-	@Override
 	public ImageDisplay createDisplay(final ImagePlus imp) {
 
 		return createDisplay(imp, LegacyUtils.getPreferredAxisOrder());
 	}
 
-	@Override
 	public ImageDisplay createDisplay(final ImagePlus imp,
 		final AxisType[] preferredOrder)
 	{
