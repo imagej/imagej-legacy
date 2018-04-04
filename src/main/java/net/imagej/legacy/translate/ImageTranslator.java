@@ -54,8 +54,8 @@ import org.scijava.plugin.Parameter;
 public class ImageTranslator extends AbstractContextual
 {
 
-	private final DisplayCreator colorDisplayCreator;
-	private final DisplayCreator grayDisplayCreator;
+	private final ColorDisplayCreator colorDisplayCreator;
+	private final GrayDisplayCreator grayDisplayCreator;
 	private final ImagePlusCreator colorImagePlusCreator;
 	private final ImagePlusCreator grayImagePlusCreator;
 
