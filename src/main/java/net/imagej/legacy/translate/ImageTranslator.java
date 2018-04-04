@@ -31,13 +31,99 @@
 
 package net.imagej.legacy.translate;
 
+import ij.ImagePlus;
+
+import net.imagej.Dataset;
+import net.imagej.axis.AxisType;
+import net.imagej.display.ImageDisplay;
+import net.imagej.display.ImageDisplayService;
+import net.imagej.legacy.LegacyService;
+
+import org.scijava.AbstractContextual;
+import org.scijava.Context;
+import org.scijava.plugin.Parameter;
+
 /**
- * The interface for translating between legacy and modern ImageJ image
- * structures.
+ * The default {@link ImageTranslator} between legacy and modern ImageJ image
+ * structures. It delegates to the appropriate more specific translators based
+ * on the type of data being translated.
  * 
- * @author Curtis Rueden
  * @author Barry DeZonia
+ * @author Curtis Rueden
  */
-public interface ImageTranslator extends DisplayCreator, ImagePlusCreator {
-	// all methods inherited
+public class ImageTranslator extends AbstractContextual
+{
+
+	private final DisplayCreator colorDisplayCreator;
+	private final DisplayCreator grayDisplayCreator;
+	private final ImagePlusCreator colorImagePlusCreator;
+	private final ImagePlusCreator grayImagePlusCreator;
+
+	private final LegacyService legacyService;
+
+	@Parameter
+	private ImageDisplayService imageDisplayService;
+
+	public ImageTranslator(final LegacyService legacyService) {
+		final Context context = legacyService.getContext();
+		context.inject(this);
+		this.legacyService = legacyService;
+		colorDisplayCreator = new ColorDisplayCreator(context);
+		grayDisplayCreator = new GrayDisplayCreator(context);
+		colorImagePlusCreator = new ColorImagePlusCreator(context);
+		grayImagePlusCreator = new GrayImagePlusCreator(context);
+	}
+
+	/**
+	 * Creates a {@link ImageDisplay} from an {@link ImagePlus}. Shares planes of
+	 * data when possible.
+	 */
+	public ImageDisplay createDisplay(final ImagePlus imp) {
+		
+		return createDisplay(imp, LegacyUtils.getPreferredAxisOrder());
+	}
+
+	/**
+	 * Creates a {@link ImageDisplay} from an {@link ImagePlus}. Shares planes of
+	 * data when possible. Builds ImageDisplay with preferred Axis ordering.
+	 */
+	public ImageDisplay createDisplay(final ImagePlus imp,
+		final AxisType[] preferredOrder)
+	{
+
+		if ((imp.getType() == ImagePlus.COLOR_RGB) && (imp.getNChannels() == 1)) {
+			return colorDisplayCreator.createDisplay(imp, preferredOrder);
+		}
+
+		return grayDisplayCreator.createDisplay(imp, preferredOrder);
+	}
+
+	/**
+	 * Creates an {@link ImagePlus} from a {@link ImageDisplay}. Shares planes of
+	 * data when possible.
+	 */
+	public ImagePlus createLegacyImage(final ImageDisplay display) {
+		final Dataset ds = imageDisplayService.getActiveDataset(display);
+		return createLegacyImage(ds, display);
+	}
+
+	public ImagePlus createLegacyImage(final Dataset ds) {
+		return createLegacyImage(ds, null);
+	}
+
+	public ImagePlus createLegacyImage(final Dataset ds,
+		final ImageDisplay display)
+	{
+		ImagePlus imp = null;
+		if (LegacyUtils.isColorCompatible(ds))
+		{
+			imp = colorImagePlusCreator.createLegacyImage(ds, display);
+		}
+		else {
+			imp = grayImagePlusCreator.createLegacyImage(ds, display);
+		}
+
+		return imp;
+	}
+
 }

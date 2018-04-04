@@ -49,7 +49,6 @@ import net.imagej.Dataset;
 import net.imagej.display.ImageDisplay;
 import net.imagej.display.ImageDisplayService;
 import net.imagej.legacy.convert.TableListWrapper;
-import net.imagej.legacy.translate.DefaultImageTranslator;
 import net.imagej.legacy.translate.Harmonizer;
 import net.imagej.legacy.translate.ImageTranslator;
 import net.imagej.legacy.translate.LegacyUtils;
@@ -160,7 +159,7 @@ public class LegacyImageMap extends AbstractContextual {
 	 * The {@link ImageTranslator} to use when creating {@link ImagePlus} and
 	 * {@link ImageDisplay} objects corresponding to one another.
 	 */
-	private final DefaultImageTranslator imageTranslator;
+	private final ImageTranslator imageTranslator;
 
 	/**
 	 * The legacy service corresponding to this image map.
@@ -183,7 +182,7 @@ public class LegacyImageMap extends AbstractContextual {
 		this.legacyService = legacyService;
 		imagePlusTable = new ConcurrentHashMap<>();
 		displayTable = new ConcurrentHashMap<>();
-		imageTranslator = new DefaultImageTranslator(legacyService);
+		imageTranslator = new ImageTranslator(legacyService);
 	}
 
 	// -- LegacyImageMap methods --

@@ -174,11 +174,11 @@ public class ImageJ1EncapsulationTest {
 					className.startsWith(net.imagej.legacy.translate.ColorPixelHarmonizer.class.getName()) ||
 					className.startsWith(net.imagej.legacy.translate.ColorTableHarmonizer.class.getName()) ||
 					className.startsWith(net.imagej.legacy.translate.CompositeHarmonizer.class.getName()) ||
-					className.startsWith(net.imagej.legacy.translate.DefaultImageTranslator.class.getName()) ||
 					className.startsWith(net.imagej.legacy.translate.GrayDisplayCreator.class.getName()) ||
 					className.startsWith(net.imagej.legacy.translate.GrayImagePlusCreator.class.getName()) ||
 					className.startsWith(net.imagej.legacy.translate.GrayPixelHarmonizer.class.getName()) ||
 					className.startsWith(net.imagej.legacy.translate.Harmonizer.class.getName()) ||
+					className.startsWith(net.imagej.legacy.translate.ImageTranslator.class.getName()) ||
 					className.startsWith(net.imagej.legacy.translate.LegacyUtils.class.getName()) ||
 					className.startsWith(net.imagej.legacy.translate.MergedRgbVirtualStack.class.getName()) ||
 					className.startsWith(net.imagej.legacy.translate.MetadataHarmonizer.class.getName()) ||
