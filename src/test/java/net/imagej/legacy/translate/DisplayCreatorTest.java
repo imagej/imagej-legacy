@@ -179,26 +179,6 @@ public class DisplayCreatorTest
 		SubClass.testConversion( expected, image );
 	}
 
-	@Ignore("not supported, only needed for anyway broken transition between modern and legacy mode")
-	@Test
-	public void testAxesOrder() throws ExecutionException, InterruptedException
-	{
-		int x = 2, y = 5, z = 3, c = 7;
-		byte[][] pixels = IntStream.range(0, z * c).mapToObj( i -> randomBytes( x * y ) ).toArray(byte[][]::new);
-		ImagePlus image = SubClass.createByteImagePlus( x, y, c, z, 1, pixels );
-		RandomAccessibleInterval< UnsignedByteType > expected = Views.permute( ArrayImgs.unsignedBytes( concat( pixels ), x, y, c, z ), 2, 3);
-		ImageDisplay display = new DisplayCreator( SubClass.context ).createDisplay( image, new AxisType[]{ Axes.X, Axes.Y, Axes.Z, Axes.CHANNEL } );
-		Dataset dataset = ( Dataset ) display.getActiveView().getData();
-		assertEquals( (( RandomAccessibleInterval< ? extends RealType< ? > > ) expected).randomAccess().get().getClass(), dataset.getType().getClass() );
-		assertEquals(Arrays.asList( Axes.X, Axes.Y, Axes.Z, Axes.CHANNEL ), getAxes( dataset ));
-		AssertImgs.assertRealTypeImageEquals( expected, dataset );
-	}
-
-	private List< AxisType > getAxes( Dataset dataset )
-	{
-		return IntStream.range( 0, dataset.numDimensions() ).mapToObj( i -> dataset.axis( i ).type() ).collect( Collectors.toList() );
-	}
-
 	private float[] randomFloats( int size )
 	{
 		Random random = new Random(42);
