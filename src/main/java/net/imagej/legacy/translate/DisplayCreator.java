@@ -159,9 +159,9 @@ public class DisplayCreator extends AbstractContextual
 		return ds;
 	}
 
-	private ImgPlus toImgPlus( ImagePlus imp, AxisType[] preferredOrder )
+	private ImgPlus< ? > toImgPlus( ImagePlus imp, AxisType[] preferredOrder )
 	{
-		ImgPlus imgPlus = wrap( imp );
+		ImgPlus< ? > imgPlus = wrap( imp );
 		imgPlus.setSource( makeSource( imp ) );
 		return imgPlus;
 	}
