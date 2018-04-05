@@ -77,18 +77,7 @@ public class ImageTranslator extends AbstractContextual
 	 * data when possible.
 	 */
 	public ImageDisplay createDisplay(final ImagePlus imp) {
-		
-		return createDisplay(imp, LegacyUtils.getPreferredAxisOrder());
-	}
-
-	/**
-	 * Creates a {@link ImageDisplay} from an {@link ImagePlus}. Shares planes of
-	 * data when possible. Builds ImageDisplay with preferred Axis ordering.
-	 */
-	public ImageDisplay createDisplay(final ImagePlus imp,
-		final AxisType[] preferredOrder)
-	{
-		return displayCreator.createDisplay(imp, preferredOrder);
+		return displayCreator.createDisplay(imp);
 	}
 
 	/**

@@ -328,8 +328,7 @@ public class Harmonizer extends AbstractContextual {
 		//final ImagePlus impCopy = imp.duplicate();
 		//final ImageDisplay tmpDisplay =
 		//		imageTranslator.createDisplay(impCopy, ds.getAxes());
-		final ImageDisplay tmpDisplay = 
-			imageTranslator.createDisplay(imp, SpaceUtils.getAxisTypes(ds));
+		final ImageDisplay tmpDisplay = imageTranslator.createDisplay(imp);
 		final Dataset tmpDs = imageDisplayService.getActiveDataset(tmpDisplay);
 		ds.setImgPlus(tmpDs.getImgPlus());
 		ds.setRGBMerged(tmpDs.isRGBMerged());

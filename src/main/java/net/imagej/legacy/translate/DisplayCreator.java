@@ -95,23 +95,15 @@ public class DisplayCreator extends AbstractContextual
 	}
 
 	public ImageDisplay createDisplay(final ImagePlus imp) {
-
-		return createDisplay(imp, LegacyUtils.getPreferredAxisOrder());
-	}
-
-	public ImageDisplay createDisplay(final ImagePlus imp,
-		final AxisType[] preferredOrder)
-	{
-		return makeDisplay(imp, preferredOrder);
+		return makeDisplay(imp);
 	}
 
 	/**
 	 * @return A {@link Dataset} appropriate for the given {@link ImagePlus}
 	 */
-	private Dataset getDataset( final ImagePlus imp,
-			final AxisType[] preferredOrder )
+	private Dataset getDataset(final ImagePlus imp)
 	{
-		final Dataset ds = makeDataset(imp, preferredOrder);
+		final Dataset ds = makeDataset(imp);
 		ds.getProperties().put(LegacyImageMap.IMP_KEY, imp);
 		return ds;
 	}
@@ -132,7 +124,7 @@ public class DisplayCreator extends AbstractContextual
 		}
 	}
 
-	protected ImageDisplay harmonizeExceptPixels( ImagePlus imp, Dataset ds )
+	private ImageDisplay harmonizeExceptPixels( ImagePlus imp, Dataset ds )
 	{
 		metadataHarmonizer.updateDataset(ds, imp);
 		compositeHarmonizer.updateDataset(ds, imp);
@@ -151,15 +143,15 @@ public class DisplayCreator extends AbstractContextual
 		return display;
 	}
 
-	protected Dataset makeDataset(ImagePlus imp, AxisType[] preferredOrder) {
-		ImgPlus imgPlus = toImgPlus( imp, preferredOrder );
+	private Dataset makeDataset(ImagePlus imp) {
+		ImgPlus imgPlus = toImgPlus(imp);
 		final Dataset ds = datasetService.create( imgPlus );
 		DatasetUtils.initColorTables(ds);
 		ds.setRGBMerged( imp.getType() == ImagePlus.COLOR_RGB && imp.getNChannels() == 1);
 		return ds;
 	}
 
-	private ImgPlus< ? > toImgPlus( ImagePlus imp, AxisType[] preferredOrder )
+	private ImgPlus< ? > toImgPlus(ImagePlus imp)
 	{
 		ImgPlus< ? > imgPlus = wrap( imp );
 		imgPlus.setSource( makeSource( imp ) );
@@ -194,8 +186,8 @@ public class DisplayCreator extends AbstractContextual
 	/**
 	 * @return An {@link ImageDisplay} created from the given {@link ImagePlus}
 	 */
-	private ImageDisplay makeDisplay( ImagePlus imp, AxisType[] preferredOrder ) {
-		Dataset ds = getDataset(imp, preferredOrder);
+	private ImageDisplay makeDisplay(ImagePlus imp) {
+		Dataset ds = getDataset(imp);
 		return harmonizeExceptPixels( imp, ds );
 	}
 }
