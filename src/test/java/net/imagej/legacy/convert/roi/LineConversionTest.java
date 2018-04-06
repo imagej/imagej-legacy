@@ -55,7 +55,7 @@ import ij.gui.Arrow;
 
 /**
  * Tests converting between {@link ij.gui.Line Line} and {@link Line}, and the
- * corresponding {@link LineWrapper}.
+ * corresponding {@link IJLineWrapper}.
  *
  * @author Alison Walter
  */
@@ -73,7 +73,7 @@ public class LineConversionTest {
 	public static void initialize() {
 		ijLine = new ij.gui.Line(10.5, 20, 120.5, 150);
 		ilLine = new DefaultWritableLine(new double[] { 10.5, 20 }, new double[] { 120.5, 150 }, false);
-		wrap = new LineWrapper(ijLine);
+		wrap = new IJLineWrapper(ijLine);
 	}
 
 	@Before
@@ -135,7 +135,7 @@ public class LineConversionTest {
 	@Test
 	public void testIJLineToLineConverter() {
 		final Line converted = convertService.convert(ijLine, Line.class);
-		assertTrue(converted instanceof LineWrapper);
+		assertTrue(converted instanceof IJLineWrapper);
 
 		assertEquals(wrap.endpointOne().getDoublePosition(0), converted.endpointOne().getDoublePosition(0), 0);
 		assertEquals(wrap.endpointOne().getDoublePosition(1), converted.endpointOne().getDoublePosition(1), 0);

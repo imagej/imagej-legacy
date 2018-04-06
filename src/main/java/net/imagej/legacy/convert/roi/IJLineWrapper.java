@@ -44,7 +44,7 @@ import net.imglib2.roi.geom.real.Line;
  *
  * @author Alison Walter
  */
-public class LineWrapper implements IJRealRoiWrapper<ij.gui.Line>, Line {
+public class IJLineWrapper implements IJRealRoiWrapper<ij.gui.Line>, Line {
 
 	private final ij.gui.Line line;
 
@@ -62,7 +62,7 @@ public class LineWrapper implements IJRealRoiWrapper<ij.gui.Line>, Line {
 	 * @param y2
 	 *            y coordinate of the second endpoint.
 	 */
-	public LineWrapper(final int x1, final int y1, final int x2, final int y2) {
+	public IJLineWrapper(final int x1, final int y1, final int x2, final int y2) {
 		line = new ij.gui.Line(x1, y1, x2, y2);
 	}
 
@@ -80,7 +80,7 @@ public class LineWrapper implements IJRealRoiWrapper<ij.gui.Line>, Line {
 	 * @param y2
 	 *            y coordinate of the second endpoint.
 	 */
-	public LineWrapper(final double x1, final double y1, final double x2, final double y2) {
+	public IJLineWrapper(final double x1, final double y1, final double x2, final double y2) {
 		line = new ij.gui.Line(x1, y1, x2, y2);
 	}
 
@@ -91,7 +91,7 @@ public class LineWrapper implements IJRealRoiWrapper<ij.gui.Line>, Line {
 	 * @param line
 	 *            imageJ 1.x line to be wrapped
 	 */
-	public LineWrapper(final ij.gui.Line line) {
+	public IJLineWrapper(final ij.gui.Line line) {
 		if (ij.gui.Line.getWidth() > 1)
 			throw new IllegalArgumentException("Cannot wrap lines with width > 1");
 		this.line = line;

@@ -64,7 +64,7 @@ public class IJLineToLineConverter extends AbstractRoiToMaskPredicateConverter<i
 
 	@Override
 	public Line convert(final ij.gui.Line src) {
-		return new LineWrapper(src);
+		return new IJLineWrapper(src);
 	}
 
 	@Override

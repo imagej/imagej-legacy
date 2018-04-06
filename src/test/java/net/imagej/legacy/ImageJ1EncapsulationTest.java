@@ -112,7 +112,7 @@ public class ImageJ1EncapsulationTest {
 					className.startsWith(net.imagej.legacy.convert.roi.IJRoiWrapper.class.getName()) ||
 					className.startsWith(net.imagej.legacy.convert.roi.IrregularPolylineRoiWrapper.class.getName()) ||
 					className.startsWith(net.imagej.legacy.convert.roi.LineToIJLineConverter.class.getName()) ||
-					className.startsWith(net.imagej.legacy.convert.roi.LineWrapper.class.getName()) ||
+					className.startsWith(net.imagej.legacy.convert.roi.IJLineWrapper.class.getName()) ||
 					className.startsWith(net.imagej.legacy.convert.roi.OvalRoiToEllipsoidConverter.class.getName()) ||
 					className.startsWith(net.imagej.legacy.convert.roi.OvalRoiWrapper.class.getName()) ||
 					className.startsWith(net.imagej.legacy.convert.roi.PointMaskToPointRoiConverter.class.getName()) ||
