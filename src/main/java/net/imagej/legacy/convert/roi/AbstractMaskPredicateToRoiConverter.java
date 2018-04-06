@@ -74,7 +74,7 @@ public abstract class AbstractMaskPredicateToRoiConverter<M extends MaskPredicat
 		return (T) convert((M) src);
 	}
 
-	abstract R convert(M mask);
+	public abstract R convert(M mask);
 
 	// TODO: Move to scijava-common when lossy framework is implemented
 	public boolean isLossy() {

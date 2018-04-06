@@ -88,7 +88,7 @@ public abstract class AbstractRoiToMaskPredicateConverter<R extends Roi, M exten
 		return (T) convert((R) src);
 	}
 
-	abstract M convert(final R src);
+	public abstract M convert(final R src);
 
-	abstract boolean supportedType(R src);
+	public abstract boolean supportedType(R src);
 }
