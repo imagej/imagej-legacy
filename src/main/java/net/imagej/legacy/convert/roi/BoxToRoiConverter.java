@@ -33,6 +33,7 @@ package net.imagej.legacy.convert.roi;
 
 import net.imglib2.roi.geom.real.Box;
 
+import org.scijava.Priority;
 import org.scijava.convert.Converter;
 import org.scijava.plugin.Plugin;
 
@@ -44,7 +45,7 @@ import ij.gui.Roi;
  *
  * @author Alison Walter
  */
-@Plugin(type = Converter.class)
+@Plugin(type = Converter.class, priority = Priority.LOW)
 public class BoxToRoiConverter extends AbstractMaskPredicateToRoiConverter<Box, Roi> {
 
 	@Override

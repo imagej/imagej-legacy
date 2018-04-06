@@ -34,6 +34,7 @@ package net.imagej.legacy.convert.roi;
 import net.imglib2.RealLocalizable;
 import net.imglib2.roi.geom.real.Ellipsoid;
 
+import org.scijava.Priority;
 import org.scijava.convert.Converter;
 import org.scijava.plugin.Plugin;
 
@@ -45,7 +46,7 @@ import ij.gui.OvalRoi;
  *
  * @author Alison Walter
  */
-@Plugin(type = Converter.class)
+@Plugin(type = Converter.class, priority = Priority.LOW)
 public class EllipsoidToOvalRoiConverter extends AbstractMaskPredicateToRoiConverter<Ellipsoid, OvalRoi> {
 
 	@Override

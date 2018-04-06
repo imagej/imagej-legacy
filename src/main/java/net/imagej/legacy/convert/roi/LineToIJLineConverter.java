@@ -34,6 +34,7 @@ package net.imagej.legacy.convert.roi;
 import net.imglib2.RealLocalizable;
 import net.imglib2.roi.geom.real.Line;
 
+import org.scijava.Priority;
 import org.scijava.convert.Converter;
 import org.scijava.plugin.Plugin;
 
@@ -42,7 +43,7 @@ import org.scijava.plugin.Plugin;
  *
  * @author Alison Walter
  */
-@Plugin(type = Converter.class)
+@Plugin(type = Converter.class, priority = Priority.LOW)
 public class LineToIJLineConverter extends AbstractMaskPredicateToRoiConverter<Line, ij.gui.Line> {
 
 	@Override

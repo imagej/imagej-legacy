@@ -45,7 +45,7 @@ import ij.gui.PointRoi;
  *
  * @author Alison Walter
  */
-@Plugin(type = Converter.class, priority = Priority.NORMAL - 1)
+@Plugin(type = Converter.class, priority = Priority.LOW - 1)
 public class PointMaskToPointRoiConverter extends
 	AbstractMaskPredicateToRoiConverter<PointMask, PointRoi>
 {

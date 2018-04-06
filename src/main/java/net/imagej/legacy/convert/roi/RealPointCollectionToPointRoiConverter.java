@@ -36,6 +36,7 @@ import java.util.Iterator;
 import net.imglib2.RealLocalizable;
 import net.imglib2.roi.geom.real.RealPointCollection;
 
+import org.scijava.Priority;
 import org.scijava.convert.Converter;
 import org.scijava.plugin.Plugin;
 
@@ -47,7 +48,7 @@ import ij.gui.PointRoi;
  *
  * @author Alison Walter
  */
-@Plugin(type = Converter.class)
+@Plugin(type = Converter.class, priority = Priority.LOW)
 public class RealPointCollectionToPointRoiConverter extends
 	AbstractMaskPredicateToRoiConverter<RealPointCollection<RealLocalizable>, PointRoi>
 {

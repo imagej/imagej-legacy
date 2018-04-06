@@ -34,6 +34,7 @@ package net.imagej.legacy.convert.roi;
 import net.imglib2.RealLocalizable;
 import net.imglib2.roi.geom.real.Polyline;
 
+import org.scijava.Priority;
 import org.scijava.convert.Converter;
 import org.scijava.plugin.Plugin;
 
@@ -47,7 +48,7 @@ import ij.gui.Roi;
  *
  * @author Alison Walter
  */
-@Plugin(type = Converter.class)
+@Plugin(type = Converter.class, priority = Priority.LOW)
 public class PolylineToPolylineRoiConverter extends AbstractMaskPredicateToRoiConverter<Polyline, PolygonRoi> {
 
 	@Override
