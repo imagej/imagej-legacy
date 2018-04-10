@@ -32,21 +32,22 @@
 package net.imagej.legacy.convert.roi.line;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import net.imagej.legacy.convert.roi.MaskPredicateUnwrappers.WrapperToWritableLine;
 import net.imagej.legacy.convert.roi.RoiUnwrappers.WrapperToLineConverter;
 import net.imglib2.RealLocalizable;
 import net.imglib2.RealPoint;
 import net.imglib2.roi.geom.real.DefaultWritableLine;
 import net.imglib2.roi.geom.real.Line;
+import net.imglib2.roi.geom.real.WritableLine;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.scijava.Context;
 import org.scijava.convert.ConvertService;
 import org.scijava.convert.Converter;
@@ -54,27 +55,25 @@ import org.scijava.convert.Converter;
 import ij.gui.Arrow;
 
 /**
- * Tests converting between {@link ij.gui.Line Line} and {@link Line}, and the
- * corresponding {@link IJLineWrapper}.
+ * Tests converting between {@link ij.gui.Line Line} and {@link Line}.
  *
  * @author Alison Walter
  */
 public class LineConversionTest {
 
 	private static ij.gui.Line ijLine;
-	private static Line ilLine;
-	private static Line wrap;
+	private static WritableLine ilLine;
+	private static Line ijwrap;
+	private static ij.gui.Line ilwrap;
 	private ConvertService convertService;
-
-	@Rule
-	public final ExpectedException exception = ExpectedException.none();
 
 	@BeforeClass
 	public static void initialize() {
 		ijLine = new ij.gui.Line(10.5, 20, 120.5, 150);
 		ilLine = new DefaultWritableLine(new double[] { 10.5, 20 }, new double[] {
 			120.5, 150 }, false);
-		wrap = new IJLineWrapper(ijLine);
+		ijwrap = new IJLineWrapper(ijLine);
+		ilwrap = new LineWrapper(ilLine);
 	}
 
 	@Before
@@ -89,101 +88,84 @@ public class LineConversionTest {
 		convertService.context().dispose();
 	}
 
-	// -- LineWrapper tests --
+	// -- ij.gui.Line to Line tests --
 
 	@Test
-	public void testLineWrapperGetter() {
-		// Wrapped Line equals ImageJ 1.x Line
-		assertEquals(wrap.endpointOne().getDoublePosition(0), ijLine.x1d, 0);
-		assertEquals(wrap.endpointOne().getDoublePosition(1), ijLine.y1d, 0);
-		assertEquals(wrap.endpointTwo().getDoublePosition(0), ijLine.x2d, 0);
-		assertEquals(wrap.endpointTwo().getDoublePosition(1), ijLine.y2d, 0);
+	public void testIJLineToLineConverterMatching() {
+		// ij.gui.Line to Line (should wrap)
+		final Converter<?, ?> ijLineToLine = convertService.getHandler(ijLine,
+			Line.class);
+		assertTrue(ijLineToLine instanceof IJLineToLineConverter);
 
-		// Wrapped Line equals equivalent ImgLib2 Line
-		assertTrue(equalsRealLocalizable(wrap.endpointOne(), ilLine.endpointOne()));
-		assertTrue(equalsRealLocalizable(wrap.endpointTwo(), ilLine.endpointTwo()));
+		// wrapped Line to Line (should unwrap)
+		final Converter<?, ?> lineWrapperToLine = convertService.getHandler(ilwrap,
+			Line.class);
+		assertTrue(lineWrapperToLine instanceof WrapperToWritableLine);
+
+		// Arrow to Line (shouldn't work)
+		// Arrow is an ij.gui.Line but its contains method functions differently
+		// from ij.gui.Line, and an Arrow and a Line which have the same end
+		// coordinates have different measurements. So, Arrows cannot be converted
+		// to imglib2 Line
+		final Arrow a = new Arrow(10, 10, 100, 100);
+		final Converter<?, ?> arrowToLine = convertService.getHandler(a,
+			Line.class);
+		assertTrue(arrowToLine == null);
+
+		// ij.gui.Line w/ width>1 to Line (shouldn't work)
+		ij.gui.Line.setWidth(10);
+		final Converter<?, ?> WideIjLinetoLine = convertService.getHandler(ijLine,
+			Line.class);
+		assertTrue(WideIjLinetoLine == null);
 	}
-
-	@Test
-	public void testLineWrapperTest() {
-		// Test that wrapped line and Imglib2 line have same test behavior
-		final RealPoint pt1 = new RealPoint(ilLine.endpointOne());
-		final RealPoint pt2 = new RealPoint(ilLine.endpointTwo());
-		final RealPoint pt3 = new RealPoint(new double[] { 17, 126 }); // on
-		// line
-		// on line but beyond endpoint
-		final RealPoint pt4 = new RealPoint(new double[] { 4, 115 });
-		// off line
-		final RealPoint pt5 = new RealPoint(new double[] { 20.25, 40.125 });
-
-		assertEquals(ilLine.test(pt1), wrap.test(pt1));
-		assertEquals(ilLine.test(pt2), wrap.test(pt2));
-		assertEquals(ilLine.test(pt3), wrap.test(pt3));
-		assertEquals(ilLine.test(pt4), wrap.test(pt4));
-		assertEquals(ilLine.test(pt5), wrap.test(pt5));
-	}
-
-	@Test
-	public void testLineWrapperBounds() {
-		assertEquals(10.5, wrap.realMin(0), 0);
-		assertEquals(20, wrap.realMin(1), 0);
-		assertEquals(120.5, wrap.realMax(0), 0);
-		assertEquals(150, wrap.realMax(1), 0);
-	}
-
-	// -- IJLineToLineConverter tests --
 
 	@Test
 	public void testIJLineToLineConverter() {
 		final Line converted = convertService.convert(ijLine, Line.class);
 		assertTrue(converted instanceof IJLineWrapper);
 
-		assertEquals(wrap.endpointOne().getDoublePosition(0), converted
+		assertEquals(ijwrap.endpointOne().getDoublePosition(0), converted
 			.endpointOne().getDoublePosition(0), 0);
-		assertEquals(wrap.endpointOne().getDoublePosition(1), converted
+		assertEquals(ijwrap.endpointOne().getDoublePosition(1), converted
 			.endpointOne().getDoublePosition(1), 0);
-		assertEquals(wrap.endpointTwo().getDoublePosition(0), converted
+		assertEquals(ijwrap.endpointTwo().getDoublePosition(0), converted
 			.endpointTwo().getDoublePosition(0), 0);
-		assertEquals(wrap.endpointTwo().getDoublePosition(1), converted
+		assertEquals(ijwrap.endpointTwo().getDoublePosition(1), converted
 			.endpointTwo().getDoublePosition(1), 0);
 	}
 
 	@Test
-	public void testIJLineToLineConverterLineWithWidth() {
-		ij.gui.Line.setWidth(10);
-		final Line converted = convertService.convert(ijLine, Line.class);
-		assertTrue(converted == null); // converter does not work on ij.gui.Line
-		// with width > 1
-	}
-
-	@Test
-	public void testIJLineToLineConverterArrow() {
-		final Arrow a = new Arrow(10, 10, 100, 100);
-		final Line converted = convertService.convert(a, Line.class);
-		assertTrue(converted == null); // Arrow is an ij.gui.Line but its
-		// contains
-		// method functions differently from ij.gui.Line, and an Arrow and a
-		// Line
-		// which have the same end coordinates have different measurements. So,
-		// Arrows cannot be converted to imglib2 Line
+	public void testLineWrapperToLineConverter() {
+		final Line result = convertService.convert(ilwrap, Line.class);
+		assertTrue(result == ilLine);
 	}
 
 	// -- Line to ij.gui.Line converter tests --
 
 	@Test
 	public void testLineToIJLineConverterMatching() {
+		// WritableLine to ij.gui.Line (should wrap)
 		final Converter<?, ?> c = convertService.getHandler(ilLine,
 			ij.gui.Line.class);
-		assertTrue(c instanceof LineToIJLineConverter);
+		assertTrue(c instanceof WritableLineToIJLineConverter);
 
-		final Converter<?, ?> wrapc = convertService.getHandler(wrap,
+		// Read only line to ij.gui.Line (shouldn't wrap)
+		final TestLine test = new TestLine(0, 0, 10, 10);
+		final Converter<?, ?> readOnlyToIjLine = convertService.getHandler(test,
+			ij.gui.Line.class);
+		assertTrue(readOnlyToIjLine instanceof LineToIJLineConverter);
+
+		// Wrapped ij.gui.Line to ij.gui.Line (should unwrap)
+		final Converter<?, ?> wrapc = convertService.getHandler(ijwrap,
 			ij.gui.Line.class);
 		assertTrue(wrapc instanceof WrapperToLineConverter);
 
+		// WritableLine to Arrow (shouldn't work)
 		final Converter<?, ?> arrow = convertService.getHandler(ilLine,
 			Arrow.class);
 		assertNull(arrow);
 
+		// 3D Line to ij.gui.Line (shouldn't work)
 		final Line ddd = new DefaultWritableLine(new double[] { 10.5, 7, -6.25 },
 			new double[] { 106, -8.5, 21 }, false);
 		final Converter<?, ?> multiDLine = convertService.getHandler(ddd,
@@ -192,12 +174,29 @@ public class LineConversionTest {
 	}
 
 	@Test
-	public void testLineToIJLineConverterWithLine() {
+	public void testLineToIJLineConverter() {
+		final Line test = new TestLine(0, 1, 13, 44);
+		final ij.gui.Line result = convertService.convert(test, ij.gui.Line.class);
+
+		assertFalse(result instanceof LineWrapper);
+
+		final RealLocalizable eOne = test.endpointOne();
+		final RealLocalizable eTwo = test.endpointTwo();
+		assertEquals(result.x1d, eOne.getDoublePosition(0), 0);
+		assertEquals(result.y1d, eOne.getDoublePosition(1), 0);
+		assertEquals(result.x2d, eTwo.getDoublePosition(0), 0);
+		assertEquals(result.y2d, eTwo.getDoublePosition(1), 0);
+	}
+
+	@Test
+	public void testWritableLineToIJLineConverter() {
 		final ij.gui.Line result = convertService.convert(ilLine,
 			ij.gui.Line.class);
+
+		assertTrue(result instanceof LineWrapper);
+
 		final RealLocalizable eOne = ilLine.endpointOne();
 		final RealLocalizable eTwo = ilLine.endpointTwo();
-
 		assertEquals(result.x1d, eOne.getDoublePosition(0), 0);
 		assertEquals(result.y1d, eOne.getDoublePosition(1), 0);
 		assertEquals(result.x2d, eTwo.getDoublePosition(0), 0);
@@ -206,22 +205,60 @@ public class LineConversionTest {
 
 	@Test
 	public void testLineToIJLineConverterWithLineWrapper() {
-		final ij.gui.Line result = convertService.convert(wrap, ij.gui.Line.class);
-
+		final ij.gui.Line result = convertService.convert(ijwrap,
+			ij.gui.Line.class);
 		assertTrue(ijLine == result);
 	}
 
-	// -- Helper methods --
+	// -- Helper classes --
 
-	public boolean equalsRealLocalizable(final RealLocalizable pointOne,
-		final RealLocalizable pointTwo)
-	{
-		if (pointOne.numDimensions() != pointTwo.numDimensions()) return false;
-		for (int d = 0; d < pointOne.numDimensions(); d++) {
-			if (pointOne.getDoublePosition(d) != pointTwo.getDoublePosition(d))
-				return false;
+	private static final class TestLine implements Line {
+
+		private final double x1;
+		private final double y1;
+		private final double x2;
+		private final double y2;
+
+		public TestLine(final double x1, final double y1, final double x2,
+			final double y2)
+		{
+			this.x1 = x1;
+			this.y1 = y1;
+			this.x2 = x2;
+			this.y2 = y2;
 		}
-		return true;
+
+		@Override
+		public boolean test(final RealLocalizable t) {
+			return false;
+		}
+
+		@Override
+		public int numDimensions() {
+			return 2;
+		}
+
+		@Override
+		public double realMin(final int d) {
+			if (d == 0) return x1 > x2 ? x2 : x1;
+			return y1 > y2 ? y2 : y1;
+		}
+
+		@Override
+		public double realMax(final int d) {
+			if (d == 0) return x1 > x2 ? x1 : x2;
+			return y1 > y2 ? y1 : y2;
+		}
+
+		@Override
+		public RealLocalizable endpointOne() {
+			return new RealPoint(new double[] { x1, y1 });
+		}
+
+		@Override
+		public RealLocalizable endpointTwo() {
+			return new RealPoint(new double[] { x2, y2 });
+		}
 	}
 
 }

@@ -36,6 +36,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import net.imagej.legacy.convert.roi.MaskPredicateUnwrappers.WrapperToWritableBoxConverter;
 import net.imagej.legacy.convert.roi.RoiUnwrappers.WrapperToRoiConverter;
 import net.imglib2.RealLocalizable;
 import net.imglib2.RealPoint;
@@ -45,9 +46,7 @@ import net.imglib2.roi.geom.real.WritableBox;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.scijava.Context;
 import org.scijava.convert.ConvertService;
 import org.scijava.convert.Converter;
@@ -55,30 +54,24 @@ import org.scijava.convert.Converter;
 import ij.gui.Roi;
 
 /**
- * Tests converting between {@link Roi} and {@link Box}, and the corresponding
- * {@link RoiWrapper}.
+ * Tests converting between {@link Roi} and {@link Box}.
  *
  * @author Alison Walter
  */
 public class RoiConversionTest {
 
 	private Roi rect;
-	private WritableBox wrap;
-	private Box b;
-	private RealLocalizable inside;
-	private RealLocalizable outside;
+	private WritableBox wrapRect;
+	private WritableBox b;
+	private Roi wrapBox;
 	private ConvertService convertService;
-
-	@Rule
-	public final ExpectedException exception = ExpectedException.none();
 
 	@Before
 	public void setup() {
 		rect = new Roi(1, 13, 7, 4);
-		wrap = new RoiWrapper(rect);
+		wrapRect = new RoiWrapper(rect);
 		b = new ClosedWritableBox(new double[] { 1, 13 }, new double[] { 8, 17 });
-		inside = new RealPoint(new double[] { 6.25, 15 });
-		outside = new RealPoint(new double[] { -2, 12.5 });
+		wrapBox = new BoxWrapper(b);
 
 		final Context context = new Context(ConvertService.class);
 		convertService = context.service(ConvertService.class);
@@ -89,104 +82,25 @@ public class RoiConversionTest {
 		convertService.context().dispose();
 	}
 
-	// -- Wrapper tests --
-
-	@Test
-	public void testRoiWrapperGetters() {
-		assertEquals(rect.getXBase() + rect.getFloatWidth() / 2, wrap.center()
-			.getDoublePosition(0), 0);
-		assertEquals(rect.getYBase() + rect.getFloatHeight() / 2, wrap.center()
-			.getDoublePosition(1), 0);
-		assertEquals(rect.getFloatWidth(), wrap.sideLength(0), 0);
-		assertEquals(rect.getFloatHeight(), wrap.sideLength(1), 0);
-
-		assertEquals(b.center().getDoublePosition(0), wrap.center()
-			.getDoublePosition(0), 0);
-		assertEquals(b.center().getDoublePosition(1), wrap.center()
-			.getDoublePosition(1), 0);
-		assertEquals(b.sideLength(0), wrap.sideLength(0), 0);
-		assertEquals(b.sideLength(1), wrap.sideLength(1), 0);
-	}
-
-	@Test
-	public void testRoiWrapperSetCenter() {
-		wrap.center().setPosition(new double[] { 1, 11.5 });
-
-		assertEquals(1, wrap.center().getDoublePosition(0), 0);
-		assertEquals(11.5, wrap.center().getDoublePosition(1), 0);
-
-		// check if backing Roi was updated
-		assertEquals(-2.5, rect.getXBase(), 0);
-		assertEquals(9.5, rect.getYBase(), 0);
-		assertEquals(7, rect.getFloatWidth(), 0);
-		assertEquals(4, rect.getFloatHeight(), 0);
-	}
-
-	@Test
-	public void testRoiWrapperSetSideLength() {
-		exception.expect(UnsupportedOperationException.class);
-		wrap.setSideLength(0, 3);
-	}
-
-	@Test
-	public void testRoiWrapperTest() {
-		// Test corners
-		final RealLocalizable topLeft = new RealPoint(new double[] { 1, 13 });
-		final RealLocalizable bottomLeft = new RealPoint(new double[] { 1, 17 });
-		final RealLocalizable topRight = new RealPoint(new double[] { 8, 13 });
-		final RealLocalizable bottomRight = new RealPoint(new double[] { 8, 17 });
-
-		assertTrue(wrap.test(topLeft));
-		assertFalse(wrap.test(bottomLeft));
-		assertFalse(wrap.test(bottomRight));
-		assertFalse(wrap.test(topRight));
-
-		// Test edges
-		final RealLocalizable top = new RealPoint(new double[] { 3.25, 13 });
-		final RealLocalizable left = new RealPoint(new double[] { 1, 15 });
-		final RealLocalizable right = new RealPoint(new double[] { 8, 14.125 });
-		final RealLocalizable bottom = new RealPoint(new double[] { 5.5, 17 });
-
-		assertTrue(wrap.test(top));
-		assertTrue(wrap.test(left));
-		assertFalse(wrap.test(bottom));
-		assertFalse(wrap.test(right));
-
-		// Test points
-		assertTrue(wrap.test(inside));
-		assertFalse(wrap.test(outside));
-	}
-
-	@Test
-	public void testRoiWrapperBounds() {
-		assertEquals(1, wrap.realMin(0), 0);
-		assertEquals(13, wrap.realMin(1), 0);
-		assertEquals(8, wrap.realMax(0), 0);
-		assertEquals(17, wrap.realMax(1), 0);
-	}
-
-	@Test
-	public void testRoiWrapperAfterMoved() {
-		wrap.center().setPosition(new double[] { 1, 11.5 });
-
-		// Check test
-		assertFalse(wrap.test(inside));
-		assertTrue(wrap.test(outside));
-
-		// Check getters
-		assertEquals(1, wrap.center().getDoublePosition(0), 0);
-		assertEquals(11.5, wrap.center().getDoublePosition(1), 0);
-		assertEquals(7, wrap.sideLength(0), 0);
-		assertEquals(4, wrap.sideLength(1), 0);
-
-		// Check bounds
-		assertEquals(-2.5, wrap.realMin(0), 0);
-		assertEquals(9.5, wrap.realMin(1), 0);
-		assertEquals(4.5, wrap.realMax(0), 0);
-		assertEquals(13.5, wrap.realMax(1), 0);
-	}
-
 	// -- To Box conversion tests --
+
+	@Test
+	public void testRoiToBoxConverterMatching() {
+		// Roi to Box
+		final Converter<?, ?> roiToBox = convertService.getHandler(rect, Box.class);
+		assertTrue(roiToBox instanceof RoiToBoxConverter);
+
+		// WrappedBox to Box
+		final Converter<?, ?> wrapToBox = convertService.getHandler(wrapBox,
+			Box.class);
+		assertTrue(wrapToBox instanceof WrapperToWritableBoxConverter);
+
+		// Roi w/ rounded corners to Box
+		rect.setCornerDiameter(10);
+		final Converter<?, ?> roundedCornerToBox = convertService.getHandler(rect,
+			Box.class);
+		assertTrue(roundedCornerToBox == null);
+	}
 
 	@Test
 	public void testRoiToBoxConverter() {
@@ -194,20 +108,19 @@ public class RoiConversionTest {
 
 		assertTrue(converted instanceof RoiWrapper);
 
-		assertEquals(wrap.center().getDoublePosition(0), converted.center()
+		assertEquals(wrapRect.center().getDoublePosition(0), converted.center()
 			.getDoublePosition(0), 0);
-		assertEquals(wrap.center().getDoublePosition(1), converted.center()
+		assertEquals(wrapRect.center().getDoublePosition(1), converted.center()
 			.getDoublePosition(1), 0);
 		assertEquals(converted.sideLength(0), converted.sideLength(0), 0);
 		assertEquals(converted.sideLength(1), converted.sideLength(1), 0);
 	}
 
 	@Test
-	public void testRoiToBoxConverterRoundedCorner() {
-		rect.setCornerDiameter(10);
-		final Box converted = convertService.convert(rect, Box.class);
+	public void testWrapperToBoxConversion() {
+		final Box converted = convertService.convert(wrapBox, Box.class);
 
-		assertTrue(converted == null);
+		assertTrue(converted == b);
 	}
 
 	// -- To Roi conversion tests --
@@ -215,10 +128,14 @@ public class RoiConversionTest {
 	@Test
 	public void testBoxToRoiConverterMatching() {
 		final Converter<?, ?> cb = convertService.getHandler(b, Roi.class);
-		assertTrue(cb instanceof BoxToRoiConverter);
+		assertTrue(cb instanceof WritableBoxToRoiConverter);
 
-		final Converter<?, ?> cw = convertService.getHandler(wrap, Roi.class);
+		final Converter<?, ?> cw = convertService.getHandler(wrapRect, Roi.class);
 		assertTrue(cw instanceof WrapperToRoiConverter);
+
+		final Converter<?, ?> cr = convertService.getHandler(new TestBox(),
+			Roi.class);
+		assertTrue(cr instanceof BoxToRoiConverter);
 
 		final Box d = new ClosedWritableBox(new double[] { 0, -6.5, 12, 50 },
 			new double[] { 2, 0.5, 6, 13.5 });
@@ -227,8 +144,11 @@ public class RoiConversionTest {
 	}
 
 	@Test
-	public void testBoxToRoiConversion() {
+	public void testWritableBoxToRoiConversion() {
 		final Roi r = convertService.convert(b, Roi.class);
+
+		assertTrue(r instanceof BoxWrapper);
+		assertEquals(((BoxWrapper) r).getSource(), b);
 
 		assertEquals(Roi.RECTANGLE, r.getType());
 		assertEquals(b.sideLength(0), r.getFloatWidth(), 0);
@@ -240,9 +160,71 @@ public class RoiConversionTest {
 	}
 
 	@Test
+	public void testBoxToRoiConversion() {
+		final Box testBox = new TestBox();
+		final Roi r = convertService.convert(testBox, Roi.class);
+
+		assertFalse(r instanceof BoxWrapper);
+
+		assertEquals(Roi.RECTANGLE, r.getType());
+		assertEquals(testBox.sideLength(0), r.getFloatWidth(), 0);
+		assertEquals(testBox.sideLength(1), r.getFloatHeight(), 0);
+		assertEquals(testBox.center().getDoublePosition(0) - testBox.sideLength(0) /
+			2, r.getXBase(), 0);
+		assertEquals(testBox.center().getDoublePosition(1) - testBox.sideLength(1) /
+			2, r.getYBase(), 0);
+	}
+
+	@Test
 	public void testWrapperToRoiConversion() {
-		final Roi r = convertService.convert(wrap, Roi.class);
+		final Roi r = convertService.convert(wrapRect, Roi.class);
 		assertEquals(Roi.RECTANGLE, r.getType());
 		assertTrue(rect == r);
+	}
+
+	// -- Helper classes --
+
+	private static final class TestBox implements Box {
+
+		private final double[] min;
+		private final double[] max;
+
+		public TestBox() {
+			min = new double[] { 0, 0 };
+			max = new double[] { 10, 10 };
+		}
+
+		@Override
+		public boolean test(final RealLocalizable t) {
+			return t.getDoublePosition(0) < max[0] && t.getDoublePosition(
+				0) > min[0] && t.getDoublePosition(1) < max[1] && t.getDoublePosition(
+					1) > min[1];
+		}
+
+		@Override
+		public int numDimensions() {
+			return 2;
+		}
+
+		@Override
+		public double realMin(final int d) {
+			return min[d];
+		}
+
+		@Override
+		public double realMax(final int d) {
+			return max[d];
+		}
+
+		@Override
+		public double sideLength(final int d) {
+			return max[d] - min[d];
+		}
+
+		@Override
+		public RealLocalizable center() {
+			return new RealPoint(new double[] { 5, 5 });
+		}
+
 	}
 }

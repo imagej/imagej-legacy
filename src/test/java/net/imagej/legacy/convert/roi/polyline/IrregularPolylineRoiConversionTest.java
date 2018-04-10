@@ -32,12 +32,9 @@
 package net.imagej.legacy.convert.roi.polyline;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import net.imagej.legacy.convert.roi.RoiUnwrappers.WrapperToPolygonRoiConverter;
-import net.imglib2.Point;
-import net.imglib2.RealPoint;
 import net.imglib2.roi.RealMaskRealInterval;
 
 import org.junit.After;
@@ -53,8 +50,7 @@ import ij.gui.PolygonRoi;
 import ij.gui.Roi;
 
 /**
- * Tests converting {@link PolygonRoi} to {@link RealMaskRealInterval} and the
- * corresponding {@link IrregularPolylineRoiWrapper}.
+ * Tests converting {@link PolygonRoi} to {@link RealMaskRealInterval}.
  * <p>
  * Specifically, this tests the following conversions:
  * </p>
@@ -119,133 +115,7 @@ public class IrregularPolylineRoiConversionTest {
 		convertService.context().dispose();
 	}
 
-	// -- Wrapper tests --
-
-	@Test
-	public void testIrregularPolylineRoiWrapperPolylineWithWidth() {
-		poly.updateWideLine(4);
-
-		// Test test(...)
-		final Point test = new Point(new int[] { 23, 15 });
-		assertTrue(wrap.test(test));
-
-		test.setPosition(new int[] { 7, 5 });
-		assertTrue(wrap.test(test));
-
-		test.setPosition(new int[] { 52, -26 });
-		assertTrue(wrap.test(test));
-
-		test.setPosition(new int[] { 51, -25 });
-		assertFalse(wrap.test(test));
-
-		// Test bounds
-		assertEquals(1.25 - 2, wrap.realMin(0), 0);
-		assertEquals(-30 - 2, wrap.realMin(1), 0);
-		assertEquals(79 + 2, wrap.realMax(0), 0);
-		assertEquals(20 + 2, wrap.realMax(1), 0);
-	}
-
-	@Test
-	public void testIrregularPolylineRoiWrapperFreelineWithWidth() {
-		free.updateWideLine(10.5f);
-
-		// Test test(...)
-		final Point test = new Point(new int[] { 115, 50 });
-		assertTrue(freeWrap.test(test));
-
-		test.setPosition(new int[] { 143, 110 });
-		assertTrue(freeWrap.test(test));
-
-		test.setPosition(new int[] { 144, 96 });
-		assertTrue(freeWrap.test(test));
-
-		test.setPosition(new int[] { 120, 25 });
-		assertFalse(freeWrap.test(test));
-
-		// Test bounds
-		assertEquals(115 - 5.25, freeWrap.realMin(0), 0);
-		assertEquals(34 - 5.25, freeWrap.realMin(1), 0);
-		assertEquals(183 + 5.25, freeWrap.realMax(0), 0);
-		assertEquals(129 + 5.25, freeWrap.realMax(1), 0);
-	}
-
-	@Test
-	public void testIrregularPolylineRoiWrapperSplineFitPolyline() {
-		poly.fitSpline();
-		final float[] x = poly.getFloatPolygon().xpoints;
-		final float[] y = poly.getFloatPolygon().ypoints;
-
-		// Test test(...)
-		// It is difficult to guess points along the spline, so this just tests
-		// that spline points are considered "contained" by the polyline
-		final RealPoint test = new RealPoint(new double[] { x[0], y[0] });
-		assertTrue(wrap.test(test));
-
-		test.setPosition(new double[] { x[90], y[90] });
-		assertTrue(wrap.test(test));
-
-		// contained by non-spline polyline
-		test.setPosition(new double[] { 18, 18 });
-		assertFalse(wrap.test(test));
-
-		// Test bounds
-		// The bounds of the underlying Roi change when the polyline is fit with a
-		// spline
-		double minX = Double.POSITIVE_INFINITY;
-		double minY = Double.POSITIVE_INFINITY;
-		double maxX = Double.NEGATIVE_INFINITY;
-		double maxY = Double.NEGATIVE_INFINITY;
-		for (int i = 0; i < x.length; i++) {
-			if (x[i] < minX) minX = x[i];
-			if (y[i] < minY) minY = y[i];
-			if (x[i] > maxX) maxX = x[i];
-			if (y[i] > maxY) maxY = y[i];
-		}
-
-		assertEquals(minX, wrap.realMin(0), 0);
-		assertEquals(minY, wrap.realMin(1), 0);
-		assertEquals(maxX, wrap.realMax(0), 0);
-		assertEquals(maxY, wrap.realMax(1), 0);
-	}
-
-	@Test
-	public void testIrregularPolylineRoiWrapperSplineFitPolylineWithWidth() {
-		poly.updateWideLine(5);
-		poly.fitSpline();
-		final float[] x = poly.getFloatPolygon().xpoints;
-		final float[] y = poly.getFloatPolygon().ypoints;
-
-		final RealPoint test = new RealPoint(new double[] { 17, 20 });
-		assertTrue(wrap.test(test));
-
-		test.setPosition(new double[] { 25, 11 });
-		assertTrue(wrap.test(test));
-
-		// contained by non-spline polyline
-		test.setPosition(new double[] { 18, 18 });
-		assertFalse(wrap.test(test));
-
-		// Test bounds
-		// The bounds of the underlying Roi change when the polyline is fit with a
-		// spline. But changing the width doesn't change the bounds.
-		double minX = Double.POSITIVE_INFINITY;
-		double minY = Double.POSITIVE_INFINITY;
-		double maxX = Double.NEGATIVE_INFINITY;
-		double maxY = Double.NEGATIVE_INFINITY;
-		for (int i = 0; i < x.length; i++) {
-			if (x[i] < minX) minX = x[i];
-			if (y[i] < minY) minY = y[i];
-			if (x[i] > maxX) maxX = x[i];
-			if (y[i] > maxY) maxY = y[i];
-		}
-
-		assertEquals(minX - 2.5, wrap.realMin(0), 0);
-		assertEquals(minY - 2.5, wrap.realMin(1), 0);
-		assertEquals(maxX + 2.5, wrap.realMax(0), 0);
-		assertEquals(maxY + 2.5, wrap.realMax(1), 0);
-	}
-
-	// -- PolygonRoi to MaskRealInterval conversion tests --
+	// -- PolygonRoi to RealMaskRealInterval conversion tests --
 	@Test
 	public void
 		testPolylineRoiToRealMaskRealIntervalConverterPolylineWithWidth()

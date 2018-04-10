@@ -35,6 +35,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import net.imagej.legacy.convert.roi.MaskPredicateUnwrappers.WrapperToWritablePolygon2D;
 import net.imagej.legacy.convert.roi.RoiUnwrappers.WrapperToPolygonRoiConverter;
 import net.imglib2.RealLocalizable;
 import net.imglib2.RealPoint;
@@ -44,20 +45,16 @@ import net.imglib2.roi.geom.real.WritablePolygon2D;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.scijava.Context;
 import org.scijava.convert.ConvertService;
 import org.scijava.convert.Converter;
 
-import ij.ImagePlus;
 import ij.gui.PolygonRoi;
 import ij.gui.Roi;
 
 /**
- * Tests converting {@link PolygonRoi} to {@link Polygon2D} and the
- * corresponding wrappers.
+ * Tests converting {@link PolygonRoi} to {@link Polygon2D}.
  *
  * @author Alison Walter
  */
@@ -69,21 +66,15 @@ public class PolygonRoiConversionTest {
 	private Polygon2D freeWrap;
 	private PolygonRoi traced;
 	private Polygon2D tracedWrap;
-	private Polygon2D dp;
-	private RealLocalizable inside;
-	private RealLocalizable outside;
+	private WritablePolygon2D p2d;
+	private PolygonRoi p2dwrap;
 	private ConvertService convertService;
-
-	@Rule
-	public final ExpectedException exception = ExpectedException.none();
 
 	@Before
 	public void setup() {
 		poly = new PolygonRoi(new float[] { 100.5f, 100.5f, 150, 199, 199 },
 			new float[] { 100, 200, 250.25f, 200, 100 }, Roi.POLYGON);
 		wrap = new PolygonRoiWrapper(poly);
-		dp = new DefaultWritablePolygon2D(new double[] { 100.5, 100.5, 150, 199,
-			199 }, new double[] { 100, 200, 250.25, 200, 100 });
 
 		final int[] x = new int[] { 21, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6,
 			6, 5, 5, 4, 4, 3, 3, 3, 2, 2, 2, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 2,
@@ -101,8 +92,9 @@ public class PolygonRoiConversionTest {
 		traced = new PolygonRoi(xt, yt, xt.length, Roi.TRACED_ROI);
 		tracedWrap = new UnmodifiablePolygonRoiWrapper(traced);
 
-		inside = new RealPoint(new double[] { 151, 225 });
-		outside = new RealPoint(new double[] { 100, 100 });
+		p2d = new DefaultWritablePolygon2D(new double[] { 1, 17, 30 },
+			new double[] { 33, 40, 40 });
+		p2dwrap = new Polygon2DWrapper(p2d);
 
 		final Context context = new Context(ConvertService.class);
 		convertService = context.service(ConvertService.class);
@@ -113,144 +105,39 @@ public class PolygonRoiConversionTest {
 		convertService.context().dispose();
 	}
 
-	// -- Wrapper tests --
-
-	@Test
-	public void testPolygonRoiWrapperGetters() {
-		assertEquals(5, wrap.numVertices());
-		final float[] x = poly.getFloatPolygon().xpoints;
-		final float[] y = poly.getFloatPolygon().ypoints;
-
-		for (int i = 0; i < 5; i++) {
-			// compare ImageJ 1.x to Wrapper
-			assertEquals(x[i], wrap.vertex(i).getDoublePosition(0), 0);
-			assertEquals(y[i], wrap.vertex(i).getDoublePosition(1), 0);
-
-			// compare ImgLib2 to Wrapper
-			assertEquals(dp.vertex(i).getDoublePosition(0), wrap.vertex(i)
-				.getDoublePosition(0), 0);
-			assertEquals(dp.vertex(i).getDoublePosition(1), wrap.vertex(i)
-				.getDoublePosition(1), 0);
-		}
-	}
-
-	@Test
-	public void testPolygonRoiWrapperSetVertex() {
-		exception.expect(UnsupportedOperationException.class);
-		wrap.vertex(2).setPosition(new double[] { 1, -3 });
-	}
-
-	@Test
-	public void testPolygonRoiWrapperAddVertex() {
-		exception.expect(UnsupportedOperationException.class);
-		wrap.addVertex(3, new double[] { 0, 0 });
-	}
-
-	@Test
-	public void testPolygonRoiWrapperRemoveVertexNoImagePlus() {
-		exception.expect(UnsupportedOperationException.class);
-		wrap.removeVertex(0);
-	}
-
-	@Test
-	public void testPolygonRoiWrapperRemoveVertexWithImagePlus() {
-		final ImagePlus i = new ImagePlus("http://imagej.net/images/blobs.gif");
-		i.setRoi(poly);
-		poly.setImage(i);
-
-		wrap.removeVertex(2);
-		assertEquals(4, wrap.numVertices());
-
-		// Check that backing PolygonRoi was updated
-		assertEquals(4, poly.getNCoordinates());
-	}
-
-	@Test
-	public void testPolygonRoiWrapperTest() {
-		assertTrue(wrap.test(inside));
-		assertFalse(wrap.test(outside));
-	}
-
-	@Test
-	public void testPolygonRoiWrapperBounds() {
-		assertEquals(100.5, wrap.realMin(0), 0);
-		assertEquals(100, wrap.realMin(1), 0);
-		assertEquals(199, wrap.realMax(0), 0);
-		assertEquals(250.25, wrap.realMax(1), 0);
-	}
-
-	@Test
-	public void testUnmodifiablePolygonRoiWrapperFreeRoiGetters() {
-		final RealLocalizable twentytwo = freeWrap.vertex(22);
-		assertEquals(2, twentytwo.getDoublePosition(0), 0);
-		assertEquals(7, twentytwo.getDoublePosition(1), 0);
-
-		assertEquals(free.getNCoordinates(), freeWrap.numVertices());
-	}
-
-	@Test
-	public void testUnmodifiablePolygonRoiWrapperFreeRoiTest() {
-		assertTrue(freeWrap.test(new RealPoint(new double[] { 16.25, 13 })));
-		assertTrue(freeWrap.test(new RealPoint(new double[] { 15, 1.125 })));
-		assertFalse(freeWrap.test(new RealPoint(new double[] { 27.25, 8 })));
-	}
-
-	@Test
-	public void testUnmodifiablePolygonRoiWrapperFreeRoiBounds() {
-		assertEquals(0, freeWrap.realMin(0), 0);
-		assertEquals(0, freeWrap.realMin(1), 0);
-		assertEquals(27, freeWrap.realMax(0), 0);
-		assertEquals(23, freeWrap.realMax(1), 0);
-	}
-
-	@Test
-	public void testUnmodifiablePolygonRoiWrapperTracedRoiGetters() {
-		final RealLocalizable three = tracedWrap.vertex(3);
-		assertEquals(0, three.getDoublePosition(0), 0);
-		assertEquals(5, three.getDoublePosition(1), 0);
-
-		assertEquals(traced.getNCoordinates(), tracedWrap.numVertices());
-	}
-
-	@Test
-	public void testUnmodifiablePolygonRoiWrapperTracedRoiTest() {
-		assertTrue(tracedWrap.test(new RealPoint(new double[] { 6.5, 1.125 })));
-		assertTrue(tracedWrap.test(new RealPoint(new double[] { 1.5, 4 })));
-		assertFalse(tracedWrap.test(new RealPoint(new double[] { 8, 5 })));
-	}
-
-	@Test
-	public void testUnmodifiablePolygonRoiWrapperTracedRoiBounds() {
-		assertEquals(0, tracedWrap.realMin(0), 0);
-		assertEquals(0, tracedWrap.realMin(1), 0);
-		assertEquals(8, tracedWrap.realMax(0), 0);
-		assertEquals(5, tracedWrap.realMax(1), 0);
-	}
-
-	@Test
-	public void testUpdatedAfterPolygonRoiWrapperModified() {
-		final ImagePlus i = new ImagePlus("http://imagej.net/images/blobs.gif");
-		i.setRoi(poly);
-		poly.setImage(i);
-
-		assertTrue(wrap.test(inside));
-		assertFalse(wrap.test(outside));
-
-		wrap.removeVertex(2);
-		assertFalse(wrap.test(inside));
-		assertFalse(wrap.test(outside));
-
-		// Check bounds updated
-		assertEquals(100.5, wrap.realMin(0), 0);
-		assertEquals(100, wrap.realMin(1), 0);
-		assertEquals(199, wrap.realMax(0), 0);
-		assertEquals(200, wrap.realMax(1), 0);
-	}
-
 	// -- to Polygon2D conversion tests --
 
 	@Test
-	public void testPolygonRoiToPolygon2DConverter() {
+	public void testPolygonRoiToPolygon2DConverterMatching() {
+		// PolygonRoi to Polygon2D (should wrap)
+		final Converter<?, ?> prToP2d = convertService.getHandler(poly,
+			Polygon2D.class);
+		assertTrue(prToP2d instanceof PolygonRoiToPolygon2DConverter);
+
+		// FreeRoi to Polygon2D (should wrap)
+		final Converter<?, ?> frToP2d = convertService.getHandler(free,
+			Polygon2D.class);
+		assertTrue(frToP2d instanceof PolygonRoiToPolygon2DConverter);
+
+		// TracedRoi to Polygon2D (should wrap)
+		final Converter<?, ?> trToP2d = convertService.getHandler(traced,
+			Polygon2D.class);
+		assertTrue(trToP2d instanceof PolygonRoiToPolygon2DConverter);
+
+		// Spline fit to Polygon2D (shouldn't work)
+		poly.fitSpline();
+		final Converter<?, ?> splinePrToP2d = convertService.getHandler(poly,
+			Polygon2D.class);
+		assertTrue(splinePrToP2d == null);
+
+		// Wrapped Polygon2D to Polygon2D (should unwrap)
+		final Converter<?, ?> wrapperToP2d = convertService.getHandler(p2dwrap,
+			Polygon2D.class);
+		assertTrue(wrapperToP2d instanceof WrapperToWritablePolygon2D);
+	}
+
+	@Test
+	public void testPolygonRoiToPolygon2D() {
 		final Polygon2D converted = convertService.convert(poly, Polygon2D.class);
 
 		assertTrue(converted instanceof PolygonRoiWrapper);
@@ -279,82 +166,163 @@ public class PolygonRoiConversionTest {
 	}
 
 	@Test
-	public void testPolygonRoiToPolygon2DConverterFreeRoi() {
+	public void testFreeRoiToPolygon2D() {
 		final Polygon2D converted = convertService.convert(free, Polygon2D.class);
+
 		assertTrue(converted instanceof UnmodifiablePolygonRoiWrapper);
+
+		final float[] xp = free.getFloatPolygon().xpoints;
+		final float[] yp = free.getFloatPolygon().ypoints;
+
+		assertEquals(free.getNCoordinates(), converted.numVertices());
+		for (int i = 0; i < free.getNCoordinates(); i++) {
+			assertEquals(xp[i], converted.vertex(i).getDoublePosition(0), 0);
+			assertEquals(yp[i], converted.vertex(i).getDoublePosition(1), 0);
+		}
 	}
 
 	@Test
-	public void testPolygonRoiToPolygon2DConverterTracedRoi() {
+	public void testTracedRoiToPolygon2D() {
 		final Polygon2D converted = convertService.convert(traced, Polygon2D.class);
+
 		assertTrue(converted instanceof UnmodifiablePolygonRoiWrapper);
+
+		final float[] xp = traced.getFloatPolygon().xpoints;
+		final float[] yp = traced.getFloatPolygon().ypoints;
+
+		assertEquals(traced.getNCoordinates(), converted.numVertices());
+		for (int i = 0; i < traced.getNCoordinates(); i++) {
+			assertEquals(xp[i], converted.vertex(i).getDoublePosition(0), 0);
+			assertEquals(yp[i], converted.vertex(i).getDoublePosition(1), 0);
+		}
 	}
 
 	@Test
-	public void testPolygonRoiToPolygon2DConverterWithSpline() {
-		poly.fitSpline();
-		final Polygon2D converted = convertService.convert(poly, Polygon2D.class);
-
-		assertTrue(converted == null);
+	public void testWrapperToPolygon2D() {
+		final Polygon2D converted = convertService.convert(p2dwrap,
+			Polygon2D.class);
+		assertTrue(p2d == converted);
 	}
 
 	// -- to PolygonRoi conversion tests --
 
 	@Test
 	public void testPolygonRoiConverterMatching() {
-		final Polygon2D py = new DefaultWritablePolygon2D(new double[] { 10, 10, 15,
-			20, 20 }, new double[] { 1, 20, 33, 20, 1 });
-		final Converter<?, ?> c = convertService.getHandler(py, PolygonRoi.class);
-		assertTrue(c instanceof Polygon2DToPolygonRoiConverter);
+		// WritablePolygon2D to PolygonRoi (should wrap)
+		final Converter<?, ?> c = convertService.getHandler(p2d, PolygonRoi.class);
+		assertTrue(c instanceof WritablePolygon2DToPolygonRoiConverter);
 
+		// Read only Polygon2D to Polygon2D (shouldn't wrap)
+		final Polygon2D readOnly = new TestPolygon2D();
+		final Converter<?, ?> readOnlyP2dToPr = convertService.getHandler(readOnly,
+			PolygonRoi.class);
+		assertTrue(readOnlyP2dToPr instanceof Polygon2DToPolygonRoiConverter);
+
+		// WrappedPolyonRoi to PolygonRoi (should unwrap)
 		final Converter<?, ?> pWrap = convertService.getHandler(wrap,
 			PolygonRoi.class);
 		assertTrue(pWrap instanceof WrapperToPolygonRoiConverter);
 
+		// WrappedTracedRoi to PolygonRoi (should unwrap)
 		final Converter<?, ?> tWrap = convertService.getHandler(tracedWrap,
 			PolygonRoi.class);
 		assertTrue(tWrap instanceof WrapperToPolygonRoiConverter);
 
+		// WrappedFreeRoi to PolygonRoi (should unwrap)
 		final Converter<?, ?> fWrap = convertService.getHandler(freeWrap,
 			PolygonRoi.class);
 		assertTrue(fWrap instanceof WrapperToPolygonRoiConverter);
 	}
 
 	@Test
-	public void testPolygon2DToPolygonRoiConversion() {
-		final Polygon2D py = new DefaultWritablePolygon2D(new double[] { 10, 10, 15,
-			20, 20 }, new double[] { 1, 20, 33, 20, 1 });
-		final PolygonRoi pr = convertService.convert(py, PolygonRoi.class);
+	public void testPolygon2DToPolygonRoi() {
+		final Polygon2D test = new TestPolygon2D();
+		final PolygonRoi pr = convertService.convert(test, PolygonRoi.class);
 
+		assertFalse(pr instanceof Polygon2DWrapper);
 		assertEquals(Roi.POLYGON, pr.getType());
-		assertEquals(py.numVertices(), pr.getNCoordinates());
+		assertEquals(test.numVertices(), pr.getNCoordinates());
 		final float[] x = pr.getFloatPolygon().xpoints;
 		final float[] y = pr.getFloatPolygon().ypoints;
-		for (int i = 0; i < py.numVertices(); i++) {
-			final RealLocalizable v = py.vertex(i);
+		for (int i = 0; i < test.numVertices(); i++) {
+			final RealLocalizable v = test.vertex(i);
 			assertEquals(v.getDoublePosition(0), x[i], 0);
 			assertEquals(v.getDoublePosition(1), y[i], 0);
 		}
 	}
 
 	@Test
-	public void testWrappedPolygonToPolygonRoiConversion() {
+	public void testWritablePolygon2DToPolygonRoi() {
+		final PolygonRoi pr = convertService.convert(p2d, PolygonRoi.class);
+
+		assertTrue(pr instanceof Polygon2DWrapper);
+		assertEquals(Roi.POLYGON, pr.getType());
+		assertEquals(p2d.numVertices(), pr.getNCoordinates());
+		final float[] x = pr.getFloatPolygon().xpoints;
+		final float[] y = pr.getFloatPolygon().ypoints;
+		for (int i = 0; i < p2d.numVertices(); i++) {
+			final RealLocalizable v = p2d.vertex(i);
+			assertEquals(v.getDoublePosition(0), x[i], 0);
+			assertEquals(v.getDoublePosition(1), y[i], 0);
+		}
+	}
+
+	@Test
+	public void testWrappedPolygonToPolygonRoi() {
 		final PolygonRoi pr = convertService.convert(wrap, PolygonRoi.class);
 		assertEquals(Roi.POLYGON, pr.getType());
 		assertTrue(poly == pr);
 	}
 
 	@Test
-	public void testWrappedFreelineToPolygonRoiConversion() {
+	public void testWrappedFreelineToPolygonRoi() {
 		final PolygonRoi pr = convertService.convert(freeWrap, PolygonRoi.class);
 		assertEquals(Roi.FREEROI, pr.getType());
 		assertTrue(free == pr);
 	}
 
 	@Test
-	public void testWrappedTracedToPolygonRoiConversion() {
+	public void testWrappedTracedToPolygonRoi() {
 		final PolygonRoi pr = convertService.convert(tracedWrap, PolygonRoi.class);
 		assertEquals(Roi.TRACED_ROI, pr.getType());
 		assertTrue(traced == pr);
+	}
+
+	// -- Helper classes --
+
+	private static final class TestPolygon2D implements Polygon2D {
+
+		@Override
+		public boolean test(final RealLocalizable t) {
+			return false;
+		}
+
+		@Override
+		public int numDimensions() {
+			return 2;
+		}
+
+		@Override
+		public double realMin(final int d) {
+			return 0;
+		}
+
+		@Override
+		public double realMax(final int d) {
+			return d == 0 ? 10 : 5;
+		}
+
+		@Override
+		public RealLocalizable vertex(final int pos) {
+			if (pos == 0) return new RealPoint(new double[] { 0, 0 });
+			else if (pos == 1) return new RealPoint(new double[] { 5, 5 });
+			return new RealPoint(new double[] { 10, 0 });
+		}
+
+		@Override
+		public int numVertices() {
+			return 3;
+		}
+
 	}
 }

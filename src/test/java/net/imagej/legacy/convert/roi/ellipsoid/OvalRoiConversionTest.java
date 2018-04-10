@@ -48,9 +48,7 @@ import net.imglib2.roi.geom.real.WritableEllipsoid;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.scijava.Context;
 import org.scijava.convert.ConvertService;
 import org.scijava.convert.Converter;
@@ -58,34 +56,25 @@ import org.scijava.convert.Converter;
 import ij.gui.OvalRoi;
 
 /**
- * Tests converting between {@link OvalRoi} and {@link Ellipsoid}, and the
- * corresponding {@link OvalRoiWrapper}.
+ * Tests converting between {@link OvalRoi} and {@link Ellipsoid}.
  *
  * @author Alison Walter
  */
 public class OvalRoiConversionTest {
 
 	private OvalRoi oval;
-	private Ellipsoid e;
-	private WritableEllipsoid wrap;
-	private RealLocalizable inside;
-	private RealLocalizable onBoundary;
-	private RealLocalizable outside;
+	private WritableEllipsoid e;
+	private WritableEllipsoid wrapOval;
+	private OvalRoi wrapEllipsoid;
 	private ConvertService convertService;
-
-	@Rule
-	public final ExpectedException exception = ExpectedException.none();
 
 	@Before
 	public void setup() {
 		oval = new OvalRoi(10, 22, 7, 4);
 		e = new ClosedWritableEllipsoid(new double[] { 13.5, 24 }, new double[] {
 			3.5, 2 });
-		wrap = new OvalRoiWrapper(oval);
-
-		inside = new RealPoint(new double[] { 12.125, 23 });
-		onBoundary = new RealPoint(new double[] { 17, 24 });
-		outside = new RealPoint(new double[] { 101, 41.125 });
+		wrapOval = new OvalRoiWrapper(oval);
+		wrapEllipsoid = new EllipsoidWrapper(e);
 
 		final Context context = new Context(ConvertService.class);
 		convertService = context.service(ConvertService.class);
@@ -96,117 +85,60 @@ public class OvalRoiConversionTest {
 		convertService.context().dispose();
 	}
 
-	// -- OvalWrapper tests --
-
-	@Test
-	public void testOvalWrapperGetters() {
-		// Test ImageJ 1.x and wrapper equivalent
-		assertEquals(oval.getFloatWidth() / 2, wrap.semiAxisLength(0), 0);
-		assertEquals(oval.getFloatHeight() / 2, wrap.semiAxisLength(1), 0);
-		assertEquals(oval.getXBase() + oval.getFloatWidth() / 2, wrap.center()
-			.getDoublePosition(0), 0);
-		assertEquals(oval.getYBase() + oval.getFloatHeight() / 2, wrap.center()
-			.getDoublePosition(1), 0);
-
-		// Test ImgLib2 and wrapper equivalent
-		assertEquals(e.semiAxisLength(0), wrap.semiAxisLength(0), 0);
-		assertEquals(e.semiAxisLength(1), wrap.semiAxisLength(1), 0);
-		assertEquals(e.center().getDoublePosition(0), wrap.center()
-			.getDoublePosition(0), 0);
-		assertEquals(e.center().getDoublePosition(1), wrap.center()
-			.getDoublePosition(1), 0);
-	}
-
-	@Test
-	public void testOvalWrapperSetCenter() {
-		wrap.center().setPosition(new double[] { 100, 40.5 });
-		assertEquals(100, wrap.center().getDoublePosition(0), 0);
-		assertEquals(40.5, wrap.center().getDoublePosition(1), 0);
-
-		// check that underlying OvalRoi was updated
-		assertEquals(oval.getXBase() + oval.getFloatWidth() / 2, wrap.center()
-			.getDoublePosition(0), 0);
-		assertEquals(oval.getYBase() + oval.getFloatHeight() / 2, wrap.center()
-			.getDoublePosition(1), 0);
-	}
-
-	@Test
-	public void testOvalWrapperSetSemiAxisLength() {
-		exception.expect(UnsupportedOperationException.class);
-		wrap.setSemiAxisLength(0, 3);
-	}
-
-	@Test
-	public void testOvalWrapperTest() {
-		assertEquals(e.test(inside), wrap.test(inside));
-		assertEquals(e.test(onBoundary), wrap.test(onBoundary));
-		assertEquals(e.test(outside), wrap.test(outside));
-	}
-
-	@Test
-	public void testOvalWrapperBounds() {
-		assertEquals(10, wrap.realMin(0), 0);
-		assertEquals(22, wrap.realMin(1), 0);
-		assertEquals(17, wrap.realMax(0), 0);
-		assertEquals(26, wrap.realMax(1), 0);
-	}
-
-	@Test
-	public void testOvalWrapperAfterMoved() {
-		final RealLocalizable onNewBoundary = new RealPoint(new double[] { 100,
-			42.5 });
-
-		assertTrue(wrap.test(inside));
-		assertTrue(wrap.test(onBoundary));
-		assertFalse(wrap.test(outside));
-		assertFalse(wrap.test(onNewBoundary));
-
-		wrap.center().setPosition(new double[] { 100, 40.5 });
-
-		// Check that move occurred
-		assertFalse(wrap.test(inside));
-		assertFalse(wrap.test(onBoundary));
-		assertTrue(wrap.test(outside));
-		assertTrue(wrap.test(onNewBoundary));
-
-		// Check that the bounds are updated
-		assertEquals(96.5, wrap.realMin(0), 0);
-		assertEquals(38.5, wrap.realMin(1), 0);
-		assertEquals(103.5, wrap.realMax(0), 0);
-		assertEquals(42.5, wrap.realMax(1), 0);
-
-		// Check that underlying OvalRoi was updated
-		assertEquals(oval.getFloatWidth() / 2, wrap.semiAxisLength(0), 0);
-		assertEquals(oval.getFloatHeight() / 2, wrap.semiAxisLength(1), 0);
-		assertEquals(oval.getXBase() + oval.getFloatWidth() / 2, wrap.center()
-			.getDoublePosition(0), 0);
-		assertEquals(oval.getYBase() + oval.getFloatHeight() / 2, wrap.center()
-			.getDoublePosition(1), 0);
-	}
-
 	// -- OvalRoiToEllipsoidConverter tests --
+
+	@Test
+	public void testOvalRoiToEllipsoidConverterMatching() {
+		// OvalRoi to Ellipsoid (should wrap)
+
+		// EllipsoidWrapper to Ellipsoid (should unwrap)
+	}
 
 	@Test
 	public void testOvalRoiToEllipsoidConverter() {
 		final Ellipsoid converted = convertService.convert(oval, Ellipsoid.class);
 
 		assertTrue(converted instanceof OvalRoiWrapper);
+		assertEquals(oval.getXBase() + oval.getFloatWidth() / 2, converted.center()
+			.getDoublePosition(0), 0);
+		assertEquals(oval.getYBase() + oval.getFloatHeight() / 2, converted.center()
+			.getDoublePosition(1), 0);
+		assertEquals(oval.getFloatWidth() / 2, converted.semiAxisLength(0), 0);
+		assertEquals(oval.getFloatHeight() / 2, converted.semiAxisLength(1), 0);
+	}
+
+	@Test
+	public void testEllipsoidWrapperToEllipsoidConverter() {
+		final Ellipsoid converted = convertService.convert(wrapEllipsoid,
+			Ellipsoid.class);
+
+		assertTrue(converted == e);
 	}
 
 	// -- EllipsoidToOvalRoiConverter tests --
 
 	@Test
 	public void testEllipsoidToOvalRoiConverterMatching() {
+		// Writable Ellipsoid to OvalRoi (should wrap)
 		final Converter<?, ?> c = convertService.getHandler(e, OvalRoi.class);
-		assertTrue(c instanceof EllipsoidToOvalRoiConverter);
+		assertTrue(c instanceof WritableEllipsoidToOvalRoiConverter);
 
-		final Converter<?, ?> cc = convertService.getHandler(wrap, OvalRoi.class);
+		// Wrapped OvalRoi to OvalRoi (should unwrap)
+		final Converter<?, ?> cc = convertService.getHandler(wrapOval,
+			OvalRoi.class);
 		assertTrue(cc instanceof WrapperToOvalRoiConverter);
 
+		// Writable Sphere to OvalRoi (should wrap)
 		final Sphere s = new ClosedWritableSphere(new double[] { 1.25, -13.5 }, 10);
 		final Converter<?, ?> ccc = convertService.getHandler(s, OvalRoi.class);
-		assertTrue(ccc instanceof EllipsoidToOvalRoiConverter);
+		assertTrue(ccc instanceof WritableEllipsoidToOvalRoiConverter);
 
+		// Read Only Ellipsoid to OvalRoi (should not wrap)
+		final Converter<?, ?> ccccc = convertService.getHandler(new TestEllipsoid(),
+			OvalRoi.class);
+		assertTrue(ccccc instanceof EllipsoidToOvalRoiConverter);
+
+		// 3D Ellipsoid to OvalRoi (not possible)
 		final Ellipsoid oe = new OpenWritableEllipsoid(new double[] { 1.5, 6.25, -9,
 			62.125 }, new double[] { 11, 1, 0.5, 107 });
 		final Converter<?, ?> cccc = convertService.getHandler(oe, OvalRoi.class);
@@ -214,8 +146,11 @@ public class OvalRoiConversionTest {
 	}
 
 	@Test
-	public void testEllipsoidToOvalRoiConverterWithEllipsoid() {
+	public void testEllipsoidToOvalRoiConverterWithWritableEllipsoid() {
 		final OvalRoi o = convertService.convert(e, OvalRoi.class);
+
+		assertTrue(o instanceof EllipsoidWrapper);
+		assertTrue(((EllipsoidWrapper) o).getSource() == e);
 
 		final RealLocalizable center = e.center();
 		assertEquals(center.getDoublePosition(0), o.getXBase() + o.getFloatWidth() /
@@ -227,8 +162,72 @@ public class OvalRoiConversionTest {
 	}
 
 	@Test
+	public void testEllipsoidToOvalRoiConverterWithEllipsoid() {
+		final Ellipsoid test = new TestEllipsoid();
+		final OvalRoi o = convertService.convert(test, OvalRoi.class);
+
+		assertFalse(o instanceof EllipsoidWrapper);
+		final RealLocalizable center = test.center();
+		assertEquals(center.getDoublePosition(0), o.getXBase() + o.getFloatWidth() /
+			2, 0);
+		assertEquals(center.getDoublePosition(1), o.getYBase() + o
+			.getFloatHeight() / 2, 0);
+		assertEquals(test.semiAxisLength(0), o.getFloatWidth() / 2, 0);
+		assertEquals(test.semiAxisLength(1), o.getFloatHeight() / 2, 0);
+	}
+
+	@Test
 	public void testEllipsoidToOvalRoiConverterWithWrapper() {
-		final OvalRoi o = convertService.convert(wrap, OvalRoi.class);
+		final OvalRoi o = convertService.convert(wrapOval, OvalRoi.class);
 		assertTrue(oval == o);
+	}
+
+	// -- Helper classes --
+
+	private static final class TestEllipsoid implements Ellipsoid {
+
+		private final RealPoint center;
+		private final double[] semiAxis;
+
+		public TestEllipsoid() {
+			center = new RealPoint(10, 12);
+			semiAxis = new double[] { 3, 4 };
+		}
+
+		@Override
+		public double exponent() {
+			return 2;
+		}
+
+		@Override
+		public double semiAxisLength(final int d) {
+			return semiAxis[d];
+		}
+
+		@Override
+		public RealLocalizable center() {
+			return center;
+		}
+
+		@Override
+		public boolean test(final RealLocalizable t) {
+			return false;
+		}
+
+		@Override
+		public int numDimensions() {
+			return 2;
+		}
+
+		@Override
+		public double realMin(final int d) {
+			return center.getDoublePosition(d) - semiAxis[d];
+		}
+
+		@Override
+		public double realMax(final int d) {
+			return center.getDoublePosition(d) + semiAxis[d];
+		}
+
 	}
 }

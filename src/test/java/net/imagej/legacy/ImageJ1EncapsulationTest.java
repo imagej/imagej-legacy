@@ -122,6 +122,7 @@ public class ImageJ1EncapsulationTest {
 					className.startsWith(net.imagej.legacy.convert.roi.box.RoiToBoxConverter.class.getName()) ||
 					className.startsWith(net.imagej.legacy.convert.roi.box.RoiToBoxConverter.class.getName()) ||
 					className.startsWith(net.imagej.legacy.convert.roi.box.RoiWrapper.class.getName()) ||
+					className.startsWith(net.imagej.legacy.convert.roi.box.WritableBoxToRoiConverter.class.getName()) ||
 					className.startsWith(net.imagej.legacy.convert.roi.ellipsoid.EllipsoidToOvalRoiConverter.class.getName()) ||
 					className.startsWith(net.imagej.legacy.convert.roi.ellipsoid.EllipsoidToOvalRoiConverter.class.getName()) ||
 					className.startsWith(net.imagej.legacy.convert.roi.ellipsoid.EllipsoidWrapper.class.getName()) ||
@@ -129,6 +130,7 @@ public class ImageJ1EncapsulationTest {
 					className.startsWith(net.imagej.legacy.convert.roi.ellipsoid.OvalRoiToEllipsoidConverter.class.getName()) ||
 					className.startsWith(net.imagej.legacy.convert.roi.ellipsoid.OvalRoiWrapper.class.getName()) ||
 					className.startsWith(net.imagej.legacy.convert.roi.ellipsoid.OvalRoiWrapper.class.getName()) ||
+					className.startsWith(net.imagej.legacy.convert.roi.ellipsoid.WritableEllipsoidToOvalRoiConverter.class.getName()) ||
 					className.startsWith(net.imagej.legacy.convert.roi.line.IJLineToLineConverter.class.getName()) ||
 					className.startsWith(net.imagej.legacy.convert.roi.line.IJLineToLineConverter.class.getName()) ||
 					className.startsWith(net.imagej.legacy.convert.roi.line.IJLineWrapper.class.getName()) ||
@@ -136,6 +138,7 @@ public class ImageJ1EncapsulationTest {
 					className.startsWith(net.imagej.legacy.convert.roi.line.LineToIJLineConverter.class.getName()) ||
 					className.startsWith(net.imagej.legacy.convert.roi.line.LineToIJLineConverter.class.getName()) ||
 					className.startsWith(net.imagej.legacy.convert.roi.line.LineWrapper.class.getName()) ||
+					className.startsWith(net.imagej.legacy.convert.roi.line.WritableLineToIJLineConverter.class.getName()) ||
 					className.startsWith(net.imagej.legacy.convert.roi.point.PointMaskToPointRoiConverter.class.getName()) ||
 					className.startsWith(net.imagej.legacy.convert.roi.point.PointMaskToPointRoiConverter.class.getName()) ||
 					className.startsWith(net.imagej.legacy.convert.roi.point.PointMaskWrapper.class.getName()) ||
@@ -146,6 +149,8 @@ public class ImageJ1EncapsulationTest {
 					className.startsWith(net.imagej.legacy.convert.roi.point.RealPointCollectionToPointRoiConverter.class.getName()) ||
 					className.startsWith(net.imagej.legacy.convert.roi.point.RealPointCollectionToPointRoiConverter.class.getName()) ||
 					className.startsWith(net.imagej.legacy.convert.roi.point.RealPointCollectionWrapper.class.getName()) ||
+					className.startsWith(net.imagej.legacy.convert.roi.point.WritablePointMaskToPointRoiConverter.class.getName()) ||
+					className.startsWith(net.imagej.legacy.convert.roi.point.WritableRealPointCollectionToPointRoiConverter.class.getName()) ||
 					className.startsWith(net.imagej.legacy.convert.roi.polygon2d.Polygon2DToPolygonRoiConverter.class.getName()) ||
 					className.startsWith(net.imagej.legacy.convert.roi.polygon2d.Polygon2DToPolygonRoiConverter.class.getName()) ||
 					className.startsWith(net.imagej.legacy.convert.roi.polygon2d.Polygon2DWrapper.class.getName()) ||
@@ -155,6 +160,7 @@ public class ImageJ1EncapsulationTest {
 					className.startsWith(net.imagej.legacy.convert.roi.polygon2d.PolygonRoiWrapper.class.getName()) ||
 					className.startsWith(net.imagej.legacy.convert.roi.polygon2d.UnmodifiablePolygonRoiWrapper.class.getName()) ||
 					className.startsWith(net.imagej.legacy.convert.roi.polygon2d.UnmodifiablePolygonRoiWrapper.class.getName()) ||
+					className.startsWith(net.imagej.legacy.convert.roi.polygon2d.WritablePolygon2DToPolygonRoiConverter.class.getName()) ||
 					className.startsWith(net.imagej.legacy.convert.roi.polyline.IrregularPolylineRoiWrapper.class.getName()) ||
 					className.startsWith(net.imagej.legacy.convert.roi.polyline.IrregularPolylineRoiWrapper.class.getName()) ||
 					className.startsWith(net.imagej.legacy.convert.roi.polyline.PolylineRoiToPolylineConverter.class.getName()) ||
@@ -168,6 +174,7 @@ public class ImageJ1EncapsulationTest {
 					className.startsWith(net.imagej.legacy.convert.roi.polyline.PolylineWrapper.class.getName()) ||
 					className.startsWith(net.imagej.legacy.convert.roi.polyline.UnmodifiablePolylineRoiWrapper.class.getName()) ||
 					className.startsWith(net.imagej.legacy.convert.roi.polyline.UnmodifiablePolylineRoiWrapper.class.getName()) ||
+					className.startsWith(net.imagej.legacy.convert.roi.polyline.WritablePolylineToPolylineRoiConverter.class.getName()) ||
 					className.startsWith(net.imagej.legacy.display.AbstractImagePlusDisplayViewer.class.getName()) ||
 					className.startsWith(net.imagej.legacy.display.LegacyImageDisplayService.class.getName()) ||
 					className.startsWith(net.imagej.legacy.display.LegacyImageDisplayViewer.class.getName()) ||
