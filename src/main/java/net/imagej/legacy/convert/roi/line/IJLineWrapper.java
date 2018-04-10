@@ -54,14 +54,10 @@ public class IJLineWrapper implements IJRealRoiWrapper<ij.gui.Line>, Line {
 	 * specified integer coordinates, and then wraps this as an ImgLib2
 	 * {@link Line}.
 	 *
-	 * @param x1
-	 *            x coordinate of the first endpoint.
-	 * @param y1
-	 *            y coordinate of the first endpoint.
-	 * @param x2
-	 *            x coordinate of the second endpoint.
-	 * @param y2
-	 *            y coordinate of the second endpoint.
+	 * @param x1 x coordinate of the first endpoint.
+	 * @param y1 y coordinate of the first endpoint.
+	 * @param x2 x coordinate of the second endpoint.
+	 * @param y2 y coordinate of the second endpoint.
 	 */
 	public IJLineWrapper(final int x1, final int y1, final int x2, final int y2) {
 		line = new ij.gui.Line(x1, y1, x2, y2);
@@ -69,19 +65,16 @@ public class IJLineWrapper implements IJRealRoiWrapper<ij.gui.Line>, Line {
 
 	/**
 	 * Creates a new ImageJ 1.x {@link ij.gui.Line Line} with endpoints at the
-	 * specified real coordinates, and then wraps this as an ImgLib2
-	 * {@link Line}.
+	 * specified real coordinates, and then wraps this as an ImgLib2 {@link Line}.
 	 *
-	 * @param x1
-	 *            x coordinate of the first endpoint.
-	 * @param y1
-	 *            y coordinate of the first endpoint.
-	 * @param x2
-	 *            x coordinate of the second endpoint.
-	 * @param y2
-	 *            y coordinate of the second endpoint.
+	 * @param x1 x coordinate of the first endpoint.
+	 * @param y1 y coordinate of the first endpoint.
+	 * @param x2 x coordinate of the second endpoint.
+	 * @param y2 y coordinate of the second endpoint.
 	 */
-	public IJLineWrapper(final double x1, final double y1, final double x2, final double y2) {
+	public IJLineWrapper(final double x1, final double y1, final double x2,
+		final double y2)
+	{
 		line = new ij.gui.Line(x1, y1, x2, y2);
 	}
 
@@ -89,12 +82,11 @@ public class IJLineWrapper implements IJRealRoiWrapper<ij.gui.Line>, Line {
 	 * Wraps the given ImageJ 1.x {@link ij.gui.Line Line} as an ImgLib2
 	 * {@link Line}.
 	 *
-	 * @param line
-	 *            imageJ 1.x line to be wrapped
+	 * @param line imageJ 1.x line to be wrapped
 	 */
 	public IJLineWrapper(final ij.gui.Line line) {
-		if (ij.gui.Line.getWidth() > 1)
-			throw new IllegalArgumentException("Cannot wrap lines with width > 1");
+		if (ij.gui.Line.getWidth() > 1) throw new IllegalArgumentException(
+			"Cannot wrap lines with width > 1");
 		this.line = line;
 	}
 
@@ -103,33 +95,32 @@ public class IJLineWrapper implements IJRealRoiWrapper<ij.gui.Line>, Line {
 		// NB: ImageJ 1.x contains(...) is not used due to the limitations of
 		// integer coordinates. Due to this, ImageJ 1.x contains(...) always
 		// returns false for lines with width = 1.
-		return GeomMaths.lineContains(new double[] { line.x1d, line.y1d }, new double[] { line.x2d, line.y2d }, t, 2);
+		return GeomMaths.lineContains(new double[] { line.x1d, line.y1d },
+			new double[] { line.x2d, line.y2d }, t, 2);
 	}
 
 	@Override
 	public double realMin(final int d) {
-		if (d != 0 && d != 1)
-			throw new IllegalArgumentException("Invalid dimension " + d);
+		if (d != 0 && d != 1) throw new IllegalArgumentException(
+			"Invalid dimension " + d);
 		return d == 0 ? Math.min(line.x1d, line.x2d) : Math.min(line.y1d, line.y2d);
 	}
 
 	@Override
 	public double realMax(final int d) {
-		if (d != 0 && d != 1)
-			throw new IllegalArgumentException("Invalid dimension " + d);
+		if (d != 0 && d != 1) throw new IllegalArgumentException(
+			"Invalid dimension " + d);
 		return d == 0 ? Math.max(line.x1d, line.x2d) : Math.max(line.y1d, line.y2d);
 	}
 
 	@Override
 	public RealLocalizable endpointOne() {
-		return new AbstractRealLocalizable(new double[] { line.x1d, line.y1d }) {
-		};
+		return new AbstractRealLocalizable(new double[] { line.x1d, line.y1d }) {};
 	}
 
 	@Override
 	public RealLocalizable endpointTwo() {
-		return new AbstractRealLocalizable(new double[] { line.x2d, line.y2d }) {
-		};
+		return new AbstractRealLocalizable(new double[] { line.x2d, line.y2d }) {};
 	}
 
 	@Override

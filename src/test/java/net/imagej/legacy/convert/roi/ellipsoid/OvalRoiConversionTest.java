@@ -36,10 +36,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import net.imagej.legacy.convert.roi.RoiUnwrappers;
 import net.imagej.legacy.convert.roi.RoiUnwrappers.WrapperToOvalRoiConverter;
-import net.imagej.legacy.convert.roi.ellipsoid.EllipsoidToOvalRoiConverter;
-import net.imagej.legacy.convert.roi.ellipsoid.OvalRoiWrapper;
 import net.imglib2.RealLocalizable;
 import net.imglib2.RealPoint;
 import net.imglib2.roi.geom.real.ClosedWritableEllipsoid;
@@ -82,7 +79,8 @@ public class OvalRoiConversionTest {
 	@Before
 	public void setup() {
 		oval = new OvalRoi(10, 22, 7, 4);
-		e = new ClosedWritableEllipsoid(new double[] { 13.5, 24 }, new double[] { 3.5, 2 });
+		e = new ClosedWritableEllipsoid(new double[] { 13.5, 24 }, new double[] {
+			3.5, 2 });
 		wrap = new OvalRoiWrapper(oval);
 
 		inside = new RealPoint(new double[] { 12.125, 23 });
@@ -105,14 +103,18 @@ public class OvalRoiConversionTest {
 		// Test ImageJ 1.x and wrapper equivalent
 		assertEquals(oval.getFloatWidth() / 2, wrap.semiAxisLength(0), 0);
 		assertEquals(oval.getFloatHeight() / 2, wrap.semiAxisLength(1), 0);
-		assertEquals(oval.getXBase() + oval.getFloatWidth() / 2, wrap.center().getDoublePosition(0), 0);
-		assertEquals(oval.getYBase() + oval.getFloatHeight() / 2, wrap.center().getDoublePosition(1), 0);
+		assertEquals(oval.getXBase() + oval.getFloatWidth() / 2, wrap.center()
+			.getDoublePosition(0), 0);
+		assertEquals(oval.getYBase() + oval.getFloatHeight() / 2, wrap.center()
+			.getDoublePosition(1), 0);
 
 		// Test ImgLib2 and wrapper equivalent
 		assertEquals(e.semiAxisLength(0), wrap.semiAxisLength(0), 0);
 		assertEquals(e.semiAxisLength(1), wrap.semiAxisLength(1), 0);
-		assertEquals(e.center().getDoublePosition(0), wrap.center().getDoublePosition(0), 0);
-		assertEquals(e.center().getDoublePosition(1), wrap.center().getDoublePosition(1), 0);
+		assertEquals(e.center().getDoublePosition(0), wrap.center()
+			.getDoublePosition(0), 0);
+		assertEquals(e.center().getDoublePosition(1), wrap.center()
+			.getDoublePosition(1), 0);
 	}
 
 	@Test
@@ -122,8 +124,10 @@ public class OvalRoiConversionTest {
 		assertEquals(40.5, wrap.center().getDoublePosition(1), 0);
 
 		// check that underlying OvalRoi was updated
-		assertEquals(oval.getXBase() + oval.getFloatWidth() / 2, wrap.center().getDoublePosition(0), 0);
-		assertEquals(oval.getYBase() + oval.getFloatHeight() / 2, wrap.center().getDoublePosition(1), 0);
+		assertEquals(oval.getXBase() + oval.getFloatWidth() / 2, wrap.center()
+			.getDoublePosition(0), 0);
+		assertEquals(oval.getYBase() + oval.getFloatHeight() / 2, wrap.center()
+			.getDoublePosition(1), 0);
 	}
 
 	@Test
@@ -149,7 +153,8 @@ public class OvalRoiConversionTest {
 
 	@Test
 	public void testOvalWrapperAfterMoved() {
-		final RealLocalizable onNewBoundary = new RealPoint(new double[] { 100, 42.5 });
+		final RealLocalizable onNewBoundary = new RealPoint(new double[] { 100,
+			42.5 });
 
 		assertTrue(wrap.test(inside));
 		assertTrue(wrap.test(onBoundary));
@@ -173,8 +178,10 @@ public class OvalRoiConversionTest {
 		// Check that underlying OvalRoi was updated
 		assertEquals(oval.getFloatWidth() / 2, wrap.semiAxisLength(0), 0);
 		assertEquals(oval.getFloatHeight() / 2, wrap.semiAxisLength(1), 0);
-		assertEquals(oval.getXBase() + oval.getFloatWidth() / 2, wrap.center().getDoublePosition(0), 0);
-		assertEquals(oval.getYBase() + oval.getFloatHeight() / 2, wrap.center().getDoublePosition(1), 0);
+		assertEquals(oval.getXBase() + oval.getFloatWidth() / 2, wrap.center()
+			.getDoublePosition(0), 0);
+		assertEquals(oval.getYBase() + oval.getFloatHeight() / 2, wrap.center()
+			.getDoublePosition(1), 0);
 	}
 
 	// -- OvalRoiToEllipsoidConverter tests --
@@ -200,8 +207,8 @@ public class OvalRoiConversionTest {
 		final Converter<?, ?> ccc = convertService.getHandler(s, OvalRoi.class);
 		assertTrue(ccc instanceof EllipsoidToOvalRoiConverter);
 
-		final Ellipsoid oe = new OpenWritableEllipsoid(new double[] { 1.5, 6.25, -9, 62.125 },
-				new double[] { 11, 1, 0.5, 107 });
+		final Ellipsoid oe = new OpenWritableEllipsoid(new double[] { 1.5, 6.25, -9,
+			62.125 }, new double[] { 11, 1, 0.5, 107 });
 		final Converter<?, ?> cccc = convertService.getHandler(oe, OvalRoi.class);
 		assertNull(cccc);
 	}
@@ -211,8 +218,10 @@ public class OvalRoiConversionTest {
 		final OvalRoi o = convertService.convert(e, OvalRoi.class);
 
 		final RealLocalizable center = e.center();
-		assertEquals(center.getDoublePosition(0), o.getXBase() + o.getFloatWidth() / 2, 0);
-		assertEquals(center.getDoublePosition(1), o.getYBase() + o.getFloatHeight() / 2, 0);
+		assertEquals(center.getDoublePosition(0), o.getXBase() + o.getFloatWidth() /
+			2, 0);
+		assertEquals(center.getDoublePosition(1), o.getYBase() + o
+			.getFloatHeight() / 2, 0);
 		assertEquals(e.semiAxisLength(0), o.getFloatWidth() / 2, 0);
 		assertEquals(e.semiAxisLength(1), o.getFloatHeight() / 2, 0);
 	}

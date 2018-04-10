@@ -37,7 +37,6 @@ import ij.gui.Roi;
 
 /**
  * ImageJ 1.x {@link Roi}s with associated {@link MaskPredicate}.
- *
  * <p>
  * Classes which implement this interface are expected to also extend an ImageJ
  * 1.x Roi class. Failure to do so, may result in problems downstream.

@@ -40,9 +40,10 @@ import ij.gui.Roi;
  * Wraps ImageJ 1.x {@link Roi}s as ImgLib2 {@link RealMaskRealInterval}
  *
  * @author Alison Walter
- * @param <R>
- *            the type of the Roi being wrapped
+ * @param <R> the type of the Roi being wrapped
  */
-public interface IJRealRoiWrapper<R extends Roi> extends IJRoiWrapper<R, RealLocalizable>, RealMaskRealInterval {
+public interface IJRealRoiWrapper<R extends Roi> extends
+	IJRoiWrapper<R, RealLocalizable>, RealMaskRealInterval
+{
 
 }

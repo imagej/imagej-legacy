@@ -40,11 +40,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import net.imagej.legacy.convert.roi.RoiUnwrappers;
 import net.imagej.legacy.convert.roi.RoiUnwrappers.WrapperToPointRoiConverter;
-import net.imagej.legacy.convert.roi.point.PointMaskToPointRoiConverter;
-import net.imagej.legacy.convert.roi.point.PointRoiWrapper;
-import net.imagej.legacy.convert.roi.point.RealPointCollectionToPointRoiConverter;
 import net.imglib2.RealLocalizable;
 import net.imglib2.RealPoint;
 import net.imglib2.roi.geom.real.DefaultWritablePointMask;
@@ -83,7 +79,8 @@ public class PointRoiConversionTest {
 
 	@Before
 	public void setup() {
-		point = new PointRoi(new float[] { 12.125f, 17, 1 }, new float[] { -4, 6.5f, 30 });
+		point = new PointRoi(new float[] { 12.125f, 17, 1 }, new float[] { -4, 6.5f,
+			30 });
 		final List<RealLocalizable> c = new ArrayList<>();
 		c.add(new RealPoint(new double[] { 12.125, -4 }));
 		c.add(new RealPoint(new double[] { 17, 6.5 }));
@@ -238,7 +235,8 @@ public class PointRoiConversionTest {
 	@Test
 	@SuppressWarnings("unchecked")
 	public void testPointRoiToRealPointCollectionConverter() {
-		final RealPointCollection<RealLocalizable> converted = convertService.convert(point, RealPointCollection.class);
+		final RealPointCollection<RealLocalizable> converted = convertService
+			.convert(point, RealPointCollection.class);
 
 		assertTrue(converted instanceof PointRoiWrapper);
 
@@ -302,20 +300,24 @@ public class PointRoiConversionTest {
 
 	@Test
 	public void testPointMaskToPointRoiConverterMatching() {
-		final PointMask p = new DefaultWritablePointMask(new double[] { 20.5, -30 });
+		final PointMask p = new DefaultWritablePointMask(new double[] { 20.5,
+			-30 });
 		final Converter<?, ?> c = convertService.getHandler(p, PointRoi.class);
 		assertTrue(c instanceof PointMaskToPointRoiConverter);
 	}
 
 	@Test
 	public void testPointMaskToPointRoiConverterWithPointMask() {
-		final PointMask pm = new DefaultWritablePointMask(new double[] { 140.25, -0.5 });
+		final PointMask pm = new DefaultWritablePointMask(new double[] { 140.25,
+			-0.5 });
 		final PointRoi pr = convertService.convert(pm, PointRoi.class);
 
 		assertEquals(1, pr.getNCoordinates());
 
-		assertEquals(pm.getDoublePosition(0), pr.getContainedFloatPoints().xpoints[0], 0);
-		assertEquals(pm.getDoublePosition(1), pr.getContainedFloatPoints().ypoints[0], 0);
+		assertEquals(pm.getDoublePosition(0), pr
+			.getContainedFloatPoints().xpoints[0], 0);
+		assertEquals(pm.getDoublePosition(1), pr
+			.getContainedFloatPoints().ypoints[0], 0);
 	}
 
 }

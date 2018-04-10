@@ -50,20 +50,21 @@ import ij.process.FloatPolygon;
  *
  * @author Alison Walter
  */
-public class PolylineRoiWrapper extends AbstractPolygonRoiWrapper implements WritablePolyline {
+public class PolylineRoiWrapper extends AbstractPolygonRoiWrapper implements
+	WritablePolyline
+{
 
 	/**
 	 * Creates an ImageJ 1.x {@link PolygonRoi} and wraps it as an ImgLib2
 	 * {@link Polyline}.
 	 *
-	 * @param xPoints
-	 *            x coordinates of the vertices
-	 * @param yPoints
-	 *            y coordinates of the vertices
-	 * @param nPoints
-	 *            number of vertices
+	 * @param xPoints x coordinates of the vertices
+	 * @param yPoints y coordinates of the vertices
+	 * @param nPoints number of vertices
 	 */
-	public PolylineRoiWrapper(final int[] xPoints, final int[] yPoints, final int nPoints) {
+	public PolylineRoiWrapper(final int[] xPoints, final int[] yPoints,
+		final int nPoints)
+	{
 		super(xPoints, yPoints, nPoints, Roi.POLYLINE);
 	}
 
@@ -71,14 +72,13 @@ public class PolylineRoiWrapper extends AbstractPolygonRoiWrapper implements Wri
 	 * Creates an ImageJ 1.x {@link PolygonRoi} and wraps it as an ImgLib2
 	 * {@link Polyline}.
 	 *
-	 * @param xPoints
-	 *            x coordinates of the vertices
-	 * @param yPoints
-	 *            y coordinates of the vertices
-	 * @param nPoints
-	 *            number of vertices
+	 * @param xPoints x coordinates of the vertices
+	 * @param yPoints y coordinates of the vertices
+	 * @param nPoints number of vertices
 	 */
-	public PolylineRoiWrapper(final float[] xPoints, final float[] yPoints, final int nPoints) {
+	public PolylineRoiWrapper(final float[] xPoints, final float[] yPoints,
+		final int nPoints)
+	{
 		super(xPoints, yPoints, nPoints, Roi.POLYLINE);
 	}
 
@@ -87,10 +87,8 @@ public class PolylineRoiWrapper extends AbstractPolygonRoiWrapper implements Wri
 	 * {@link Polyline}. The length of {@code xPoints} will be used to determine
 	 * the number of vertices this {@code Polyline} has.
 	 *
-	 * @param xPoints
-	 *            x coordinates of the vertices
-	 * @param yPoints
-	 *            y coordinates of the vertices
+	 * @param xPoints x coordinates of the vertices
+	 * @param yPoints y coordinates of the vertices
 	 */
 	public PolylineRoiWrapper(final float[] xPoints, final float[] yPoints) {
 		super(xPoints, yPoints, Roi.POLYLINE);
@@ -99,17 +97,16 @@ public class PolylineRoiWrapper extends AbstractPolygonRoiWrapper implements Wri
 	/**
 	 * Wraps an ImageJ 1.x {@link PolygonRoi} as an ImgLib2 {@link Polyline}.
 	 *
-	 * @param poly
-	 *            the {@code PolygonRoi} to be wrapped
+	 * @param poly the {@code PolygonRoi} to be wrapped
 	 */
 	public PolylineRoiWrapper(final PolygonRoi poly) {
 		super(poly);
-		if (poly.getType() != Roi.POLYLINE)
-			throw new IllegalArgumentException("Cannot wrap " + poly.getTypeAsString() + " as Polyline");
-		if (poly.getStrokeWidth() != 0)
-			throw new IllegalArgumentException("Cannot wrap polylines with non-zero width");
-		if (poly.isSplineFit())
-			throw new IllegalArgumentException("Cannot wrap " + "spline fitted polylines");
+		if (poly.getType() != Roi.POLYLINE) throw new IllegalArgumentException(
+			"Cannot wrap " + poly.getTypeAsString() + " as Polyline");
+		if (poly.getStrokeWidth() != 0) throw new IllegalArgumentException(
+			"Cannot wrap polylines with non-zero width");
+		if (poly.isSplineFit()) throw new IllegalArgumentException("Cannot wrap " +
+			"spline fitted polylines");
 	}
 
 	@Override
@@ -121,9 +118,9 @@ public class PolylineRoiWrapper extends AbstractPolygonRoiWrapper implements Wri
 			for (int i = 1; i < numVertices(); i++) {
 				final double[] start = new double[] { x[i - 1], y[i - 1] };
 				final double[] end = new double[] { x[i], y[i] };
-				final boolean testLineContains = GeomMaths.lineContains(start, end, t, 2);
-				if (testLineContains)
-					return true;
+				final boolean testLineContains = GeomMaths.lineContains(start, end, t,
+					2);
+				if (testLineContains) return true;
 			}
 		}
 		return false;
@@ -139,8 +136,8 @@ public class PolylineRoiWrapper extends AbstractPolygonRoiWrapper implements Wri
 	 * This will <strong>always</strong> throw an
 	 * {@code UnsupportedOperationException}.
 	 *
-	 * @throws UnsupportedOperationException
-	 *             cannot add a new vertex to the underlying {@link PolygonRoi}
+	 * @throws UnsupportedOperationException cannot add a new vertex to the
+	 *           underlying {@link PolygonRoi}
 	 */
 	@Override
 	public void addVertex(final int index, final RealLocalizable vertex) {
@@ -159,7 +156,7 @@ public class PolylineRoiWrapper extends AbstractPolygonRoiWrapper implements Wri
 			final double x = getRoi().getFloatPolygon().xpoints[index];
 			final double y = getRoi().getFloatPolygon().ypoints[index];
 			getRoi().deleteHandle(x, y);
-		} else
-			throw new UnsupportedOperationException("removeVertex");
+		}
+		else throw new UnsupportedOperationException("removeVertex");
 	}
 }

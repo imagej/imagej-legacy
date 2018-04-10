@@ -58,20 +58,23 @@ import ij.gui.ShapeRoi;
  * @author Alison Walter
  */
 @Plugin(type = Converter.class)
-public class BinaryCompositeMaskPredicateToShapeRoiConverter
-		extends AbstractMaskPredicateToRoiConverter<BinaryCompositeMaskPredicate<RealLocalizable>, ShapeRoi> {
+public class BinaryCompositeMaskPredicateToShapeRoiConverter extends
+	AbstractMaskPredicateToRoiConverter<BinaryCompositeMaskPredicate<RealLocalizable>, ShapeRoi>
+{
 
 	@Parameter
 	private ConvertService convertService;
 
 	@Override
 	public boolean canConvert(final Object src, final Type dest) {
-		if (super.canConvert(src, dest) && src instanceof BinaryCompositeMaskPredicate) {
-			final BinaryCompositeMaskPredicate<?> mor = (BinaryCompositeMaskPredicate<?>) src;
+		if (super.canConvert(src, dest) &&
+			src instanceof BinaryCompositeMaskPredicate)
+		{
+			final BinaryCompositeMaskPredicate<?> mor =
+				(BinaryCompositeMaskPredicate<?>) src;
 			final List<?> o = mor.operands();
 			for (int i = 0; i < o.size(); i++) {
-				if (!convertService.supports(o.get(i), Roi.class))
-					return false;
+				if (!convertService.supports(o.get(i), Roi.class)) return false;
 			}
 			return true;
 		}
@@ -80,12 +83,14 @@ public class BinaryCompositeMaskPredicateToShapeRoiConverter
 
 	@Override
 	public boolean canConvert(final Object src, final Class<?> dest) {
-		if (super.canConvert(src, dest) && src instanceof BinaryCompositeMaskPredicate) {
-			final BinaryCompositeMaskPredicate<?> mor = (BinaryCompositeMaskPredicate<?>) src;
+		if (super.canConvert(src, dest) &&
+			src instanceof BinaryCompositeMaskPredicate)
+		{
+			final BinaryCompositeMaskPredicate<?> mor =
+				(BinaryCompositeMaskPredicate<?>) src;
 			final List<?> o = mor.operands();
 			for (int i = 0; i < o.size(); i++) {
-				if (!convertService.supports(o.get(i), Roi.class))
-					return false;
+				if (!convertService.supports(o.get(i), Roi.class)) return false;
 			}
 			return true;
 		}
@@ -104,23 +109,23 @@ public class BinaryCompositeMaskPredicateToShapeRoiConverter
 	}
 
 	@Override
-	public ShapeRoi convert(final BinaryCompositeMaskPredicate<RealLocalizable> mask) {
+	public ShapeRoi convert(
+		final BinaryCompositeMaskPredicate<RealLocalizable> mask)
+	{
 		final List<Predicate<?>> o = mask.operands();
 		final List<ShapeRoi> sr = new ArrayList<>();
 		final MaskOperator op = mask.operator();
 
 		for (final Predicate<?> es : o) {
 			final Roi result = convertService.convert(es, Roi.class);
-			if (result == null)
-				throw new IllegalArgumentException("Cannot convert " + es.getClass() + " to Roi");
-			if (result instanceof ShapeRoi)
-				sr.add((ShapeRoi) result);
-			else
-				sr.add(new ShapeRoi(result));
+			if (result == null) throw new IllegalArgumentException("Cannot convert " +
+				es.getClass() + " to Roi");
+			if (result instanceof ShapeRoi) sr.add((ShapeRoi) result);
+			else sr.add(new ShapeRoi(result));
 		}
 
-		if (sr.isEmpty())
-			throw new IllegalArgumentException("Cannot convert operands to Rois");
+		if (sr.isEmpty()) throw new IllegalArgumentException(
+			"Cannot convert operands to Rois");
 
 		ShapeRoi base = sr.get(0);
 		for (int i = 1; i < sr.size(); i++) {
@@ -137,17 +142,14 @@ public class BinaryCompositeMaskPredicateToShapeRoiConverter
 
 	// -- Helper methods --
 
-	private ShapeRoi combineRois(final ShapeRoi base, final ShapeRoi sr, final MaskOperator op) {
-		if (op == Operators.AND)
-			return base.and(sr);
-		else if (op == Operators.OR)
-			return base.or(sr);
-		else if (op == Operators.MINUS)
-			return base.not(sr);
-		else if (op == Operators.XOR)
-			return base.xor(sr);
-		else
-			throw new IllegalArgumentException("Unsupported Operation");
+	private ShapeRoi combineRois(final ShapeRoi base, final ShapeRoi sr,
+		final MaskOperator op)
+	{
+		if (op == Operators.AND) return base.and(sr);
+		else if (op == Operators.OR) return base.or(sr);
+		else if (op == Operators.MINUS) return base.not(sr);
+		else if (op == Operators.XOR) return base.xor(sr);
+		else throw new IllegalArgumentException("Unsupported Operation");
 	}
 
 }

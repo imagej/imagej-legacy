@@ -53,7 +53,9 @@ import ij.gui.Roi;
  * @author Alison Walter
  */
 @Plugin(type = Converter.class)
-public class PolylineRoiToPolylineConverter extends AbstractRoiToMaskPredicateConverter<PolygonRoi, Polyline> {
+public class PolylineRoiToPolylineConverter extends
+	AbstractRoiToMaskPredicateConverter<PolygonRoi, Polyline>
+{
 
 	@Override
 	public Class<Polyline> getOutputType() {
@@ -67,15 +69,14 @@ public class PolylineRoiToPolylineConverter extends AbstractRoiToMaskPredicateCo
 
 	@Override
 	public Polyline convert(final PolygonRoi src) {
-		if (src.getType() == Roi.POLYLINE)
-			return new PolylineRoiWrapper(src);
+		if (src.getType() == Roi.POLYLINE) return new PolylineRoiWrapper(src);
 		return new UnmodifiablePolylineRoiWrapper(src);
 	}
 
 	@Override
 	public boolean supportedType(final PolygonRoi src) {
-		final boolean supportedType = src.getType() == Roi.POLYLINE || src.getType() == Roi.ANGLE
-				|| src.getType() == Roi.FREELINE;
+		final boolean supportedType = src.getType() == Roi.POLYLINE || src
+			.getType() == Roi.ANGLE || src.getType() == Roi.FREELINE;
 		return supportedType && src.getStrokeWidth() == 0 && !src.isSplineFit();
 	}
 

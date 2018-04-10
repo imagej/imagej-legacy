@@ -48,7 +48,9 @@ import ij.gui.OvalRoi;
  * @author Alison Walter
  */
 @Plugin(type = Converter.class, priority = Priority.LOW)
-public class EllipsoidToOvalRoiConverter extends AbstractMaskPredicateToRoiConverter<Ellipsoid, OvalRoi> {
+public class EllipsoidToOvalRoiConverter extends
+	AbstractMaskPredicateToRoiConverter<Ellipsoid, OvalRoi>
+{
 
 	@Override
 	public Class<OvalRoi> getOutputType() {
@@ -65,8 +67,8 @@ public class EllipsoidToOvalRoiConverter extends AbstractMaskPredicateToRoiConve
 		final RealLocalizable center = mask.center();
 		final double width = mask.semiAxisLength(0);
 		final double height = mask.semiAxisLength(1);
-		return new OvalRoi(center.getDoublePosition(0) - width, center.getDoublePosition(1) - height, width * 2,
-				height * 2);
+		return new OvalRoi(center.getDoublePosition(0) - width, center
+			.getDoublePosition(1) - height, width * 2, height * 2);
 	}
 
 	@Override

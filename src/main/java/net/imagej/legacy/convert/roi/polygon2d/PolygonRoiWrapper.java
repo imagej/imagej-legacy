@@ -50,20 +50,21 @@ import ij.process.FloatPolygon;
  *
  * @author Alison Walter
  */
-public class PolygonRoiWrapper extends AbstractPolygonRoiWrapper implements WritablePolygon2D {
+public class PolygonRoiWrapper extends AbstractPolygonRoiWrapper implements
+	WritablePolygon2D
+{
 
 	/**
 	 * Creates an ImageJ 1.x {@link PolygonRoi} and wraps it as an ImgLib2
 	 * {@link Polygon2D}.
 	 *
-	 * @param xPoints
-	 *            x coordinates of the vertices
-	 * @param yPoints
-	 *            y coordinates of the vertices
-	 * @param nPoints
-	 *            number of vertices
+	 * @param xPoints x coordinates of the vertices
+	 * @param yPoints y coordinates of the vertices
+	 * @param nPoints number of vertices
 	 */
-	public PolygonRoiWrapper(final int[] xPoints, final int[] yPoints, final int nPoints) {
+	public PolygonRoiWrapper(final int[] xPoints, final int[] yPoints,
+		final int nPoints)
+	{
 		super(xPoints, yPoints, nPoints, Roi.POLYGON);
 	}
 
@@ -71,26 +72,23 @@ public class PolygonRoiWrapper extends AbstractPolygonRoiWrapper implements Writ
 	 * Creates an ImageJ 1.x {@link PolygonRoi} and wraps it as an ImgLib2
 	 * {@link Polygon2D}.
 	 *
-	 * @param xPoints
-	 *            x coordinates of the vertices
-	 * @param yPoints
-	 *            y coordinates of the vertices
-	 * @param nPoints
-	 *            number of vertices
+	 * @param xPoints x coordinates of the vertices
+	 * @param yPoints y coordinates of the vertices
+	 * @param nPoints number of vertices
 	 */
-	public PolygonRoiWrapper(final float[] xPoints, final float[] yPoints, final int nPoints) {
+	public PolygonRoiWrapper(final float[] xPoints, final float[] yPoints,
+		final int nPoints)
+	{
 		super(xPoints, yPoints, nPoints, Roi.POLYGON);
 	}
 
 	/**
 	 * Creates an ImageJ 1.x {@link PolygonRoi} and wraps it as an ImgLib2
-	 * {@link Polygon2D}. The length of {@code xPoints} will be used to
-	 * determine the number of vertices this {@code Polygon2D} has.
+	 * {@link Polygon2D}. The length of {@code xPoints} will be used to determine
+	 * the number of vertices this {@code Polygon2D} has.
 	 *
-	 * @param xPoints
-	 *            x coordinates of the vertices
-	 * @param yPoints
-	 *            y coordinates of the vertices
+	 * @param xPoints x coordinates of the vertices
+	 * @param yPoints y coordinates of the vertices
 	 */
 	public PolygonRoiWrapper(final float[] xPoints, final float[] yPoints) {
 		super(xPoints, yPoints, Roi.POLYGON);
@@ -99,22 +97,21 @@ public class PolygonRoiWrapper extends AbstractPolygonRoiWrapper implements Writ
 	/**
 	 * Wraps an ImageJ 1.x {@link PolygonRoi} as an ImgLib2 {@link Polygon2D}.
 	 *
-	 * @param poly
-	 *            the {@code PolygonRoi} to be wrapped
+	 * @param poly the {@code PolygonRoi} to be wrapped
 	 */
 	public PolygonRoiWrapper(final PolygonRoi poly) {
 		super(poly);
-		if (poly.getType() != Roi.POLYGON)
-			throw new IllegalArgumentException("Cannot wrap " + poly.getTypeAsString() + " as Polygon2D");
-		if (poly.isSplineFit())
-			throw new IllegalArgumentException("Cannot wrap " + "spline fitted polygons");
+		if (poly.getType() != Roi.POLYGON) throw new IllegalArgumentException(
+			"Cannot wrap " + poly.getTypeAsString() + " as Polygon2D");
+		if (poly.isSplineFit()) throw new IllegalArgumentException("Cannot wrap " +
+			"spline fitted polygons");
 	}
 
 	/**
 	 * {@inheritDoc}
 	 * <p>
-	 * Since {@link PolygonRoi#contains(int, int)} uses the "pnpoly" algorithm
-	 * for real space polygons, so does this implementation. Thus resulting in a
+	 * Since {@link PolygonRoi#contains(int, int)} uses the "pnpoly" algorithm for
+	 * real space polygons, so does this implementation. Thus resulting in a
 	 * {@code Polygon2D} with {@link net.imglib2.roi.BoundaryType#UNSPECIFIED
 	 * unspecified} boundary behavior.
 	 * </p>
@@ -144,8 +141,8 @@ public class PolygonRoiWrapper extends AbstractPolygonRoiWrapper implements Writ
 	 * This will <strong>always</strong> throw an
 	 * {@code UnsupportedOperationException}.
 	 *
-	 * @throws UnsupportedOperationException
-	 *             cannot add a new vertex to the underlying {@link PolygonRoi}
+	 * @throws UnsupportedOperationException cannot add a new vertex to the
+	 *           underlying {@link PolygonRoi}
 	 */
 	@Override
 	public void addVertex(final int index, final double[] vertex) {
@@ -164,8 +161,8 @@ public class PolygonRoiWrapper extends AbstractPolygonRoiWrapper implements Writ
 			final double x = getRoi().getFloatPolygon().xpoints[index];
 			final double y = getRoi().getFloatPolygon().ypoints[index];
 			getRoi().deleteHandle(x, y);
-		} else
-			Rois.unsupported("removeVertex");
+		}
+		else Rois.unsupported("removeVertex");
 	}
 
 }

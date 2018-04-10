@@ -42,19 +42,21 @@ import ij.gui.Roi;
  *
  * @author Alison Walter
  */
-public abstract class AbstractRoiUnwrapConverter<R extends Roi> extends AbstractConverter<IJRoiWrapper<?, ?>, R> {
+public abstract class AbstractRoiUnwrapConverter<R extends Roi> extends
+	AbstractConverter<IJRoiWrapper<?, ?>, R>
+{
 
 	@Override
 	public boolean canConvert(final Object src, final Type dest) {
-		if (src instanceof IJRoiWrapper)
-			return getOutputType().isInstance(((IJRoiWrapper<?, ?>) src).getRoi()) && super.canConvert(src, dest);
+		if (src instanceof IJRoiWrapper) return getOutputType().isInstance(
+			((IJRoiWrapper<?, ?>) src).getRoi()) && super.canConvert(src, dest);
 		return false;
 	}
 
 	@Override
 	public boolean canConvert(final Object src, final Class<?> dest) {
-		if (src instanceof IJRoiWrapper)
-			return getOutputType().isInstance(((IJRoiWrapper<?, ?>) src).getRoi()) && super.canConvert(src, dest);
+		if (src instanceof IJRoiWrapper) return getOutputType().isInstance(
+			((IJRoiWrapper<?, ?>) src).getRoi()) && super.canConvert(src, dest);
 		return false;
 	}
 
@@ -67,8 +69,8 @@ public abstract class AbstractRoiUnwrapConverter<R extends Roi> extends Abstract
 	@Override
 	@SuppressWarnings("unchecked")
 	public <T> T convert(final Object src, final Class<T> dest) {
-		if (!(src instanceof IJRoiWrapper))
-			throw new IllegalArgumentException("Cannot convert " + src.getClass() + " to " + getOutputType());
+		if (!(src instanceof IJRoiWrapper)) throw new IllegalArgumentException(
+			"Cannot convert " + src.getClass() + " to " + getOutputType());
 
 		return (T) ((IJRoiWrapper<?, ?>) src).getRoi();
 	}

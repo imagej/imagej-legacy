@@ -48,7 +48,9 @@ import ij.gui.OvalRoi;
  *
  * @author Alison Walter
  */
-public class OvalRoiWrapper implements IJRealRoiWrapper<OvalRoi>, WritableEllipsoid {
+public class OvalRoiWrapper implements IJRealRoiWrapper<OvalRoi>,
+	WritableEllipsoid
+{
 
 	private final OvalRoi oval;
 
@@ -56,18 +58,16 @@ public class OvalRoiWrapper implements IJRealRoiWrapper<OvalRoi>, WritableEllips
 	 * Creates an ImageJ 1.x {@link OvalRoi} and then wraps it as an ImgLib2
 	 * {@link Ellipsoid}.
 	 *
-	 * @param x
-	 *            x coordinate of the upper left corner of the bounding box,
-	 *            i.e. (x coor of center) - (x semi-axis length)
-	 * @param y
-	 *            y coordinate of the upper left corner of the bounding box,
-	 *            i.e. (y coor of center) - (y semi-axis length)
-	 * @param width
-	 *            width of the bounding box, i.e. 2 * (x semi-axis length)
-	 * @param height
-	 *            height of the bounding box, i.e. 2 * (y semi-axis length)
+	 * @param x x coordinate of the upper left corner of the bounding box, i.e. (x
+	 *          coor of center) - (x semi-axis length)
+	 * @param y y coordinate of the upper left corner of the bounding box, i.e. (y
+	 *          coor of center) - (y semi-axis length)
+	 * @param width width of the bounding box, i.e. 2 * (x semi-axis length)
+	 * @param height height of the bounding box, i.e. 2 * (y semi-axis length)
 	 */
-	public OvalRoiWrapper(final int x, final int y, final int width, final int height) {
+	public OvalRoiWrapper(final int x, final int y, final int width,
+		final int height)
+	{
 		oval = new OvalRoi(x, y, width, height);
 	}
 
@@ -75,27 +75,23 @@ public class OvalRoiWrapper implements IJRealRoiWrapper<OvalRoi>, WritableEllips
 	 * Creates an ImageJ 1.x {@link OvalRoi} and then wraps it as an ImgLib2
 	 * {@link Ellipsoid}.
 	 *
-	 * @param x
-	 *            x coordinate of the upper left corner of the bounding box,
-	 *            i.e. (x coor of center) - (x semi-axis length)
-	 * @param y
-	 *            y coordinate of the upper left corner of the bounding box,
-	 *            i.e. (y coor of center) - (y semi-axis length)
-	 * @param width
-	 *            width of the bounding box, i.e. 2 * (x semi-axis length)
-	 * @param height
-	 *            height of the bounding box, i.e. 2 * (y semi-axis length)
+	 * @param x x coordinate of the upper left corner of the bounding box, i.e. (x
+	 *          coor of center) - (x semi-axis length)
+	 * @param y y coordinate of the upper left corner of the bounding box, i.e. (y
+	 *          coor of center) - (y semi-axis length)
+	 * @param width width of the bounding box, i.e. 2 * (x semi-axis length)
+	 * @param height height of the bounding box, i.e. 2 * (y semi-axis length)
 	 */
-	public OvalRoiWrapper(final double x, final double y, final double width, final double height) {
+	public OvalRoiWrapper(final double x, final double y, final double width,
+		final double height)
+	{
 		oval = new OvalRoi(x, y, width, height);
 	}
 
 	/**
-	 * Wraps the given ImageJ 1.x {@link OvalRoi} as an ImgLib2
-	 * {@link Ellipsoid}.
+	 * Wraps the given ImageJ 1.x {@link OvalRoi} as an ImgLib2 {@link Ellipsoid}.
 	 *
-	 * @param oval
-	 *            ImageJ 1.x oval to be wrapped
+	 * @param oval ImageJ 1.x oval to be wrapped
 	 */
 	public OvalRoiWrapper(final OvalRoi oval) {
 		this.oval = oval;
@@ -113,24 +109,26 @@ public class OvalRoiWrapper implements IJRealRoiWrapper<OvalRoi>, WritableEllips
 			final double xt = t.getDoublePosition(0);
 			final double yt = t.getDoublePosition(1);
 
-			return (((xt - c.getDoublePosition(0)) / xr) * ((xt - c.getDoublePosition(0)) / xr))
-					+ (((yt - c.getDoublePosition(1)) / yr) * ((yt - c.getDoublePosition(1)) / yr)) <= 1.0;
+			return (((xt - c.getDoublePosition(0)) / xr) * ((xt - c.getDoublePosition(
+				0)) / xr)) + (((yt - c.getDoublePosition(1)) / yr) * ((yt - c
+					.getDoublePosition(1)) / yr)) <= 1.0;
 		}
 		return false;
 	}
 
 	@Override
 	public double realMin(final int d) {
-		if (d != 0 && d != 1)
-			throw new IllegalArgumentException("Invalid dimension " + d);
+		if (d != 0 && d != 1) throw new IllegalArgumentException(
+			"Invalid dimension " + d);
 		return d == 0 ? oval.getXBase() : oval.getYBase();
 	}
 
 	@Override
 	public double realMax(final int d) {
-		if (d != 0 && d != 1)
-			throw new IllegalArgumentException("Invalid dimension " + d);
-		return d == 0 ? oval.getXBase() + oval.getFloatWidth() : oval.getYBase() + oval.getFloatHeight();
+		if (d != 0 && d != 1) throw new IllegalArgumentException(
+			"Invalid dimension " + d);
+		return d == 0 ? oval.getXBase() + oval.getFloatWidth() : oval.getYBase() +
+			oval.getFloatHeight();
 	}
 
 	@Override
@@ -140,22 +138,23 @@ public class OvalRoiWrapper implements IJRealRoiWrapper<OvalRoi>, WritableEllips
 
 	@Override
 	public double semiAxisLength(final int d) {
-		if (d != 0 && d != 1)
-			throw new IllegalArgumentException("Invalid dimension " + d);
+		if (d != 0 && d != 1) throw new IllegalArgumentException(
+			"Invalid dimension " + d);
 		return d == 0 ? oval.getFloatWidth() / 2 : oval.getFloatHeight() / 2;
 	}
 
 	@Override
 	public RealLocalizableRealPositionable center() {
-		return new OvalCenter((realMin(0) + realMax(0)) / 2.0, (realMin(1) + realMax(1)) / 2.0);
+		return new OvalCenter((realMin(0) + realMax(0)) / 2.0, (realMin(1) +
+			realMax(1)) / 2.0);
 	}
 
 	/**
 	 * This will <strong>always</strong> throw an
 	 * {@code UnsupportedOperationException}.
 	 *
-	 * @throws UnsupportedOperationException
-	 *             cannot modify width/height of underlying {@link OvalRoi}
+	 * @throws UnsupportedOperationException cannot modify width/height of
+	 *           underlying {@link OvalRoi}
 	 */
 	@Override
 	public void setSemiAxisLength(final int d, final double length) {

@@ -48,25 +48,27 @@ import ij.process.FloatPolygon;
  *
  * @author Alison Walter
  */
-public class UnmodifiablePolygonRoiWrapper extends AbstractPolygonRoiWrapper implements Polygon2D {
+public class UnmodifiablePolygonRoiWrapper extends AbstractPolygonRoiWrapper
+	implements Polygon2D
+{
 
 	/**
 	 * Wraps an ImageJ 1.x {@link PolygonRoi} as an ImgLib2 {@link Polygon2D}.
 	 *
-	 * @param poly
-	 *            the {@code PolygonRoi} to be wrapped
+	 * @param poly the {@code PolygonRoi} to be wrapped
 	 */
 	public UnmodifiablePolygonRoiWrapper(final PolygonRoi poly) {
 		super(poly);
 		if (poly.getType() != Roi.FREEROI && poly.getType() != Roi.TRACED_ROI)
-			throw new IllegalArgumentException("Cannot wrap " + poly.getTypeAsString() + " as Polygon2D");
+			throw new IllegalArgumentException("Cannot wrap " + poly
+				.getTypeAsString() + " as Polygon2D");
 	}
 
 	/**
 	 * {@inheritDoc}
 	 * <p>
-	 * Since {@link PolygonRoi#contains(int, int)} uses the "pnpoly" algorithm
-	 * for real space polygons, so does this implementation. Thus resulting in a
+	 * Since {@link PolygonRoi#contains(int, int)} uses the "pnpoly" algorithm for
+	 * real space polygons, so does this implementation. Thus resulting in a
 	 * {@code Polygon2D} with {@link net.imglib2.roi.BoundaryType#UNSPECIFIED
 	 * unspecified} boundary behavior.
 	 * </p>
@@ -89,8 +91,9 @@ public class UnmodifiablePolygonRoiWrapper extends AbstractPolygonRoiWrapper imp
 	@Override
 	public RealLocalizable vertex(final int pos) {
 		final FloatPolygon fp = getRoi().getFloatPolygon();
-		return new AbstractRealLocalizable(new double[] { fp.xpoints[pos], fp.ypoints[pos] }) {
-		};
+		return new AbstractRealLocalizable(new double[] { fp.xpoints[pos],
+			fp.ypoints[pos] })
+		{};
 	}
 
 }

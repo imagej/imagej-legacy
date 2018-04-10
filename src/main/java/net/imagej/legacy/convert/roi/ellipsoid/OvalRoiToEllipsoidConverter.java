@@ -47,7 +47,9 @@ import ij.gui.Roi;
  * @author Alison Walter
  */
 @Plugin(type = Converter.class)
-public class OvalRoiToEllipsoidConverter extends AbstractRoiToMaskPredicateConverter<OvalRoi, WritableEllipsoid> {
+public class OvalRoiToEllipsoidConverter extends
+	AbstractRoiToMaskPredicateConverter<OvalRoi, WritableEllipsoid>
+{
 
 	@Override
 	public Class<WritableEllipsoid> getOutputType() {

@@ -60,16 +60,17 @@ public class ShapeRoiWrapper implements IJRealRoiWrapper<ShapeRoi> {
 
 	@Override
 	public double realMin(final int d) {
-		if (d != 0 && d != 1)
-			throw new IllegalArgumentException("Invalid dimension " + d);
+		if (d != 0 && d != 1) throw new IllegalArgumentException(
+			"Invalid dimension " + d);
 		return d == 0 ? shape.getXBase() : shape.getYBase();
 	}
 
 	@Override
 	public double realMax(final int d) {
-		if (d != 0 && d != 1)
-			throw new IllegalArgumentException("Invalid dimension " + d);
-		return d == 0 ? shape.getXBase() + shape.getFloatWidth() : shape.getYBase() + shape.getFloatHeight();
+		if (d != 0 && d != 1) throw new IllegalArgumentException(
+			"Invalid dimension " + d);
+		return d == 0 ? shape.getXBase() + shape.getFloatWidth() : shape
+			.getYBase() + shape.getFloatHeight();
 	}
 
 	@Override

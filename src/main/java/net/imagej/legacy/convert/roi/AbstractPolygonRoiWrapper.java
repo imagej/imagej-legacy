@@ -44,7 +44,9 @@ import ij.gui.Roi;
  *
  * @author Alison Walter
  */
-public abstract class AbstractPolygonRoiWrapper implements IJRealRoiWrapper<PolygonRoi> {
+public abstract class AbstractPolygonRoiWrapper implements
+	IJRealRoiWrapper<PolygonRoi>
+{
 
 	private final PolygonRoi poly;
 
@@ -52,17 +54,15 @@ public abstract class AbstractPolygonRoiWrapper implements IJRealRoiWrapper<Poly
 	 * Creates an ImageJ 1.x {@link PolygonRoi} and wraps it as an ImgLib2
 	 * {@link Polygon2D} or {@link Polyline}.
 	 *
-	 * @param xPoints
-	 *            x coordinates of the vertices
-	 * @param yPoints
-	 *            y coordinates of the vertices
-	 * @param nPoints
-	 *            number of vertices
-	 * @param type
-	 *            denotes if PolygonRoi behaves as {@link Roi#POLYGON} or
-	 *            {@link Roi#POLYLINE}
+	 * @param xPoints x coordinates of the vertices
+	 * @param yPoints y coordinates of the vertices
+	 * @param nPoints number of vertices
+	 * @param type denotes if PolygonRoi behaves as {@link Roi#POLYGON} or
+	 *          {@link Roi#POLYLINE}
 	 */
-	public AbstractPolygonRoiWrapper(final int[] xPoints, final int[] yPoints, final int nPoints, final int type) {
+	public AbstractPolygonRoiWrapper(final int[] xPoints, final int[] yPoints,
+		final int nPoints, final int type)
+	{
 		poly = new PolygonRoi(xPoints, yPoints, nPoints, type);
 	}
 
@@ -70,17 +70,15 @@ public abstract class AbstractPolygonRoiWrapper implements IJRealRoiWrapper<Poly
 	 * Creates an ImageJ 1.x {@link PolygonRoi} and wraps it as an ImgLib2
 	 * {@link Polygon2D} or {@link Polyline}.
 	 *
-	 * @param xPoints
-	 *            x coordinates of the vertices
-	 * @param yPoints
-	 *            y coordinates of the vertices
-	 * @param nPoints
-	 *            number of vertices
-	 * @param type
-	 *            denotes if PolygonRoi behaves as {@link Roi#POLYGON} or
-	 *            {@link Roi#POLYLINE}
+	 * @param xPoints x coordinates of the vertices
+	 * @param yPoints y coordinates of the vertices
+	 * @param nPoints number of vertices
+	 * @param type denotes if PolygonRoi behaves as {@link Roi#POLYGON} or
+	 *          {@link Roi#POLYLINE}
 	 */
-	public AbstractPolygonRoiWrapper(final float[] xPoints, final float[] yPoints, final int nPoints, final int type) {
+	public AbstractPolygonRoiWrapper(final float[] xPoints, final float[] yPoints,
+		final int nPoints, final int type)
+	{
 		poly = new PolygonRoi(xPoints, yPoints, nPoints, type);
 	}
 
@@ -89,53 +87,51 @@ public abstract class AbstractPolygonRoiWrapper implements IJRealRoiWrapper<Poly
 	 * {@link Mask}. The length of {@code xPoints} will be used to determine the
 	 * number of vertices this {@code Mask} has.
 	 *
-	 * @param xPoints
-	 *            x coordinates of the vertices
-	 * @param yPoints
-	 *            y coordinates of the vertices
-	 * @param type
-	 *            denotes if PolygonRoi behaves as {@link Roi#POLYGON} or
-	 *            {@link Roi#POLYLINE}
+	 * @param xPoints x coordinates of the vertices
+	 * @param yPoints y coordinates of the vertices
+	 * @param type denotes if PolygonRoi behaves as {@link Roi#POLYGON} or
+	 *          {@link Roi#POLYLINE}
 	 */
-	public AbstractPolygonRoiWrapper(final float[] xPoints, final float[] yPoints, final int type) {
+	public AbstractPolygonRoiWrapper(final float[] xPoints, final float[] yPoints,
+		final int type)
+	{
 		poly = new PolygonRoi(xPoints, yPoints, type);
 	}
 
 	/**
 	 * Wraps an ImageJ 1.x {@link PolygonRoi} as an ImgLib2 {@link Mask}.
 	 *
-	 * @param poly
-	 *            the {@code PolygonRoi} to be wrapped
+	 * @param poly the {@code PolygonRoi} to be wrapped
 	 */
 	public AbstractPolygonRoiWrapper(final PolygonRoi poly) {
-		if (poly.isSplineFit())
-			throw new IllegalArgumentException("Cannot wrap spline fit PolygonRois");
+		if (poly.isSplineFit()) throw new IllegalArgumentException(
+			"Cannot wrap spline fit PolygonRois");
 		this.poly = poly;
 	}
 
 	@Override
 	public double realMin(final int d) {
-		if (d != 0 && d != 1)
-			throw new IllegalArgumentException("Invalid dimension " + d);
+		if (d != 0 && d != 1) throw new IllegalArgumentException(
+			"Invalid dimension " + d);
 		// NB: bounding box doesn't update after vertex removed
-		final float[] c = d == 0 ? poly.getFloatPolygon().xpoints : poly.getFloatPolygon().ypoints;
+		final float[] c = d == 0 ? poly.getFloatPolygon().xpoints : poly
+			.getFloatPolygon().ypoints;
 		double min = Double.POSITIVE_INFINITY;
 		for (int i = 0; i < numVertices(); i++)
-			if (c[i] < min)
-				min = c[i];
+			if (c[i] < min) min = c[i];
 		return min;
 	}
 
 	@Override
 	public double realMax(final int d) {
-		if (d != 0 && d != 1)
-			throw new IllegalArgumentException("Invalid dimension " + d);
+		if (d != 0 && d != 1) throw new IllegalArgumentException(
+			"Invalid dimension " + d);
 		// NB: bounding box doesn't update after vertex removed
-		final float[] c = d == 0 ? poly.getFloatPolygon().xpoints : poly.getFloatPolygon().ypoints;
+		final float[] c = d == 0 ? poly.getFloatPolygon().xpoints : poly
+			.getFloatPolygon().ypoints;
 		double max = Double.NEGATIVE_INFINITY;
 		for (int i = 0; i < numVertices(); i++)
-			if (c[i] > max)
-				max = c[i];
+			if (c[i] > max) max = c[i];
 		return max;
 	}
 

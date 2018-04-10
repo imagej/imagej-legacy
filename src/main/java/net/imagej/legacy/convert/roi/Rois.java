@@ -1,3 +1,4 @@
+
 package net.imagej.legacy.convert.roi;
 
 import net.imglib2.AbstractRealLocalizable;
@@ -16,8 +17,7 @@ public class Rois {
 	/**
 	 * Throws {@link UnsupportedOperationException} with the given method name.
 	 *
-	 * @param methodName
-	 *            name of unsupported method
+	 * @param methodName name of unsupported method
 	 */
 	public static void unsupported(final String methodName) {
 		throw new UnsupportedOperationException(methodName);
@@ -26,12 +26,12 @@ public class Rois {
 	/**
 	 * Creates a new {@link IJRoiPoint}
 	 *
-	 * @param x
-	 *            x-coordinate of the point
-	 * @param y
-	 *            y-coordinate of the point
+	 * @param x x-coordinate of the point
+	 * @param y y-coordinate of the point
 	 */
-	public static RealLocalizableRealPositionable ijRoiPoint(final double x, final double y) {
+	public static RealLocalizableRealPositionable ijRoiPoint(final double x,
+		final double y)
+	{
 		return new IJRoiPoint(x, y);
 	}
 
@@ -44,9 +44,10 @@ public class Rois {
 	 * "points" (endpoints, vertices, etc.) are not.
 	 *
 	 * @author Alison Walter
-	 *
 	 */
-	private static class IJRoiPoint extends AbstractRealLocalizable implements RealLocalizableRealPositionable {
+	private static class IJRoiPoint extends AbstractRealLocalizable implements
+		RealLocalizableRealPositionable
+	{
 
 		protected IJRoiPoint(final double x, final double y) {
 			super(new double[] { x, y });

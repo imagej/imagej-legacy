@@ -50,7 +50,9 @@ import ij.gui.Roi;
  * @author Alison Walter
  */
 @Plugin(type = Converter.class, priority = Priority.LOW)
-public class PolylineToPolylineRoiConverter extends AbstractMaskPredicateToRoiConverter<Polyline, PolygonRoi> {
+public class PolylineToPolylineRoiConverter extends
+	AbstractMaskPredicateToRoiConverter<Polyline, PolygonRoi>
+{
 
 	@Override
 	public Class<PolygonRoi> getOutputType() {

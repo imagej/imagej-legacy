@@ -47,7 +47,9 @@ import ij.gui.Roi;
  * @author Alison Walter
  */
 @Plugin(type = Converter.class, priority = Priority.LOW)
-public class BoxToRoiConverter extends AbstractMaskPredicateToRoiConverter<Box, Roi> {
+public class BoxToRoiConverter extends
+	AbstractMaskPredicateToRoiConverter<Box, Roi>
+{
 
 	@Override
 	public Class<Roi> getOutputType() {
@@ -61,7 +63,8 @@ public class BoxToRoiConverter extends AbstractMaskPredicateToRoiConverter<Box, 
 
 	@Override
 	public Roi convert(final Box mask) {
-		return new Roi(mask.realMin(0), mask.realMin(1), mask.sideLength(0), mask.sideLength(1));
+		return new Roi(mask.realMin(0), mask.realMin(1), mask.sideLength(0), mask
+			.sideLength(1));
 	}
 
 	@Override

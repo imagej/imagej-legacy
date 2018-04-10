@@ -48,22 +48,24 @@ import ij.process.FloatPolygon;
  *
  * @author Alison Walter
  */
-public class UnmodifiablePolylineRoiWrapper extends AbstractPolygonRoiWrapper implements Polyline {
+public class UnmodifiablePolylineRoiWrapper extends AbstractPolygonRoiWrapper
+	implements Polyline
+{
 
 	/**
 	 * Wraps an ImageJ 1.x {@link PolygonRoi} as an ImgLib2 {@link Polyline}.
 	 *
-	 * @param poly
-	 *            the {@code PolygonRoi} to be wrapped
+	 * @param poly the {@code PolygonRoi} to be wrapped
 	 */
 	public UnmodifiablePolylineRoiWrapper(final PolygonRoi poly) {
 		super(poly);
 		if (poly.getType() != Roi.FREELINE && poly.getType() != Roi.ANGLE)
-			throw new IllegalArgumentException("Cannot wrap " + poly.getTypeAsString() + " as Polyline");
-		if (poly.getStrokeWidth() != 0)
-			throw new IllegalArgumentException("Cannot wrap polylines with non-zero width");
-		if (poly.isSplineFit())
-			throw new IllegalArgumentException("Cannot wrap " + "spline fitted polylines");
+			throw new IllegalArgumentException("Cannot wrap " + poly
+				.getTypeAsString() + " as Polyline");
+		if (poly.getStrokeWidth() != 0) throw new IllegalArgumentException(
+			"Cannot wrap polylines with non-zero width");
+		if (poly.isSplineFit()) throw new IllegalArgumentException("Cannot wrap " +
+			"spline fitted polylines");
 	}
 
 	@Override
@@ -75,9 +77,9 @@ public class UnmodifiablePolylineRoiWrapper extends AbstractPolygonRoiWrapper im
 			for (int i = 1; i < numVertices(); i++) {
 				final double[] start = new double[] { x[i - 1], y[i - 1] };
 				final double[] end = new double[] { x[i], y[i] };
-				final boolean testLineContains = GeomMaths.lineContains(start, end, t, 2);
-				if (testLineContains)
-					return true;
+				final boolean testLineContains = GeomMaths.lineContains(start, end, t,
+					2);
+				if (testLineContains) return true;
 			}
 		}
 		return false;
@@ -86,8 +88,9 @@ public class UnmodifiablePolylineRoiWrapper extends AbstractPolygonRoiWrapper im
 	@Override
 	public RealLocalizable vertex(final int pos) {
 		final FloatPolygon fp = getRoi().getFloatPolygon();
-		return new AbstractRealLocalizable(new double[] { fp.xpoints[pos], fp.ypoints[pos] }) {
-		};
+		return new AbstractRealLocalizable(new double[] { fp.xpoints[pos],
+			fp.ypoints[pos] })
+		{};
 	}
 
 }

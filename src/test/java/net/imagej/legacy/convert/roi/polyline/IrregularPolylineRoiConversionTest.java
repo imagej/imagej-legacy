@@ -35,9 +35,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import net.imagej.legacy.convert.roi.RoiUnwrappers;
 import net.imagej.legacy.convert.roi.RoiUnwrappers.WrapperToPolygonRoiConverter;
-import net.imagej.legacy.convert.roi.polyline.IrregularPolylineRoiWrapper;
 import net.imglib2.Point;
 import net.imglib2.RealPoint;
 import net.imglib2.roi.RealMaskRealInterval;

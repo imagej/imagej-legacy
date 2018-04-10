@@ -52,7 +52,9 @@ import ij.process.FloatPolygon;
  *
  * @author Alison Walter
  */
-public class PointRoiWrapper implements IJRealRoiWrapper<PointRoi>, WritableRealPointCollection<RealLocalizable> {
+public class PointRoiWrapper implements IJRealRoiWrapper<PointRoi>,
+	WritableRealPointCollection<RealLocalizable>
+{
 
 	private final PointRoi points;
 
@@ -60,12 +62,9 @@ public class PointRoiWrapper implements IJRealRoiWrapper<PointRoi>, WritableReal
 	 * Creates an ImageJ 1.x {@link PointRoi} and wraps it as an ImgLib2
 	 * {@link RealPointCollection}.
 	 *
-	 * @param x
-	 *            x coordinates of the points
-	 * @param y
-	 *            y coordinates of the points
-	 * @param numPoints
-	 *            total number of points in the collection
+	 * @param x x coordinates of the points
+	 * @param y y coordinates of the points
+	 * @param numPoints total number of points in the collection
 	 */
 	public PointRoiWrapper(final int[] x, final int[] y, final int numPoints) {
 		this.points = new PointRoi(x, y, numPoints);
@@ -75,14 +74,13 @@ public class PointRoiWrapper implements IJRealRoiWrapper<PointRoi>, WritableReal
 	 * Creates an ImageJ 1.x {@link PointRoi} and wraps it as an ImgLib2
 	 * {@link RealPointCollection}.
 	 *
-	 * @param x
-	 *            x coordinates of the points
-	 * @param y
-	 *            y coordinates of the points
-	 * @param numPoints
-	 *            total number of points in the collection
+	 * @param x x coordinates of the points
+	 * @param y y coordinates of the points
+	 * @param numPoints total number of points in the collection
 	 */
-	public PointRoiWrapper(final float[] x, final float[] y, final int numPoints) {
+	public PointRoiWrapper(final float[] x, final float[] y,
+		final int numPoints)
+	{
 		this.points = new PointRoi(x, y, numPoints);
 	}
 
@@ -90,10 +88,8 @@ public class PointRoiWrapper implements IJRealRoiWrapper<PointRoi>, WritableReal
 	 * Creates an ImageJ 1.x {@link PointRoi} and wraps it as an ImgLib2
 	 * {@link RealPointCollection}.
 	 *
-	 * @param x
-	 *            x coordinates of the points
-	 * @param y
-	 *            y coordinates of the points
+	 * @param x x coordinates of the points
+	 * @param y y coordinates of the points
 	 */
 	public PointRoiWrapper(final float[] x, final float[] y) {
 		points = new PointRoi(x, y);
@@ -103,9 +99,8 @@ public class PointRoiWrapper implements IJRealRoiWrapper<PointRoi>, WritableReal
 	 * Creates an ImageJ 1.x {@link PointRoi} and wraps it as an ImgLib2
 	 * {@link RealPointCollection}.
 	 *
-	 * @param polygon
-	 *            {@link FloatPolygon} whose vertices will be the points
-	 *            contained in this collection
+	 * @param polygon {@link FloatPolygon} whose vertices will be the points
+	 *          contained in this collection
 	 */
 	public PointRoiWrapper(final FloatPolygon polygon) {
 		points = new PointRoi(polygon);
@@ -115,9 +110,8 @@ public class PointRoiWrapper implements IJRealRoiWrapper<PointRoi>, WritableReal
 	 * Creates an ImageJ 1.x {@link PointRoi} and wraps it as an ImgLib2
 	 * {@link RealPointCollection}.
 	 *
-	 * @param polygon
-	 *            {@link Polygon} whose vertices will be the points contained in
-	 *            this collection
+	 * @param polygon {@link Polygon} whose vertices will be the points contained
+	 *          in this collection
 	 */
 	public PointRoiWrapper(final Polygon polygon) {
 		points = new PointRoi(polygon);
@@ -127,10 +121,8 @@ public class PointRoiWrapper implements IJRealRoiWrapper<PointRoi>, WritableReal
 	 * Creates an ImageJ 1.x {@link PointRoi} and wraps it as an ImgLib2
 	 * {@link RealPointCollection}.
 	 *
-	 * @param x
-	 *            x coordinate of the point
-	 * @param y
-	 *            y coordinate of the point
+	 * @param x x coordinate of the point
+	 * @param y y coordinate of the point
 	 */
 	public PointRoiWrapper(final int x, final int y) {
 		points = new PointRoi(x, y);
@@ -140,10 +132,8 @@ public class PointRoiWrapper implements IJRealRoiWrapper<PointRoi>, WritableReal
 	 * Creates an ImageJ 1.x {@link PointRoi} and wraps it as an ImgLib2
 	 * {@link RealPointCollection}.
 	 *
-	 * @param x
-	 *            x coordinate of the point
-	 * @param y
-	 *            y coordinate of the point
+	 * @param x x coordinate of the point
+	 * @param y y coordinate of the point
 	 */
 	public PointRoiWrapper(final double x, final double y) {
 		points = new PointRoi(x, y);
@@ -153,8 +143,7 @@ public class PointRoiWrapper implements IJRealRoiWrapper<PointRoi>, WritableReal
 	 * Wraps the given ImageJ 1.x {@link PointRoi} as an ImgLib2
 	 * {@link RealPointCollection}.
 	 *
-	 * @param points
-	 *            {@link PointRoi} to be wrapped
+	 * @param points {@link PointRoi} to be wrapped
 	 */
 	public PointRoiWrapper(final PointRoi points) {
 		this.points = points;
@@ -171,15 +160,14 @@ public class PointRoiWrapper implements IJRealRoiWrapper<PointRoi>, WritableReal
 		final int numPoints = points.getNCoordinates();
 
 		for (int i = 0; i < numPoints; i++)
-			if (xt == x[i] && yt == y[i])
-				return true;
+			if (xt == x[i] && yt == y[i]) return true;
 		return false;
 	}
 
 	@Override
 	public double realMin(final int d) {
-		if (d != 0 && d != 1)
-			throw new IllegalArgumentException("Invalid dimension " + d);
+		if (d != 0 && d != 1) throw new IllegalArgumentException(
+			"Invalid dimension " + d);
 
 		final int numPoints = points.getNCoordinates();
 		double min = Double.POSITIVE_INFINITY;
@@ -187,22 +175,20 @@ public class PointRoiWrapper implements IJRealRoiWrapper<PointRoi>, WritableReal
 		if (d == 0) {
 			final float[] x = points.getContainedFloatPoints().xpoints;
 			for (int i = 0; i < numPoints; i++)
-				if (x[i] < min)
-					min = x[i];
+				if (x[i] < min) min = x[i];
 			return min;
 		}
 
 		final float[] y = points.getContainedFloatPoints().ypoints;
 		for (int i = 0; i < numPoints; i++)
-			if (y[i] < min)
-				min = y[i];
+			if (y[i] < min) min = y[i];
 		return min;
 	}
 
 	@Override
 	public double realMax(final int d) {
-		if (d != 0 && d != 1)
-			throw new IllegalArgumentException("Invalid dimension " + d);
+		if (d != 0 && d != 1) throw new IllegalArgumentException(
+			"Invalid dimension " + d);
 
 		final int numPoints = points.getNCoordinates();
 		double max = Double.NEGATIVE_INFINITY;
@@ -210,15 +196,13 @@ public class PointRoiWrapper implements IJRealRoiWrapper<PointRoi>, WritableReal
 		if (d == 0) {
 			final float[] x = points.getContainedFloatPoints().xpoints;
 			for (int i = 0; i < numPoints; i++)
-				if (x[i] > max)
-					max = x[i];
+				if (x[i] > max) max = x[i];
 			return max;
 		}
 
 		final float[] y = points.getContainedFloatPoints().ypoints;
 		for (int i = 0; i < numPoints; i++)
-			if (y[i] > max)
-				max = y[i];
+			if (y[i] > max) max = y[i];
 		return max;
 	}
 
@@ -230,8 +214,7 @@ public class PointRoiWrapper implements IJRealRoiWrapper<PointRoi>, WritableReal
 		final int numPoints = points.getNCoordinates();
 
 		for (int i = 0; i < numPoints; i++) {
-			pts.add(new AbstractRealLocalizable(new double[] { x[i], y[i] }) {
-			});
+			pts.add(new AbstractRealLocalizable(new double[] { x[i], y[i] }) {});
 		}
 		return pts;
 	}
@@ -252,9 +235,9 @@ public class PointRoiWrapper implements IJRealRoiWrapper<PointRoi>, WritableReal
 	 * {@inheritDoc}
 	 * <p>
 	 * If there is no {@link ImagePlus} associated with the wrapped
-	 * {@link PointRoi}, then an {@code UnsupportedOperationException} will
-	 * always be thrown. Otherwise, the point will be removed if it matches any
-	 * of the points in the collection.
+	 * {@link PointRoi}, then an {@code UnsupportedOperationException} will always
+	 * be thrown. Otherwise, the point will be removed if it matches any of the
+	 * points in the collection.
 	 * </p>
 	 */
 	@Override
@@ -265,10 +248,10 @@ public class PointRoiWrapper implements IJRealRoiWrapper<PointRoi>, WritableReal
 			// exact match is not found. So test that the point is part of the
 			// roi
 			// first.
-			if (test(point))
-				points.deleteHandle(point.getDoublePosition(0), point.getDoublePosition(1));
-		} else
-			Rois.unsupported("removePoint");
+			if (test(point)) points.deleteHandle(point.getDoublePosition(0), point
+				.getDoublePosition(1));
+		}
+		else Rois.unsupported("removePoint");
 	}
 
 	@Override

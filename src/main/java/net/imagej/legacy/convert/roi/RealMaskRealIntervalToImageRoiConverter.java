@@ -60,8 +60,9 @@ import ij.gui.ImageRoi;
  * @author Alison Walter
  */
 @Plugin(type = Converter.class, priority = Priority.LOW)
-public class RealMaskRealIntervalToImageRoiConverter
-		extends AbstractMaskPredicateToRoiConverter<RealMaskRealInterval, ImageRoi> {
+public class RealMaskRealIntervalToImageRoiConverter extends
+	AbstractMaskPredicateToRoiConverter<RealMaskRealInterval, ImageRoi>
+{
 
 	@Parameter
 	private ConvertService convertService;
@@ -102,21 +103,24 @@ public class RealMaskRealIntervalToImageRoiConverter
 	@Override
 	public ImageRoi convert(final RealMaskRealInterval mask) {
 		// Wrap mask as RRARI
-		final RealRandomAccessibleRealInterval<BoolType> rrari = Masks.toRealRandomAccessibleRealInterval(mask);
+		final RealRandomAccessibleRealInterval<BoolType> rrari = Masks
+			.toRealRandomAccessibleRealInterval(mask);
 
 		// Convert the RRARI to a RAI whose min is (0, 0), this will ensure it
 		// displays properly
 		final RandomAccessible<BoolType> raster = Views.raster(rrari);
 		final RandomAccessible<BoolType> translate = Views.translate(raster,
-				new long[] { (long) -mask.realMin(0), (long) -mask.realMin(1) });
-		final RandomAccessibleInterval<BoolType> rai = Views.interval(translate, new long[] { 0, 0 },
-				new long[] { (long) (mask.realMax(0) - mask.realMin(0)), (long) (mask.realMax(1) - mask.realMin(1)) });
+			new long[] { (long) -mask.realMin(0), (long) -mask.realMin(1) });
+		final RandomAccessibleInterval<BoolType> rai = Views.interval(translate,
+			new long[] { 0, 0 }, new long[] { (long) (mask.realMax(0) - mask.realMin(
+				0)), (long) (mask.realMax(1) - mask.realMin(1)) });
 
 		// Convert RAI to ImagePlus
 		final Dataset d = datasetService.create(rai);
 		final ImagePlus ip = convertService.convert(d, ImagePlus.class);
 
-		return new ImageRoi((int) mask.realMin(0), (int) mask.realMin(1), ip.getBufferedImage());
+		return new ImageRoi((int) mask.realMin(0), (int) mask.realMin(1), ip
+			.getBufferedImage());
 	}
 
 	@Override

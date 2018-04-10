@@ -55,7 +55,9 @@ import ij.gui.RotatedRectRoi;
  * @author Alison Walter
  */
 @Plugin(type = Converter.class)
-public class PolygonRoiToPolygon2DConverter extends AbstractRoiToMaskPredicateConverter<PolygonRoi, Polygon2D> {
+public class PolygonRoiToPolygon2DConverter extends
+	AbstractRoiToMaskPredicateConverter<PolygonRoi, Polygon2D>
+{
 
 	@Override
 	public Class<Polygon2D> getOutputType() {
@@ -69,16 +71,16 @@ public class PolygonRoiToPolygon2DConverter extends AbstractRoiToMaskPredicateCo
 
 	@Override
 	public Polygon2D convert(final PolygonRoi src) {
-		if (src.getType() == Roi.POLYGON)
-			return new PolygonRoiWrapper(src);
+		if (src.getType() == Roi.POLYGON) return new PolygonRoiWrapper(src);
 		return new UnmodifiablePolygonRoiWrapper(src);
 	}
 
 	@Override
 	public boolean supportedType(final PolygonRoi src) {
-		final boolean supportedType = src.getType() == Roi.POLYGON || src.getType() == Roi.TRACED_ROI
-				|| src.getType() == Roi.FREEROI;
+		final boolean supportedType = src.getType() == Roi.POLYGON || src
+			.getType() == Roi.TRACED_ROI || src.getType() == Roi.FREEROI;
 		// EllipseRoi and RotatedRectRoi are both PolygonRois & FREEROI
-		return supportedType && !src.isSplineFit() && !(src instanceof RotatedRectRoi) && !(src instanceof EllipseRoi);
+		return supportedType && !src.isSplineFit() &&
+			!(src instanceof RotatedRectRoi) && !(src instanceof EllipseRoi);
 	}
 }

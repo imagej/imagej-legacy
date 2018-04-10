@@ -97,12 +97,15 @@ public class ShapeRoiConversionTest {
 		final Context context = new Context(ConvertService.class);
 		convertService = context.service(ConvertService.class);
 
-		cb = new ClosedWritableBox(new double[] { 10, 12 }, new double[] { 123, 80 });
+		cb = new ClosedWritableBox(new double[] { 10, 12 }, new double[] { 123,
+			80 });
 		ob = new OpenWritableBox(new double[] { -9, 63 }, new double[] { 12, 92 });
 		cs = new ClosedWritableSphere(new double[] { 53, 61 }, 5);
 		ops = new OpenWritableSphere(new double[] { 50, 51 }, 10);
-		oe = new OpenWritableEllipsoid(new double[] { 0, 0 }, new double[] { 3, 5 });
-		ce = new ClosedWritableEllipsoid(new double[] { 15, 70 }, new double[] { 8.5, 1 });
+		oe = new OpenWritableEllipsoid(new double[] { 0, 0 }, new double[] { 3,
+			5 });
+		ce = new ClosedWritableEllipsoid(new double[] { 15, 70 }, new double[] {
+			8.5, 1 });
 	}
 
 	@After
@@ -143,7 +146,8 @@ public class ShapeRoiConversionTest {
 
 	@Test
 	public void testShapeRoiToMaskRealIntervalConverter() {
-		final RealMaskRealInterval converted = convertService.convert(shape, RealMaskRealInterval.class);
+		final RealMaskRealInterval converted = convertService.convert(shape,
+			RealMaskRealInterval.class);
 
 		assertTrue(converted instanceof ShapeRoiWrapper);
 
@@ -158,7 +162,8 @@ public class ShapeRoiConversionTest {
 	@Test
 	public void testMaskOperationResultToShapeRoiConverterMatching() {
 		// Unwrap
-		final Converter<?, ?> unwrap = convertService.getHandler(wrap, ShapeRoi.class);
+		final Converter<?, ?> unwrap = convertService.getHandler(wrap,
+			ShapeRoi.class);
 		assertTrue(unwrap instanceof WrapperToShapeRoiConverter);
 
 		// AND
@@ -168,8 +173,10 @@ public class ShapeRoiConversionTest {
 
 		// N-ary OR then And
 		final RealMaskRealInterval nary = ops.and(cb.or(cs).or(ce));
-		final Converter<?, ?> naryC = convertService.getHandler(nary, ShapeRoi.class);
-		assertTrue(naryC instanceof BinaryCompositeMaskPredicateToShapeRoiConverter);
+		final Converter<?, ?> naryC = convertService.getHandler(nary,
+			ShapeRoi.class);
+		assertTrue(
+			naryC instanceof BinaryCompositeMaskPredicateToShapeRoiConverter);
 
 		// Not
 		final RealMask not = ops.negate();
@@ -180,7 +187,8 @@ public class ShapeRoiConversionTest {
 		final AffineTransform2D t = new AffineTransform2D();
 		t.rotate(Math.PI / 2);
 		final RealMask rotate = oe.and(ops.or(ob.transform(t.inverse())));
-		final Converter<?, ?> rotateC = convertService.getHandler(rotate, ShapeRoi.class);
+		final Converter<?, ?> rotateC = convertService.getHandler(rotate,
+			ShapeRoi.class);
 		assertNull(rotateC);
 	}
 
@@ -226,7 +234,8 @@ public class ShapeRoiConversionTest {
 
 	@Test
 	public void testMaskOperationResultToShapeRoiConverterMultiple() {
-		final RealMaskRealInterval multi = cb.and(cs).or(oe.or(ce).minus(ob).or(ops.xor(cb)));
+		final RealMaskRealInterval multi = cb.and(cs).or(oe.or(ce).minus(ob).or(ops
+			.xor(cb)));
 		final ShapeRoi s = convertService.convert(multi, ShapeRoi.class);
 
 		assertEquals(multi.realMin(0), s.getXBase(), 0);

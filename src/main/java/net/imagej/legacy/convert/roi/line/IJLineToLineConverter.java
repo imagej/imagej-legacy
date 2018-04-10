@@ -46,11 +46,14 @@ import ij.gui.Arrow;
  * @author Alison Walter
  */
 @Plugin(type = Converter.class)
-public class IJLineToLineConverter extends AbstractRoiToMaskPredicateConverter<ij.gui.Line, Line> {
+public class IJLineToLineConverter extends
+	AbstractRoiToMaskPredicateConverter<ij.gui.Line, Line>
+{
 
 	@Override
 	public boolean canConvert(final Class<?> src, final Class<?> dest) {
-		return super.canConvert(src, dest) && !src.equals(Arrow.class) && ij.gui.Line.getWidth() <= 1;
+		return super.canConvert(src, dest) && !src.equals(Arrow.class) &&
+			ij.gui.Line.getWidth() <= 1;
 	}
 
 	@Override

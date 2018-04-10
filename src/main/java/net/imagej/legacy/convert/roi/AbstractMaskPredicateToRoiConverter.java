@@ -43,13 +43,12 @@ import ij.gui.Roi;
  * Abstract base class for converting {@link MaskPredicate}s to {@link Roi}s.
  *
  * @author Alison Walter
- * @param <M>
- *            the {@link MaskPredicate} input type
- * @param <R>
- *            the ImageJ 1.x {@link Roi} output type
+ * @param <M> the {@link MaskPredicate} input type
+ * @param <R> the ImageJ 1.x {@link Roi} output type
  */
 public abstract class AbstractMaskPredicateToRoiConverter<M extends MaskPredicate<?>, R extends Roi>
-		extends AbstractConverter<M, R> {
+	extends AbstractConverter<M, R>
+{
 
 	@Override
 	@SuppressWarnings("unchecked")
@@ -66,10 +65,10 @@ public abstract class AbstractMaskPredicateToRoiConverter<M extends MaskPredicat
 	@Override
 	@SuppressWarnings("unchecked")
 	public <T> T convert(final Object src, final Class<T> dest) {
-		if (!getInputType().isInstance(src))
-			throw new IllegalArgumentException("Cannot convert " + src.getClass() + " to " + getOutputType());
-		if (((M) src).numDimensions() != 2)
-			throw new IllegalArgumentException("Mask must be 2D");
+		if (!getInputType().isInstance(src)) throw new IllegalArgumentException(
+			"Cannot convert " + src.getClass() + " to " + getOutputType());
+		if (((M) src).numDimensions() != 2) throw new IllegalArgumentException(
+			"Mask must be 2D");
 
 		return (T) convert((M) src);
 	}

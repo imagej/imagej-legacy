@@ -36,10 +36,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import net.imagej.legacy.convert.roi.RoiUnwrappers;
 import net.imagej.legacy.convert.roi.RoiUnwrappers.WrapperToRoiConverter;
-import net.imagej.legacy.convert.roi.box.BoxToRoiConverter;
-import net.imagej.legacy.convert.roi.box.RoiWrapper;
 import net.imglib2.RealLocalizable;
 import net.imglib2.RealPoint;
 import net.imglib2.roi.geom.real.Box;
@@ -96,13 +93,17 @@ public class RoiConversionTest {
 
 	@Test
 	public void testRoiWrapperGetters() {
-		assertEquals(rect.getXBase() + rect.getFloatWidth() / 2, wrap.center().getDoublePosition(0), 0);
-		assertEquals(rect.getYBase() + rect.getFloatHeight() / 2, wrap.center().getDoublePosition(1), 0);
+		assertEquals(rect.getXBase() + rect.getFloatWidth() / 2, wrap.center()
+			.getDoublePosition(0), 0);
+		assertEquals(rect.getYBase() + rect.getFloatHeight() / 2, wrap.center()
+			.getDoublePosition(1), 0);
 		assertEquals(rect.getFloatWidth(), wrap.sideLength(0), 0);
 		assertEquals(rect.getFloatHeight(), wrap.sideLength(1), 0);
 
-		assertEquals(b.center().getDoublePosition(0), wrap.center().getDoublePosition(0), 0);
-		assertEquals(b.center().getDoublePosition(1), wrap.center().getDoublePosition(1), 0);
+		assertEquals(b.center().getDoublePosition(0), wrap.center()
+			.getDoublePosition(0), 0);
+		assertEquals(b.center().getDoublePosition(1), wrap.center()
+			.getDoublePosition(1), 0);
 		assertEquals(b.sideLength(0), wrap.sideLength(0), 0);
 		assertEquals(b.sideLength(1), wrap.sideLength(1), 0);
 	}
@@ -193,8 +194,10 @@ public class RoiConversionTest {
 
 		assertTrue(converted instanceof RoiWrapper);
 
-		assertEquals(wrap.center().getDoublePosition(0), converted.center().getDoublePosition(0), 0);
-		assertEquals(wrap.center().getDoublePosition(1), converted.center().getDoublePosition(1), 0);
+		assertEquals(wrap.center().getDoublePosition(0), converted.center()
+			.getDoublePosition(0), 0);
+		assertEquals(wrap.center().getDoublePosition(1), converted.center()
+			.getDoublePosition(1), 0);
 		assertEquals(converted.sideLength(0), converted.sideLength(0), 0);
 		assertEquals(converted.sideLength(1), converted.sideLength(1), 0);
 	}
@@ -217,7 +220,8 @@ public class RoiConversionTest {
 		final Converter<?, ?> cw = convertService.getHandler(wrap, Roi.class);
 		assertTrue(cw instanceof WrapperToRoiConverter);
 
-		final Box d = new ClosedWritableBox(new double[] { 0, -6.5, 12, 50 }, new double[] { 2, 0.5, 6, 13.5 });
+		final Box d = new ClosedWritableBox(new double[] { 0, -6.5, 12, 50 },
+			new double[] { 2, 0.5, 6, 13.5 });
 		final Converter<?, ?> cd = convertService.getHandler(d, Roi.class);
 		assertNull(cd);
 	}
@@ -229,8 +233,10 @@ public class RoiConversionTest {
 		assertEquals(Roi.RECTANGLE, r.getType());
 		assertEquals(b.sideLength(0), r.getFloatWidth(), 0);
 		assertEquals(b.sideLength(1), r.getFloatHeight(), 0);
-		assertEquals(b.center().getDoublePosition(0) - b.sideLength(0) / 2, r.getXBase(), 0);
-		assertEquals(b.center().getDoublePosition(1) - b.sideLength(1) / 2, r.getYBase(), 0);
+		assertEquals(b.center().getDoublePosition(0) - b.sideLength(0) / 2, r
+			.getXBase(), 0);
+		assertEquals(b.center().getDoublePosition(1) - b.sideLength(1) / 2, r
+			.getYBase(), 0);
 	}
 
 	@Test

@@ -45,7 +45,9 @@ import org.scijava.plugin.Plugin;
  * @author Alison Walter
  */
 @Plugin(type = Converter.class, priority = Priority.LOW)
-public class LineToIJLineConverter extends AbstractMaskPredicateToRoiConverter<Line, ij.gui.Line> {
+public class LineToIJLineConverter extends
+	AbstractMaskPredicateToRoiConverter<Line, ij.gui.Line>
+{
 
 	@Override
 	public Class<ij.gui.Line> getOutputType() {
@@ -61,7 +63,7 @@ public class LineToIJLineConverter extends AbstractMaskPredicateToRoiConverter<L
 	public ij.gui.Line convert(final Line mask) {
 		final RealLocalizable ptOne = mask.endpointOne();
 		final RealLocalizable ptTwo = mask.endpointTwo();
-		return new ij.gui.Line(ptOne.getDoublePosition(0), ptOne.getDoublePosition(1), ptTwo.getDoublePosition(0),
-				ptTwo.getDoublePosition(1));
+		return new ij.gui.Line(ptOne.getDoublePosition(0), ptOne.getDoublePosition(
+			1), ptTwo.getDoublePosition(0), ptTwo.getDoublePosition(1));
 	}
 }

@@ -56,28 +56,25 @@ public class RoiWrapper implements IJRealRoiWrapper<Roi>, WritableBox {
 	 * Creates an ImageJ 1.x {@link Roi} and then wraps it as an ImgLib2
 	 * {@link Box}.
 	 *
-	 * @param x
-	 *            x coordinate of upper left corner
-	 * @param y
-	 *            y coordinate of upper left corner
-	 * @param width
-	 *            width of rectangle
-	 * @param height
-	 *            height of rectangle
+	 * @param x x coordinate of upper left corner
+	 * @param y y coordinate of upper left corner
+	 * @param width width of rectangle
+	 * @param height height of rectangle
 	 */
-	public RoiWrapper(final double x, final double y, final double width, final double height) {
+	public RoiWrapper(final double x, final double y, final double width,
+		final double height)
+	{
 		rect = new Roi(x, y, width, height);
 	}
 
 	/**
 	 * Wraps an ImageJ 1.x {@link Roi} as an ImgLib2 {@link Box}.
 	 *
-	 * @param roi
-	 *            the {@link Roi} to be wrapped
+	 * @param roi the {@link Roi} to be wrapped
 	 */
 	public RoiWrapper(final Roi roi) {
-		if (roi.getCornerDiameter() != 0)
-			throw new IllegalArgumentException("Cannot wrap Roi with rounded corners");
+		if (roi.getCornerDiameter() != 0) throw new IllegalArgumentException(
+			"Cannot wrap Roi with rounded corners");
 		rect = roi;
 	}
 
@@ -96,42 +93,44 @@ public class RoiWrapper implements IJRealRoiWrapper<Roi>, WritableBox {
 		final double x = t.getDoublePosition(0);
 		final double y = t.getDoublePosition(1);
 
-		return x >= realMin(0) && x < realMax(0) && y >= realMin(1) && y < realMax(1);
+		return x >= realMin(0) && x < realMax(0) && y >= realMin(1) && y < realMax(
+			1);
 	}
 
 	@Override
 	public double realMin(final int d) {
-		if (d != 0 && d != 1)
-			throw new IllegalArgumentException("Invalid dimension " + d);
+		if (d != 0 && d != 1) throw new IllegalArgumentException(
+			"Invalid dimension " + d);
 		return d == 0 ? rect.getXBase() : rect.getYBase();
 	}
 
 	@Override
 	public double realMax(final int d) {
-		if (d != 0 && d != 1)
-			throw new IllegalArgumentException("Invalid dimension " + d);
-		return d == 0 ? rect.getXBase() + rect.getFloatWidth() : rect.getYBase() + rect.getFloatHeight();
+		if (d != 0 && d != 1) throw new IllegalArgumentException(
+			"Invalid dimension " + d);
+		return d == 0 ? rect.getXBase() + rect.getFloatWidth() : rect.getYBase() +
+			rect.getFloatHeight();
 	}
 
 	@Override
 	public double sideLength(final int d) {
-		if (d != 0 && d != 1)
-			throw new IllegalArgumentException("Invalid dimension " + d);
+		if (d != 0 && d != 1) throw new IllegalArgumentException(
+			"Invalid dimension " + d);
 		return d == 0 ? rect.getFloatWidth() : rect.getFloatHeight();
 	}
 
 	@Override
 	public RealLocalizableRealPositionable center() {
-		return new BoxCenter(rect.getXBase() + rect.getFloatWidth() / 2.0,
-				rect.getYBase() + rect.getFloatHeight() / 2.0);
+		return new BoxCenter(rect.getXBase() + rect.getFloatWidth() / 2.0, rect
+			.getYBase() + rect.getFloatHeight() / 2.0);
 	}
 
 	/**
 	 * This will <strong>always</strong> throw an
 	 * {@code UnsupportedOperationException}.
 	 *
-	 * @throws UnsupportedOperationException
-	 *             cannot modify width/height of underlying {@link Roi}
+	 * @throws UnsupportedOperationException cannot modify width/height of
+	 *           underlying {@link Roi}
 	 */
 	@Override
 	public void setSideLength(final int d, final double length) {

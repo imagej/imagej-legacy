@@ -46,44 +46,41 @@ import ij.gui.Roi;
  * {@link MaskPredicate}.
  *
  * @author Alison Walter
- * @param <R>
- *            ImageJ 1.x {@link Roi} input type
- * @param <M>
- *            {@link MaskPredicate} output type
+ * @param <R> ImageJ 1.x {@link Roi} input type
+ * @param <M> {@link MaskPredicate} output type
  */
 public abstract class AbstractRoiToMaskPredicateConverter<R extends Roi, M extends MaskPredicate<? extends RealLocalizable>>
-		extends AbstractConverter<R, M> {
+	extends AbstractConverter<R, M>
+{
 
 	@Override
 	@SuppressWarnings("unchecked")
 	public boolean canConvert(final ConversionRequest request) {
-		if (super.canConvert(request))
-			return supportedType((R) request.sourceObject());
+		if (super.canConvert(request)) return supportedType((R) request
+			.sourceObject());
 		return false;
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
 	public boolean canConvert(final Object src, final Type dest) {
-		if (super.canConvert(src, dest))
-			return supportedType((R) src);
+		if (super.canConvert(src, dest)) return supportedType((R) src);
 		return false;
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
 	public boolean canConvert(final Object src, final Class<?> dest) {
-		if (super.canConvert(src, dest))
-			return supportedType((R) src);
+		if (super.canConvert(src, dest)) return supportedType((R) src);
 		return false;
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
 	public <T> T convert(final Object src, final Class<T> dest) {
-		if (!getInputType().isInstance(src))
-			throw new IllegalArgumentException(
-					"Cannot convert " + src.getClass().getSimpleName() + " to " + getOutputType().getSimpleName());
+		if (!getInputType().isInstance(src)) throw new IllegalArgumentException(
+			"Cannot convert " + src.getClass().getSimpleName() + " to " +
+				getOutputType().getSimpleName());
 
 		return (T) convert((R) src);
 	}

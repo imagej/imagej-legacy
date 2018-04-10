@@ -64,12 +64,12 @@ public class PointRoiToRealPointCollectionConverter extends
 	}
 
 	@Override
-	public RealPointCollection<RealLocalizable> convert(PointRoi src) {
+	public RealPointCollection<RealLocalizable> convert(final PointRoi src) {
 		return new PointRoiWrapper(src);
 	}
 
 	@Override
-	public boolean supportedType(PointRoi src) {
+	public boolean supportedType(final PointRoi src) {
 		return src.getType() == Roi.POINT;
 	}
 
