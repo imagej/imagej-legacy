@@ -12,6 +12,7 @@ import net.imagej.DatasetService;
 import net.imagej.ImgPlus;
 import net.imagej.axis.Axes;
 import net.imagej.axis.AxisType;
+import net.imagej.axis.DefaultLinearAxis;
 import net.imglib2.img.Img;
 import net.imglib2.img.ImgFactory;
 import net.imglib2.img.array.ArrayImg;
@@ -257,5 +258,25 @@ public class ImagePlusCreatorTest
 		for( T pixel : image)
 			pixel.setReal( expectedPixels[i++] );
 		return image;
+	}
+
+	@Test
+	public void testTitle() {
+		String title = "Hello World";
+		Img<UnsignedByteType> img = ArrayImgs.unsignedBytes(10, 10);
+		Dataset dataset = datasetService.create(img);
+		dataset.setName(title);
+		ImagePlus imagePlus = creator.createLegacyImage(dataset);
+		assertEquals(title, imagePlus.getTitle());
+	}
+
+	@Test
+	public void testCalibration() {
+		int scale = 42;
+		Img<UnsignedByteType> img = ArrayImgs.unsignedBytes(10, 10, 10);
+		Dataset dataset = datasetService.create(img);
+		dataset.setAxis(new DefaultLinearAxis(Axes.TIME, scale), 2);
+		ImagePlus imagePlus = creator.createLegacyImage(dataset);
+		assertEquals(scale, imagePlus.getCalibration().frameInterval, 0);
 	}
 }
