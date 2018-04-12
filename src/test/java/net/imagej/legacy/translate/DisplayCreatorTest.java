@@ -33,6 +33,7 @@ package net.imagej.legacy.translate;
 
 import ij.ImagePlus;
 import ij.ImageStack;
+import ij.gui.NewImage;
 import ij.process.ByteProcessor;
 import ij.process.ColorProcessor;
 import ij.process.FloatProcessor;
@@ -213,5 +214,23 @@ public class DisplayCreatorTest
 		byte[] joinedArray = Arrays.copyOf( a, a.length + b.length );
 		System.arraycopy( b, 0, joinedArray, a.length, b.length );
 		return joinedArray;
+	}
+
+	@Test
+	public void testCalibration() {
+		int frameInterval = 42;
+		ImagePlus image = NewImage.createByteImage("test", 10, 20, 30, NewImage.FILL_BLACK);
+		image.setDimensions(1, 1, 30);
+		image.getCalibration().frameInterval = frameInterval;
+		Dataset result = SubClass.toDataset(image);
+		assertEquals(frameInterval, result.averageScale(result.dimensionIndex(Axes.TIME)), 0);
+	}
+
+	@Test
+	public void testName() {
+		String title = "Hello World!";
+		ImagePlus image = NewImage.createByteImage(title, 10, 20, 30, NewImage.FILL_BLACK);
+		Dataset result = SubClass.toDataset(image);
+		assertEquals(title, result.getName());
 	}
 }
