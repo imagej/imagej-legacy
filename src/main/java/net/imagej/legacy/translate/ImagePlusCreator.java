@@ -62,7 +62,6 @@ public class ImagePlusCreator extends AbstractContextual
 	// -- instance variables --
 
 	private final ColorTableHarmonizer colorTableHarmonizer;
-	private final MetadataHarmonizer metadataHarmonizer;
 	private final PositionHarmonizer positionHarmonizer;
 	private final NameHarmonizer nameHarmonizer;
 
@@ -77,7 +76,6 @@ public class ImagePlusCreator extends AbstractContextual
 	public ImagePlusCreator(final Context context) {
 		setContext(context);
 		colorTableHarmonizer = new ColorTableHarmonizer(imageDisplayService);
-		metadataHarmonizer = new MetadataHarmonizer();
 		positionHarmonizer = new PositionHarmonizer();
 		nameHarmonizer = new NameHarmonizer();
 	}
@@ -98,7 +96,6 @@ public class ImagePlusCreator extends AbstractContextual
 		ImagePlus imp = createImagePlus( dataset );
 		ImagePlusCreatorUtils.setMetadata( dataset, imp );
 		imp = ImagePlusCreatorUtils.optionalMakeComposite( dataset, imp );
-		metadataHarmonizer.updateLegacyImage(dataset, imp);
 		if (display != null) {
 			if (shouldBeComposite(display, dataset, imp)) {
 				imp = makeCompositeImage(imp);
