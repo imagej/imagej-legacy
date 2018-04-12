@@ -43,8 +43,7 @@ import io.scif.Metadata;
 import io.scif.img.SCIFIOImgPlus;
 import net.imagej.Dataset;
 import net.imagej.ImgPlus;
-import net.imagej.axis.Axes;
-import net.imagej.axis.CalibratedAxis;
+import net.imglib2.img.display.imagej.CalibrationUtils;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
 
@@ -67,47 +66,9 @@ public class ImagePlusCreatorUtils
 		// prevent from instantiation
 	}
 
-	/**
-	 * Sets the {@link Calibration} data on the provided {@link ImagePlus}.
-	 */
-	public static void populateCalibrationData( final ImagePlus imp, final Dataset ds )
-	{
-		final ImgPlus<? extends RealType<?>> imgPlus = ds.getImgPlus();
-
-		final Calibration calibration = imp.getCalibration();
-		final int xIndex = imgPlus.dimensionIndex(Axes.X);
-		final int yIndex = imgPlus.dimensionIndex(Axes.Y);
-		final int zIndex = imgPlus.dimensionIndex(Axes.Z);
-		final int tIndex = imgPlus.dimensionIndex(Axes.TIME);
-
-		if (xIndex >= 0) {
-			calibration.pixelWidth = imgPlus.averageScale( xIndex );
-			CalibratedAxis axis = imgPlus.axis( xIndex );
-			calibration.xOrigin = axis.calibratedValue( 0 );
-			calibration.setXUnit( axis.unit());
-		}
-		if (yIndex >= 0) {
-			calibration.pixelHeight = imgPlus.averageScale( yIndex );
-			CalibratedAxis axis = imgPlus.axis( yIndex );
-			calibration.yOrigin = axis.calibratedValue( 0 );
-			calibration.setYUnit( axis.unit());
-		}
-		if (zIndex >= 0) {
-			calibration.pixelDepth = imgPlus.averageScale( zIndex );
-			CalibratedAxis axis = imgPlus.axis( zIndex );
-			calibration.zOrigin = axis.calibratedValue( 0 );
-			calibration.setZUnit( axis.unit());
-		}
-		if (tIndex >= 0) {
-			calibration.frameInterval = imgPlus.averageScale( tIndex );
-			calibration.setTimeUnit(imgPlus.axis(tIndex).unit());
-		}
-	}
-
 	static void setMetadata( Dataset ds, ImagePlus imp )
 	{
 		imp.setOpenAsHyperStack(imp.getNDimensions() > 3);
-		populateCalibrationData(imp, ds);
 		final FileInfo fileInfo = getFileInfo( ds, imp );
 		imp.setFileInfo(fileInfo);
 		setSliceLabels( imp, fileInfo );
