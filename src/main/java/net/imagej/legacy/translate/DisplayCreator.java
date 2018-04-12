@@ -74,7 +74,6 @@ public class DisplayCreator extends AbstractContextual
 	private ImageDisplayService imageDisplayService;
 
 	private final ColorTableHarmonizer colorTableHarmonizer;
-	private final MetadataHarmonizer metadataHarmonizer;
 	private final CompositeHarmonizer compositeHarmonizer;
 	private final OverlayHarmonizer overlayHarmonizer;
 	private final PositionHarmonizer positionHarmonizer;
@@ -87,7 +86,6 @@ public class DisplayCreator extends AbstractContextual
 	{
 		setContext(context);
 		nameHarmonizer = new NameHarmonizer();
-		metadataHarmonizer = new MetadataHarmonizer();
 		overlayHarmonizer = new OverlayHarmonizer(context);
 		positionHarmonizer = new PositionHarmonizer();
 		compositeHarmonizer = new CompositeHarmonizer();
@@ -126,7 +124,6 @@ public class DisplayCreator extends AbstractContextual
 
 	private ImageDisplay harmonizeExceptPixels( ImagePlus imp, Dataset ds )
 	{
-		metadataHarmonizer.updateDataset(ds, imp);
 		compositeHarmonizer.updateDataset(ds, imp);
 
 		// CTR FIXME - add imageDisplayService.createImageDisplay method?
