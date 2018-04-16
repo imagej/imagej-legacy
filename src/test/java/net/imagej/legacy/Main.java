@@ -31,9 +31,24 @@
 
 package net.imagej.legacy;
 
+import net.imagej.Dataset;
+import net.imagej.DatasetService;
+import net.imagej.ImgPlus;
+import net.imagej.axis.Axes;
+import net.imagej.axis.AxisType;
 import net.imagej.legacy.ui.LegacyUI;
 
+import net.imglib2.Cursor;
+import net.imglib2.img.Img;
+import net.imglib2.img.array.ArrayImgs;
+import net.imglib2.img.planar.PlanarImgs;
+import net.imglib2.type.numeric.RealType;
+import net.imglib2.type.numeric.integer.UnsignedByteType;
 import org.scijava.Context;
+import org.scijava.ItemIO;
+import org.scijava.command.Command;
+import org.scijava.plugin.Parameter;
+import org.scijava.plugin.Plugin;
 import org.scijava.ui.UIService;
 
 /**
@@ -46,5 +61,82 @@ public class Main {
 	public static void main(String[] args) {
 		final Context context = new Context();
 		context.service(UIService.class).showUI(LegacyUI.NAME);
+	}
+
+	@Plugin(type = Command.class, menuPath = "Test > Create ArrayImg")
+	public static class CreateArrayImg implements Command {
+
+		@Parameter(type = ItemIO.OUTPUT)
+		private Dataset result;
+
+		@Parameter
+		private DatasetService datasetService;
+
+		@Override
+		public void run() {
+			AxisType[] axisTypes = { Axes.X, Axes.Y, Axes.Z };
+			result = datasetService.create(new ImgPlus<>(ArrayImgs.unsignedBytes(100, 100, 100), "array img", axisTypes));
+			Cursor<RealType<?>> cursor = result.localizingCursor();
+			while (cursor.hasNext()) {
+				cursor.fwd();
+				double x = cursor.getDoublePosition(0);
+				cursor.get().setReal(Math.sin(x / 20) * 127 + 127);
+			}
+		}
+	}
+
+	@Plugin(type = Command.class, menuPath = "Test > Create ArrayImg BitType")
+	public static class CreateBitTypeImg implements Command {
+
+		@Parameter(type = ItemIO.OUTPUT)
+		private Dataset result;
+
+		@Parameter
+		private DatasetService datasetService;
+
+		@Override
+		public void run() {
+			AxisType[] axisTypes = { Axes.X, Axes.Y, Axes.Z };
+			result = datasetService.create(new ImgPlus<>(ArrayImgs.bits(100, 100, 100), "array img", axisTypes));
+			Cursor<RealType<?>> cursor = result.localizingCursor();
+			while (cursor.hasNext()) {
+				cursor.fwd();
+				double x = cursor.getDoublePosition(0);
+				double y = cursor.getDoublePosition(1);
+				cursor.get().setReal(Math.sin(y / 10) * Math.sin(x / 10) * 127 + 127);
+			}
+		}
+	}
+
+	@Plugin(type = Command.class, menuPath = "Test > Create PlanarImg")
+	public static class CreatePlanerImg implements Command {
+
+		@Parameter(type = ItemIO.OUTPUT)
+		private Dataset result;
+
+		@Parameter
+		private DatasetService datasetService;
+
+		@Override
+		public void run() {
+			AxisType[] axisTypes = { Axes.X, Axes.Y, Axes.Z };
+			result = datasetService.create(new ImgPlus<>(PlanarImgs.unsignedBytes(100, 100, 100), "planer img", axisTypes));
+		}
+	}
+
+	@Plugin(type = Command.class, menuPath = "Test > Create 2d ArrayImg")
+	public static class Create2dArrayImg implements Command {
+
+		@Parameter(type = ItemIO.OUTPUT)
+		private Dataset result;
+
+		@Parameter
+		private DatasetService datasetService;
+
+		@Override
+		public void run() {
+			AxisType[] axisTypes = { Axes.X, Axes.Y };
+			result = datasetService.create(new ImgPlus<>(ArrayImgs.unsignedBytes(100, 100), "2d array img", axisTypes));
+		}
 	}
 }
