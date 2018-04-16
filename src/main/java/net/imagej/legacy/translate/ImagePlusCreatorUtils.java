@@ -133,22 +133,6 @@ public class ImagePlusCreatorUtils
 		}
 	}
 
-	static ImagePlus optionalMakeComposite( Dataset ds, ImagePlus imp )
-	{
-		if (!ds.isRGBMerged()) {
-			/*
-			 * ImageJ 1.x will use a StackWindow *only* if there is more than one channel.
-			 * So unfortunately, we cannot consistently return a composite image here. We
-			 * have to continue to deliver different data types that require specific case
-			 * logic in any handler.
-			 */
-			if (imp.getStackSize() > 1) {
-				imp = new CompositeImage(imp, CompositeImage.COMPOSITE);
-			}
-		}
-		return imp;
-	}
-
 	// TODO remove usage of SCIFIO classes after migrating ImageMetadata
 	// framework to imagej-common
 	private static String[] getSliceLabels(final Dataset ds) {
