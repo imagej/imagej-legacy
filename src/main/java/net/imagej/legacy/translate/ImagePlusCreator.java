@@ -122,6 +122,7 @@ public class ImagePlusCreator extends AbstractContextual
 		 * have to continue to deliver different data types that require specific case
 		 * logic in any handler.
 		 */
+		// NB: ColorTableHarmonizer crashes, if it gets a CompositeImage but the Dataset has no CHANNEL axis.
 		if ( imp.getType() != ImagePlus.COLOR_RGB && imp.getStackSize() > 1 && ds.axis( Axes.CHANNEL ).isPresent() )
 			return new CompositeImage(imp, CompositeImage.COMPOSITE);
 		return imp;
