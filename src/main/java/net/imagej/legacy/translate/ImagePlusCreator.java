@@ -33,14 +33,11 @@ package net.imagej.legacy.translate;
 
 import ij.CompositeImage;
 import ij.ImagePlus;
-
 import net.imagej.Dataset;
 import net.imagej.ImgPlus;
-import net.imagej.display.ColorMode;
-import net.imagej.display.DatasetView;
+import net.imagej.axis.Axes;
 import net.imagej.display.ImageDisplay;
 import net.imagej.display.ImageDisplayService;
-
 import net.imglib2.img.display.imagej.ArrayImgToVirtualStack;
 import net.imglib2.img.display.imagej.ImgToVirtualStack;
 import net.imglib2.img.display.imagej.PlanarImgToVirtualStack;
@@ -95,11 +92,8 @@ public class ImagePlusCreator extends AbstractContextual
 		if (dataset == null) return null;
 		ImagePlus imp = createImagePlus( dataset );
 		ImagePlusCreatorUtils.setMetadata( dataset, imp );
-		imp = ImagePlusCreatorUtils.optionalMakeComposite( dataset, imp );
+		imp = optionalMakeComposite( dataset, imp );
 		if (display != null) {
-			if (shouldBeComposite(display, dataset, imp)) {
-				imp = makeCompositeImage(imp);
-			}
 			colorTableHarmonizer.updateLegacyImage(display, imp);
 			positionHarmonizer.updateLegacyImage(display, imp);
 			nameHarmonizer.updateLegacyImage(display, imp);
@@ -120,28 +114,16 @@ public class ImagePlusCreator extends AbstractContextual
 
 	// -- private interface --
 
-	private boolean shouldBeComposite(final ImageDisplay display,
-		final Dataset ds, final ImagePlus imp)
+	private static ImagePlus optionalMakeComposite( Dataset ds, ImagePlus imp )
 	{
-		final int channels = imp.getNChannels();
-		if (channels < 2 || channels > 7) return false;
-		final DatasetView view = imageDisplayService.getActiveDatasetView(display);
-		if (view != null && view.getColorMode() == ColorMode.COMPOSITE) return true;
-		if (ds.getCompositeChannelCount() == 1) return false;
-		return true;
+		/*
+		 * ImageJ 1.x will use a StackWindow *only* if there is more than one channel.
+		 * So unfortunately, we cannot consistently return a composite image here. We
+		 * have to continue to deliver different data types that require specific case
+		 * logic in any handler.
+		 */
+		if ( imp.getType() != ImagePlus.COLOR_RGB && imp.getStackSize() > 1 && ds.axis( Axes.CHANNEL ).isPresent() )
+			return new CompositeImage(imp, CompositeImage.COMPOSITE);
+		return imp;
 	}
-
-	/**
-	 * Makes a {@link CompositeImage} that wraps a given {@link ImagePlus} and
-	 * sets channel LUTs to match how modern ImageJ displays the given paired
-	 * {@link Dataset}. Assumes given ImagePlus has channels in range 2..7 and
-	 * that if Dataset View has ColorTables defined there is one per channel.
-	 */
-	// TODO - last assumption may be bad. If I have a 6 channel Dataset with
-	// compos chann count == 2 then maybe I only have 2 or 3 ColorTables. Is
-	// this configuration even valid. If so then what to do for translation?
-	private CompositeImage makeCompositeImage(final ImagePlus imp) {
-		return new CompositeImage(imp, CompositeImage.COMPOSITE);
-	}
-
 }
