@@ -41,7 +41,9 @@ import net.imagej.display.ImageDisplayService;
 import net.imglib2.img.display.imagej.ArrayImgToVirtualStack;
 import net.imglib2.img.display.imagej.ImgToVirtualStack;
 import net.imglib2.img.display.imagej.PlanarImgToVirtualStack;
+import net.imglib2.type.logic.BitType;
 import net.imglib2.type.numeric.RealType;
+import net.imglib2.util.Util;
 import org.scijava.AbstractContextual;
 import org.scijava.Context;
 import org.scijava.log.LogService;
@@ -109,6 +111,8 @@ public class ImagePlusCreator extends AbstractContextual
 			return PlanarImgToVirtualStack.wrap( imgPlus );
 		if( ArrayImgToVirtualStack.isSupported( imgPlus ) )
 			return ArrayImgToVirtualStack.wrap( imgPlus );
+		if( Util.getTypeFromInterval( imgPlus ) instanceof BitType )
+			return ImgToVirtualStack.wrapAndScaleBitType( (ImgPlus<BitType>) imgPlus );
 		return ImgToVirtualStack.wrap( imgPlus, dataset.isRGBMerged() );
 	}
 
