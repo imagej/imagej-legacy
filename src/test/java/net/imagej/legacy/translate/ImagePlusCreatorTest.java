@@ -53,6 +53,7 @@ import net.imagej.ImgPlus;
 import net.imagej.axis.Axes;
 import net.imagej.axis.AxisType;
 import net.imagej.axis.DefaultLinearAxis;
+import net.imglib2.RandomAccess;
 import net.imglib2.img.Img;
 import net.imglib2.img.ImgFactory;
 import net.imglib2.img.array.ArrayImg;
@@ -64,6 +65,7 @@ import net.imglib2.img.display.imagej.PlanarImgToVirtualStack;
 import net.imglib2.img.planar.PlanarImg;
 import net.imglib2.img.planar.PlanarImgFactory;
 import net.imglib2.type.NativeType;
+import net.imglib2.type.logic.BitType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.integer.LongType;
 import net.imglib2.type.numeric.integer.ShortType;
@@ -153,6 +155,19 @@ public class ImagePlusCreatorTest
 	@Test
 	public void testShortPlanarImage() {
 		testPlanarImage( UnsignedShortType::new, ShortProcessor.class );
+	}
+
+	@Test
+	public void testBits() {
+		Img< BitType > image = ArrayImgs.bits( 2, 1 );
+		RandomAccess< BitType > randomAccess = image.randomAccess();
+		randomAccess.setPosition( new long[]{0, 0} );
+		randomAccess.get().set( true );
+		ImagePlus imagePlus = creator.createLegacyImage( datasetService.create( image ) );
+		ImageProcessor processor = imagePlus.getProcessor();
+		assertTrue( ByteProcessor.class.isInstance( processor ) );
+		float[] actualPixels = pixelsAsFloatArray( processor );
+		assertArrayEquals( new float[]{ 255, 0 }, actualPixels, 0f);
 	}
 
 	@Test
