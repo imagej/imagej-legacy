@@ -42,6 +42,7 @@ import net.imagej.legacy.ui.LegacyUI;
 import net.imagej.ui.viewer.image.AbstractImageDisplayViewer;
 import net.imagej.ui.viewer.image.ImageDisplayViewer;
 
+import org.scijava.Initializable;
 import org.scijava.Priority;
 import org.scijava.display.Display;
 import org.scijava.display.DisplayService;
@@ -73,6 +74,14 @@ public class LegacyImageDisplayViewer extends AbstractImageDisplayViewer
 	LogService logService;
 
 	// -- DisplayViewer methods --
+
+	@Override public boolean canView( Display< ? > d )
+	{
+		if ( ! (d instanceof ImageDisplay) )
+			return false;
+		// NB: only use legacy ui to display image with at most five dimensions.
+		return getDataset( ((ImageDisplay) d).getActiveView() ).numDimensions() <= 5;
+	}
 
 	@Override
 	public void view(final DisplayWindow w, final Display<?> d) {
