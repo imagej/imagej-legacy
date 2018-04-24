@@ -32,6 +32,7 @@
 package net.imagej.legacy.translate;
 
 import ij.ImagePlus;
+import ij.VirtualStack;
 import ij.io.FileInfo;
 
 import net.imagej.Dataset;
@@ -46,6 +47,7 @@ import net.imagej.legacy.LegacyImageMap;
 
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.converter.Converters;
+import net.imglib2.img.ImagePlusAdapter;
 import net.imglib2.img.Img;
 import net.imglib2.img.ImgView;
 import net.imglib2.img.VirtualStackAdapter;
@@ -53,6 +55,7 @@ import net.imglib2.img.display.imagej.ImgPlusViews;
 import net.imglib2.img.planar.PlanarImgFactory;
 import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
+import net.imglib2.util.Util;
 import net.imglib2.view.Views;
 import org.scijava.AbstractContextual;
 import org.scijava.Context;
@@ -157,14 +160,13 @@ public class DisplayCreator extends AbstractContextual
 
 	private ImgPlus< ? > wrap( ImagePlus imp )
 	{
-		if (imp.getType() == ImagePlus.COLOR_RGB) {
-			ImgPlus<ARGBType> colored = VirtualStackAdapter.wrapRGBA( imp );
-			// TODO: This special treatment of Img<ARGBType> is wrongly placed.
-			return splitColorChannels(colored);
-		}
-		else {
-			return VirtualStackAdapter.wrap( imp );
-		}
+		ImgPlus< ? > imgPlus = imp.getStack() instanceof VirtualStack ?
+				VirtualStackAdapter.wrap( imp ) :
+				ImagePlusAdapter.wrapImgPlus( imp );
+		// TODO: This special treatment of Img<ARGBType> is wrongly placed.
+		if ( Util.getTypeFromInterval(imgPlus) instanceof ARGBType )
+			imgPlus = splitColorChannels( (ImgPlus< ARGBType >) imgPlus );
+		return imgPlus;
 	}
 
 	private ImgPlus<UnsignedByteType> splitColorChannels(ImgPlus<ARGBType> input) {
