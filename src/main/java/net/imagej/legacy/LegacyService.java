@@ -60,6 +60,7 @@ import net.imagej.ui.viewer.image.ImageDisplayViewer;
 import org.scijava.Identifiable;
 import org.scijava.MenuPath;
 import org.scijava.Priority;
+import org.scijava.UIDetails;
 import org.scijava.app.App;
 import org.scijava.app.AppService;
 import org.scijava.app.StatusService;
@@ -634,10 +635,10 @@ public final class LegacyService extends AbstractService implements
 		for (final CommandInfo info : commandService.getCommandsOfType(
 			Command.class))
 		{
-			if (info.getMenuPath().size() == 0 || info.is("no-legacy")) {
-				continue;
-			}
-			else if (!info.getAnnotation().visible()) {
+			if (!UIDetails.APPLICATION_MENU_ROOT.equals(info.getMenuRoot()) || //
+				info.getMenuPath().size() == 0 || info.is("no-legacy") || //
+				!info.getAnnotation().visible())
+			{
 				continue;
 			}
 			final String key = info.getIdentifier();
