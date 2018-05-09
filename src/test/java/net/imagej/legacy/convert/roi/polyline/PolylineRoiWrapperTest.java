@@ -35,6 +35,11 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import ij.IJ;
+import ij.ImagePlus;
+import ij.gui.PolygonRoi;
+import ij.gui.Roi;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,10 +53,6 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-
-import ij.ImagePlus;
-import ij.gui.PolygonRoi;
-import ij.gui.Roi;
 
 /**
  * Tests {@link PolylineRoiWrapper}
@@ -119,7 +120,7 @@ public class PolylineRoiWrapperTest {
 
 	@Test
 	public void testPolylineRoiWrapperRemoveVertexWithImagePlus() {
-		final ImagePlus i = new ImagePlus("http://imagej.net/images/blobs.gif");
+		final ImagePlus i = IJ.createImage("Ramp", "8-bit ramp", 128, 128, 1);;
 		i.setRoi(poly);
 		poly.setImage(i);
 
@@ -149,7 +150,7 @@ public class PolylineRoiWrapperTest {
 
 	@Test
 	public void testUpdatedAfterPolylineRoiWrapperModified() {
-		final ImagePlus i = new ImagePlus("http://imagej.net/images/blobs.gif");
+		final ImagePlus i = IJ.createImage("Ramp", "8-bit ramp", 128, 128, 1);;
 		i.setRoi(poly);
 		poly.setImage(i);
 

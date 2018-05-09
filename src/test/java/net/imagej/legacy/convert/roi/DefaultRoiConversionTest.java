@@ -35,6 +35,17 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import ij.IJ;
+import ij.ImagePlus;
+import ij.gui.Arrow;
+import ij.gui.EllipseRoi;
+import ij.gui.ImageRoi;
+import ij.gui.Line;
+import ij.gui.PolygonRoi;
+import ij.gui.Roi;
+import ij.gui.RotatedRectRoi;
+import ij.gui.TextRoi;
+
 import java.awt.Rectangle;
 
 import net.imagej.legacy.convert.roi.RoiUnwrappers.WrapperToEllipseRoiConverter;
@@ -54,16 +65,6 @@ import org.junit.Test;
 import org.scijava.Context;
 import org.scijava.convert.ConvertService;
 import org.scijava.convert.Converter;
-
-import ij.ImagePlus;
-import ij.gui.Arrow;
-import ij.gui.EllipseRoi;
-import ij.gui.ImageRoi;
-import ij.gui.Line;
-import ij.gui.PolygonRoi;
-import ij.gui.Roi;
-import ij.gui.RotatedRectRoi;
-import ij.gui.TextRoi;
 
 /**
  * Tests converting between ImageJ 1.x {@link Roi}s and ImgLib2
@@ -303,7 +304,7 @@ public class DefaultRoiConversionTest {
 	@Test
 	@SuppressWarnings("unchecked")
 	public void testRoiToMaskIntervalConverterImageRoi() {
-		final ImagePlus img = new ImagePlus("http://imagej.net/images/blobs.gif");
+		final ImagePlus img = IJ.createImage("Ramp", "8-bit ramp", 128, 128, 1);
 		final ImageRoi i = new ImageRoi(12, 8, img.getBufferedImage());
 		final MaskPredicate<? extends RealLocalizable> converted = convertService
 			.convert(i, MaskPredicate.class);

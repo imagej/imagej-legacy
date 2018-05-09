@@ -35,6 +35,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import ij.IJ;
+import ij.ImagePlus;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -48,8 +51,6 @@ import net.imglib2.roi.util.RealLocalizableRealPositionableWrapper;
 
 import org.junit.Before;
 import org.junit.Test;
-
-import ij.ImagePlus;
 
 /**
  * Tests {@link RealPointCollectionWrapper}
@@ -75,7 +76,7 @@ public class RealPointCollectionWrapperTest {
 		wrap = new RealPointCollectionWrapper(rpc);
 
 		// NB: can't remove points without associated image
-		final ImagePlus i = new ImagePlus("http://imagej.net/images/blobs.gif");
+		final ImagePlus i = IJ.createImage("Ramp", "8-bit ramp", 128, 128, 1);;
 		i.setRoi(wrap);
 		wrap.setImage(i);
 	}

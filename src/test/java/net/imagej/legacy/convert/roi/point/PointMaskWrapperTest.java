@@ -34,14 +34,15 @@ package net.imagej.legacy.convert.roi.point;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 
+import ij.IJ;
+import ij.ImagePlus;
+import ij.process.FloatPolygon;
+
 import net.imglib2.roi.geom.real.DefaultWritablePointMask;
 import net.imglib2.roi.geom.real.WritablePointMask;
 
 import org.junit.Before;
 import org.junit.Test;
-
-import ij.ImagePlus;
-import ij.process.FloatPolygon;
 
 /**
  * Tests {@link PointMaskWrapper}
@@ -59,7 +60,7 @@ public class PointMaskWrapperTest {
 		w = new PointMaskWrapper(pm);
 
 		// NB: can't remove points without associated image
-		final ImagePlus i = new ImagePlus("http://imagej.net/images/blobs.gif");
+		final ImagePlus i = IJ.createImage("Ramp", "8-bit ramp", 128, 128, 1);;
 		i.setRoi(w);
 		w.setImage(i);
 	}

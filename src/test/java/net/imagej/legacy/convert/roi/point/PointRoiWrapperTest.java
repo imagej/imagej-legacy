@@ -35,6 +35,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import ij.IJ;
+import ij.ImagePlus;
+import ij.gui.PointRoi;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -49,9 +53,6 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-
-import ij.ImagePlus;
-import ij.gui.PointRoi;
 
 /**
  * Tests {@link PointRoiWrapper}
@@ -129,7 +130,7 @@ public class PointRoiWrapperTest {
 
 	@Test
 	public void testPointRoiWrapperRemovePointWithImagePlus() {
-		final ImagePlus i = new ImagePlus("http://imagej.net/images/blobs.gif");
+		final ImagePlus i = IJ.createImage("Ramp", "8-bit ramp", 128, 128, 1);;
 		i.setRoi(point);
 		point.setImage(i);
 
@@ -192,7 +193,7 @@ public class PointRoiWrapperTest {
 		assertEquals(100.25, wrap.realMax(1), 0);
 
 		// removePoint
-		final ImagePlus i = new ImagePlus("http://imagej.net/images/blobs.gif");
+		final ImagePlus i = IJ.createImage("Ramp", "8-bit ramp", 128, 128, 1);;
 		i.setRoi(point);
 		point.setImage(i); // wrapper needs associated ImagePlus in order to
 		// removePoint

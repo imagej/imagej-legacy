@@ -34,14 +34,15 @@ package net.imagej.legacy.convert.roi.polygon2d;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import ij.IJ;
+import ij.ImagePlus;
+
 import net.imglib2.roi.geom.real.DefaultWritablePolygon2D;
 import net.imglib2.roi.geom.real.Polygon2D;
 import net.imglib2.roi.geom.real.WritablePolygon2D;
 
 import org.junit.Before;
 import org.junit.Test;
-
-import ij.ImagePlus;
 
 /**
  * Tests {@link Polygon2DWrapper}
@@ -60,7 +61,7 @@ public class Polygon2DWrapperTest {
 		wrap = new Polygon2DWrapper(polygon);
 
 		// NB: can't remove points without associated image
-		final ImagePlus i = new ImagePlus("http://imagej.net/images/blobs.gif");
+		final ImagePlus i = IJ.createImage("Ramp", "8-bit ramp", 128, 128, 1);;
 		i.setRoi(wrap);
 		wrap.setImage(i);
 	}
