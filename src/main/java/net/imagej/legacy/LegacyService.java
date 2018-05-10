@@ -121,6 +121,9 @@ public final class LegacyService extends AbstractService implements
 	ImageJService
 {
 
+	private static final String ENABLE_MODERN_ONLY_COMMANDS_PROPERTY =
+		"imagej.legacy.modernOnlyCommands";
+
 	/**
 	 * Static reference to the one and only active {@link LegacyService}. The JVM
 	 * can only have one instance of ImageJ 1.x, and hence one LegacyService,
@@ -492,11 +495,16 @@ public final class LegacyService extends AbstractService implements
 		}
 
 		// remove modules blacklisted from the legacy UI
-		final List<ModuleInfo> noLegacyModules = //
-			moduleService.getModules().stream() //
-				.filter(info -> info.is("no-legacy")) //
-				.collect(Collectors.toList());
-		moduleService.removeModules(noLegacyModules);
+		if (Boolean.getBoolean(ENABLE_MODERN_ONLY_COMMANDS_PROPERTY)) {
+			log.info("Skipping blacklist of no-legacy commands");
+		}
+		else {
+			final List<ModuleInfo> noLegacyModules = //
+				moduleService.getModules().stream() //
+					.filter(info -> info.is("no-legacy")) //
+					.collect(Collectors.toList());
+			moduleService.removeModules(noLegacyModules);
+		}
 
 		// wrap ImageJ 1.x commands as SciJava modules
 		final List<CommandInfo> ij1Commands = //
