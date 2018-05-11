@@ -194,7 +194,7 @@ public class LegacyUI extends AbstractUserInterface implements SwingUI {
 
 					@Override
 					public void run() {
-						finalViewer.view(null, display);
+						finalViewer.view(LegacyUI.this, display);
 					}
 				});
 			}
