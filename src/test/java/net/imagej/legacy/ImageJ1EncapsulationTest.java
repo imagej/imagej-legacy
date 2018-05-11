@@ -102,6 +102,7 @@ public class ImageJ1EncapsulationTest {
 					className.startsWith(net.imagej.legacy.convert.ResultsTableWrapper.class.getName()) ||
 					className.startsWith(net.imagej.legacy.convert.StringToImagePlusConverter.class.getName()) ||
 					className.startsWith(net.imagej.legacy.convert.TableToResultsTableConverters.class.getName()) ||
+					className.startsWith(net.imagej.legacy.convert.TableUnwrapper.class.getName()) ||
 					className.startsWith(net.imagej.legacy.convert.TableWrapper.class.getName()) ||
 					className.startsWith(net.imagej.legacy.convert.roi.AbstractMaskPredicateToRoiConverter.class.getName()) ||
 					className.startsWith(net.imagej.legacy.convert.roi.AbstractPolygonRoiWrapper.class.getName()) ||
