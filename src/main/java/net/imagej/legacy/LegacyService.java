@@ -79,6 +79,9 @@ import org.scijava.log.LogService;
 import org.scijava.menu.MenuService;
 import org.scijava.module.ModuleInfo;
 import org.scijava.module.ModuleService;
+import org.scijava.module.event.ModuleCanceledEvent;
+import org.scijava.module.event.ModuleFinishedEvent;
+import org.scijava.module.event.ModuleStartedEvent;
 import org.scijava.options.OptionsService;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
@@ -594,6 +597,21 @@ public final class LegacyService extends AbstractService implements
 		if (ij1Helper.isMacintosh() && code == KeyCode.META) {
 			ij1Helper.setKeyUp(KeyCode.CONTROL.getCode());
 		}
+	}
+
+	@EventHandler
+	private void onEvent(final ModuleStartedEvent evt) {
+		Macros.setActiveModule(evt.getModule());
+	}
+
+	@EventHandler
+	private void onEvent(@SuppressWarnings("unused") final ModuleCanceledEvent evt) {
+		Macros.setActiveModule(null);
+	}
+
+	@EventHandler
+	private void onEvent(@SuppressWarnings("unused") final ModuleFinishedEvent evt) {
+		Macros.setActiveModule(null);
 	}
 
 	// -- Internal methods --
