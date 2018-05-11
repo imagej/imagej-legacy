@@ -85,8 +85,6 @@ public class IJLineWrapper implements IJRealRoiWrapper<ij.gui.Line>, Line {
 	 * @param line imageJ 1.x line to be wrapped
 	 */
 	public IJLineWrapper(final ij.gui.Line line) {
-		if (ij.gui.Line.getWidth() > 1) throw new IllegalArgumentException(
-			"Cannot wrap lines with width > 1");
 		this.line = line;
 	}
 

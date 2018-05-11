@@ -111,12 +111,6 @@ public class LineConversionTest {
 		final Converter<?, ?> arrowToLine = convertService.getHandler(a,
 			Line.class);
 		assertTrue(arrowToLine == null);
-
-		// ij.gui.Line w/ width>1 to Line (shouldn't work)
-		ij.gui.Line.setWidth(10);
-		final Converter<?, ?> WideIjLinetoLine = convertService.getHandler(ijLine,
-			Line.class);
-		assertTrue(WideIjLinetoLine == null);
 	}
 
 	@Test

@@ -35,6 +35,8 @@ import net.imagej.legacy.convert.roi.AbstractRoiToMaskPredicateConverter;
 import net.imglib2.roi.geom.real.Line;
 
 import org.scijava.convert.Converter;
+import org.scijava.log.LogService;
+import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 
 import ij.gui.Arrow;
@@ -50,10 +52,12 @@ public class IJLineToLineConverter extends
 	AbstractRoiToMaskPredicateConverter<ij.gui.Line, Line>
 {
 
+	@Parameter(required = false)
+	private LogService log;
+
 	@Override
 	public boolean canConvert(final Class<?> src, final Class<?> dest) {
-		return super.canConvert(src, dest) && !src.equals(Arrow.class) &&
-			ij.gui.Line.getWidth() <= 1;
+		return super.canConvert(src, dest) && !src.equals(Arrow.class);
 	}
 
 	@Override
@@ -68,12 +72,15 @@ public class IJLineToLineConverter extends
 
 	@Override
 	public Line convert(final ij.gui.Line src) {
+		if (log != null && ij.gui.Line.getWidth() > 1) {
+			log.warn("Ignoring line width >1.");
+		}
 		return new IJLineWrapper(src);
 	}
 
 	@Override
 	public boolean supportedType(final ij.gui.Line src) {
-		return !(src instanceof Arrow) && ij.gui.Line.getWidth() <= 1;
+		return !(src instanceof Arrow);
 	}
 
 }
