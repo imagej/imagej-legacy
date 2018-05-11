@@ -35,7 +35,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 
-import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 
 import javax.script.Bindings;
@@ -73,8 +72,8 @@ public class IJ1MacroLanguageTest {
 	}
 
 	@Test
-	public void testReturnValues() throws InterruptedException, ExecutionException,
-		IOException, ScriptException
+	public void testReturnValues() throws InterruptedException,
+		ExecutionException
 	{
 		final String script = "return \"green eggs and ham\"";
 		final ScriptModule m = scriptService.run("return.ijm", script, true).get();
@@ -122,9 +121,7 @@ public class IJ1MacroLanguageTest {
 	}
 
 	@Test
-	public void testParameters() throws InterruptedException, ExecutionException,
-		IOException, ScriptException
-	{
+	public void testParameters() throws InterruptedException, ExecutionException {
 		final String script = "" + //
 			"// @String name\n" + //
 			"// @int age\n" + //
