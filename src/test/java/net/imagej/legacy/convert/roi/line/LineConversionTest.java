@@ -118,14 +118,14 @@ public class LineConversionTest {
 		final Line converted = convertService.convert(ijLine, Line.class);
 		assertTrue(converted instanceof IJLineWrapper);
 
-		assertEquals(ijwrap.endpointOne().getDoublePosition(0), converted
-			.endpointOne().getDoublePosition(0), 0);
-		assertEquals(ijwrap.endpointOne().getDoublePosition(1), converted
-			.endpointOne().getDoublePosition(1), 0);
-		assertEquals(ijwrap.endpointTwo().getDoublePosition(0), converted
-			.endpointTwo().getDoublePosition(0), 0);
-		assertEquals(ijwrap.endpointTwo().getDoublePosition(1), converted
-			.endpointTwo().getDoublePosition(1), 0);
+		assertEquals(ijwrap.endpointOne().getDoublePosition(0), //
+			converted.endpointOne().getDoublePosition(0), 0);
+		assertEquals(ijwrap.endpointOne().getDoublePosition(1), //
+			converted.endpointOne().getDoublePosition(1), 0);
+		assertEquals(ijwrap.endpointTwo().getDoublePosition(0), //
+			converted.endpointTwo().getDoublePosition(0), 0);
+		assertEquals(ijwrap.endpointTwo().getDoublePosition(1), //
+			converted.endpointTwo().getDoublePosition(1), 0);
 	}
 
 	@Test
