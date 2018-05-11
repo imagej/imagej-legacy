@@ -31,8 +31,12 @@
 
 package net.imagej.legacy;
 
+import ij.IJ;
 import ij.ImagePlus;
 import ij.WindowManager;
+import ij.measure.ResultsTable;
+
+import java.util.Collections;
 
 import org.scijava.module.Module;
 
@@ -65,5 +69,13 @@ public final class Macros {
 		final Object value = m.getInput(name);
 		if (value == null || !(value instanceof ImagePlus)) return;
 		WindowManager.setTempCurrentImage((ImagePlus) value);
+	}
+
+	public static void attachResultsTable() {
+		final ResultsTable results = ResultsTable.getResultsTable();
+		if (results == null) return;
+		final ImagePlus activeImage = IJ.getImage();
+		if (activeImage == null) return;
+		activeImage.setProperty("tables", Collections.singletonList(results));
 	}
 }
