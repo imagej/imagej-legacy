@@ -31,6 +31,8 @@
 
 package net.imagej.legacy.convert.roi.line;
 
+import ij.gui.Arrow;
+
 import net.imagej.legacy.convert.roi.AbstractRoiToMaskPredicateConverter;
 import net.imglib2.roi.geom.real.Line;
 
@@ -38,8 +40,6 @@ import org.scijava.convert.Converter;
 import org.scijava.log.LogService;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
-
-import ij.gui.Arrow;
 
 /**
  * Converts an ImageJ 1.x {@link Line} to an ImgLib2 {@link Line}. This is only
