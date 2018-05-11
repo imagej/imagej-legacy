@@ -468,7 +468,8 @@ public final class LegacyService extends AbstractService implements
 			ij1Helper = new IJ1Helper(this);
 		}
 		catch (final Throwable t) {
-			throw new RuntimeException("Failed to instantiate IJ1.", t);
+			log.error("Failed to instantiate IJ1.", t);
+			return;
 		}
 
 		synchronized (LegacyService.class) {
