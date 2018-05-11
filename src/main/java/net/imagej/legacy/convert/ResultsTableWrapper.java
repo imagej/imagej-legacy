@@ -31,6 +31,8 @@
 
 package net.imagej.legacy.convert;
 
+import ij.measure.ResultsTable;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -41,8 +43,6 @@ import java.util.ListIterator;
 
 import net.imagej.table.Column;
 import net.imagej.table.GenericTable;
-
-import ij.measure.ResultsTable;
 
 /**
  * Wraps a {@link ij.measure.ResultsTable} as a {@link GenericTable}.
@@ -55,6 +55,10 @@ public class ResultsTableWrapper implements GenericTable {
 
 	public ResultsTableWrapper(final ij.measure.ResultsTable table) {
 		this.table = table;
+	}
+
+	public ij.measure.ResultsTable getSource() {
+		return table;
 	}
 
 	@Override
