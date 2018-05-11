@@ -141,6 +141,7 @@ Institute of Molecular Cell Biology and Genetics.</license.copyrightOwners>
 
 		<!-- NB: Deploy releases to the ImageJ Maven repository. -->
 		<releaseProfiles>deploy-to-imagej</releaseProfiles>
+		<imglib2-roi.version>0.5.0</imglib2-roi.version>
 	</properties>
 
 	<repositories>
