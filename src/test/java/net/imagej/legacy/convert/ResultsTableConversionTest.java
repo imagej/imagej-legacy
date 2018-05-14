@@ -39,7 +39,6 @@ import ij.ImagePlus;
 import ij.gui.OvalRoi;
 import ij.gui.Overlay;
 import ij.gui.Roi;
-import ij.measure.ResultsTable;
 
 import net.imagej.patcher.LegacyInjector;
 import net.imagej.table.ByteTable;
@@ -66,7 +65,7 @@ public class ResultsTableConversionTest {
 		LegacyInjector.preinit();
 	}
 
-	private ResultsTable table;
+	private ij.measure.ResultsTable table;
 
 	private final String[] headings = { "col 1", "col2", "col-3", "col_4",
 		"col 5" };
@@ -90,7 +89,7 @@ public class ResultsTableConversionTest {
 		context = new Context(ConvertService.class);
 		convertService = context.getService(ConvertService.class);
 
-		table = new ResultsTable();
+		table = new ij.measure.ResultsTable();
 
 		for (int i = 0; i < headings.length; i++) {
 			for (int j = 0; j < rowLabels.length; j++) {
@@ -262,7 +261,7 @@ public class ResultsTableConversionTest {
 			4, 5 }, { -50, -51, -52 } };
 		final ByteTable bt = new DefaultByteTable(4, 3);
 		populateTable(bt, data);
-		final ResultsTable rt = new TableWrapper(bt, convertService);
+		final ij.measure.ResultsTable rt = new TableWrapper(bt, convertService);
 
 		final Converter<?, ?> c = convertService.getHandler(rt, Table.class);
 		assertTrue(c instanceof TableUnwrapper);
@@ -280,7 +279,7 @@ public class ResultsTableConversionTest {
 
 		final ImagePlus imagePlus = IJ.createImage("gradient", "8-bit ramp", 200,
 			200, 5);
-		final ResultsTable measurements = overlay.measure(imagePlus);
+		final ij.measure.ResultsTable measurements = overlay.measure(imagePlus);
 
 		final Table<?, ?> converted = convertService.convert(measurements,
 			Table.class);
