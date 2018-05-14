@@ -34,17 +34,26 @@ package net.imagej.legacy.convert;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import ij.IJ;
+import ij.ImagePlus;
+import ij.gui.OvalRoi;
+import ij.gui.Overlay;
+import ij.gui.Roi;
+import ij.measure.ResultsTable;
+
 import net.imagej.patcher.LegacyInjector;
+import net.imagej.table.ByteTable;
 import net.imagej.table.Column;
+import net.imagej.table.DefaultByteTable;
 import net.imagej.table.GenericTable;
 import net.imagej.table.Table;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.scijava.Context;
 import org.scijava.convert.ConvertService;
-
-import ij.measure.ResultsTable;
+import org.scijava.convert.Converter;
 
 /**
  * Tests table converters and wrappers.
@@ -78,6 +87,9 @@ public class ResultsTableConversionTest {
 
 	@Before
 	public void setup() {
+		context = new Context(ConvertService.class);
+		convertService = context.getService(ConvertService.class);
+
 		table = new ResultsTable();
 
 		for (int i = 0; i < headings.length; i++) {
@@ -89,6 +101,13 @@ public class ResultsTableConversionTest {
 			}
 		}
 	}
+
+	@After
+	public void teardown() {
+		context.dispose();
+	}
+
+	// -- Test ij.measure.ResultsTable to net.imagej.table.GenericTable --
 
 	@Test
 	public void testColumnWrapperDoubleGet() {
@@ -217,9 +236,6 @@ public class ResultsTableConversionTest {
 
 	@Test
 	public void testConvert() {
-		context = new Context();
-		convertService = context.service(ConvertService.class);
-
 		final GenericTable t = convertService.convert(table, GenericTable.class);
 
 		// check values
@@ -232,7 +248,79 @@ public class ResultsTableConversionTest {
 					0);
 			}
 		}
+	}
 
-		context.dispose();
+	@Test
+	public void testConverterMatchingToTable() {
+		final Converter<?, ?> c = convertService.getHandler(table, Table.class);
+		assertTrue(c instanceof ResultsTableToGenericTableConverter);
+	}
+
+	@Test
+	public void testTableUnwrapping() {
+		final Byte[][] data = new Byte[][] { { 10, 20, 30 }, { -100, 0, 100 }, { 3,
+			4, 5 }, { -50, -51, -52 } };
+		final ByteTable bt = new DefaultByteTable(4, 3);
+		populateTable(bt, data);
+		final ResultsTable rt = new TableWrapper(bt, convertService);
+
+		final Converter<?, ?> c = convertService.getHandler(rt, Table.class);
+		assertTrue(c instanceof TableUnwrapper);
+		final Table<?, ?> t = c.convert(rt, Table.class);
+		assertEquals(bt, t);
+	}
+
+	@Test
+	public void testMeasurementTable() {
+		final Overlay overlay = new Overlay();
+		overlay.add(new Roi(10, 10, 5, 6));
+		overlay.add(new Roi(1, 40, 25, 103));
+		overlay.add(new Roi(20, 18, 87, 12));
+		overlay.add(new OvalRoi(40, 100, 3, 15));
+
+		final ImagePlus imagePlus = IJ.createImage("gradient", "8-bit ramp", 200,
+			200, 5);
+		final ResultsTable measurements = overlay.measure(imagePlus);
+
+		final Table<?, ?> converted = convertService.convert(measurements,
+			Table.class);
+		assertTablesEqual(measurements, converted);
+	}
+
+	// -- Helper methods --
+
+	private void assertTablesEqual(final ij.measure.ResultsTable expected,
+		final Table<?, ?> actual)
+	{
+		final String[] ijHeadings = expected.getHeadings();
+		assertEquals(expected.size(), actual.getRowCount());
+		assertEquals(ijHeadings.length, actual.getColumnCount());
+
+		final int[] columnsInUse = new int[actual.getColumnCount()];
+		for (int i = 0; i < ijHeadings.length; i++)
+			columnsInUse[i] = expected.getColumnIndex(ijHeadings[i]);
+
+		for (int c = 0; c < actual.getColumnCount(); c++) {
+			final int actualIJColumnIndex = columnsInUse[c];
+			assertEquals(expected.getColumnHeading(actualIJColumnIndex), actual
+				.getColumnHeader(c));
+			for (int r = 0; r < actual.getRowCount(); r++) {
+				final Object actualValue = actual.get(c, r);
+				if (actualValue instanceof String) assertEquals(expected.getStringValue(
+					actualIJColumnIndex, r), actualValue);
+				else assertEquals(expected.getValueAsDouble(actualIJColumnIndex, r),
+					(double) actualValue, 0);
+			}
+		}
+	}
+
+	private <T, C extends Column<T>> void populateTable(final Table<C, T> t,
+		final T[][] data)
+	{
+		for (int c = 0; c < data.length; c++) {
+			for (int r = 0; r < data[c].length; r++) {
+				t.set(c, r, data[c][r]);
+			}
+		}
 	}
 }
