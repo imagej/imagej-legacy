@@ -37,6 +37,7 @@ import ij.gui.ImageWindow;
 import ij.gui.Roi;
 
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -47,15 +48,21 @@ import net.imagej.Data;
 import net.imagej.Dataset;
 import net.imagej.display.ImageDisplay;
 import net.imagej.display.ImageDisplayService;
+import net.imagej.legacy.convert.TableListWrapper;
 import net.imagej.legacy.translate.DefaultImageTranslator;
 import net.imagej.legacy.translate.Harmonizer;
 import net.imagej.legacy.translate.ImageTranslator;
 import net.imagej.legacy.translate.LegacyUtils;
 import net.imagej.overlay.Overlay;
 import net.imagej.patcher.LegacyInjector;
+import net.imagej.roi.ROIService;
+import net.imagej.roi.ROITree;
+import net.imagej.table.Table;
+import net.imagej.table.TableService;
 import net.imagej.ui.viewer.image.ImageDisplayViewer;
 
 import org.scijava.AbstractContextual;
+import org.scijava.convert.ConvertService;
 import org.scijava.display.Display;
 import org.scijava.display.DisplayService;
 import org.scijava.display.event.DisplayDeletedEvent;
@@ -166,6 +173,9 @@ public class LegacyImageMap extends AbstractContextual {
 	@Parameter
 	private DisplayService displayService;
 
+	@Parameter
+	private ConvertService convertService;
+
 	// -- Constructor --
 
 	public LegacyImageMap(final LegacyService legacyService) {
@@ -184,8 +194,11 @@ public class LegacyImageMap extends AbstractContextual {
 	 */
 	public ImageDisplay lookupDisplay(final ImagePlus imp) {
 		if (imp == null) return null;
-		if (legacyService.isLegacyMode()) return legacyDisplayTable.get(imp);
-		return displayTable.get(imp);
+		ImageDisplay display;
+		if (legacyService.isLegacyMode()) display = legacyDisplayTable.get(imp);
+		else display = displayTable.get(imp);
+		synchronizeAttachmentsToDataset(display, imp);
+		return display;
 	}
 
 	/**
@@ -194,12 +207,15 @@ public class LegacyImageMap extends AbstractContextual {
 	 */
 	public ImagePlus lookupImagePlus(final ImageDisplay display) {
 		if (display == null) return null;
+		ImagePlus imagePlus;
 		if (legacyService.isLegacyMode()) {
-			final WeakReference<ImagePlus> weakReference =
-				legacyImagePlusTable.get(display);
-			return weakReference == null ? null : weakReference.get();
+			final WeakReference<ImagePlus> weakReference = legacyImagePlusTable.get(
+				display);
+			imagePlus = weakReference == null ? null : weakReference.get();
 		}
-		return imagePlusTable.get(display);
+		else imagePlus = imagePlusTable.get(display);
+		synchronizeAttachmentsToImagePlus(imagePlus, display);
+		return imagePlus;
 	}
 
 	/**
@@ -220,9 +236,10 @@ public class LegacyImageMap extends AbstractContextual {
 	public ImagePlus registerDataset(final Dataset ds) {
 		final ImagePlus imp = imageTranslator.createLegacyImage(ds);
 		ds.getProperties().put(LegacyImageMap.IMP_KEY, imp);
-		final ImageDisplay display =
-			(ImageDisplay)displayService.createDisplay(ds.getName(), ds);
+		final ImageDisplay display = (ImageDisplay) displayService.createDisplay(ds
+			.getName(), ds);
 		addMapping(display, imp);
+		synchronizeAttachmentsToImagePlus(imp, ds);
 		return imp;
 	}
 
@@ -251,6 +268,7 @@ public class LegacyImageMap extends AbstractContextual {
 			imp = imageTranslator.createLegacyImage(display);
 			addMapping(display, imp, createLegacyMappings);
 		}
+		synchronizeAttachmentsToImagePlus(imp, display);
 		return imp;
 	}
 
@@ -273,6 +291,7 @@ public class LegacyImageMap extends AbstractContextual {
 			display = imageTranslator.createDisplay(imp);
 			addMapping(display, imp);
 		}
+		synchronizeAttachmentsToDataset(display, imp);
 		return display;
 	}
 
@@ -465,6 +484,155 @@ public class LegacyImageMap extends AbstractContextual {
 				if (imp == currImagePlus) WindowManager.setTempCurrentImage(null);
 			}
 		}
+	}
+
+	/**
+	 * Ensures that the given {@link ImagePlus} has the same ROIs/tables attached
+	 * as those attached to the active {@link Dataset} in the given
+	 * {@link ImageDisplay}.
+	 * <p>
+	 * All ROIs/tables associated with the active {@link Dataset}, are converted
+	 * and attached to the given {@link ImagePlus}. Such that both the active
+	 * {@link Dataset} and {@link ImagePlus} have equivalent ROIs and tables.
+	 * </p>
+	 *
+	 * @param imagePlus The {@link ImagePlus} to attach ROIs/tables to
+	 * @param display The {@link ImageDisplay} whose active {@link Dataset}'s
+	 *          ROIs/tables will be converted and referenced by the ImagePlus
+	 */
+	private void synchronizeAttachmentsToImagePlus(final ImagePlus imagePlus,
+		final ImageDisplay display)
+	{
+		synchronizeAttachmentsToImagePlus(imagePlus, imageDisplayService
+			.getActiveDataset(display));
+	}
+
+	/**
+	 * Ensures that the given {@link ImagePlus} has the same ROIs/tables attached
+	 * as those attached to the given {@link Dataset}.
+	 * <p>
+	 * All ROIs/tables associated with the given {@link Dataset}, are converted
+	 * and attached to the given {@link ImagePlus}. Such that both the
+	 * {@link Dataset} and {@link ImagePlus} have equivalent ROIs and tables.
+	 * </p>
+	 *
+	 * @param imagePlus The {@link ImagePlus} to attach ROIs/tables to
+	 * @param dataset The {@link Dataset} whose ROIs/tables will be converted and
+	 *          referenced by the ImagePlus
+	 */
+	private void synchronizeAttachmentsToImagePlus(final ImagePlus imagePlus,
+		final Dataset dataset)
+	{
+		if (dataset == null || imagePlus == null) return;
+
+		// ROIs
+		if (dataset.getProperties().get(ROIService.ROI_PROPERTY) != null) {
+			final ij.gui.Overlay o = convertService.convert(dataset.getProperties()
+				.get(ROIService.ROI_PROPERTY), ij.gui.Overlay.class);
+			if (o == null) return;
+			imagePlus.setOverlay(o);
+		}
+		else {
+			imagePlus.setOverlay(null);
+			imagePlus.deleteRoi();
+		}
+
+		// Tables
+		if (dataset.getProperties().get(TableService.TABLE_PROPERTY) != null &&
+			dataset.getProperties().get(
+				TableService.TABLE_PROPERTY) instanceof List)
+		{
+			@SuppressWarnings("unchecked")
+			final List<Table<?, ?>> tables = (List<Table<?, ?>>) dataset
+				.getProperties().get(TableService.TABLE_PROPERTY);
+			final List<ij.measure.ResultsTable> ijTables = new TableListWrapper(
+				tables, convertService);
+			imagePlus.setProperty("tables", ijTables);
+		}
+		else {
+			if (imagePlus.getProperty("tables") == null) return;
+			imagePlus.getProperties().remove("tables");
+		}
+	}
+
+	/**
+	 * Ensures that the active {@link Dataset} of the given {@link ImageDisplay}
+	 * has equivalent ROIs/tables attached as those associated with the given
+	 * {@link ImagePlus}.
+	 * <p>
+	 * All ROIs/tables associated with the given {@link ImagePlus} are converted
+	 * and attached to the active {@link Dataset}. Such that both the given
+	 * {@link ImagePlus} and the active {@link Dataset} have equivalent ROIs and
+	 * tables attached.
+	 * </p>
+	 *
+	 * @param display The {@link ImageDisplay} whose active {@link Dataset} will
+	 *          have equivalent ROIs/tables attached
+	 * @param imagePlus The {@link ImagePlus} whose ROIs/tables will be converted
+	 *          and referenced by the active Dataset
+	 */
+	private void synchronizeAttachmentsToDataset(final ImageDisplay display,
+		final ImagePlus imagePlus)
+	{
+		synchronizeAttachmentsToDataset(imageDisplayService.getActiveDataset(
+			display), imagePlus);
+	}
+
+	/**
+	 * Ensures that the given {@link Dataset} has equivalent ROIs/tables attached
+	 * as those associated with the given {@link ImagePlus}.
+	 * <p>
+	 * All ROIs/tables associated with the given {@link ImagePlus} are converted
+	 * and attached to the {@link Dataset}. Such that both the given
+	 * {@link ImagePlus} and the {@link Dataset} have equivalent ROIs and tables
+	 * attached.
+	 * </p>
+	 *
+	 * @param dataset The {@link Dataset} to which equivalent ROIs/tables will be
+	 *          attached
+	 * @param imagePlus The {@link ImagePlus} whose ROIs/tables will be converted
+	 *          and referenced by the active Dataset
+	 */
+	private void synchronizeAttachmentsToDataset(final Dataset dataset,
+		final ImagePlus imagePlus)
+	{
+		if (dataset == null || imagePlus == null) return;
+
+		// ROIs
+		if (imagePlus.getOverlay() != null && imagePlus.getOverlay().size() > 0) {
+			if (imagePlus.getRoi() != null && !imagePlus.getOverlay().contains(
+				imagePlus.getRoi())) imagePlus.getOverlay().add(imagePlus.getRoi());
+			final ROITree rois = convertService.convert(imagePlus.getOverlay(),
+				ROITree.class);
+			dataset.getProperties().put(ROIService.ROI_PROPERTY, rois);
+		}
+		else if (imagePlus.getRoi() != null) {
+			final ij.gui.Overlay o = new ij.gui.Overlay();
+			o.add(imagePlus.getRoi());
+			final ROITree rois = convertService.convert(o, ROITree.class);
+			dataset.getProperties().put(ROIService.ROI_PROPERTY, rois);
+		}
+		else dataset.getProperties().remove(ROIService.ROI_PROPERTY);
+
+		// Tables
+		if (imagePlus.getProperty("tables") != null && imagePlus.getProperty(
+			"tables") instanceof List)
+		{
+			final List<?> tables = (List<?>) imagePlus.getProperty("tables");
+			List<Table<?, ?>> imagejTables;
+			if (tables instanceof TableListWrapper) imagejTables =
+				((TableListWrapper) tables).getUpdatedSource();
+			else {
+				imagejTables = new ArrayList<>();
+				for (final Object table : tables) {
+					if (!(table instanceof ij.measure.ResultsTable)) continue;
+					final Table<?, ?> t = convertService.convert(table, Table.class);
+					if (t != null) imagejTables.add(t);
+				}
+			}
+			dataset.getProperties().put(TableService.TABLE_PROPERTY, imagejTables);
+		}
+		else dataset.getProperties().remove(TableService.TABLE_PROPERTY);
 	}
 
 	// -- Event handlers --
