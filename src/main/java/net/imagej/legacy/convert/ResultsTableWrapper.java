@@ -31,6 +31,8 @@
 
 package net.imagej.legacy.convert;
 
+import ij.measure.ResultsTable;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -41,8 +43,6 @@ import java.util.ListIterator;
 
 import net.imagej.table.Column;
 import net.imagej.table.GenericTable;
-
-import ij.measure.ResultsTable;
 
 /**
  * Wraps a {@link ij.measure.ResultsTable} as a {@link GenericTable}.
@@ -57,9 +57,20 @@ public class ResultsTableWrapper implements GenericTable {
 		this.table = table;
 	}
 
+	public ij.measure.ResultsTable getSource() {
+		return table;
+	}
+
 	@Override
 	public int getColumnCount() {
-		return table.getLastColumn() + 1;
+		// NB: Last column gives the index of the last column in use, but there may
+		// be columns before that index which are null. Additionally, cannot use
+		// getHeadings().length or getColumnHeadings() because if there is a row
+		// label that will also be included in the returned structures
+		int count = 0;
+		for (int i = 0; i <= table.getLastColumn(); i++)
+			if (table.columnExists(i)) count++;
+		return count;
 	}
 
 	@Override
@@ -273,13 +284,15 @@ public class ResultsTableWrapper implements GenericTable {
 
 	@Override
 	public String getColumnHeader(final int col) {
-		return table.getColumnHeading(col);
+		final int actualCol = getActualColumnIndex(col);
+		return table.getColumnHeading(actualCol);
 	}
 
 	@Override
 	@SuppressWarnings("deprecation")
 	public void setColumnHeader(final int col, final String header) {
-		table.setHeading(col, header);
+		final int actualCol = getActualColumnIndex(col);
+		table.setHeading(actualCol, header);
 	}
 
 	@Override
@@ -311,9 +324,10 @@ public class ResultsTableWrapper implements GenericTable {
 	 */
 	@Override
 	public void set(final int col, final int row, final Object value) {
-		if (value instanceof String) table.setValue(col, row, (String) value);
-		else if (value instanceof Number) table.setValue(col, row, ((Number) value)
-			.doubleValue());
+		final int actualCol = getActualColumnIndex(col);
+		if (value instanceof String) table.setValue(actualCol, row, (String) value);
+		else if (value instanceof Number) table.setValue(actualCol, row,
+			((Number) value).doubleValue());
 	}
 
 	/**
@@ -329,8 +343,10 @@ public class ResultsTableWrapper implements GenericTable {
 
 	@Override
 	public Object get(final int col, final int row) {
-		if (checkString(row, col)) return table.getStringValue(col, row);
-		return table.getValueAsDouble(col, row);
+		final int actualCol = getActualColumnIndex(col);
+		if (checkString(row, actualCol)) return table.getStringValue(actualCol,
+			row);
+		return table.getValueAsDouble(actualCol, row);
 	}
 
 	@Override
@@ -342,7 +358,7 @@ public class ResultsTableWrapper implements GenericTable {
 
 	@Override
 	public int size() {
-		return table.getLastColumn() + 1;
+		return getColumnCount();
 	}
 
 	@Override
@@ -362,25 +378,24 @@ public class ResultsTableWrapper implements GenericTable {
 
 	@Override
 	public Object[] toArray() {
-		final Object[] o = new Object[table.getLastColumn() + 1];
-		for (int i = 0; i <= table.getLastColumn(); i++) {
-			o[i] = new ResultsTableColumnWrapper(table, i);
-		}
+		final int size = getColumnCount();
+		final Object[] o = new Object[size];
+		for (int i = 0; i < size; i++)
+			o[i] = new ResultsTableColumnWrapper(table, getActualColumnIndex(i));
 		return o;
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
 	public <A> A[] toArray(final A[] a) {
-		final A[] copy = a.length < table.getLastColumn() + 1
-			? (A[]) java.lang.reflect.Array.newInstance(a.getClass()
-				.getComponentType(), table.getLastColumn() + 1) : a;
+		final int size = getColumnCount();
+		final A[] copy = a.length < size ? (A[]) java.lang.reflect.Array
+			.newInstance(a.getClass().getComponentType(), size) : a;
 
-		for (int i = 0; i < table.getLastColumn() + 1; i++) {
-			copy[i] = (A) new ResultsTableColumnWrapper(table, i);
-		}
-		if (copy.length > table.getLastColumn() + 1) copy[table.getLastColumn() +
-			1] = null;
+		for (int i = 0; i < size; i++)
+			copy[i] = (A) new ResultsTableColumnWrapper(table, getActualColumnIndex(
+				i));
+		if (copy.length > size) copy[size] = null;
 
 		return copy;
 	}
@@ -391,7 +406,8 @@ public class ResultsTableWrapper implements GenericTable {
 		for (int i = 0; i < column.size(); i++) {
 			if (column.get(i) instanceof Number) table.setValue(colIndex, i,
 				((Number) column.get(i)).doubleValue());
-			else if (column.get(i) != null) table.setValue(colIndex, i, column.get(i).toString());
+			else if (column.get(i) != null) table.setValue(colIndex, i, column.get(i)
+				.toString());
 			else return false;
 		}
 		return true;
@@ -442,7 +458,8 @@ public class ResultsTableWrapper implements GenericTable {
 
 	@Override
 	public Column<? extends Object> get(final int col) {
-		return new ResultsTableColumnWrapper(table, col);
+		final int actualCol = getActualColumnIndex(col);
+		return new ResultsTableColumnWrapper(table, actualCol);
 	}
 
 	/**
@@ -453,7 +470,8 @@ public class ResultsTableWrapper implements GenericTable {
 	public Column<? extends Object> set(final int col,
 		final Column<? extends Object> column)
 	{
-		final Column<Object> w = new ResultsTableColumnWrapper(table, col);
+		final int actualCol = getActualColumnIndex(col);
+		final Column<Object> w = new ResultsTableColumnWrapper(table, actualCol);
 		for (int i = 0; i < column.size(); i++) {
 			w.set(i, column.get(i));
 		}
@@ -496,7 +514,8 @@ public class ResultsTableWrapper implements GenericTable {
 	{
 		final List<Column<?>> l = new ArrayList<>(toCol - fromCol);
 		for (int i = fromCol; i < toCol; i++) {
-			l.add(new ResultsTableColumnWrapper(table, i));
+			final int actualCol = getActualColumnIndex(i);
+			l.add(new ResultsTableColumnWrapper(table, actualCol));
 		}
 		return l;
 	}
@@ -539,6 +558,28 @@ public class ResultsTableWrapper implements GenericTable {
 		if (((Double) d).isNaN() && (s == "" || s == null)) return false;
 
 		return !s.equals(c);
+	}
+
+	/**
+	 * Returns the corresponding column in IJ ResultsTable.
+	 * <p>
+	 * ResultsTables may not sequential populate columns. This means a
+	 * ResultsTable can have four populated columns but the actual indices of
+	 * those columns could be 1, 2, 8, 10.
+	 * </p>
+	 *
+	 * @param col the ImageJ2 column index
+	 * @return the actual column index in the IJ ResultsTable
+	 */
+	private int getActualColumnIndex(final int col) {
+		if (table.columnExists(col)) return col;
+		int columnCount = 0;
+		for (int i = 0; i <= table.getLastColumn(); i++) {
+			if (table.columnExists(i)) columnCount++;
+			if ((columnCount - 1) == col) return i;
+		}
+
+		throw new IllegalArgumentException("Column not defined: " + col);
 	}
 
 }
