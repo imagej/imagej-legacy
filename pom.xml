@@ -145,6 +145,10 @@ Institute of Molecular Cell Biology and Genetics.</license.copyrightOwners>
 		<scijava-common.version>2.73.1</scijava-common.version>
 		<imagej-common.version>0.26.1</imagej-common.version>
 		<imglib2-ij.version>2.0.0-beta-41</imglib2-ij.version>
+
+		<jmh.version>1.19</jmh.version>
+		<jmh-core.version>${jmh.version}</jmh-core.version>
+		<jmh-generator-annprocess.version>${jmh.version}</jmh-generator-annprocess.version>
 	</properties>
 
 	<repositories>
@@ -235,13 +239,13 @@ Institute of Molecular Cell Biology and Genetics.</license.copyrightOwners>
 		<dependency>
 			<groupId>org.openjdk.jmh</groupId>
 			<artifactId>jmh-core</artifactId>
-			<version>1.19</version>
+			<version>${jmh-core.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.openjdk.jmh</groupId>
 			<artifactId>jmh-generator-annprocess</artifactId>
-			<version>1.19</version>
+			<version>${jmh-generator-annprocess.version}</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
