@@ -59,8 +59,7 @@ import java.util.Map;
  * @author Mark Hiner
  * @author Matthias Arzt
  */
-public class ImagePlusCreatorUtils
-{
+public final class ImagePlusCreatorUtils {
 
 	private ImagePlusCreatorUtils() {
 		// prevent from instantiation
