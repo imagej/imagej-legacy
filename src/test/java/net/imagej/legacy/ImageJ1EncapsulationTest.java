@@ -179,7 +179,8 @@ public class ImageJ1EncapsulationTest {
 					className.startsWith(net.imagej.legacy.translate.NameHarmonizer.class.getName()) ||
 					className.startsWith(net.imagej.legacy.translate.OverlayHarmonizer.class.getName()) ||
 					className.startsWith(net.imagej.legacy.translate.PositionHarmonizer.class.getName()) ||
-					className.startsWith(net.imagej.legacy.translate.ResultsTableHarmonizer.class.getName()))
+					className.startsWith(net.imagej.legacy.translate.ResultsTableHarmonizer.class.getName()) ||
+					className.startsWith(net.imagej.legacy.LegacyDatasetService.class.getName()))
 			{
 				continue;
 			}
