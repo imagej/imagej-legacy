@@ -36,6 +36,8 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import ij.gui.Arrow;
+
 import net.imagej.legacy.convert.roi.MaskPredicateUnwrappers.WrapperToWritableLine;
 import net.imagej.legacy.convert.roi.RoiUnwrappers.WrapperToLineConverter;
 import net.imglib2.RealLocalizable;
@@ -51,8 +53,6 @@ import org.junit.Test;
 import org.scijava.Context;
 import org.scijava.convert.ConvertService;
 import org.scijava.convert.Converter;
-
-import ij.gui.Arrow;
 
 /**
  * Tests converting between {@link ij.gui.Line Line} and {@link Line}.

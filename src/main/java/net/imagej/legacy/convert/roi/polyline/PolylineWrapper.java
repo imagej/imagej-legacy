@@ -31,13 +31,13 @@
 
 package net.imagej.legacy.convert.roi.polyline;
 
-import net.imagej.legacy.convert.roi.MaskPredicateWrapper;
-import net.imglib2.RealPoint;
-import net.imglib2.roi.geom.real.WritablePolyline;
-
 import ij.gui.PolygonRoi;
 import ij.gui.Roi;
 import ij.process.FloatPolygon;
+
+import net.imagej.legacy.convert.roi.MaskPredicateWrapper;
+import net.imglib2.RealPoint;
+import net.imglib2.roi.geom.real.WritablePolyline;
 
 /**
  * A {@link PolygonRoi} with an associated {@link WritablePolyline}.

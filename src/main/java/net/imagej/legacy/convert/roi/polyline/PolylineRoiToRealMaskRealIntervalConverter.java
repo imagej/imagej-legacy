@@ -31,15 +31,15 @@
 
 package net.imagej.legacy.convert.roi.polyline;
 
+import ij.gui.PolygonRoi;
+import ij.gui.Roi;
+
 import net.imagej.legacy.convert.roi.AbstractRoiToMaskPredicateConverter;
 import net.imglib2.roi.RealMaskRealInterval;
 
 import org.scijava.Priority;
 import org.scijava.convert.Converter;
 import org.scijava.plugin.Plugin;
-
-import ij.gui.PolygonRoi;
-import ij.gui.Roi;
 
 /**
  * Converts an ImageJ 1.x {@link PolygonRoi} to an ImgLib2

@@ -31,11 +31,11 @@
 
 package net.imagej.legacy.convert.roi.ellipsoid;
 
+import ij.gui.OvalRoi;
+
 import net.imagej.legacy.convert.roi.MaskPredicateWrapper;
 import net.imglib2.RealPositionable;
 import net.imglib2.roi.geom.real.WritableEllipsoid;
-
-import ij.gui.OvalRoi;
 
 /**
  * A {@link OvalRoi} with an associated {@link WritableEllipsoid}.

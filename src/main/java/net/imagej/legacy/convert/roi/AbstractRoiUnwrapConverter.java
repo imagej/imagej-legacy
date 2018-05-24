@@ -31,11 +31,11 @@
 
 package net.imagej.legacy.convert.roi;
 
+import ij.gui.Roi;
+
 import java.lang.reflect.Type;
 
 import org.scijava.convert.AbstractConverter;
-
-import ij.gui.Roi;
 
 /**
  * Abstract base class for converters which unwrap wrapped ImageJ 1.x Rois.

@@ -45,7 +45,6 @@ import ij.process.ShortProcessor;
 
 import java.util.Arrays;
 import java.util.function.Supplier;
-import java.util.stream.IntStream;
 
 import net.imagej.Dataset;
 import net.imagej.DatasetService;

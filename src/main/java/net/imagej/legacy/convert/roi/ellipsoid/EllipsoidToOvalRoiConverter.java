@@ -31,6 +31,8 @@
 
 package net.imagej.legacy.convert.roi.ellipsoid;
 
+import ij.gui.OvalRoi;
+
 import net.imagej.legacy.convert.roi.AbstractMaskPredicateToRoiConverter;
 import net.imglib2.RealLocalizable;
 import net.imglib2.roi.geom.real.Ellipsoid;
@@ -38,8 +40,6 @@ import net.imglib2.roi.geom.real.Ellipsoid;
 import org.scijava.Priority;
 import org.scijava.convert.Converter;
 import org.scijava.plugin.Plugin;
-
-import ij.gui.OvalRoi;
 
 /**
  * Converts an {@link Ellipsoid} to an {@link OvalRoi}. The boundary behavior of

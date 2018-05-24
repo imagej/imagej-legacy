@@ -35,15 +35,15 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import ij.gui.PolygonRoi;
+import ij.gui.Roi;
+
 import net.imglib2.RealLocalizable;
 import net.imglib2.RealPoint;
 import net.imglib2.roi.geom.real.Polygon2D;
 
 import org.junit.Before;
 import org.junit.Test;
-
-import ij.gui.PolygonRoi;
-import ij.gui.Roi;
 
 /**
  * Tests {@link UnmodifiablePolygonRoiWrapper}

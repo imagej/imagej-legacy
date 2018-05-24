@@ -31,6 +31,9 @@
 
 package net.imagej.legacy.convert.roi;
 
+import ij.gui.Roi;
+import ij.gui.ShapeRoi;
+
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
@@ -45,9 +48,6 @@ import org.scijava.convert.ConvertService;
 import org.scijava.convert.Converter;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
-
-import ij.gui.Roi;
-import ij.gui.ShapeRoi;
 
 /**
  * Converts {@link BinaryCompositeMaskPredicate} to {@link ShapeRoi}. This

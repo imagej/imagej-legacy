@@ -42,7 +42,6 @@ import net.imagej.ImgPlus;
 import net.imagej.display.ImageDisplay;
 import net.imagej.display.ImageDisplayService;
 import net.imagej.legacy.LegacyService;
-import net.imagej.space.SpaceUtils;
 
 import org.scijava.AbstractContextual;
 import org.scijava.Context;

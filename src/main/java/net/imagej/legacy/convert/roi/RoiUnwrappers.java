@@ -31,10 +31,6 @@
 
 package net.imagej.legacy.convert.roi;
 
-import org.scijava.Priority;
-import org.scijava.convert.Converter;
-import org.scijava.plugin.Plugin;
-
 import ij.gui.EllipseRoi;
 import ij.gui.Line;
 import ij.gui.OvalRoi;
@@ -43,6 +39,10 @@ import ij.gui.PolygonRoi;
 import ij.gui.Roi;
 import ij.gui.RotatedRectRoi;
 import ij.gui.ShapeRoi;
+
+import org.scijava.Priority;
+import org.scijava.convert.Converter;
+import org.scijava.plugin.Plugin;
 
 /**
  * Converters which unwrap wrapped ImageJ 1.x Rois.

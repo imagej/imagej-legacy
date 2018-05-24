@@ -31,16 +31,16 @@
 
 package net.imagej.legacy.convert.roi;
 
+import ij.gui.Arrow;
+import ij.gui.ImageRoi;
+import ij.gui.Roi;
+import ij.gui.TextRoi;
+
 import net.imglib2.roi.MaskInterval;
 
 import org.scijava.Priority;
 import org.scijava.convert.Converter;
 import org.scijava.plugin.Plugin;
-
-import ij.gui.Arrow;
-import ij.gui.ImageRoi;
-import ij.gui.Roi;
-import ij.gui.TextRoi;
 
 /**
  * Converts an ImageJ 1.x {@link Roi} to an Imglib2 {@link MaskInterval}. The

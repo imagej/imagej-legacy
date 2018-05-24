@@ -36,6 +36,9 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import ij.gui.PolygonRoi;
+import ij.gui.Roi;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -55,9 +58,6 @@ import org.junit.rules.ExpectedException;
 import org.scijava.Context;
 import org.scijava.convert.ConvertService;
 import org.scijava.convert.Converter;
-
-import ij.gui.PolygonRoi;
-import ij.gui.Roi;
 
 /**
  * Tests converting between {@link PolygonRoi} and {@link Polyline}.

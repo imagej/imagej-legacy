@@ -31,16 +31,16 @@
 
 package net.imagej.legacy.convert.roi.polyline;
 
+import ij.gui.PolygonRoi;
+import ij.gui.Roi;
+import ij.process.FloatPolygon;
+
 import net.imagej.legacy.convert.roi.AbstractPolygonRoiWrapper;
 import net.imglib2.AbstractRealLocalizable;
 import net.imglib2.RealLocalizable;
 import net.imglib2.roi.geom.GeomMaths;
 import net.imglib2.roi.geom.real.Polyline;
 import net.imglib2.util.Intervals;
-
-import ij.gui.PolygonRoi;
-import ij.gui.Roi;
-import ij.process.FloatPolygon;
 
 /**
  * Wraps an ImageJ 1.x {@link PolygonRoi} of type {@link Roi#FREELINE} and

@@ -31,13 +31,13 @@
 
 package net.imagej.legacy.convert.roi;
 
+import ij.gui.Roi;
+import ij.gui.ShapeRoi;
+
 import net.imglib2.roi.RealMaskRealInterval;
 
 import org.scijava.convert.Converter;
 import org.scijava.plugin.Plugin;
-
-import ij.gui.Roi;
-import ij.gui.ShapeRoi;
 
 /**
  * Converts an ImageJ 1.x {@link ShapeRoi} to an ImgLib2

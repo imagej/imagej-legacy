@@ -31,19 +31,20 @@
 
 package net.imagej.test;
 
+import static org.junit.Assert.fail;
+
+import java.util.Arrays;
+import java.util.function.BiConsumer;
+import java.util.function.BiPredicate;
+
 import net.imglib2.Interval;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.operators.ValueEquals;
 import net.imglib2.util.Intervals;
 import net.imglib2.view.Views;
+
 import org.junit.Assert;
-
-import java.util.Arrays;
-import java.util.function.BiConsumer;
-import java.util.function.BiPredicate;
-
-import static org.junit.Assert.fail;
 
 public class AssertImgs
 {

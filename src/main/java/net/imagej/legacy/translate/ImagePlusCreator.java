@@ -33,6 +33,7 @@ package net.imagej.legacy.translate;
 
 import ij.CompositeImage;
 import ij.ImagePlus;
+
 import net.imagej.Dataset;
 import net.imagej.ImgPlus;
 import net.imagej.axis.Axes;
@@ -45,6 +46,7 @@ import net.imglib2.img.display.imagej.PlanarImgToVirtualStack;
 import net.imglib2.type.logic.BitType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.util.Util;
+
 import org.scijava.AbstractContextual;
 import org.scijava.Context;
 import org.scijava.log.LogService;

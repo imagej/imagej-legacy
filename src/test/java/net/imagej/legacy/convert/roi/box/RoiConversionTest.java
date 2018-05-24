@@ -36,6 +36,8 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import ij.gui.Roi;
+
 import net.imagej.legacy.convert.roi.MaskPredicateUnwrappers.WrapperToWritableBoxConverter;
 import net.imagej.legacy.convert.roi.RoiUnwrappers.WrapperToRoiConverter;
 import net.imglib2.RealLocalizable;
@@ -50,8 +52,6 @@ import org.junit.Test;
 import org.scijava.Context;
 import org.scijava.convert.ConvertService;
 import org.scijava.convert.Converter;
-
-import ij.gui.Roi;
 
 /**
  * Tests converting between {@link Roi} and {@link Box}.

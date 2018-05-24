@@ -31,6 +31,9 @@
 
 package net.imagej.legacy.convert.roi.polygon2d;
 
+import ij.gui.PolygonRoi;
+import ij.gui.Roi;
+
 import net.imagej.legacy.convert.roi.AbstractMaskPredicateToRoiConverter;
 import net.imglib2.RealLocalizable;
 import net.imglib2.roi.geom.real.Polygon2D;
@@ -38,9 +41,6 @@ import net.imglib2.roi.geom.real.Polygon2D;
 import org.scijava.Priority;
 import org.scijava.convert.Converter;
 import org.scijava.plugin.Plugin;
-
-import ij.gui.PolygonRoi;
-import ij.gui.Roi;
 
 /**
  * Converts a {@link Polygon2D} to a {@link PolygonRoi} of type POLYGON. This

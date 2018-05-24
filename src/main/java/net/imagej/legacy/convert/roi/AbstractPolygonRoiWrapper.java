@@ -31,12 +31,12 @@
 
 package net.imagej.legacy.convert.roi;
 
+import ij.gui.PolygonRoi;
+import ij.gui.Roi;
+
 import net.imglib2.roi.Mask;
 import net.imglib2.roi.geom.real.Polygon2D;
 import net.imglib2.roi.geom.real.Polyline;
-
-import ij.gui.PolygonRoi;
-import ij.gui.Roi;
 
 /**
  * Abstract base class for wrapping ImageJ 1.x objects which are

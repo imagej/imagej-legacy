@@ -31,6 +31,8 @@
 
 package net.imagej.legacy.convert.roi.ellipsoid;
 
+import ij.gui.OvalRoi;
+
 import net.imagej.legacy.convert.roi.IJRealRoiWrapper;
 import net.imagej.legacy.convert.roi.Rois;
 import net.imglib2.RealLocalizable;
@@ -40,8 +42,6 @@ import net.imglib2.roi.geom.real.WritableEllipsoid;
 import net.imglib2.roi.util.AbstractRealMaskPoint;
 import net.imglib2.roi.util.RealLocalizableRealPositionable;
 import net.imglib2.util.Intervals;
-
-import ij.gui.OvalRoi;
 
 /**
  * Wraps an ImageJ 1.x {@link OvalRoi} as an ImgLib2 {@link Ellipsoid}.

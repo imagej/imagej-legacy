@@ -31,6 +31,8 @@
 
 package net.imagej.legacy.convert;
 
+import ij.gui.Overlay;
+
 import net.imagej.roi.ROITree;
 import net.imglib2.roi.MaskPredicate;
 
@@ -40,8 +42,6 @@ import org.scijava.convert.Converter;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 import org.scijava.util.TreeNode;
-
-import ij.gui.Overlay;
 
 /**
  * Converts a {@link ROITree} to an {@link Overlay}.

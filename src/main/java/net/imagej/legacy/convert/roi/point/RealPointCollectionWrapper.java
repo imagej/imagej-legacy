@@ -31,6 +31,8 @@
 
 package net.imagej.legacy.convert.roi.point;
 
+import ij.gui.PointRoi;
+
 import java.util.Iterator;
 
 import net.imagej.legacy.convert.roi.MaskPredicateWrapper;
@@ -41,8 +43,6 @@ import net.imglib2.roi.util.RealLocalizableRealPositionable;
 import net.imglib2.roi.util.RealLocalizableRealPositionableWrapper;
 
 import org.scijava.util.FloatArray;
-
-import ij.gui.PointRoi;
 
 /**
  * A {@link PointRoi} with an associated {@link WritableRealPointCollection}.

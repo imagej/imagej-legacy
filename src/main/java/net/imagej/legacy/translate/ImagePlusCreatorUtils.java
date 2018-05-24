@@ -31,27 +31,27 @@
 
 package net.imagej.legacy.translate;
 
-import ij.CompositeImage;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.VirtualStack;
 import ij.io.FileInfo;
 import ij.measure.Calibration;
+
 import io.scif.ImageMetadata;
 import io.scif.MetaTable;
 import io.scif.Metadata;
 import io.scif.img.SCIFIOImgPlus;
-import net.imagej.Dataset;
-import net.imagej.ImgPlus;
-import net.imglib2.img.display.imagej.CalibrationUtils;
-import net.imglib2.type.numeric.RealType;
-import net.imglib2.type.numeric.integer.UnsignedShortType;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+
+import net.imagej.Dataset;
+import net.imagej.ImgPlus;
+import net.imglib2.type.numeric.RealType;
+import net.imglib2.type.numeric.integer.UnsignedShortType;
 
 /**
  * Utility class for {@link ImagePlusCreator}.

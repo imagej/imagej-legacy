@@ -34,7 +34,6 @@ package net.imagej.legacy.translate;
 import ij.ImagePlus;
 
 import net.imagej.Dataset;
-import net.imagej.axis.AxisType;
 import net.imagej.display.ImageDisplay;
 import net.imagej.legacy.LegacyService;
 

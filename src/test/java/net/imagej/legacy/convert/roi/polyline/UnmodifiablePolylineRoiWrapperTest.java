@@ -35,6 +35,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import ij.gui.PolygonRoi;
+import ij.gui.Roi;
+
 import net.imglib2.RealLocalizable;
 import net.imglib2.RealPoint;
 import net.imglib2.roi.geom.real.Polyline;
@@ -43,9 +46,6 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-
-import ij.gui.PolygonRoi;
-import ij.gui.Roi;
 
 /**
  * Tests {@link UnmodifiablePolylineRoiWrapper}

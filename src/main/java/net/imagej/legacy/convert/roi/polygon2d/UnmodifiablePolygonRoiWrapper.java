@@ -31,6 +31,10 @@
 
 package net.imagej.legacy.convert.roi.polygon2d;
 
+import ij.gui.PolygonRoi;
+import ij.gui.Roi;
+import ij.process.FloatPolygon;
+
 import net.imagej.legacy.convert.roi.AbstractPolygonRoiWrapper;
 import net.imglib2.AbstractRealLocalizable;
 import net.imglib2.RealLocalizable;
@@ -38,9 +42,6 @@ import net.imglib2.roi.geom.GeomMaths;
 import net.imglib2.roi.geom.real.Polygon2D;
 
 import gnu.trove.list.array.TDoubleArrayList;
-import ij.gui.PolygonRoi;
-import ij.gui.Roi;
-import ij.process.FloatPolygon;
 
 /**
  * Wraps an ImageJ 1.x {@link PolygonRoi} of type {@link Roi#FREEROI} or

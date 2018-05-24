@@ -31,9 +31,9 @@
 
 package net.imagej.legacy.convert.roi;
 
-import net.imglib2.roi.MaskPredicate;
-
 import ij.gui.Roi;
+
+import net.imglib2.roi.MaskPredicate;
 
 /**
  * ImageJ 1.x {@link Roi}s with associated {@link MaskPredicate}.

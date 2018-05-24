@@ -31,13 +31,13 @@
 
 package net.imagej.legacy.convert.roi.polyline;
 
+import ij.gui.PolygonRoi;
+import ij.gui.Roi;
+
 import net.imagej.legacy.convert.roi.IJRealRoiWrapper;
 import net.imglib2.RealLocalizable;
 import net.imglib2.roi.BoundaryType;
 import net.imglib2.roi.RealMaskRealInterval;
-
-import ij.gui.PolygonRoi;
-import ij.gui.Roi;
 
 /**
  * Wraps a {@link PolygonRoi} of type {@link Roi#POLYLINE} or

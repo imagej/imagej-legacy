@@ -31,14 +31,14 @@
 
 package net.imagej.legacy.convert.roi;
 
+import ij.gui.Roi;
+
 import java.awt.Rectangle;
 
 import net.imglib2.Localizable;
 import net.imglib2.Positionable;
 import net.imglib2.RealPositionable;
 import net.imglib2.roi.MaskInterval;
-
-import ij.gui.Roi;
 
 /**
  * Wraps any {@link Roi} as a {@link MaskInterval}. The {@code test(...)} method

@@ -35,6 +35,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import ij.gui.PointRoi;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -61,8 +63,6 @@ import org.junit.Test;
 import org.scijava.Context;
 import org.scijava.convert.ConvertService;
 import org.scijava.convert.Converter;
-
-import ij.gui.PointRoi;
 
 /**
  * Tests converting between {@link PointRoi} and {@link RealPointCollection} /

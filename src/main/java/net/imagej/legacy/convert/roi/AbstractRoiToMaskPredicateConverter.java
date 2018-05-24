@@ -31,6 +31,8 @@
 
 package net.imagej.legacy.convert.roi;
 
+import ij.gui.Roi;
+
 import java.lang.reflect.Type;
 
 import net.imglib2.RealLocalizable;
@@ -38,8 +40,6 @@ import net.imglib2.roi.MaskPredicate;
 
 import org.scijava.convert.AbstractConverter;
 import org.scijava.convert.ConversionRequest;
-
-import ij.gui.Roi;
 
 /**
  * Base class for all converters which convert {@link Roi} to

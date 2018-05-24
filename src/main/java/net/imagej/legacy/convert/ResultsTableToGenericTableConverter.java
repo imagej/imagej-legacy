@@ -31,14 +31,14 @@
 
 package net.imagej.legacy.convert;
 
+import ij.measure.ResultsTable;
+
 import net.imagej.table.GenericTable;
 
 import org.scijava.Priority;
 import org.scijava.convert.AbstractConverter;
 import org.scijava.convert.Converter;
 import org.scijava.plugin.Plugin;
-
-import ij.measure.ResultsTable;
 
 /**
  * Converts a {@link ResultsTable} to a {@link GenericTable}.

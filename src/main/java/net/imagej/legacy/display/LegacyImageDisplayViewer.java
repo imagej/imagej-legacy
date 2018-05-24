@@ -42,7 +42,6 @@ import net.imagej.legacy.ui.LegacyUI;
 import net.imagej.ui.viewer.image.AbstractImageDisplayViewer;
 import net.imagej.ui.viewer.image.ImageDisplayViewer;
 
-import org.scijava.Initializable;
 import org.scijava.Priority;
 import org.scijava.display.Display;
 import org.scijava.display.DisplayService;

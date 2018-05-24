@@ -31,12 +31,12 @@
 
 package net.imagej.legacy.convert.roi.polygon2d;
 
-import net.imagej.legacy.convert.roi.MaskPredicateWrapper;
-import net.imglib2.roi.geom.real.WritablePolygon2D;
-
 import ij.gui.PolygonRoi;
 import ij.gui.Roi;
 import ij.process.FloatPolygon;
+
+import net.imagej.legacy.convert.roi.MaskPredicateWrapper;
+import net.imglib2.roi.geom.real.WritablePolygon2D;
 
 /**
  * A {@link PolygonRoi} with an associated {@link WritablePolygon2D}.

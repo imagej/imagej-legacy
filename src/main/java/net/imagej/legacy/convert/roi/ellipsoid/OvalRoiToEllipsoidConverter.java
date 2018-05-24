@@ -31,15 +31,15 @@
 
 package net.imagej.legacy.convert.roi.ellipsoid;
 
+import ij.gui.OvalRoi;
+import ij.gui.Roi;
+
 import net.imagej.legacy.convert.roi.AbstractRoiToMaskPredicateConverter;
 import net.imglib2.roi.geom.real.Ellipsoid;
 import net.imglib2.roi.geom.real.WritableEllipsoid;
 
 import org.scijava.convert.Converter;
 import org.scijava.plugin.Plugin;
-
-import ij.gui.OvalRoi;
-import ij.gui.Roi;
 
 /**
  * Converts an ImageJ 1.x {@link OvalRoi} to an ImgLib2 {@link Ellipsoid}.

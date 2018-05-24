@@ -35,6 +35,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import ij.gui.PolygonRoi;
+import ij.gui.Roi;
+
 import net.imagej.legacy.convert.roi.MaskPredicateUnwrappers.WrapperToWritablePolygon2D;
 import net.imagej.legacy.convert.roi.RoiUnwrappers.WrapperToPolygonRoiConverter;
 import net.imglib2.RealLocalizable;
@@ -49,9 +52,6 @@ import org.junit.Test;
 import org.scijava.Context;
 import org.scijava.convert.ConvertService;
 import org.scijava.convert.Converter;
-
-import ij.gui.PolygonRoi;
-import ij.gui.Roi;
 
 /**
  * Tests converting {@link PolygonRoi} to {@link Polygon2D}.

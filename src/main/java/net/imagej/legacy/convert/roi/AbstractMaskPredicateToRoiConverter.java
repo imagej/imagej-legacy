@@ -31,13 +31,13 @@
 
 package net.imagej.legacy.convert.roi;
 
+import ij.gui.Roi;
+
 import java.lang.reflect.Type;
 
 import net.imglib2.roi.MaskPredicate;
 
 import org.scijava.convert.AbstractConverter;
-
-import ij.gui.Roi;
 
 /**
  * Abstract base class for converting {@link MaskPredicate}s to {@link Roi}s.

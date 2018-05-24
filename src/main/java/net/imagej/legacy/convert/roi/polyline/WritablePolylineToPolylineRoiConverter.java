@@ -31,13 +31,13 @@
 
 package net.imagej.legacy.convert.roi.polyline;
 
+import ij.gui.PolygonRoi;
+
 import net.imagej.legacy.convert.roi.AbstractMaskPredicateToRoiConverter;
 import net.imglib2.roi.geom.real.WritablePolyline;
 
 import org.scijava.convert.Converter;
 import org.scijava.plugin.Plugin;
-
-import ij.gui.PolygonRoi;
 
 /**
  * Converts an {@link WritablePolyline} to an {@link PolygonRoi} of type

@@ -33,6 +33,7 @@ package net.imagej.legacy.plugin;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assume.assumeTrue;
+
 import ij.gui.Roi;
 import ij.plugin.frame.RoiManager;
 

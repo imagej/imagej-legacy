@@ -31,6 +31,10 @@
 
 package net.imagej.legacy.convert.roi.point;
 
+import ij.ImagePlus;
+import ij.gui.PointRoi;
+import ij.process.FloatPolygon;
+
 import java.awt.Polygon;
 import java.util.ArrayList;
 import java.util.List;
@@ -41,10 +45,6 @@ import net.imglib2.AbstractRealLocalizable;
 import net.imglib2.RealLocalizable;
 import net.imglib2.roi.geom.real.RealPointCollection;
 import net.imglib2.roi.geom.real.WritableRealPointCollection;
-
-import ij.ImagePlus;
-import ij.gui.PointRoi;
-import ij.process.FloatPolygon;
 
 /**
  * Wraps an ImageJ 1.x {@link PointRoi} as an ImgLib2

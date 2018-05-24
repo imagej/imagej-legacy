@@ -31,10 +31,10 @@
 
 package net.imagej.legacy.convert.roi.box;
 
+import ij.gui.Roi;
+
 import net.imagej.legacy.convert.roi.MaskPredicateWrapper;
 import net.imglib2.roi.geom.real.WritableBox;
-
-import ij.gui.Roi;
 
 /**
  * A {@link Roi} with an associated {@link WritableBox}.
