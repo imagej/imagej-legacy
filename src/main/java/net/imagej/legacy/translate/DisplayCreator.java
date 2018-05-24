@@ -32,27 +32,158 @@
 package net.imagej.legacy.translate;
 
 import ij.ImagePlus;
+import ij.io.FileInfo;
 
-import net.imagej.axis.AxisType;
+import net.imagej.Dataset;
+import net.imagej.DatasetService;
+import net.imagej.ImgPlus;
+import net.imagej.axis.Axes;
+import net.imagej.axis.DefaultLinearAxis;
 import net.imagej.display.ImageDisplay;
+import net.imagej.display.ImageDisplayService;
+import net.imagej.legacy.LegacyImageMap;
+import net.imglib2.RandomAccessibleInterval;
+import net.imglib2.converter.Converters;
+import net.imglib2.img.Img;
+import net.imglib2.img.ImgView;
+import net.imglib2.img.VirtualStackAdapter;
+import net.imglib2.img.display.imagej.ImgPlusViews;
+import net.imglib2.img.planar.PlanarImgFactory;
+import net.imglib2.type.numeric.ARGBType;
+import net.imglib2.type.numeric.integer.UnsignedByteType;
+import net.imglib2.view.Views;
+
+import org.scijava.AbstractContextual;
+import org.scijava.Context;
+import org.scijava.display.DisplayService;
+import org.scijava.plugin.Parameter;
 
 /**
- * The interface for creating {@link ImageDisplay}s from {@link ImagePlus}es.
- * 
- * @author Barry DeZonia
+ * Class to create a {@link Dataset} which is linked to an {@link ImagePlus}.
+ *
+ * @author Mark Hiner
+ * @author Matthias Arzt
  */
-public interface DisplayCreator {
+public class DisplayCreator extends AbstractContextual
+{
+	@Parameter
+	private DatasetService datasetService;
+
+	@Parameter
+	private ImageDisplayService imageDisplayService;
+
+	private final ColorTableHarmonizer colorTableHarmonizer;
+	private final CompositeHarmonizer compositeHarmonizer;
+	private final OverlayHarmonizer overlayHarmonizer;
+	private final PositionHarmonizer positionHarmonizer;
+	private final NameHarmonizer nameHarmonizer;
+
+	@Parameter
+	private DisplayService displayService;
+
+	public DisplayCreator( final Context context )
+	{
+		setContext(context);
+		nameHarmonizer = new NameHarmonizer();
+		overlayHarmonizer = new OverlayHarmonizer(context);
+		positionHarmonizer = new PositionHarmonizer();
+		compositeHarmonizer = new CompositeHarmonizer();
+		colorTableHarmonizer = new ColorTableHarmonizer(imageDisplayService);
+	}
+
+	public ImageDisplay createDisplay(final ImagePlus imp) {
+		return makeDisplay(imp);
+	}
 
 	/**
-	 * Create an ImageDisplay from an ImagePlus. Default call to be preferred in
-	 * general.
+	 * @return A {@link Dataset} appropriate for the given {@link ImagePlus}
 	 */
-	ImageDisplay createDisplay(ImagePlus imp);
+	private Dataset getDataset(final ImagePlus imp)
+	{
+		final Dataset ds = makeDataset(imp);
+		ds.getProperties().put(LegacyImageMap.IMP_KEY, imp);
+		return ds;
+	}
+
+	private String makeSource( ImagePlus imp )
+	{
+		final FileInfo fileInfo = imp.getOriginalFileInfo();
+		if (fileInfo == null) {
+			// If no original file info, just use the title. This may be the case
+			// when an ImagePlus is created as the output of a command.
+			return imp.getTitle();
+		}
+		else {
+			if (fileInfo.url == null || fileInfo.url.isEmpty())
+				return fileInfo.directory + fileInfo.fileName;
+			else
+				return fileInfo.url;
+		}
+	}
+
+	private ImageDisplay harmonizeExceptPixels( ImagePlus imp, Dataset ds )
+	{
+		compositeHarmonizer.updateDataset(ds, imp);
+
+		// CTR FIXME - add imageDisplayService.createImageDisplay method?
+		// returns null if it cannot find an ImageDisplay-compatible display?
+		final ImageDisplay display =
+			(ImageDisplay) displayService.createDisplay(ds.getName(), ds);
+
+		colorTableHarmonizer.updateDisplay(display, imp);
+		// NB - correct thresholding behavior requires overlay harmonization after
+		// color table harmonization
+		overlayHarmonizer.updateDisplay(display, imp);
+		positionHarmonizer.updateDisplay(display, imp);
+		nameHarmonizer.updateDisplay(display, imp);
+		return display;
+	}
+
+	private Dataset makeDataset(ImagePlus imp) {
+		ImgPlus imgPlus = toImgPlus(imp);
+		final Dataset ds = datasetService.create( imgPlus );
+		DatasetUtils.initColorTables(ds);
+		ds.setRGBMerged( imp.getType() == ImagePlus.COLOR_RGB && imp.getNChannels() == 1);
+		return ds;
+	}
+
+	private ImgPlus< ? > toImgPlus(ImagePlus imp)
+	{
+		ImgPlus< ? > imgPlus = wrap( imp );
+		imgPlus.setSource( makeSource( imp ) );
+		return imgPlus;
+	}
+
+	private ImgPlus< ? > wrap( ImagePlus imp )
+	{
+		if (imp.getType() == ImagePlus.COLOR_RGB) {
+			ImgPlus<ARGBType> colored = VirtualStackAdapter.wrapRGBA( imp );
+			// TODO: This special treatment of Img<ARGBType> is wrongly placed.
+			return splitColorChannels(colored);
+		}
+		else {
+			return VirtualStackAdapter.wrap( imp );
+		}
+	}
+
+	private ImgPlus<UnsignedByteType> splitColorChannels(ImgPlus<ARGBType> input) {
+		Img<ARGBType> colored = input.getImg();
+		RandomAccessibleInterval<UnsignedByteType> colorStack = Views.stack(
+				Converters.argbChannel( colored, 1 ),
+				Converters.argbChannel( colored, 2 ),
+				Converters.argbChannel( colored, 3 ) );
+		ImgPlus<UnsignedByteType> result = new ImgPlus<>(ImgView.wrap(colorStack, new PlanarImgFactory<>()), input.getName());
+		int lastAxis = colored.numDimensions();
+		for (int i = 0; i < lastAxis; i++) result.setAxis(input.axis(i).copy(), i);
+		result.setAxis(new DefaultLinearAxis(Axes.CHANNEL), lastAxis);
+		return ImgPlusViews.moveAxis(result, lastAxis, 2);
+	}
 
 	/**
-	 * Create an ImageDisplay from an ImagePlus. Use a preferred order of axes as
-	 * possible.
+	 * @return An {@link ImageDisplay} created from the given {@link ImagePlus}
 	 */
-	ImageDisplay createDisplay(ImagePlus imp, AxisType[] preferredOrder);
-
+	private ImageDisplay makeDisplay(ImagePlus imp) {
+		Dataset ds = getDataset(imp);
+		return harmonizeExceptPixels( imp, ds );
+	}
 }

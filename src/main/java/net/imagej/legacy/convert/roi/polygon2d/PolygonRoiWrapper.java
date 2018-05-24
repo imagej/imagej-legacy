@@ -31,6 +31,11 @@
 
 package net.imagej.legacy.convert.roi.polygon2d;
 
+import ij.ImagePlus;
+import ij.gui.PolygonRoi;
+import ij.gui.Roi;
+import ij.process.FloatPolygon;
+
 import net.imagej.legacy.convert.roi.AbstractPolygonRoiWrapper;
 import net.imagej.legacy.convert.roi.Rois;
 import net.imglib2.RealLocalizable;
@@ -40,10 +45,6 @@ import net.imglib2.roi.geom.real.WritablePolygon2D;
 import net.imglib2.roi.util.RealLocalizableRealPositionable;
 
 import gnu.trove.list.array.TDoubleArrayList;
-import ij.ImagePlus;
-import ij.gui.PolygonRoi;
-import ij.gui.Roi;
-import ij.process.FloatPolygon;
 
 /**
  * Wraps an ImageJ 1.x {@link PolygonRoi} as an ImgLib2 {@link Polygon2D}.

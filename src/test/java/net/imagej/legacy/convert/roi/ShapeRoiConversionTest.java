@@ -36,6 +36,10 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import ij.gui.OvalRoi;
+import ij.gui.Roi;
+import ij.gui.ShapeRoi;
+
 import net.imagej.legacy.convert.roi.RoiUnwrappers.WrapperToShapeRoiConverter;
 import net.imglib2.RealPoint;
 import net.imglib2.realtransform.AffineTransform2D;
@@ -58,10 +62,6 @@ import org.junit.Test;
 import org.scijava.Context;
 import org.scijava.convert.ConvertService;
 import org.scijava.convert.Converter;
-
-import ij.gui.OvalRoi;
-import ij.gui.Roi;
-import ij.gui.ShapeRoi;
 
 /**
  * Tests converting an ImageJ 1.x {@link ShapeRoi} to an ImgLib2

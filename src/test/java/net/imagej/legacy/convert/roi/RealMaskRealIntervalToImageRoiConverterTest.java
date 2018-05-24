@@ -34,6 +34,9 @@ package net.imagej.legacy.convert.roi;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import ij.gui.ImageRoi;
+import ij.gui.Roi;
+
 import net.imglib2.FinalRealInterval;
 import net.imglib2.RealPoint;
 import net.imglib2.realtransform.AffineTransform2D;
@@ -48,9 +51,6 @@ import org.junit.Test;
 import org.scijava.Context;
 import org.scijava.convert.ConvertService;
 import org.scijava.convert.Converter;
-
-import ij.gui.ImageRoi;
-import ij.gui.Roi;
 
 /**
  * Tests for {@link RealMaskRealIntervalToImageRoiConverter}.

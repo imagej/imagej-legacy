@@ -31,14 +31,14 @@
 
 package net.imagej.legacy.convert.roi.point;
 
+import ij.gui.PointRoi;
+
 import net.imagej.legacy.convert.roi.AbstractMaskPredicateToRoiConverter;
 import net.imglib2.roi.geom.real.WritableRealPointCollection;
 import net.imglib2.roi.util.RealLocalizableRealPositionable;
 
 import org.scijava.convert.Converter;
 import org.scijava.plugin.Plugin;
-
-import ij.gui.PointRoi;
 
 /**
  * Converts a {@link WritableRealPointCollection} to a {@link PointRoi}. This

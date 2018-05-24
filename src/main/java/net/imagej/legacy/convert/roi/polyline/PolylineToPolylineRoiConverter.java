@@ -31,6 +31,9 @@
 
 package net.imagej.legacy.convert.roi.polyline;
 
+import ij.gui.PolygonRoi;
+import ij.gui.Roi;
+
 import net.imagej.legacy.convert.roi.AbstractMaskPredicateToRoiConverter;
 import net.imglib2.RealLocalizable;
 import net.imglib2.roi.geom.real.Polyline;
@@ -38,9 +41,6 @@ import net.imglib2.roi.geom.real.Polyline;
 import org.scijava.Priority;
 import org.scijava.convert.Converter;
 import org.scijava.plugin.Plugin;
-
-import ij.gui.PolygonRoi;
-import ij.gui.Roi;
 
 /**
  * Converts an {@link Polyline} to an {@link PolygonRoi} of type POLYLINE. This

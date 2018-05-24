@@ -33,23 +33,18 @@ package net.imagej.legacy.translate;
 
 import ij.ImagePlus;
 import ij.ImageStack;
-import ij.process.ImageProcessor;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import net.imagej.Dataset;
 import net.imagej.ImgPlus;
-import net.imagej.axis.Axes;
 import net.imagej.display.ImageDisplay;
 import net.imagej.display.ImageDisplayService;
 import net.imagej.legacy.LegacyService;
-import net.imagej.space.SpaceUtils;
-import net.imglib2.type.numeric.RealType;
 
 import org.scijava.AbstractContextual;
 import org.scijava.Context;
-import org.scijava.log.LogService;
 import org.scijava.plugin.Parameter;
 
 /**
@@ -65,21 +60,15 @@ public class Harmonizer extends AbstractContextual {
 	private final ImageTranslator imageTranslator;
 	private final Map<ImagePlus, Integer> bitDepthMap;
 
-	private final GrayPixelHarmonizer grayPixelHarmonizer;
-	private final ColorPixelHarmonizer colorPixelHarmonizer;
 	private final ColorTableHarmonizer colorTableHarmonizer;
 	private final MetadataHarmonizer metadataHarmonizer;
 	private final CompositeHarmonizer compositeHarmonizer;
-	private final PlaneHarmonizer planeHarmonizer;
 	private final OverlayHarmonizer overlayHarmonizer;
 	private final PositionHarmonizer positionHarmonizer;
 	private final NameHarmonizer nameHarmonizer;
 
 	@Parameter
 	private ImageDisplayService imageDisplayService;
-
-	@Parameter
-	private LogService log;
 
 	@Parameter
 	private LegacyService legacyService;
@@ -91,12 +80,9 @@ public class Harmonizer extends AbstractContextual {
 		setContext(context);
 		imageTranslator = trans;
 		bitDepthMap = new HashMap<>();
-		grayPixelHarmonizer = new GrayPixelHarmonizer();
-		colorPixelHarmonizer = new ColorPixelHarmonizer();
 		colorTableHarmonizer = new ColorTableHarmonizer(imageDisplayService);
 		metadataHarmonizer = new MetadataHarmonizer();
 		compositeHarmonizer = new CompositeHarmonizer();
-		planeHarmonizer = new PlaneHarmonizer(log);
 		overlayHarmonizer = new OverlayHarmonizer(context);
 		positionHarmonizer = new PositionHarmonizer();
 		nameHarmonizer = new NameHarmonizer();
@@ -113,40 +99,7 @@ public class Harmonizer extends AbstractContextual {
 		updateLegacyImage(final ImageDisplay display, final ImagePlus imp)
 	{
 		final Dataset ds = imageDisplayService.getActiveDataset(display);
-		/*
-		boolean binaryTypeChange = false;
-		if (imp.getBitDepth() == 8) {
-			if (ds.getType() instanceof BitType) {
-				binaryTypeChange = !LegacyUtils.isBinary(imp);
-			}
-			else if (ds.getType() instanceof UnsignedByteType) {
-				binaryTypeChange = LegacyUtils.isBinary(imp);
-			}
-		}
-		*/
-		if (!imagePlusIsNearestType(ds, imp) /* || binaryTypeChange */) {
-			rebuildImagePlusData(display, imp);
-		}
-		else {
-			// NB - in IJ1 stack size can be zero for single slice image!
-			if ((!dimensionsCompatible(ds, imp)) || (imp.getStack().getSize() == 0))
-			{
-				rebuildImagePlusData(display, imp);
-			}
-			else if (imp.getType() == ImagePlus.COLOR_RGB) {
-				if (!imp.getStack().isVirtual()) {
-					colorPixelHarmonizer.updateLegacyImage(ds, imp);
-				}
-			}
-			else if (LegacyUtils.datasetIsIJ1Compatible(ds)) {
-				planeHarmonizer.updateLegacyImage(ds, imp);
-			}
-			else {
-				if (!imp.getStack().isVirtual()) {
-					grayPixelHarmonizer.updateLegacyImage(ds, imp);
-				}
-			}
-		}
+		rebuildImagePlusData(display, imp);
 		metadataHarmonizer.updateLegacyImage(ds, imp);
 		colorTableHarmonizer.updateLegacyImage(display, imp);
 		// NB - correct thresholding behavior requires overlay harmonization after
@@ -171,11 +124,6 @@ public class Harmonizer extends AbstractContextual {
 			throw new IllegalArgumentException(
 					"cannot update a display with an ImagePlus that has an empty stack");
 
-		// NB - Remember current plane data and use in pixel harmonizers later.
-		// This makes sure that IJ2 can propagate IJ1 changes to current plane for
-		// virtual stacks.
-		saveCurrentSlice(imp);
-
 		final Dataset ds = imageDisplayService.getActiveDataset(display);
 
 		// did type of ImagePlus change?
@@ -191,24 +139,7 @@ public class Harmonizer extends AbstractContextual {
 			oldBitDepth = imp.getBitDepth();
 			bitDepthMap.put(imp, imp.getBitDepth());
 		}
-		boolean typeChanged = imp.getBitDepth() != oldBitDepth;
-		/* boolean isBinaryImp = LegacyUtils.isBinary(imp);
-		if (!typeChanged) {
-			typeChanged = sameBitDepthTypeChange(ds, imp, isBinaryImp);
-		}
-		*/
-		if ((typeChanged) || (!dimensionsCompatible(ds, imp))) {
-			rebuildDatasetData(ds, imp);
-		}
-		else { // ImagePlus type and shape unchanged
-			if (imp.getType() == ImagePlus.COLOR_RGB) {
-				colorPixelHarmonizer.updateDataset(ds, imp);
-			}
-			else if (LegacyUtils.datasetIsIJ1Compatible(ds)) {
-				planeHarmonizer.updateDataset(ds, imp);
-			}
-			else grayPixelHarmonizer.updateDataset(ds, imp);
-		}
+		rebuildDatasetData(ds, imp);
 		metadataHarmonizer.updateDataset(ds, imp);
 		compositeHarmonizer.updateDataset(ds, imp);
 		colorTableHarmonizer.updateDisplay(display, imp);
@@ -237,120 +168,7 @@ public class Harmonizer extends AbstractContextual {
 		bitDepthMap.put(imp, imp.getBitDepth());
 	}
 
-	/**
-	 * Forgets the types of all {@link ImagePlus}es. Called before a plugin is run
-	 * to reset the tracking of types.
-	 */
-	public void resetTypeTracking() {
-		bitDepthMap.clear();
-	}
-
 	// -- private interface --
-
-	/**
-	 * Returns true if an {@link ImagePlus}' type is the best fit for a given
-	 * {@link Dataset}. Best fit means the legacy ImageJ type that is the best at
-	 * preserving data.
-	 */
-	private boolean
-		imagePlusIsNearestType(final Dataset ds, final ImagePlus imp)
-	{
-		final int impType = imp.getType();
-
-		if (impType == ImagePlus.COLOR_RGB)
-			return LegacyUtils.isColorCompatible(ds);
-
-		final RealType<?> dsType = ds.getType();
-		final boolean isSigned = ds.isSigned();
-		final boolean isInteger = ds.isInteger();
-		final int bitsPerPix = dsType.getBitsPerPixel();
-
-		if (!isSigned && isInteger && bitsPerPix <= 8) {
-			return impType == ImagePlus.GRAY8 || impType == ImagePlus.COLOR_256;
-		}
-
-		if (isInteger && bitsPerPix <= 16) {
-			return impType == ImagePlus.GRAY16;
-		}
-
-		// isSigned || !isInteger || bitPerPix > 16
-		return impType == ImagePlus.GRAY32;
-	}
-
-	///**
-	// * Changes the shape of an existing {@link Dataset} to match that of an
-	// * {@link ImagePlus}. Assumes that the Dataset type is correct. Does not set
-	// * the data values or change the metadata.
-	// */
-	/* NB - this had some use at one time. But it is kind of broken in that it
-	 * assumes new number of dims == original Dataset dim count. Similarly for
-	 * axes and calibration. So this is wrong as it is. We could put code in place
-	 * to figure new dims, axes, and calibration from existing dataset and
-	 * imageplus but then we already have rebuildDatasetData() and might as well
-	 * just use it.
-	// assumes the data type of the given Dataset is fine as is
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	private void reshapeDataset(final Dataset ds, final ImagePlus imp) {
-		final long[] newDims = ds.getDims();
-		final double[] cal = new double[newDims.length];
-		ds.calibration(cal);
-		final int xIndex = ds.dimensionIndex(Axes.X);
-		final int yIndex = ds.dimensionIndex(Axes.Y);
-		final int cIndex = ds.dimensionIndex(Axes.CHANNEL);
-		final int zIndex = ds.dimensionIndex(Axes.Z);
-		final int tIndex = ds.dimensionIndex(Axes.TIME);
-		if (xIndex >= 0) newDims[xIndex] = imp.getWidth();
-		if (yIndex >= 0) newDims[yIndex] = imp.getHeight();
-		if (cIndex >= 0) {
-			if (imp.getType() == ImagePlus.COLOR_RGB) {
-				newDims[cIndex] = 3 * imp.getNChannels();
-			}
-			else newDims[cIndex] = imp.getNChannels();
-		}
-		if (zIndex >= 0) newDims[zIndex] = imp.getNSlices();
-		if (tIndex >= 0) newDims[tIndex] = imp.getNFrames();
-		final ImgFactory factory = ds.getImgPlus().factory();
-		final Img<?> img = factory.create(newDims, ds.getType());
-		final ImgPlus<?> imgPlus =
-			new ImgPlus(img, ds.getName(), ds.getAxes(), cal);
-		if ((ds.getCompositeChannelCount() > 1) && (cIndex >= 0)) {
-			imgPlus.setCompositeChannelCount((int) newDims[cIndex]);
-		}
-		ds.setImgPlus((ImgPlus<? extends RealType<?>>) imgPlus);
-	}
-	*/
-	
-	/**
-	 * Determines whether a {@link Dataset} and an {@link ImagePlus} have
-	 * compatible dimensionality.
-	 */
-	private boolean dimensionsCompatible(final Dataset ds, final ImagePlus imp) {
-		final int xIndex = ds.dimensionIndex(Axes.X);
-		final int yIndex = ds.dimensionIndex(Axes.Y);
-		final int zIndex = ds.dimensionIndex(Axes.Z);
-		final int tIndex = ds.dimensionIndex(Axes.TIME);
-		final int cIndex = ds.dimensionIndex(Axes.CHANNEL);
-
-		final long x = (xIndex < 0) ? 1 : ds.dimension(xIndex);
-		final long y = (yIndex < 0) ? 1 : ds.dimension(yIndex);
-		final long z = (zIndex < 0) ? 1 : ds.dimension(zIndex);
-		final long t = LegacyUtils.ij1PlaneCount(ds, Axes.TIME);
-		final long c = (tIndex < 0) ? 1 : ds.dimension(cIndex);
-
-		if (x != imp.getWidth()) return false;
-		if (y != imp.getHeight()) return false;
-		if (z != imp.getNSlices()) return false;
-		if (t != imp.getNFrames()) return false;
-		// channel case a little different
-		if (imp.getType() == ImagePlus.COLOR_RGB) {
-			if (cIndex < 0 || c != imp.getNChannels() * 3) return false;
-		}
-		else { // not color data
-			if (c != imp.getNChannels()) return false;
-		}
-
-		return true;
-	}
 
 	/**
 	 * Creates a new {@link ImageStack} of data from a {@link ImageDisplay} and
@@ -387,57 +205,14 @@ public class Harmonizer extends AbstractContextual {
 		//final ImagePlus impCopy = imp.duplicate();
 		//final ImageDisplay tmpDisplay =
 		//		imageTranslator.createDisplay(impCopy, ds.getAxes());
-		final ImageDisplay tmpDisplay = 
-			imageTranslator.createDisplay(imp, SpaceUtils.getAxisTypes(ds));
+		final ImageDisplay tmpDisplay = imageTranslator.createDisplay(imp);
 		final Dataset tmpDs = imageDisplayService.getActiveDataset(tmpDisplay);
 		ds.setImgPlus(tmpDs.getImgPlus());
 		ds.setRGBMerged(tmpDs.isRGBMerged());
 		tmpDisplay.close();
 	}
 	
-	/*
-	// Detect type changes when bit depth matches but sign or content incompatible
-	private boolean sameBitDepthTypeChange(Dataset ds, ImagePlus imp, boolean isBinaryImp) {
-		boolean typeChanged = false;
-		if (imp.getBitDepth() == 8) {
-			if (ds.getType() instanceof BitType) {
-				typeChanged = !isBinaryImp;
-			}
-			else if (ds.getType() instanceof UnsignedByteType) {
-				typeChanged = isBinaryImp;
-			}
-		}
-		else if (imp.getBitDepth() == 16) {
-			boolean isSigned16Imp = imp.getCalibration().isSigned16Bit();
-			if (ds.getType() instanceof ShortType) {
-				typeChanged = !isSigned16Imp;
-			}
-			else if (ds.getType() instanceof UnsignedShortType) {
-				typeChanged = isSigned16Imp;
-			}
-		}
-		
-		return typeChanged;
-	}
-	*/
-
 	// NOTE: to propagate a VirtualStack's first plane pixel changes we save it
 	// early in the harmonization process and refer to it later. This code is part
 	// of that process
-
-	private void saveCurrentSlice(ImagePlus imp) {
-		ImageProcessor proc = imp.getProcessor();
-		int pos = imp.getCurrentSlice();
-		double[] plane = new double[imp.getWidth() * imp.getHeight()];
-		for (int i = 0; i < plane.length; i++) {
-			plane[i] = proc.getf(i);
-		}
-		if (imp.getType() == ImagePlus.COLOR_RGB) {
-			colorPixelHarmonizer.savePlane(pos, plane);
-		}
-		else {
-			grayPixelHarmonizer.savePlane(pos, plane);
-		}
-	}
-
 }

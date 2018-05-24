@@ -31,10 +31,10 @@
 
 package net.imagej.legacy.convert.roi.point;
 
+import ij.gui.PointRoi;
+
 import net.imagej.legacy.convert.roi.MaskPredicateWrapper;
 import net.imglib2.roi.geom.real.WritablePointMask;
-
-import ij.gui.PointRoi;
 
 /**
  * A {@link PointRoi} with an associated {@link WritablePointMask}.

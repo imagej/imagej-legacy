@@ -38,6 +38,7 @@ import net.imagej.Dataset;
 import net.imagej.axis.Axes;
 import net.imagej.axis.CalibratedAxis;
 import net.imagej.axis.LinearAxis;
+import net.imglib2.img.display.imagej.CalibrationUtils;
 
 /**
  * Synchronizes metadata bidirectionally between a {@link Dataset} and an
@@ -101,47 +102,6 @@ public class MetadataHarmonizer implements DataHarmonizer {
 	@Override
 	public void updateLegacyImage(final Dataset ds, final ImagePlus imp) {
 		imp.setTitle(ds.getName());
-		// copy calibration info where possible
-		final Calibration cal = imp.getCalibration();
-		final int xIndex = ds.dimensionIndex(Axes.X);
-		final int yIndex = ds.dimensionIndex(Axes.Y);
-		final int cIndex = ds.dimensionIndex(Axes.CHANNEL);
-		final int zIndex = ds.dimensionIndex(Axes.Z);
-		final int tIndex = ds.dimensionIndex(Axes.TIME);
-		CalibratedAxis axis = null;
-		if (xIndex >= 0) {
-			axis = ds.axis(xIndex);
-			if (axis instanceof LinearAxis) {
-				cal.pixelWidth = ((LinearAxis) axis).scale();
-				cal.xOrigin = ((LinearAxis) axis).origin();
-			}
-			cal.setXUnit(axis.unit());
-		}
-		if (yIndex >= 0) {
-			axis = ds.axis(yIndex);
-			if (axis instanceof LinearAxis) {
-				cal.pixelHeight = ((LinearAxis) axis).scale();
-				cal.yOrigin = ((LinearAxis) axis).origin();
-			}
-			cal.setYUnit(axis.unit());
-		}
-		if (cIndex >= 0) {
-			// nothing to set on IJ1 side
-		}
-		if (zIndex >= 0) {
-			axis = ds.axis(zIndex);
-			if (axis instanceof LinearAxis) {
-				cal.pixelDepth = ((LinearAxis) axis).scale();
-				cal.zOrigin = ((LinearAxis) axis).origin();
-			}
-			cal.setZUnit(axis.unit());
-		}
-		if (tIndex >= 0) {
-			axis = ds.axis(tIndex);
-			if (axis instanceof LinearAxis) {
-				cal.frameInterval = ((LinearAxis) axis).scale();
-			}
-			cal.setTimeUnit(axis.unit());
-		}
+		CalibrationUtils.copyCalibrationToImagePlus( ds.getImgPlus(), imp );
 	}
 }

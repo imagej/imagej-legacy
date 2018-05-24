@@ -31,6 +31,8 @@
 
 package net.imagej.legacy.convert.roi.box;
 
+import ij.gui.Roi;
+
 import net.imagej.legacy.convert.roi.IJRealRoiWrapper;
 import net.imagej.legacy.convert.roi.Rois;
 import net.imglib2.RealLocalizable;
@@ -38,8 +40,6 @@ import net.imglib2.roi.geom.real.Box;
 import net.imglib2.roi.geom.real.WritableBox;
 import net.imglib2.roi.util.AbstractRealMaskPoint;
 import net.imglib2.roi.util.RealLocalizableRealPositionable;
-
-import ij.gui.Roi;
 
 /**
  * Wraps an ImageJ 1.x {@link Roi} as an ImgLib2 {@link Box}. Even though all

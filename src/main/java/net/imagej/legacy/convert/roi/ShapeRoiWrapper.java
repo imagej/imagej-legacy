@@ -31,10 +31,10 @@
 
 package net.imagej.legacy.convert.roi;
 
+import ij.gui.ShapeRoi;
+
 import net.imglib2.RealLocalizable;
 import net.imglib2.roi.RealMaskRealInterval;
-
-import ij.gui.ShapeRoi;
 
 /**
  * Wraps an ImageJ 1.x {@link ShapeRoi} as an ImgLib2

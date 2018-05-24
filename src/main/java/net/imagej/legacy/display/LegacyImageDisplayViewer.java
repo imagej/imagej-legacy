@@ -74,6 +74,14 @@ public class LegacyImageDisplayViewer extends AbstractImageDisplayViewer
 
 	// -- DisplayViewer methods --
 
+	@Override public boolean canView( Display< ? > d )
+	{
+		if ( ! (d instanceof ImageDisplay) )
+			return false;
+		// NB: only use legacy ui to display image with at most five dimensions.
+		return getDataset( ((ImageDisplay) d).getActiveView() ).numDimensions() <= 5;
+	}
+
 	@Override
 	public void view(final DisplayWindow w, final Display<?> d) {
 		final LegacyImageMap limp = legacyService.getImageMap();

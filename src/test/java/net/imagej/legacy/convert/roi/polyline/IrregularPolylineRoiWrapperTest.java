@@ -35,15 +35,15 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import ij.gui.PolygonRoi;
+import ij.gui.Roi;
+
 import net.imglib2.Point;
 import net.imglib2.RealPoint;
 import net.imglib2.roi.RealMaskRealInterval;
 
 import org.junit.Before;
 import org.junit.Test;
-
-import ij.gui.PolygonRoi;
-import ij.gui.Roi;
 
 /**
  * Tests {@link IrregularPolylineRoiWrapper}

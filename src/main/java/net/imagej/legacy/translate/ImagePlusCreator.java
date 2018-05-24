@@ -31,39 +31,109 @@
 
 package net.imagej.legacy.translate;
 
+import ij.CompositeImage;
 import ij.ImagePlus;
 
 import net.imagej.Dataset;
+import net.imagej.ImgPlus;
+import net.imagej.axis.Axes;
 import net.imagej.display.ImageDisplay;
+import net.imagej.display.ImageDisplayService;
+import net.imglib2.img.display.imagej.ArrayImgToVirtualStack;
+import net.imglib2.img.display.imagej.ImgPlusViews;
+import net.imglib2.img.display.imagej.ImgToVirtualStack;
+import net.imglib2.img.display.imagej.PlanarImgToVirtualStack;
+import net.imglib2.type.logic.BitType;
+import net.imglib2.type.numeric.RealType;
+import net.imglib2.util.Util;
+
+import org.scijava.AbstractContextual;
+import org.scijava.Context;
+import org.scijava.log.LogService;
+import org.scijava.plugin.Parameter;
 
 /**
- * The interface for creating {@link ImagePlus}es from {@link ImageDisplay}s.
+ * Creates {@link ImagePlus}es from {@link ImageDisplay}.
  * 
  * @author Barry DeZonia
+ * @author Matthias Arzt
  */
-public interface ImagePlusCreator {
+public class ImagePlusCreator extends AbstractContextual
+{
 
-	/**
-	 * Creates an {@link ImagePlus} from a {@link ImageDisplay}, as
-	 * {@link #createLegacyImage(Dataset, ImageDisplay)}.
-	 */
-	ImagePlus createLegacyImage(ImageDisplay display);
+	// -- instance variables --
 
-	/**
-	 * Creates an {@link ImagePlus} from a {@link Dataset}, when no
-	 * {@link ImageDisplay} is available. This is sufficient but will be less
-	 * informative than if a display was provided.
-	 */
-	ImagePlus createLegacyImage(final Dataset ds);
+	private final ColorTableHarmonizer colorTableHarmonizer;
+	private final PositionHarmonizer positionHarmonizer;
+	private final NameHarmonizer nameHarmonizer;
 
-	/**
-	 * Creates an {@link ImagePlus} from a given {@link Dataset} and
-	 * {@link ImageDisplay}. The display is optional, but will create a more
-	 * robust image.
-	 *
-	 * @param ds Dataset to use to create the base ImagePlus
-	 * @param display OPTIONAL image display
-	 * @return The created ImagePlus
-	 */
-	ImagePlus createLegacyImage(final Dataset ds, final ImageDisplay display);
+	@Parameter
+	private ImageDisplayService imageDisplayService;
+
+	@Parameter
+	private LogService log;
+
+	// -- public interface --
+
+	public ImagePlusCreator(final Context context) {
+		setContext(context);
+		colorTableHarmonizer = new ColorTableHarmonizer(imageDisplayService);
+		positionHarmonizer = new PositionHarmonizer();
+		nameHarmonizer = new NameHarmonizer();
+	}
+
+	public ImagePlus createLegacyImage(final ImageDisplay display) {
+		final Dataset dataset = imageDisplayService.getActiveDataset(display);
+		return createLegacyImage(dataset, display);
+	}
+
+	public ImagePlus createLegacyImage(final Dataset ds) {
+		return createLegacyImage(ds, null);
+	}
+
+	public ImagePlus createLegacyImage(final Dataset dataset,
+		final ImageDisplay display)
+	{
+		if (dataset == null) return null;
+		ImagePlus imp = createImagePlus( dataset );
+		ImagePlusCreatorUtils.setMetadata( dataset, imp );
+		imp = optionalMakeComposite( dataset, imp );
+		if (display != null) {
+			colorTableHarmonizer.updateLegacyImage(display, imp);
+			positionHarmonizer.updateLegacyImage(display, imp);
+			nameHarmonizer.updateLegacyImage(display, imp);
+		}
+
+		return imp;
+	}
+
+	private static ImagePlus createImagePlus( Dataset dataset )
+	{
+		ImgPlus< ? extends RealType< ? > > imgPlus = dataset.getImgPlus();
+		if( PlanarImgToVirtualStack.isSupported( imgPlus ) )
+			return PlanarImgToVirtualStack.wrap( imgPlus );
+		if( ArrayImgToVirtualStack.isSupported( imgPlus ) )
+			return ArrayImgToVirtualStack.wrap( imgPlus );
+		if( Util.getTypeFromInterval( imgPlus ) instanceof BitType )
+			return ImgToVirtualStack.wrapAndScaleBitType( (ImgPlus<BitType>) imgPlus );
+		if( dataset.isRGBMerged() && ImgPlusViews.canFuseColor( imgPlus ) )
+			return ImgToVirtualStack.wrap( ImgPlusViews.fuseColor( imgPlus ) );
+		return ImgToVirtualStack.wrap( imgPlus );
+	}
+
+	// -- private interface --
+
+	private static ImagePlus optionalMakeComposite( Dataset ds, ImagePlus imp )
+	{
+		/*
+		 * ImageJ 1.x will use a StackWindow *only* if there is more than one channel.
+		 * So unfortunately, we cannot consistently return a composite image here. We
+		 * have to continue to deliver different data types that require specific case
+		 * logic in any handler.
+		 */
+		// NB: ColorTableHarmonizer crashes, if it gets a CompositeImage but the Dataset has no CHANNEL axis.
+		if ( imp.getType() != ImagePlus.COLOR_RGB && imp.getStackSize() > 1 && ds.axis( Axes.CHANNEL ).isPresent() )
+			return new CompositeImage(imp, CompositeImage.COMPOSITE);
+		return imp;
+	}
 }

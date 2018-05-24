@@ -31,15 +31,15 @@
 
 package net.imagej.legacy.convert.roi.point;
 
+import ij.gui.PointRoi;
+import ij.gui.Roi;
+
 import net.imagej.legacy.convert.roi.AbstractRoiToMaskPredicateConverter;
 import net.imglib2.RealLocalizable;
 import net.imglib2.roi.geom.real.RealPointCollection;
 
 import org.scijava.convert.Converter;
 import org.scijava.plugin.Plugin;
-
-import ij.gui.PointRoi;
-import ij.gui.Roi;
 
 /**
  * Converts an ImageJ 1.x {@link PointRoi} to an ImgLib2

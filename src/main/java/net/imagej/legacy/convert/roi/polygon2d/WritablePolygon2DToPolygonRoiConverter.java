@@ -31,13 +31,13 @@
 
 package net.imagej.legacy.convert.roi.polygon2d;
 
+import ij.gui.PolygonRoi;
+
 import net.imagej.legacy.convert.roi.AbstractMaskPredicateToRoiConverter;
 import net.imglib2.roi.geom.real.WritablePolygon2D;
 
 import org.scijava.convert.Converter;
 import org.scijava.plugin.Plugin;
-
-import ij.gui.PolygonRoi;
 
 /**
  * Converts a {@link WritablePolygon2D} to a {@link PolygonRoi} of type POLYGON.

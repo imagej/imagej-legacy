@@ -31,13 +31,13 @@
 
 package net.imagej.legacy.convert.roi.box;
 
+import ij.gui.Roi;
+
 import net.imagej.legacy.convert.roi.AbstractMaskPredicateToRoiConverter;
 import net.imglib2.roi.geom.real.WritableBox;
 
 import org.scijava.convert.Converter;
 import org.scijava.plugin.Plugin;
-
-import ij.gui.Roi;
 
 /**
  * Converts a {@link WritableBox} to a {@link Roi}.

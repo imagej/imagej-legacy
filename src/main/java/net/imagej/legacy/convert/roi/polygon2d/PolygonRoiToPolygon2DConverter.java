@@ -31,16 +31,16 @@
 
 package net.imagej.legacy.convert.roi.polygon2d;
 
+import ij.gui.EllipseRoi;
+import ij.gui.PolygonRoi;
+import ij.gui.Roi;
+import ij.gui.RotatedRectRoi;
+
 import net.imagej.legacy.convert.roi.AbstractRoiToMaskPredicateConverter;
 import net.imglib2.roi.geom.real.Polygon2D;
 
 import org.scijava.convert.Converter;
 import org.scijava.plugin.Plugin;
-
-import ij.gui.EllipseRoi;
-import ij.gui.PolygonRoi;
-import ij.gui.Roi;
-import ij.gui.RotatedRectRoi;
 
 /**
  * Converts an ImageJ 1.x {@link PolygonRoi} of type:

@@ -31,6 +31,9 @@
 
 package net.imagej.legacy.convert.roi;
 
+import ij.ImagePlus;
+import ij.gui.ImageRoi;
+
 import java.lang.reflect.Type;
 
 import net.imagej.Dataset;
@@ -49,9 +52,6 @@ import org.scijava.convert.ConvertService;
 import org.scijava.convert.Converter;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
-
-import ij.ImagePlus;
-import ij.gui.ImageRoi;
 
 /**
  * Converts a {@link RealMaskRealInterval} to an {@link ImageRoi}. This

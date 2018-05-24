@@ -31,13 +31,56 @@
 
 package net.imagej.legacy.translate;
 
+import ij.ImagePlus;
+
+import net.imagej.Dataset;
+import net.imagej.display.ImageDisplay;
+import net.imagej.legacy.LegacyService;
+
+import org.scijava.AbstractContextual;
+import org.scijava.Context;
+
 /**
- * The interface for translating between legacy and modern ImageJ image
- * structures.
- * 
- * @author Curtis Rueden
+ * Combines {@link DisplayCreator} and {@link ImagePlusCreator}.
+ *
  * @author Barry DeZonia
+ * @author Curtis Rueden
  */
-public interface ImageTranslator extends DisplayCreator, ImagePlusCreator {
-	// all methods inherited
+public class ImageTranslator extends AbstractContextual
+{
+
+	private final DisplayCreator displayCreator;
+	private final ImagePlusCreator imagePlusCreator;
+
+	public ImageTranslator(final LegacyService legacyService) {
+		final Context context = legacyService.getContext();
+		displayCreator = new DisplayCreator(context);
+		imagePlusCreator = new ImagePlusCreator(context);
+	}
+
+	/**
+	 * Creates a {@link ImageDisplay} from an {@link ImagePlus}. Shares planes of
+	 * data when possible.
+	 */
+	public ImageDisplay createDisplay(final ImagePlus imp) {
+		return displayCreator.createDisplay(imp);
+	}
+
+	/**
+	 * Creates an {@link ImagePlus} from a {@link ImageDisplay}. Shares planes of
+	 * data when possible.
+	 */
+	public ImagePlus createLegacyImage(final ImageDisplay display) {
+		return imagePlusCreator.createLegacyImage(display);
+	}
+
+	public ImagePlus createLegacyImage(final Dataset ds) {
+		return imagePlusCreator.createLegacyImage(ds);
+	}
+
+	public ImagePlus createLegacyImage(final Dataset ds,
+		final ImageDisplay display)
+	{
+		return imagePlusCreator.createLegacyImage(ds, display);
+	}
 }

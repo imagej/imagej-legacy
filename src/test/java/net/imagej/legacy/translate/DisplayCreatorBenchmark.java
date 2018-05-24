@@ -29,58 +29,60 @@
  * #L%
  */
 
-package net.imagej.legacy.plugin;
+package net.imagej.legacy.translate;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assume.assumeTrue;
+import ij.ImagePlus;
+import ij.gui.NewImage;
 
-import ij.gui.Roi;
-import ij.plugin.frame.RoiManager;
-
-import java.awt.GraphicsEnvironment;
-import java.util.concurrent.ExecutionException;
-
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.openjdk.jmh.annotations.Benchmark;
+import org.openjdk.jmh.annotations.Scope;
+import org.openjdk.jmh.annotations.State;
+import org.openjdk.jmh.runner.Runner;
+import org.openjdk.jmh.runner.RunnerException;
+import org.openjdk.jmh.runner.options.Options;
+import org.openjdk.jmh.runner.options.OptionsBuilder;
+import org.openjdk.jmh.runner.options.TimeValue;
 import org.scijava.Context;
-import org.scijava.script.ScriptModule;
-import org.scijava.script.ScriptService;
 
 /**
- * Tests {@link RoiManagerPreprocessor}.
+ * Benchmark for DisplayCreator.
+ * Compare how DisplayCreator performs for images of different sizes.
  *
- * @author Jan Eglinger
+ * @author Matthias Arzt
  */
-public class RoiManagerPreprocessorTest {
+@State(value = Scope.Benchmark)
+public class DisplayCreatorBenchmark
+{
+	private static Context context = new Context();
+	ImagePlus small = NewImage.createByteImage( "deep", 10, 10, 10, NewImage.FILL_BLACK );
+	ImagePlus deep = NewImage.createByteImage( "deep", 10, 10, 1000000, NewImage.FILL_BLACK );
+	ImagePlus wide = NewImage.createByteImage( "deep", 1000, 1000, 1000, NewImage.FILL_BLACK );
 
-	private Context context;
-	private ScriptService scriptService;
-
-	@Before
-	public void setUp() {
-		context = new Context();
-		scriptService = context.service(ScriptService.class);
+	@Benchmark
+	public void testSmall() {
+		new DisplayCreator( context ).createDisplay( small );
 	}
 
-	@After
-	public void tearDown() {
-		context.dispose();
+	@Benchmark
+	public void testDeep() {
+		new DisplayCreator( context ).createDisplay( deep );
 	}
 
-	@Test
-	public void testRoiManagerParameter() throws InterruptedException,
-			ExecutionException {
-		assumeTrue(!GraphicsEnvironment.isHeadless());
-		RoiManager roiManager = new RoiManager();
-		roiManager.addRoi(new Roi(0, 0, 100, 100));
-		final String script = "" + //
-				"// @RoiManager rm\n" + //
-				"// @OUTPUT int number\n" + //
-				"number = rm.getCount()\n" + //
-				"";
-		final ScriptModule m = scriptService.run("roiManager.groovy", script,
-				true).get();
-		assertEquals(1, m.getOutput("number"));
+	@Benchmark
+	public void testWide() {
+		new DisplayCreator( context ).createDisplay( wide );
+	}
+
+	public static void main( final String... args ) throws RunnerException
+	{
+		final Options opt = new OptionsBuilder()
+				.include( DisplayCreatorBenchmark.class.getSimpleName() )
+				.forks( 0 )
+				.warmupIterations( 4 )
+				.measurementIterations( 8 )
+				.warmupTime( TimeValue.milliseconds( 100 ) )
+				.measurementTime( TimeValue.milliseconds( 100 ) )
+				.build();
+		new Runner( opt ).run();
 	}
 }

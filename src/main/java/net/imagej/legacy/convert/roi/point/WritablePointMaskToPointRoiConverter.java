@@ -31,14 +31,14 @@
 
 package net.imagej.legacy.convert.roi.point;
 
+import ij.gui.PointRoi;
+
 import net.imagej.legacy.convert.roi.AbstractMaskPredicateToRoiConverter;
 import net.imglib2.roi.geom.real.WritablePointMask;
 
 import org.scijava.Priority;
 import org.scijava.convert.Converter;
 import org.scijava.plugin.Plugin;
-
-import ij.gui.PointRoi;
 
 /**
  * Converts a {@link WritablePointMask} to a {@link PointRoi}. This conversion

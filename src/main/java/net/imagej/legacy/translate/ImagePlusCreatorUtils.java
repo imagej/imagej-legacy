@@ -31,7 +31,6 @@
 
 package net.imagej.legacy.translate;
 
-import ij.CompositeImage;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.VirtualStack;
@@ -51,69 +50,32 @@ import java.util.Map;
 
 import net.imagej.Dataset;
 import net.imagej.ImgPlus;
-import net.imagej.axis.Axes;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
 
-import org.scijava.AbstractContextual;
-
 /**
- * Abstract superclass for {@link ImagePlusCreator} implementations. Provides
- * general utility methods.
- * 
+ * Utility class for {@link ImagePlusCreator}.
+ *
  * @author Mark Hiner
+ * @author Matthias Arzt
  */
-public abstract class AbstractImagePlusCreator extends AbstractContextual
-	implements ImagePlusCreator
-{
+public final class ImagePlusCreatorUtils {
 
-	/**
-	 * Sets the {@link Calibration} data on the provided {@link ImagePlus}.
-	 */
-	protected void populateCalibrationData(final ImagePlus imp, final Dataset ds)
-	{
-		final ImgPlus<? extends RealType<?>> imgPlus = ds.getImgPlus();
-
-		final Calibration calibration = imp.getCalibration();
-		final int xIndex = imgPlus.dimensionIndex(Axes.X);
-		final int yIndex = imgPlus.dimensionIndex(Axes.Y);
-		final int zIndex = imgPlus.dimensionIndex(Axes.Z);
-		final int tIndex = imgPlus.dimensionIndex(Axes.TIME);
-
-		if (xIndex >= 0) {
-			calibration.pixelWidth = imgPlus.averageScale(xIndex);
-			calibration.setXUnit(imgPlus.axis(xIndex).unit());
-		}
-		if (yIndex >= 0) {
-			calibration.pixelHeight = imgPlus.averageScale(yIndex);
-			calibration.setYUnit(imgPlus.axis(yIndex).unit());
-		}
-		if (zIndex >= 0) {
-			calibration.pixelDepth = imgPlus.averageScale(zIndex);
-			calibration.setZUnit(imgPlus.axis(zIndex).unit());
-		}
-		if (tIndex >= 0) {
-			calibration.frameInterval = imgPlus.averageScale(tIndex);
-			calibration.setTimeUnit(imgPlus.axis(tIndex).unit());
-		}
+	private ImagePlusCreatorUtils() {
+		// prevent from instantiation
 	}
 
-	protected ImagePlus makeImagePlus(Dataset ds, ImageStack stack) {
-		final int[] dimIndices = new int[5];
-		final int[] dimValues = new int[5];
-		LegacyUtils.getImagePlusDims(ds, dimIndices, dimValues);
-		return makeImagePlus(ds, dimValues[2], dimValues[3], dimValues[4], stack);
-	}
-
-	protected ImagePlus makeImagePlus(final Dataset ds, final int c, final int z,
-		final int t, final ImageStack stack)
+	static void setMetadata( Dataset ds, ImagePlus imp )
 	{
-		ImagePlus imp = new ImagePlus(ds.getName(), stack);
-
-		imp.setDimensions(c, z, t);
-
 		imp.setOpenAsHyperStack(imp.getNDimensions() > 3);
+		final FileInfo fileInfo = getFileInfo( ds, imp );
+		imp.setFileInfo(fileInfo);
+		setSliceLabels( imp, fileInfo );
+		fillInfo(imp, ds.getImgPlus());
+	}
 
+	private static FileInfo getFileInfo( Dataset ds, ImagePlus imp )
+	{
 		final FileInfo fileInfo = new FileInfo();
 		final String source = ds.getSource();
 		final File file =
@@ -131,30 +93,12 @@ public abstract class AbstractImagePlusCreator extends AbstractContextual
 		else {
 			fileInfo.url = source;
 		}
-		fileInfo.width = stack.getWidth();
-		fileInfo.height = stack.getHeight();
-		// fileInfo.offset = 0;
-		// fileInfo.nImages = 1;
-		// fileInfo.gapBetweenImages = 0;
-		// fileInfo.whiteIsZero = false;
-		// fileInfo.intelByteOrder = false;
-		// fileInfo.compression = FileInfo.COMPRESSION_NONE;
-		// fileInfo.stripOffsets = null;
-		// fileInfo.stripLengths = null;
-		// fileInfo.rowsPerStrip = 0;
-		// fileInfo.lutSize = 0;
-		// fileInfo.reds = null;
-		// fileInfo.greens = null;
-		// fileInfo.blues = null;
-		// fileInfo.pixels = null;
+		fileInfo.width = imp.getWidth();
+		fileInfo.height = imp.getHeight();
 		fileInfo.debugInfo = ds.toString();
-		// fileInfo.sliceLabels = null;
-		// fileInfo.info = "";
-		// fileInfo.inputStream = null;
-		if (stack instanceof VirtualStack) {
-			fileInfo.virtualStack = (VirtualStack) stack;
+		if (imp.getStack() instanceof VirtualStack ) {
+			fileInfo.virtualStack = (VirtualStack) imp.getStack();
 		}
-		populateCalibrationData(imp, ds);
 		final Calibration calibration = imp.getCalibration();
 		if (calibration != null) {
 			fileInfo.pixelWidth = calibration.pixelWidth;
@@ -166,19 +110,13 @@ public abstract class AbstractImagePlusCreator extends AbstractContextual
 			fileInfo.valueUnit = calibration.getValueUnit();
 			fileInfo.frameInterval = calibration.frameInterval;
 		}
-		// fileInfo.description = "";
-		// fileInfo.longOffset = 0;
-		// fileInfo.metaDataTypes = null;
-		// fileInfo.metaData = null;
-		// fileInfo.displayRanges = null;
-		// fileInfo.channelLuts = null;
-		// fileInfo.roi = null;
-		// fileInfo.overlay = null;
-		// fileInfo.samplesPerPixel = 1;
-		// fileInfo.openNextDir = null;
-		// fileInfo.openNextName = null;
 
 		fileInfo.sliceLabels = getSliceLabels(ds);
+		return fileInfo;
+	}
+
+	private static void setSliceLabels( ImagePlus imp, FileInfo fileInfo )
+	{
 		if (fileInfo.sliceLabels != null) {
 			if (imp.getStackSize() < 2) {
 				if (fileInfo.sliceLabels.length > 0) {
@@ -186,33 +124,17 @@ public abstract class AbstractImagePlusCreator extends AbstractContextual
 				}
 			}
 			else {
+				ImageStack stack = imp.getStack();
 				for (int i = 0; i < fileInfo.sliceLabels.length && i < stack.getSize(); i++) {
 					stack.setSliceLabel(fileInfo.sliceLabels[i], i + 1);
 				}
 			}
 		}
-		imp.setFileInfo(fileInfo);
-
-		if (!ds.isRGBMerged()) {
-			/*
-			 * ImageJ 1.x will use a StackWindow *only* if there is more than one channel.
-			 * So unfortunately, we cannot consistently return a composite image here. We
-			 * have to continue to deliver different data types that require specific case
-			 * logic in any handler.
-			 */
-			if (imp.getStackSize() > 1) {
-				imp = new CompositeImage(imp, CompositeImage.COMPOSITE);
-			}
-		}
-
-		fillInfo(imp, ds.getImgPlus());
-
-		return imp;
 	}
 
 	// TODO remove usage of SCIFIO classes after migrating ImageMetadata
 	// framework to imagej-common
-	private String[] getSliceLabels(final Dataset ds) {
+	private static String[] getSliceLabels(final Dataset ds) {
 		final Map<String, Object> properties = ds.getImgPlus().getProperties();
 		if (properties == null) return null;
 		final Object metadata = properties.get("scifio.metadata.image");
@@ -228,7 +150,7 @@ public abstract class AbstractImagePlusCreator extends AbstractContextual
 
 	// TODO remove usage of SCIFIO classes after migrating ImageMetadata
 	// framework to imagej-common
-	private void fillInfo(final ImagePlus imp,
+	private static void fillInfo(final ImagePlus imp,
 		final ImgPlus<? extends RealType<?>> imgPlus)
 	{
 		if (imgPlus instanceof SCIFIOImgPlus) {
@@ -251,7 +173,7 @@ public abstract class AbstractImagePlusCreator extends AbstractContextual
 
 	// TODO remove usage of SCIFIO classes after migrating ImageMetadata
 	// framework to imagej-common
-	private void fillImageInfo(final ImagePlus imp, final Metadata meta) {
+	private static void fillImageInfo(final ImagePlus imp, final Metadata meta) {
 		addInfo(imp, "--- Dataset Information ---");
 		addInfo(imp, "BitsPerPixel = " + meta.get(0).getBitsPerPixel());
 		addInfo(imp, "PixelType = " + meta.get(0).getPixelType());
@@ -275,7 +197,7 @@ public abstract class AbstractImagePlusCreator extends AbstractContextual
 		}
 	}
 
-	private void addInfo(final ImagePlus imp, String newInfo) {
+	private static void addInfo(final ImagePlus imp, String newInfo) {
 		final String info = (String) imp.getProperty("Info");
 		if (info != null) newInfo = info + newInfo;
 		imp.setProperty("Info", newInfo + "\n");
@@ -283,7 +205,7 @@ public abstract class AbstractImagePlusCreator extends AbstractContextual
 
 	// TODO remove usage of SCIFIO classes after migrating ImageMetadata
 	// framework to imagej-common
-	private void fillInfo(final ImagePlus imp, final MetaTable table) {
+	private static void fillInfo(final ImagePlus imp, final MetaTable table) {
 		String info = (String) imp.getProperty("Info");
 		if (info == null) info = "";
 		List<String> keySet = new ArrayList<>(table.keySet());
@@ -293,4 +215,5 @@ public abstract class AbstractImagePlusCreator extends AbstractContextual
 		}
 		imp.setProperty("Info", info);
 	}
+
 }

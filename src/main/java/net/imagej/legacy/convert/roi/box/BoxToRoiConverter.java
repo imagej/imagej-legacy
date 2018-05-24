@@ -31,14 +31,14 @@
 
 package net.imagej.legacy.convert.roi.box;
 
+import ij.gui.Roi;
+
 import net.imagej.legacy.convert.roi.AbstractMaskPredicateToRoiConverter;
 import net.imglib2.roi.geom.real.Box;
 
 import org.scijava.Priority;
 import org.scijava.convert.Converter;
 import org.scijava.plugin.Plugin;
-
-import ij.gui.Roi;
 
 /**
  * Converts a {@link Box} to a {@link Roi}. The boundary behavior of this

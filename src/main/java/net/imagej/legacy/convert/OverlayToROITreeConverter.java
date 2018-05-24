@@ -30,6 +30,8 @@
  */
 package net.imagej.legacy.convert;
 
+import ij.gui.Overlay;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -42,8 +44,6 @@ import org.scijava.convert.ConvertService;
 import org.scijava.convert.Converter;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
-
-import ij.gui.Overlay;
 
 /**
  * Converts an {@link Overlay} to a {@link ROITree}.

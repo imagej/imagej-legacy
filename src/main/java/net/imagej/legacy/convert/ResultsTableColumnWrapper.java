@@ -31,6 +31,8 @@
 
 package net.imagej.legacy.convert;
 
+import ij.measure.ResultsTable;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -41,8 +43,6 @@ import java.util.ListIterator;
 import java.util.stream.IntStream;
 
 import net.imagej.table.GenericColumn;
-
-import ij.measure.ResultsTable;
 
 /**
  * Wraps a {@link ResultsTable} column as a {@link GenericColumn}.

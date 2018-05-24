@@ -49,7 +49,6 @@ import net.imagej.Dataset;
 import net.imagej.display.ImageDisplay;
 import net.imagej.display.ImageDisplayService;
 import net.imagej.legacy.convert.TableListWrapper;
-import net.imagej.legacy.translate.DefaultImageTranslator;
 import net.imagej.legacy.translate.Harmonizer;
 import net.imagej.legacy.translate.ImageTranslator;
 import net.imagej.legacy.translate.LegacyUtils;
@@ -160,7 +159,7 @@ public class LegacyImageMap extends AbstractContextual {
 	 * The {@link ImageTranslator} to use when creating {@link ImagePlus} and
 	 * {@link ImageDisplay} objects corresponding to one another.
 	 */
-	private final DefaultImageTranslator imageTranslator;
+	private final ImageTranslator imageTranslator;
 
 	/**
 	 * The legacy service corresponding to this image map.
@@ -183,7 +182,7 @@ public class LegacyImageMap extends AbstractContextual {
 		this.legacyService = legacyService;
 		imagePlusTable = new ConcurrentHashMap<>();
 		displayTable = new ConcurrentHashMap<>();
-		imageTranslator = new DefaultImageTranslator(legacyService);
+		imageTranslator = new ImageTranslator(legacyService);
 	}
 
 	// -- LegacyImageMap methods --
@@ -296,60 +295,68 @@ public class LegacyImageMap extends AbstractContextual {
 	}
 
 	public synchronized void toggleLegacyMode(boolean enteringLegacyMode) {
-		final Harmonizer harmonizer =
-			new Harmonizer(legacyService.getContext(), imageTranslator);
-		if (enteringLegacyMode) {
-			// migrate from the ImagePlusTable and DisplayTable to legacy versions.
-			final List<ImageDisplay> imageDisplays =
-					imageDisplayService.getImageDisplays();
-			// TODO: this is almost exactly what LegacyCommand does, so it is
-			// pretty obvious that it is misplaced in there.
-			for (final ImageDisplay display : imageDisplays) {
-				ImagePlus imp = lookupImagePlus(display);
-				if (imp == null) {
-					final Dataset ds = imageDisplayService.getActiveDataset(display);
-					if (LegacyUtils.dimensionsIJ1Compatible(ds)) {
-						// Ensure the mappings are registered in the legacy maps
-						imp = registerDisplay(display, true);
-						final ImageDisplayViewer viewer =
-								(ImageDisplayViewer) legacyService.uiService().getDisplayViewer(display);
-						if (viewer != null) {
-							final DisplayWindow window = viewer.getWindow();
-							if (window != null) window.showDisplay(!enteringLegacyMode);
-						}
+		if (enteringLegacyMode)
+			enterLegacyMode();
+		else
+			leaveLegacyMode();
+	}
+
+	private void enterLegacyMode()
+	{
+		final Harmonizer harmonizer = new Harmonizer(legacyService.getContext(), imageTranslator);
+		// migrate from the ImagePlusTable and DisplayTable to legacy versions.
+		final List<ImageDisplay> imageDisplays =
+				imageDisplayService.getImageDisplays();
+		// TODO: this is almost exactly what LegacyCommand does, so it is
+		// pretty obvious that it is misplaced in there.
+		for (final ImageDisplay display : imageDisplays) {
+			ImagePlus imp = lookupImagePlus(display);
+			if (imp == null) {
+				final Dataset ds = imageDisplayService.getActiveDataset(display);
+				if ( LegacyUtils.dimensionsIJ1Compatible(ds)) {
+					// Ensure the mappings are registered in the legacy maps
+					imp = registerDisplay(display, true);
+					final ImageDisplayViewer viewer =
+							(ImageDisplayViewer) legacyService.uiService().getDisplayViewer(display);
+					if (viewer != null) {
+						final DisplayWindow window = viewer.getWindow();
+						if (window != null) window.showDisplay(false);
 					}
 				}
-				else {
-					imp.unlock();
-				}
-				harmonizer.updateLegacyImage(display, imp);
-				harmonizer.registerType(imp);
 			}
-			imagePlusTable.clear();
-			displayTable.clear();
-		}
-		else {
-			// migrate from legacyImagePlusTable and legacyDisplayTable to modern
-			// versions.
-			for (final ImagePlus imp : legacyDisplayTable.keySet()) {
-				final ImageWindow window = imp.getWindow();
-				final ImageDisplay display = legacyDisplayTable.get(imp);
-				if (window == null || window.isClosed()) {
-					// This ImagePlus was closed, so we can remove it from our mappings
-					unregisterLegacyImage(imp);
-					display.close();
-				}
-				else {
-					// transfer mappings to modern maps with hard references
-					displayTable.put(imp, display);
-					imagePlusTable.put(display, imp);
-					// Update the display
-					harmonizer.updateDisplay(display, imp);
-				}
+			else {
+				imp.unlock();
 			}
-			legacyDisplayTable.clear();
-			legacyImagePlusTable.clear();
+			harmonizer.updateLegacyImage(display, imp);
+			harmonizer.registerType(imp);
 		}
+		imagePlusTable.clear();
+		displayTable.clear();
+	}
+
+	private void leaveLegacyMode()
+	{
+		final Harmonizer harmonizer = new Harmonizer(legacyService.getContext(), imageTranslator);
+		// migrate from legacyImagePlusTable and legacyDisplayTable to modern
+		// versions.
+		for (final ImagePlus imp : legacyDisplayTable.keySet()) {
+			final ImageWindow window = imp.getWindow();
+			final ImageDisplay display = legacyDisplayTable.get(imp);
+			if (window == null || window.isClosed()) {
+				// This ImagePlus was closed, so we can remove it from our mappings
+				unregisterLegacyImage(imp);
+				display.close();
+			}
+			else {
+				// transfer mappings to modern maps with hard references
+				displayTable.put(imp, display);
+				imagePlusTable.put(display, imp);
+				// Update the display
+				harmonizer.updateDisplay(display, imp);
+			}
+		}
+		legacyDisplayTable.clear();
+		legacyImagePlusTable.clear();
 	}
 
 	/** Removes the mapping associated with the given {@link ImageDisplay}. */
