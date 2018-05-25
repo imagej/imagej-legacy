@@ -158,7 +158,7 @@ public class ImageJ1EncapsulationTest {
 					className.startsWith(net.imagej.legacy.convert.roi.polyline.PolylineWrapper.class.getName()) ||
 					className.startsWith(net.imagej.legacy.convert.roi.polyline.UnmodifiablePolylineRoiWrapper.class.getName()) ||
 					className.startsWith(net.imagej.legacy.convert.roi.polyline.WritablePolylineToPolylineRoiConverter.class.getName()) ||
-					className.startsWith(net.imagej.legacy.display.AbstractImagePlusDisplayViewer.class.getName()) ||
+					className.startsWith(net.imagej.legacy.display.ImagePlusDisplayViewer.class.getName()) ||
 					className.startsWith(net.imagej.legacy.display.LegacyImageDisplayService.class.getName()) ||
 					className.startsWith(net.imagej.legacy.display.LegacyImageDisplayViewer.class.getName()) ||
 					className.startsWith(net.imagej.legacy.plugin.ActiveImagePlusPreprocessor.class.getName()) ||

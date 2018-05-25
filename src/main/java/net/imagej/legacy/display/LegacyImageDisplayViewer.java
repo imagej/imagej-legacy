@@ -57,6 +57,7 @@ import org.scijava.ui.viewer.DisplayWindow;
  * {@link Dataset} and {@link Data} outputs via an {@link ImagePlus}.
  * 
  * @author Mark Hiner
+ * @author Curtis Rueden
  */
 @Plugin(type = DisplayViewer.class, priority = Priority.HIGH)
 public class LegacyImageDisplayViewer extends AbstractImageDisplayViewer
@@ -70,41 +71,50 @@ public class LegacyImageDisplayViewer extends AbstractImageDisplayViewer
 	private DisplayService displayService;
 
 	@Parameter
-	LogService logService;
+	private LogService log;
+
+	// -- Internal AbstractDisplayViewer methods --
+
+	@Override
+	protected void updateTitle() {
+		// NB: Let's not mess with the ImagePlus title.
+	}
+
+	// -- ImageDisplayViewer methods --
+
+	@Override
+	public Dataset capture() {
+		throw new UnsupportedOperationException();
+	}
 
 	// -- DisplayViewer methods --
 
-	@Override public boolean canView( Display< ? > d )
-	{
-		if ( ! (d instanceof ImageDisplay) )
-			return false;
-		// NB: only use legacy ui to display image with at most five dimensions.
-		return getDataset( ((ImageDisplay) d).getActiveView() ).numDimensions() <= 5;
+	@Override
+	public boolean canView(final Display<?> d) {
+		if (!(d instanceof ImageDisplay)) return false;
+		// NB: ImagePlus only supports images with at most five dimensions.
+		return getDataset(((ImageDisplay) d).getActiveView()).numDimensions() <= 5;
+	}
+
+	@Override
+	public void view(final UserInterface ui, final Display<?> d) {
+		// NB: Do not create any DisplayWindow!
+		view((DisplayWindow) null, d);
+		d.update();
 	}
 
 	@Override
 	public void view(final DisplayWindow w, final Display<?> d) {
-		final LegacyImageMap limp = legacyService.getImageMap();
-		ImageDisplay imageDisplay = null;
+		super.view(w, d);
 
-		// we can only handle ImageDisplays right now
-		if (d instanceof ImageDisplay) {
-			imageDisplay = (ImageDisplay) d;
-		}
-		else {
-			logService
-				.error("LegacyImageDisplayViewer can not handle Displays of type: " +
-					d.getClass() + ". Only ImageDisplays.");
-			return;
-		}
+		final ImageDisplay imageDisplay = (ImageDisplay) d;
 
-
-		// NB: Need to tell the IJ2 framework what the "active" display is. This
-		// allows other consumers to look up the corresponding ImagePlus using the
-		// active display.
+		// NB: Tell the IJ2 framework what the "active" display is.
+		// This allows other consumers to look up the corresponding
+		// ImagePlus using the active display.
 		displayService.setActiveDisplay(imageDisplay);
 
-		Data data = imageDisplay.getActiveView().getData();
+		final Data data = imageDisplay.getActiveView().getData();
 		if (Dataset.class.isAssignableFrom(data.getClass())) {
 			// NB: Check if there is already an ImagePlus that we will
 			// associate with this display - even if it hasn't been
@@ -112,6 +122,8 @@ public class LegacyImageDisplayViewer extends AbstractImageDisplayViewer
 			final Dataset dataset = (Dataset) data;
 			if (dataset.getProperties().containsKey(LegacyImageMap.IMP_KEY)) return;
 		}
+
+		final LegacyImageMap limp = legacyService.getImageMap();
 
 		// if there is already a mapping for this display, just get its ImagePlus
 		final ImagePlus existing = limp.lookupImagePlus(imageDisplay);
@@ -122,18 +134,13 @@ public class LegacyImageDisplayViewer extends AbstractImageDisplayViewer
 
 		// display the ImagePlus via the IJ1 framework
 		imagePlus.show();
-	}
 
-	@Override
-	public Dataset capture() {
-		// TODO
-		throw new UnsupportedOperationException(
-			"LegacyImageDisplayViewer#capture not yet implemented.");
+		// fire an ImageDisplay update event
+		d.update();
 	}
 
 	@Override
 	public boolean isCompatible(final UserInterface ui) {
 		return ui instanceof LegacyUI;
 	}
-
 }

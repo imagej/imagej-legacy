@@ -33,18 +33,57 @@ package net.imagej.legacy.display;
 
 import ij.ImagePlus;
 
+import net.imagej.legacy.ui.LegacyUI;
+
+import org.scijava.display.Display;
+import org.scijava.plugin.Plugin;
+import org.scijava.ui.UserInterface;
+import org.scijava.ui.viewer.AbstractDisplayViewer;
 import org.scijava.ui.viewer.DisplayViewer;
+import org.scijava.ui.viewer.DisplayWindow;
 
 /**
- * Marker interface for {@link DisplayViewer} implementations that will be
- * displaying {@link ImagePlus}es.
+ * {@link DisplayViewer} implementation for {@link ImagePlus}. Compatible with
+ * the {@link LegacyUI}.
  * 
  * @author Mark Hiner
+ * @author Curtis Rueden
  */
-public interface ImagePlusDisplayViewer extends DisplayViewer<ImagePlus>,
-	LegacyDisplayViewer
-{
+@Plugin(type = DisplayViewer.class)
+public class ImagePlusDisplayViewer extends AbstractDisplayViewer<ImagePlus> {
+
+	// -- Internal AbstractDisplayViewer methods --
 
 	@Override
-	ImagePlusDisplay getDisplay();
+	protected void updateTitle() {
+		// NB: Let's not mess with the ImagePlus title.
+	}
+
+	// -- DisplayViewer methods --
+
+	@Override
+	public boolean isCompatible(final UserInterface ui) {
+		return ui instanceof LegacyUI;
+	}
+
+	@Override
+	public boolean canView(final Display<?> d) {
+		return d instanceof ImagePlusDisplay;
+	}
+
+	@Override
+	public void view(final UserInterface ui, final Display<?> d) {
+		// NB: Do not create any DisplayWindow!
+		view((DisplayWindow) null, d);
+		d.update();
+	}
+
+	@Override
+	public void view(final DisplayWindow w, final Display<?> d) {
+		super.view(w, d);
+		final ImagePlusDisplay display = (ImagePlusDisplay) d;
+		for (final ImagePlus imp : display) {
+			imp.show();
+		}
+	}
 }
