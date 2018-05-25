@@ -72,6 +72,7 @@ public class PolylineRoiWrapperTest {
 	public void setup() {
 		poly = new PolygonRoi(new float[] { 1.25f, 20, 50, 79 }, new float[] {
 			1.25f, 20, -30, -1 }, Roi.POLYLINE);
+		poly.setStrokeWidth(0);
 		wrap = new PolylineRoiWrapper(poly);
 		final List<RealPoint> pts = new ArrayList<>(4);
 		pts.add(new RealPoint(new double[] { 1.25, 1.25 }));

@@ -86,10 +86,12 @@ public class UnmodifiablePolylineRoiWrapperTest {
 			113, 114, 114, 114, 115, 116, 118, 119, 120, 120, 121, 122, 123, 124, 125,
 			125, 126, 128, 129 };
 		free = new PolygonRoi(xf, yf, xf.length, Roi.FREELINE);
+		free.setStrokeWidth(0);
 		freeWrap = new UnmodifiablePolylineRoiWrapper(free);
 
 		angle = new PolygonRoi(new int[] { 166, 80, 163 }, new int[] { 79, 122,
 			126 }, 3, Roi.ANGLE);
+		angle.setStrokeWidth(0);
 		angleWrap = new UnmodifiablePolylineRoiWrapper(angle);
 	}
 
