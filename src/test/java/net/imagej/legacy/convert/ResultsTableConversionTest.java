@@ -468,13 +468,13 @@ public class ResultsTableConversionTest {
 	private void assertTablesEqual(final ij.measure.ResultsTable expected,
 		final Table<?, ?> actual)
 	{
-		final String[] ijHeadings = expected.getHeadings();
+		final int ijColumnCount = computeColumnCount(expected);
 		assertEquals(expected.size(), actual.getRowCount());
-		assertEquals(ijHeadings.length, actual.getColumnCount());
+		assertEquals(computeColumnCount(expected), actual.getColumnCount());
 
 		final int[] columnsInUse = new int[actual.getColumnCount()];
-		for (int i = 0; i < ijHeadings.length; i++)
-			columnsInUse[i] = expected.getColumnIndex(ijHeadings[i]);
+		for (int i = 0; i < ijColumnCount; i++)
+			columnsInUse[i] = expected.getColumnIndex(actual.getColumnHeader(i));
 
 		for (int c = 0; c < actual.getColumnCount(); c++) {
 			final int actualIJColumnIndex = columnsInUse[c];
@@ -493,11 +493,7 @@ public class ResultsTableConversionTest {
 	private void assertTablesEqual(final Table<?, ?> expected,
 		final ij.measure.ResultsTable actual)
 	{
-		int ijColumnCount = 0;
-		for (int i = 0; i <= actual.getLastColumn(); i++)
-			if (actual.columnExists(i)) ijColumnCount++;
-
-		assertEquals(expected.getColumnCount(), ijColumnCount);
+		assertEquals(expected.getColumnCount(), computeColumnCount(actual));
 		assertEquals(expected.getRowCount(), actual.size());
 
 		for (int c = 0; c < expected.getColumnCount(); c++) {
@@ -548,5 +544,12 @@ public class ResultsTableConversionTest {
 		t.add(mixedCol);
 
 		return t;
+	}
+
+	private int computeColumnCount(final ij.measure.ResultsTable table) {
+		int count = 0;
+		for (int i = 0; i <= table.getLastColumn(); i++)
+			if (table.columnExists(i)) count++;
+		return count;
 	}
 }
