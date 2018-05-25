@@ -83,6 +83,7 @@ public class PolylineRoiConversionTest {
 	public void setup() {
 		poly = new PolygonRoi(new float[] { 1.25f, 20, 50, 79 }, new float[] {
 			1.25f, 20, -30, -1 }, Roi.POLYLINE);
+		poly.setStrokeWidth(0);
 		wrap = new PolylineRoiWrapper(poly);
 
 		final int[] xf = new int[] { 143, 136, 128, 126, 124, 123, 122, 121, 120,
@@ -107,10 +108,12 @@ public class PolylineRoiConversionTest {
 			113, 114, 114, 114, 115, 116, 118, 119, 120, 120, 121, 122, 123, 124, 125,
 			125, 126, 128, 129 };
 		free = new PolygonRoi(xf, yf, xf.length, Roi.FREELINE);
+		free.setStrokeWidth(0);
 		freeWrap = new UnmodifiablePolylineRoiWrapper(free);
 
 		angle = new PolygonRoi(new int[] { 166, 80, 163 }, new int[] { 79, 122,
 			126 }, 3, Roi.ANGLE);
+		angle.setStrokeWidth(0);
 		angleWrap = new UnmodifiablePolylineRoiWrapper(angle);
 
 		final List<RealLocalizable> pts = new ArrayList<>(3);
