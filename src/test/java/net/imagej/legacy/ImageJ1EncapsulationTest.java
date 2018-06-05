@@ -165,6 +165,7 @@ public class ImageJ1EncapsulationTest {
 					className.startsWith(net.imagej.legacy.plugin.DefaultLegacyOpener.class.getName()) ||
 					className.startsWith(net.imagej.legacy.plugin.IJ1MacroEngine.class.getName()) ||
 					className.startsWith(net.imagej.legacy.plugin.LegacyInitializer.class.getName()) ||
+					className.startsWith(net.imagej.legacy.plugin.OverlayPreprocessor.class.getName()) ||
 					className.startsWith(net.imagej.legacy.plugin.ResultsTablePreprocessor.class.getName()) ||
 					className.startsWith(net.imagej.legacy.plugin.RoiManagerPreprocessor.class.getName()) ||
 					className.startsWith(net.imagej.legacy.translate.ColorTableHarmonizer.class.getName()) ||
