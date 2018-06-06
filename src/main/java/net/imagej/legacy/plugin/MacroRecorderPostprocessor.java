@@ -44,6 +44,7 @@ import org.scijava.module.process.AbstractPostprocessorPlugin;
 import org.scijava.module.process.PostprocessorPlugin;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
+import org.scijava.widget.TextWidget;
 
 /**
  * Registers the module's final input values with ImageJ 1.x's macro recorder.
@@ -87,6 +88,14 @@ public class MacroRecorderPostprocessor extends AbstractPostprocessorPlugin {
 		final ItemVisibility visibility = input.getVisibility();
 		if (visibility == ItemVisibility.INVISIBLE) return false;
 		if (visibility == ItemVisibility.MESSAGE) return false;
+
+		// Skip password parameters.
+		final String style = input.getWidgetStyle();
+		if (style != null) {
+			for (final String s : style.split(",")) {
+				if (s.equals(TextWidget.PASSWORD_STYLE)) return false;
+			}
+		}
 
 		return true;
 	}
