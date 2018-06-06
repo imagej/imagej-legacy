@@ -72,7 +72,7 @@ public class MacroRecorderPostprocessor extends AbstractPostprocessorPlugin {
 		for (final ModuleItem<?> input : module.getInfo().inputs()) {
 			final String name = input.getName();
 			if (excludedInputs != null && excludedInputs.contains(name)) continue;
-			if (excludedFromRecording(input.getVisibility())) continue;
+			if (excludedFromRecording(input)) continue;
 			final Object value = module.getInput(name);
 			if (value != null) ij1Helper.recordOption(name, toString(value));
 		}
@@ -80,12 +80,16 @@ public class MacroRecorderPostprocessor extends AbstractPostprocessorPlugin {
 		ij1Helper.finishRecording();
 	}
 
-	private boolean excludedFromRecording(final ItemVisibility visibility) {
-		return visibility == ItemVisibility.INVISIBLE ||
-			visibility == ItemVisibility.MESSAGE;
-	}
-
 	// -- Helper methods --
+
+	private boolean excludedFromRecording(final ModuleItem<?> input) {
+		// Skip parameters of insufficient visibility.
+		final ItemVisibility visibility = input.getVisibility();
+		if (visibility == ItemVisibility.INVISIBLE) return false;
+		if (visibility == ItemVisibility.MESSAGE) return false;
+
+		return true;
+	}
 
 	private String toString(final Object value) {
 		// if object is an ImagePlus, use its title as the string representation
