@@ -81,9 +81,9 @@ import org.scijava.ui.UIService;
  * <li><em>NOT</em> running in headless mode.</li>
  * <li>Neither the {@code -batch} nor {@code -ijpath} options have been
  * specified.</li>
- * <li>The "Run single instance listener" option in <em>Edit &#9654; Options
- * &#9654; Misc</em> menu is enabled (on macOS, this option is always disabled
- * unless toggled programmatically somehow in code).</li>
+ * <li>The "Run single instance listener" option in <em>Edit &gt; Options &gt;
+ * Misc</em> menu is enabled (on macOS, this option is always disabled unless
+ * toggled programmatically somehow in code).</li>
  * <li>Another instance of ImageJ is in fact running on the same channel (port 7
  * by default).</li>
  * </ul>
