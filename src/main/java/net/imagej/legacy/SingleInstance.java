@@ -150,9 +150,6 @@ public class SingleInstance {
 	 *         creates a new server instance.
 	 */
 	public boolean sendArguments(String[] args) {
-		if (!helper.isRMIEnabled())
-			return false;
-
 		boolean sent = false;
 		final File file = new File(getStubPath());
 
