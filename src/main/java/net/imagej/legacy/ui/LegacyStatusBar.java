@@ -33,6 +33,7 @@ package net.imagej.legacy.ui;
 
 import java.awt.Panel;
 
+import net.imagej.legacy.IJ1Helper;
 import net.imagej.legacy.LegacyService;
 
 import org.scijava.ui.StatusBar;
@@ -61,9 +62,11 @@ public class LegacyStatusBar extends AbstractLegacyAdapter implements
 		// finally block earlier in this stack trace.
 		if (processing) return;
 		try {
-			helper().setStatus(message);
+			final IJ1Helper ij1helper = helper();
+			if (ij1helper != null)  ij1helper.setStatus(message);
 		} finally {
-			getLegacyService().setProcessingEvents(processing);
+			final LegacyService LegacyService = getLegacyService();
+			if (LegacyService != null) LegacyService.setProcessingEvents(processing);
 		}
 	}
 
@@ -76,9 +79,11 @@ public class LegacyStatusBar extends AbstractLegacyAdapter implements
 		// finally block earlier in this stack trace.
 		if (processing) return;
 		try {
-			helper().setProgress(val, max);
+			final IJ1Helper ij1helper = helper();
+			if (ij1helper != null)  ij1helper.setProgress(val, max);
 		} finally {
-			getLegacyService().setProcessingEvents(processing);
+			final LegacyService LegacyService = getLegacyService();
+			if (LegacyService != null) LegacyService.setProcessingEvents(processing);
 		}
 	}
 
