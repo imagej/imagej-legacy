@@ -54,6 +54,7 @@ public class LegacyStatusBar extends AbstractLegacyAdapter implements
 
 	@Override
 	public void setStatus(final String message) {
+		if (dummy()) return;
 		boolean processing = getLegacyService().setProcessingEvents(true);
 		// if we are already in the middle of processing events, then we must have
 		// gotten here from an event that originated in the LegacyStatusBar. So,
@@ -69,6 +70,7 @@ public class LegacyStatusBar extends AbstractLegacyAdapter implements
 
 	@Override
 	public void setProgress(final int val, final int max) {
+		if (dummy()) return;
 		boolean processing = getLegacyService().setProcessingEvents(true);
 		// if we are already in the middle of processing events, then we must have
 		// gotten here from an event that originated in the LegacyStatusBar. So,
@@ -84,7 +86,7 @@ public class LegacyStatusBar extends AbstractLegacyAdapter implements
 
 	@Override
 	public Panel getComponent() {
-		return helper().getStatusBar();
+		return dummy() ? null : helper().getStatusBar();
 	}
 
 	@Override

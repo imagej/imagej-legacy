@@ -61,4 +61,9 @@ public abstract class AbstractLegacyAdapter implements LegacyAdapter {
 	protected LegacyService getLegacyService() {
 		return legacyService;
 	}
+
+	/** Returns true iff the linked {@link LegacyService} is not fully active. */
+	protected boolean dummy() {
+		return legacyService == null || !legacyService.isActive();
+	}
 }

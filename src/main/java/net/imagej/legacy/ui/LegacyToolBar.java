@@ -54,7 +54,7 @@ public class LegacyToolBar extends AbstractLegacyAdapter implements ToolBar,
 
 	@Override
 	public Component getComponent() {
-		return helper().getToolBar();
+		return dummy() ? null : helper().getToolBar();
 	}
 
 	@SuppressWarnings("unchecked")
