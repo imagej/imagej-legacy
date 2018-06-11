@@ -62,11 +62,11 @@ public class LegacyStatusBar extends AbstractLegacyAdapter implements
 		// finally block earlier in this stack trace.
 		if (processing) return;
 		try {
-			final IJ1Helper ij1helper = helper();
-			if (ij1helper != null)  ij1helper.setStatus(message);
+			final IJ1Helper ij1Helper = helper();
+			if (ij1Helper != null)  ij1Helper.setStatus(message);
 		} finally {
-			final LegacyService LegacyService = getLegacyService();
-			if (LegacyService != null) LegacyService.setProcessingEvents(processing);
+			final LegacyService legacyService = getLegacyService();
+			if (legacyService != null) legacyService.setProcessingEvents(processing);
 		}
 	}
 
@@ -79,11 +79,11 @@ public class LegacyStatusBar extends AbstractLegacyAdapter implements
 		// finally block earlier in this stack trace.
 		if (processing) return;
 		try {
-			final IJ1Helper ij1helper = helper();
-			if (ij1helper != null)  ij1helper.setProgress(val, max);
+			final IJ1Helper ij1Helper = helper();
+			if (ij1Helper != null)  ij1Helper.setProgress(val, max);
 		} finally {
-			final LegacyService LegacyService = getLegacyService();
-			if (LegacyService != null) LegacyService.setProcessingEvents(processing);
+			final LegacyService legacyService = getLegacyService();
+			if (legacyService != null) legacyService.setProcessingEvents(processing);
 		}
 	}
 
