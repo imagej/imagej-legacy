@@ -1,9 +1,10 @@
-// @File(label = "Output directory", style = "directory") output
-// @String(label = "Title contains") pattern
-
 /*
  * Macro template to process multiple open images
  */
+
+#@ File(label = "Output directory", style = "directory") output
+#@ String(label = "Title contains") pattern
+
 processOpenImages();
 
 /*
