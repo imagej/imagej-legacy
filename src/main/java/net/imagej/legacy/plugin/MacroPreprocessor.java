@@ -63,6 +63,7 @@ public class MacroPreprocessor extends AbstractPreprocessorPlugin {
 
 	@Override
 	public void process(final Module module) {
+		if (legacyService == null) return;
 		final IJ1Helper ij1Helper = legacyService.getIJ1Helper();
 		if (ij1Helper == null) return;
 		if (!ij1Helper.isMacro()) return;
