@@ -83,7 +83,6 @@ public class MacroLanguageSupportPlugin extends AbstractLanguageSupport implemen
     private class MacroAutoCompletionProvider extends DefaultCompletionProvider implements ToolTipSupplier {
 
         public MacroAutoCompletionProvider() {
-            System.err.println("Hello world");
 
             ClassLoader classLoader = getClass().getClassLoader();
             InputStream resourceAsStream = classLoader.getResourceAsStream("/doc/ij1macro/functions.html");
@@ -111,7 +110,6 @@ public class MacroLanguageSupportPlugin extends AbstractLanguageSupport implemen
                     } else {
                         if (headline.length() == 0) {
                             headline = htmlToText(line);
-                            System.err.println("headline: " + headline);
                         } else {
                             description = description + line + "\n";
                         }
@@ -204,7 +202,6 @@ public class MacroLanguageSupportPlugin extends AbstractLanguageSupport implemen
 
         @Override
         public void keyReleased(KeyEvent e) {
-            System.err.println("key" + e);
             SwingUtilities.invokeLater(()->{
                 if (disabledChars.contains(e.getKeyChar())) {
                     ac.hideChildWindows();
@@ -213,10 +210,8 @@ public class MacroLanguageSupportPlugin extends AbstractLanguageSupport implemen
                           && e.getKeyCode() <= 90 // z
                         )
                 {
-                    System.err.println("show a");
                     if (provider.getAlreadyEnteredText(textArea).length() == 2 &&
                             provider.getCompletions(textArea).size() != 1) {
-                        System.err.println("show b");
                         ac.doCompletion();
                     }
                 }
