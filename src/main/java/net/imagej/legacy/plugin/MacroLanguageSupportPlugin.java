@@ -100,7 +100,7 @@ public class MacroLanguageSupportPlugin extends AbstractLanguageSupport implemen
                     line = line.trim();
                     if (line.startsWith("<a name=\"")) {
                         if (name.length() > 1) {
-                            addCompletion(makeListEntry(this, name, name, description));
+                            addCompletion(makeListEntry(this, headline, name, description));
                         }
                         name = htmlToText(line.
                                 replace("<a name=\"", "").
@@ -111,6 +111,7 @@ public class MacroLanguageSupportPlugin extends AbstractLanguageSupport implemen
                     } else {
                         if (headline.length() == 0) {
                             headline = htmlToText(line);
+                            System.err.println("headline: " + headline);
                         } else {
                             description = description + line + "\n";
                         }
@@ -130,7 +131,8 @@ public class MacroLanguageSupportPlugin extends AbstractLanguageSupport implemen
             return text.
                     replace("&quot;", "\"").
                     replace("<b>", "").
-                    replace("</b>", "");
+                    replace("</b>", "").
+                    replace("<br>", "");
         }
 
         private BasicCompletion makeListEntry(MacroAutoCompletionProvider provider, String headline, String name, String description) {
@@ -138,7 +140,7 @@ public class MacroLanguageSupportPlugin extends AbstractLanguageSupport implemen
 
             description = "<a href=\"" + link + "\">" + headline + "</a><br>" + description;
 
-            return new BasicCompletion(provider, headline, name, description);
+            return new BasicCompletion(provider, headline, "", description);
         }
 
         /**
@@ -206,7 +208,11 @@ public class MacroLanguageSupportPlugin extends AbstractLanguageSupport implemen
             SwingUtilities.invokeLater(()->{
                 if (disabledChars.contains(e.getKeyChar())) {
                     ac.hideChildWindows();
-                } else if (e.getKeyChar() != 0) {
+                } else if (
+                             e.getKeyCode() >= 65 // a
+                          && e.getKeyCode() <= 90 // z
+                        )
+                {
                     System.err.println("show a");
                     if (provider.getAlreadyEnteredText(textArea).length() == 2 &&
                             provider.getCompletions(textArea).size() != 1) {
