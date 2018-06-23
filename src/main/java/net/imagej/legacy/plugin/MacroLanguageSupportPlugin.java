@@ -110,7 +110,7 @@ public class MacroLanguageSupportPlugin extends AbstractLanguageSupport implemen
                         headline = "";
                     } else {
                         if (headline.length() == 0) {
-                            headline = line;
+                            headline = htmlToText(line);
                         } else {
                             description = description + line + "\n";
                         }
@@ -139,7 +139,6 @@ public class MacroLanguageSupportPlugin extends AbstractLanguageSupport implemen
             description = "<a href=\"" + link + "\">" + headline + "</a><br>" + description;
 
             return new BasicCompletion(provider, headline, name, description);
-
         }
 
         /**
@@ -207,9 +206,10 @@ public class MacroLanguageSupportPlugin extends AbstractLanguageSupport implemen
             SwingUtilities.invokeLater(()->{
                 if (disabledChars.contains(e.getKeyChar())) {
                     ac.hideChildWindows();
-                } else {
+                } else if (e.getKeyChar() != 0) {
                     System.err.println("show a");
-                    if (provider.getAlreadyEnteredText(textArea).length() == 2) {
+                    if (provider.getAlreadyEnteredText(textArea).length() == 2 &&
+                            provider.getCompletions(textArea).size() != 1) {
                         System.err.println("show b");
                         ac.doCompletion();
                     }
