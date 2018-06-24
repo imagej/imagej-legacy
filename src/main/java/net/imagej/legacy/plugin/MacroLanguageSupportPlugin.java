@@ -204,7 +204,9 @@ public class MacroLanguageSupportPlugin extends AbstractLanguageSupport implemen
         public void keyReleased(KeyEvent e) {
             SwingUtilities.invokeLater(()->{
                 if (disabledChars.contains(e.getKeyChar())) {
-                    ac.hideChildWindows();
+                    if (!e.isControlDown()) { // the pulldown should not be hidden if CTRL+SPACE are pressed
+                        ac.hideChildWindows();
+                    }
                 } else if (
                              e.getKeyCode() >= 65 // a
                           && e.getKeyCode() <= 90 // z
