@@ -83,9 +83,13 @@ public class MacroLanguageSupportPlugin extends AbstractLanguageSupport implemen
     private class MacroAutoCompletionProvider extends DefaultCompletionProvider implements ToolTipSupplier {
 
         public MacroAutoCompletionProvider() {
+            parseFunctionsHtmlDoc("/doc/ij1macro/functions.html");
+            parseFunctionsHtmlDoc("/doc/ij1macro/functions_extd.html");
+        }
 
+        private void parseFunctionsHtmlDoc(String filename) {
             ClassLoader classLoader = getClass().getClassLoader();
-            InputStream resourceAsStream = classLoader.getResourceAsStream("/doc/ij1macro/functions.html");
+            InputStream resourceAsStream = classLoader.getResourceAsStream(filename);
 
             try {
                 BufferedReader br
@@ -97,14 +101,13 @@ public class MacroLanguageSupportPlugin extends AbstractLanguageSupport implemen
                 String line;
                 while ((line = br.readLine()) != null) {
                     line = line.trim();
-                    if (line.startsWith("<a name=\"")) {
-                        if (name.length() > 1) {
+                    if (line.contains("<a name=\"")) {
+                        if (checkName(name)) {
                             addCompletion(makeListEntry(this, headline, name, description));
                         }
                         name = htmlToText(line.
-                                replace("<a name=\"", "").
-                                replace("\"></a>", "")).
-                                split(" ")[0];
+                                split("<a name=\"")[1].
+                                split("\"></a>")[0]);
                         description = "";
                         headline = "";
                     } else {
@@ -116,7 +119,7 @@ public class MacroLanguageSupportPlugin extends AbstractLanguageSupport implemen
                     }
 
                 }
-                if (name.length() > 1) {
+                if (checkName(name)) {
                     addCompletion(makeListEntry(this, headline, name, description));
                 }
 
@@ -125,11 +128,36 @@ public class MacroLanguageSupportPlugin extends AbstractLanguageSupport implemen
             }
         }
 
+        private boolean checkName(String name) {
+            return (name.length() > 1) &&
+                    (!name.trim().startsWith("<")) &&
+                    (!name.trim().startsWith("-")) &&
+                    (name.compareTo("Top") != 0) &&
+                    (name.compareTo("IJ") != 0) &&
+                    (name.compareTo("Stack") != 0) &&
+                    (name.compareTo("Array") != 0) &&
+                    (name.compareTo("file") != 0) &&
+                    (name.compareTo("Fit") != 0) &&
+                    (name.compareTo("List") != 0) &&
+                    (name.compareTo("Overlay") != 0) &&
+                    (name.compareTo("Plot") != 0) &&
+                    (name.compareTo("Roi") != 0) &&
+                    (name.compareTo("String") != 0) &&
+                    (name.compareTo("Table") != 0) &&
+                    (name.compareTo("Ext") != 0) &&
+                    (name.compareTo("ext") != 0)&&
+                    (name.compareTo("alphabar") != 0)&&
+                    (name.compareTo("ext") != 0)
+            ;
+        }
+
         private String htmlToText(String text) {
             return text.
                     replace("&quot;", "\"").
                     replace("<b>", "").
                     replace("</b>", "").
+                    replace("<i>", "").
+                    replace("</i>", "").
                     replace("<br>", "");
         }
 
