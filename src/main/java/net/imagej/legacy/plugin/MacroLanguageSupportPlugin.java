@@ -42,7 +42,6 @@ public class MacroLanguageSupportPlugin extends AbstractLanguageSupport implemen
     @Override
     public void install(RSyntaxTextArea rSyntaxTextArea) {
         AutoCompletion ac = createAutoCompletion(getMacroAutoCompletionProvider());
-        //ac.setAutoCompleteEnabled(true);
         ac.setAutoActivationDelay(100);
         ac.setAutoActivationEnabled(true);
         ac.setShowDescWindow(true);
