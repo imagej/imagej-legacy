@@ -51,6 +51,7 @@ class MacroAutoCompletionProvider extends DefaultCompletionProvider implements T
                 ClassLoader classLoader = getClass().getClassLoader();
                 resourceAsStream = classLoader.getResourceAsStream(filename);
             }
+            if (resourceAsStream == null) return false;
             BufferedReader br
                     = new BufferedReader(new InputStreamReader(resourceAsStream));
 
