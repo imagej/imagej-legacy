@@ -22,7 +22,7 @@ import java.util.List;
  * This plugin makes basic auto completion available for IJ macro scripts. It offers
  * all commands and additional help copied from this website:
  *
- * https://imagej.nih.gov/ij/developer/macro/functions.html
+ * https://imagej.net/developer/macro/functions.html
  *
  * Author: @haesleinhuepf
  * June 2018

@@ -110,7 +110,7 @@ class MacroAutoCompletionProvider extends DefaultCompletionProvider implements T
     }
 
     private BasicCompletion makeListEntry(MacroAutoCompletionProvider provider, String headline, String name, String description) {
-        String link = "https://imagej.nih.gov/ij/developer/macro/functions.html#" + name;
+        String link = "https://imagej.net/developer/macro/functions.html#" + name;
 
         description = "<a href=\"" + link + "\">" + headline + "</a><br>" + description;
 
