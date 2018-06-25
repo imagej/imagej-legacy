@@ -11,6 +11,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URL;
+import java.net.UnknownHostException;
 import java.util.List;
 
 /**
@@ -24,7 +26,9 @@ class MacroAutoCompletionProvider extends DefaultCompletionProvider implements T
     private static MacroAutoCompletionProvider instance = null;
 
     private MacroAutoCompletionProvider() {
-        parseFunctionsHtmlDoc("/doc/ij1macro/functions.html");
+        if (!parseFunctionsHtmlDoc("https://imagej.net/developer/macro/functions.html")) {
+            parseFunctionsHtmlDoc("/doc/ij1macro/functions.html");
+        }
         parseFunctionsHtmlDoc("/doc/ij1macro/functions_extd.html");
     }
 
@@ -35,11 +39,18 @@ class MacroAutoCompletionProvider extends DefaultCompletionProvider implements T
         return instance;
     }
 
-    private void parseFunctionsHtmlDoc(String filename) {
-        ClassLoader classLoader = getClass().getClassLoader();
-        InputStream resourceAsStream = classLoader.getResourceAsStream(filename);
+    private boolean parseFunctionsHtmlDoc(String filename) {
+        InputStream resourceAsStream;
 
         try {
+            if (filename.startsWith("http")) {
+                URL url = new URL(filename);
+                resourceAsStream = url.openStream();
+            } else{
+
+                ClassLoader classLoader = getClass().getClassLoader();
+                resourceAsStream = classLoader.getResourceAsStream(filename);
+            }
             BufferedReader br
                     = new BufferedReader(new InputStreamReader(resourceAsStream));
 
@@ -49,13 +60,16 @@ class MacroAutoCompletionProvider extends DefaultCompletionProvider implements T
             String line;
             while ((line = br.readLine()) != null) {
                 line = line.trim();
-                if (line.contains("<a name=\"")) {
+                line = line.
+                        replace("<a name=\"", "<a name=").
+                        replace("\"></a>", "></a>");
+                if (line.contains("<a name=")) {
                     if (checkName(name)) {
                         addCompletion(makeListEntry(this, headline, name, description));
                     }
                     name = htmlToText(line.
-                            split("<a name=\"")[1].
-                            split("\"></a>")[0]);
+                            split("<a name=")[1].
+                            split("></a>")[0]);
                     description = "";
                     headline = "";
                 } else {
@@ -71,9 +85,13 @@ class MacroAutoCompletionProvider extends DefaultCompletionProvider implements T
                 addCompletion(makeListEntry(this, headline, name, description));
             }
 
+        } catch (UnknownHostException e) {
+            return false;
         } catch (IOException e) {
             e.printStackTrace();
+            return false;
         }
+        return true;
     }
 
     private boolean checkName(String name) {
