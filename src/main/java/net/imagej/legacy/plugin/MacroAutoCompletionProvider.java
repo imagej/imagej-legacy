@@ -216,4 +216,8 @@ class MacroAutoCompletionProvider extends DefaultCompletionProvider implements
 		return tip;
 	}
 
+	protected boolean isValidChar(char ch) {
+		return Character.isLetterOrDigit(ch) || ch == '_' || ch == '.';
+	}
+
 }
