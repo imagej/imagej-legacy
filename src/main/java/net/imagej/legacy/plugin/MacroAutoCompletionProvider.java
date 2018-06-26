@@ -120,8 +120,11 @@ class MacroAutoCompletionProvider extends DefaultCompletionProvider implements
 			}
 
 		}
+		catch (final javax.net.ssl.SSLHandshakeException e)
+		{
+			return false;
+		}
 		catch (final UnknownHostException e) {
-			e.printStackTrace();
 			return false;
 		}
 		catch (final IOException e) {
@@ -165,7 +168,7 @@ class MacroAutoCompletionProvider extends DefaultCompletionProvider implements
 	}
 
 	private BasicCompletion makeListEntry(
-		final MacroAutoCompletionProvider provider, final String headline,
+		final MacroAutoCompletionProvider provider, String headline,
 		final String name, String description)
 	{
 		final String link = //
@@ -173,6 +176,11 @@ class MacroAutoCompletionProvider extends DefaultCompletionProvider implements
 
 		description = //
 			"<a href=\"" + link + "\">" + headline + "</a><br>" + description;
+
+		if (headline.trim().endsWith("-")) {
+			headline = headline.trim();
+			headline = headline.substring(0, headline.length() - 2);
+		}
 
 		return new BasicCompletion(provider, headline, null, description);
 	}
