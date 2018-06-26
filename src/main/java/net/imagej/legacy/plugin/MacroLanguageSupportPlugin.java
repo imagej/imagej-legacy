@@ -55,6 +55,7 @@ import org.scijava.ui.swing.script.LanguageSupportPlugin;
 public class MacroLanguageSupportPlugin extends AbstractLanguageSupport
 	implements LanguageSupportPlugin
 {
+	private final static int MINIMUM_WORD_LENGTH_TO_OPEN_PULLDOWN = 1;
 
 	@Override
 	public String getLanguageName() {
@@ -136,8 +137,9 @@ public class MacroLanguageSupportPlugin extends AbstractLanguageSupport
 				&& e.getKeyCode() <= 90 // z
 				) {
 					if (MacroAutoCompletionProvider.getInstance().getAlreadyEnteredText(
-						textArea).length() == 2 && MacroAutoCompletionProvider.getInstance()
-							.getCompletions(textArea).size() != 1)
+						textArea).length() >= MINIMUM_WORD_LENGTH_TO_OPEN_PULLDOWN &&
+						MacroAutoCompletionProvider.getInstance()
+							.getCompletions(textArea).size() > 1)
 					{
 						ac.doCompletion();
 					}
