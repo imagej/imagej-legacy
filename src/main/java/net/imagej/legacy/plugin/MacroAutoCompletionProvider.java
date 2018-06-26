@@ -31,8 +31,6 @@
 
 package net.imagej.legacy.plugin;
 
-import ij.IJ;
-
 import java.awt.event.MouseEvent;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -100,7 +98,7 @@ class MacroAutoCompletionProvider extends DefaultCompletionProvider implements
 				line = line.replace("<a name=\"", "<a name=").replace("\"></a>",
 					"></a>");
 				if (line.contains("<a name=")) {
-					if (checkName(name)) {
+					if (checkCompletion(headline, name, description)) {
 						addCompletion(makeListEntry(this, headline, name, description));
 					}
 					name = htmlToText(line.split("<a name=")[1].split("></a>")[0]);
@@ -117,7 +115,7 @@ class MacroAutoCompletionProvider extends DefaultCompletionProvider implements
 				}
 
 			}
-			if (checkName(name)) {
+			if (checkCompletion(headline, name, description)) {
 				addCompletion(makeListEntry(this, headline, name, description));
 			}
 
@@ -133,8 +131,9 @@ class MacroAutoCompletionProvider extends DefaultCompletionProvider implements
 		return true;
 	}
 
-	private boolean checkName(final String name) {
-		return name.length() > 1 && //
+	private boolean checkCompletion(final String headline, final String name, final String description) {
+		return headline.length() > 0 && //
+			name.length() > 1 && //
 			!name.trim().startsWith("<") && //
 			!name.trim().startsWith("-") && //
 			name.compareTo("Top") != 0 && //
@@ -175,7 +174,7 @@ class MacroAutoCompletionProvider extends DefaultCompletionProvider implements
 		description = //
 			"<a href=\"" + link + "\">" + headline + "</a><br>" + description;
 
-		return new BasicCompletion(provider, headline, "", description);
+		return new BasicCompletion(provider, headline, null, description);
 	}
 
 	/**
