@@ -46,6 +46,9 @@ import org.fife.ui.autocomplete.DefaultCompletionProvider;
 import org.fife.ui.rtextarea.RTextArea;
 import org.fife.ui.rtextarea.ToolTipSupplier;
 
+import org.scijava.module.ModuleInfo;
+import org.scijava.module.ModuleService;
+
 /**
  * Creates the list of auto-completion suggestions from functions.html
  * documentation.
@@ -55,6 +58,7 @@ import org.fife.ui.rtextarea.ToolTipSupplier;
 class MacroAutoCompletionProvider extends DefaultCompletionProvider implements
 	ToolTipSupplier
 {
+	private ModuleService moduleService;
 
 	private static MacroAutoCompletionProvider instance = null;
 
@@ -171,11 +175,13 @@ class MacroAutoCompletionProvider extends DefaultCompletionProvider implements
 		final MacroAutoCompletionProvider provider, String headline,
 		final String name, String description)
 	{
-		final String link = //
-			"https://imagej.net/developer/macro/functions.html#" + name;
+		if (!headline.startsWith("run(\"")) {
+			final String link = //
+					"https://imagej.net/developer/macro/functions.html#" + name;
 
-		description = //
-			"<a href=\"" + link + "\">" + headline + "</a><br>" + description;
+			description = //
+					"<a href=\"" + link + "\">" + headline + "</a><br>" + description;
+		}
 
 		if (headline.trim().endsWith("-")) {
 			headline = headline.trim();
@@ -217,7 +223,24 @@ class MacroAutoCompletionProvider extends DefaultCompletionProvider implements
 	}
 
 	protected boolean isValidChar(char ch) {
-		return Character.isLetterOrDigit(ch) || ch == '_' || ch == '.';
+		return Character.isLetterOrDigit(ch) || ch == '_' || ch == '.' || ch == '"' || ch == '(';
 	}
 
+	void addModuleCompletions(ModuleService moduleService) {
+		if (this.moduleService == moduleService) {
+			return;
+		}
+		this.moduleService = moduleService;
+
+		for (ModuleInfo info : moduleService.getModules()) {
+			if(info.getMenuPath().getLeaf() != null) {
+				String name = info.getMenuPath().getLeaf().getName().trim();
+				String headline = "run(\"" + name +"\")";
+				String description = "<b>" + headline + "</b><p>" +
+						"<a href=\"https://imagej.net/Special:Search/" + name.replace(" ", "%20") + "\">Search imagej wiki for help</a>";
+
+				addCompletion(makeListEntry(this, headline, null, description));
+			}
+		}
+	}
 }
