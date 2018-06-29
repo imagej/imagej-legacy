@@ -164,6 +164,7 @@ class MacroAutoCompletionProvider extends DefaultCompletionProvider implements
 	private String htmlToText(final String text) {
 		return text //
 			.replace("&quot;", "\"") //
+			.replace("&amp;", "&") //
 			.replace("<b>", "") //
 			.replace("</b>", "") //
 			.replace("<i>", "") //
