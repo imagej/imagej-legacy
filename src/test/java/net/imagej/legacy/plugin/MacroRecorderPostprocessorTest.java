@@ -125,17 +125,11 @@ public class MacroRecorderPostprocessorTest {
 
 		public EideticIJ1Helper() {
 			super(legacyService);
-			finishRecording();
 		}
 
 		private final List<String> recordedArgs = new ArrayList<>();
 		private boolean finished;
 
-		@Override
-		public boolean isMacro() {
-			boolean isMacro = super.isMacro();
-			return isMacro;
-		}
 		@Override
 		public void recordOption(final String key, final String value) {
 			if (finished) {
