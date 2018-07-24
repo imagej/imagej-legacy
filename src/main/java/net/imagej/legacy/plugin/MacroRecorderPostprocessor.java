@@ -86,18 +86,18 @@ public class MacroRecorderPostprocessor extends AbstractPostprocessorPlugin {
 	private boolean excludedFromRecording(final ModuleItem<?> input) {
 		// Skip parameters of insufficient visibility.
 		final ItemVisibility visibility = input.getVisibility();
-		if (visibility == ItemVisibility.INVISIBLE) return false;
-		if (visibility == ItemVisibility.MESSAGE) return false;
+		if (visibility == ItemVisibility.INVISIBLE) return true;
+		if (visibility == ItemVisibility.MESSAGE) return true;
 
 		// Skip password parameters.
 		final String style = input.getWidgetStyle();
 		if (style != null) {
 			for (final String s : style.split(",")) {
-				if (s.equals(TextWidget.PASSWORD_STYLE)) return false;
+				if (s.equals(TextWidget.PASSWORD_STYLE)) return true;
 			}
 		}
 
-		return true;
+		return false;
 	}
 
 	private String toString(final Object value) {
