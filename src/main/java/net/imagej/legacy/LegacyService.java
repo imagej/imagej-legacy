@@ -620,6 +620,17 @@ public final class LegacyService extends AbstractService implements
 	/**
 	 * <strong>This is not part of the public API. DO NOT USE!</strong>
 	 * <p>
+	 * This method makes it possible to override the {@link IJ1Helper} behavior,
+	 * to facilitate unit testing.
+	 * </p>
+	 */
+	public void setIJ1Helper(final IJ1Helper ij1Helper) {
+		this.ij1Helper = ij1Helper;
+	}
+
+	/**
+	 * <strong>This is not part of the public API. DO NOT USE!</strong>
+	 * <p>
 	 * This method toggles a {@link ThreadLocal} flag as to whether or not legacy
 	 * UI components are in the process of handling {@code StatusEvents}.
 	 * </p>
