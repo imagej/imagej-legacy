@@ -48,6 +48,8 @@ import org.scijava.module.Module;
  * then accesses this same set so that it can record only those input values
  * that were still unresolved at that point in the preprocessing chain.
  * </p>
+ * 
+ * @author Curtis Rueden
  */
 public final class MacroRecorderExcludedInputs {
 
@@ -62,7 +64,10 @@ public final class MacroRecorderExcludedInputs {
 		return EI_MAP.computeIfAbsent(module, key -> new HashSet<>());
 	}
 
-	/** Obtains the cached set of excluded inputs, remove it from the . */
+	/**
+	 * Obtains the cached set of excluded inputs for a particular module instance,
+	 * clearing it from the data structure.
+	 */
 	public static Set<String> retrieve(final Module module) {
 		return EI_MAP.remove(module);
 	}
