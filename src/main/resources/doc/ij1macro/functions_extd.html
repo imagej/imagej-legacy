@@ -19,6 +19,26 @@ Defines a list of commands as function which can be called.
 <b>if (expression) {</b><br>
 All commands inside an if block are only executed if expression is true.
 
+<a name="macro"></a>
+<b>macro "title" {</b><br>
+Macro sets can be defined to make reusable macro available via ImageJs menu, the toolbar or via shortcuts. See <a href="https://imagej.net/ij/developer/macro/macros.html#sets">documentation</a> for more details.
+
+<a name="print_clear"></a>
+<b>print("\\Clear")</b>
+Empty the log window.
+
+<a name="print_update"></a>
+<b>print("\\Update:[text]")</b>
+Update the recent line of the log window by replace its content by [text].
+
+<a name="print_update_n"></a>
+<b>print("\\Update[n]:[text]")</b>
+Update the [n+1]th line of the log window by replace its content by [text].
+
+<a name="var"></a>
+<b>var</b><br>
+The <pre>var</pre> statement allows defining global variables which are available from different macros. See <a href="https://imagej.net/ij/developer/macro/macros.html#sets">documentation</a> for more details.
+
 <a name="while"></a>
 <b>while (expression) {</b><br>
 All commands inside a while loop block are repeatedly executed until expression becomes false.
