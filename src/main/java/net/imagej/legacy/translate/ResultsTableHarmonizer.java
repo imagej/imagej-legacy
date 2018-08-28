@@ -37,10 +37,10 @@ import ij.text.TextWindow;
 
 import net.imagej.table.DefaultResultsTable;
 import net.imagej.table.ResultsTable;
-import net.imagej.table.Table;
-import net.imagej.table.TableDisplay;
 
 import org.scijava.display.DisplayService;
+import org.scijava.table.Table;
+import org.scijava.table.TableDisplay;
 
 /**
  * Harmonizes data between legacy ImageJ and modern ImageJ ResultsTables

@@ -41,23 +41,23 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 
-import net.imagej.table.Column;
-import net.imagej.table.GenericTable;
+import org.scijava.table.Column;
+import org.scijava.table.GenericTable;
 
 /**
- * Wraps a {@link ij.measure.ResultsTable} as a {@link GenericTable}.
+ * Wraps a {@link ResultsTable} as a {@link GenericTable}.
  *
  * @author Alison Walter
  */
 public class ResultsTableWrapper implements GenericTable {
 
-	private final ij.measure.ResultsTable table;
+	private final ResultsTable table;
 
-	public ResultsTableWrapper(final ij.measure.ResultsTable table) {
+	public ResultsTableWrapper(final ResultsTable table) {
 		this.table = table;
 	}
 
-	public ij.measure.ResultsTable getSource() {
+	public ResultsTable getSource() {
 		return table;
 	}
 
@@ -89,7 +89,7 @@ public class ResultsTableWrapper implements GenericTable {
 		// Determine if empty cells are NaN or 0
 		double fill = 0;
 		try {
-			final Field f = ij.measure.ResultsTable.class.getDeclaredField(
+			final Field f = ResultsTable.class.getDeclaredField(
 				"NaNEmptyCells");
 			f.setAccessible(true);
 			final boolean nan = (boolean) f.get(table);
@@ -192,7 +192,7 @@ public class ResultsTableWrapper implements GenericTable {
 		// Determine if empty cells are NaN or 0
 		double fill = 0;
 		try {
-			final Field f = ij.measure.ResultsTable.class.getDeclaredField(
+			final Field f = ResultsTable.class.getDeclaredField(
 				"NaNEmptyCells");
 			f.setAccessible(true);
 			final boolean nan = (boolean) f.get(table);
@@ -535,7 +535,7 @@ public class ResultsTableWrapper implements GenericTable {
 		// convert d to a string, as ResultsTable would
 		String c = "";
 		try {
-			final Field f = ij.measure.ResultsTable.class.getDeclaredField(
+			final Field f = ResultsTable.class.getDeclaredField(
 				"decimalPlaces");
 			f.setAccessible(true);
 			final short[] dec = (short[]) f.get(table);
@@ -551,7 +551,7 @@ public class ResultsTableWrapper implements GenericTable {
 		}
 		catch (final Exception exc) {
 			// if can't get the decimal places or n(...), call d2s with AUTO_FORMAT
-			c = ResultsTable.d2s(d, ij.measure.ResultsTable.AUTO_FORMAT);
+			c = ResultsTable.d2s(d, ResultsTable.AUTO_FORMAT);
 		}
 
 		// Special case for NaN

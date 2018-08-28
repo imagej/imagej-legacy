@@ -56,7 +56,6 @@ import net.imagej.overlay.Overlay;
 import net.imagej.patcher.LegacyInjector;
 import net.imagej.roi.ROIService;
 import net.imagej.roi.ROITree;
-import net.imagej.table.Table;
 import net.imagej.table.TableService;
 import net.imagej.ui.viewer.image.ImageDisplayViewer;
 
@@ -68,6 +67,7 @@ import org.scijava.display.event.DisplayDeletedEvent;
 import org.scijava.display.event.DisplayUpdatedEvent;
 import org.scijava.event.EventHandler;
 import org.scijava.plugin.Parameter;
+import org.scijava.table.Table;
 import org.scijava.ui.viewer.DisplayWindow;
 
 /**

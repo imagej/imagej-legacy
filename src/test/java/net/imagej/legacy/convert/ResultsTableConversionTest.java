@@ -40,31 +40,32 @@ import ij.ImagePlus;
 import ij.gui.OvalRoi;
 import ij.gui.Overlay;
 import ij.gui.Roi;
+import ij.measure.ResultsTable;
 
 import java.util.Arrays;
 
 import net.imagej.patcher.LegacyInjector;
-import net.imagej.table.BoolTable;
-import net.imagej.table.ByteTable;
-import net.imagej.table.Column;
-import net.imagej.table.DefaultBoolTable;
-import net.imagej.table.DefaultByteTable;
-import net.imagej.table.DefaultColumn;
-import net.imagej.table.DefaultFloatTable;
-import net.imagej.table.DefaultGenericTable;
-import net.imagej.table.DefaultIntTable;
-import net.imagej.table.DefaultLongTable;
-import net.imagej.table.DefaultResultsTable;
-import net.imagej.table.DefaultShortTable;
-import net.imagej.table.DoubleColumn;
-import net.imagej.table.FloatTable;
-import net.imagej.table.GenericColumn;
-import net.imagej.table.GenericTable;
-import net.imagej.table.IntTable;
-import net.imagej.table.LongTable;
-import net.imagej.table.ResultsTable;
-import net.imagej.table.ShortTable;
-import net.imagej.table.Table;
+import org.scijava.table.BoolTable;
+import org.scijava.table.ByteTable;
+import org.scijava.table.Column;
+import org.scijava.table.DefaultBoolTable;
+import org.scijava.table.DefaultByteTable;
+import org.scijava.table.DefaultColumn;
+import org.scijava.table.DefaultDoubleTable;
+import org.scijava.table.DefaultFloatTable;
+import org.scijava.table.DefaultGenericTable;
+import org.scijava.table.DefaultIntTable;
+import org.scijava.table.DefaultLongTable;
+import org.scijava.table.DefaultShortTable;
+import org.scijava.table.DoubleColumn;
+import org.scijava.table.DoubleTable;
+import org.scijava.table.FloatTable;
+import org.scijava.table.GenericColumn;
+import org.scijava.table.GenericTable;
+import org.scijava.table.IntTable;
+import org.scijava.table.LongTable;
+import org.scijava.table.ShortTable;
+import org.scijava.table.Table;
 import net.imglib2.type.numeric.integer.ByteType;
 
 import org.junit.After;
@@ -85,7 +86,7 @@ public class ResultsTableConversionTest {
 		LegacyInjector.preinit();
 	}
 
-	private ij.measure.ResultsTable table;
+	private ResultsTable table;
 
 	private final String[] headings = { "col 1", "col2", "col-3", "col_4",
 		"col 5" };
@@ -109,7 +110,7 @@ public class ResultsTableConversionTest {
 		context = new Context(ConvertService.class);
 		convertService = context.getService(ConvertService.class);
 
-		table = new ij.measure.ResultsTable();
+		table = new ResultsTable();
 
 		for (int i = 0; i < headings.length; i++) {
 			for (int j = 0; j < rowLabels.length; j++) {
@@ -126,7 +127,7 @@ public class ResultsTableConversionTest {
 		context.dispose();
 	}
 
-	// -- Test ij.measure.ResultsTable to net.imagej.table.GenericTable --
+	// -- Test ij.measure.ResultsTable to org.scijava.table.GenericTable --
 
 	@Test
 	public void testColumnWrapperDoubleGet() {
@@ -281,7 +282,7 @@ public class ResultsTableConversionTest {
 			4, 5 }, { -50, -51, -52 } };
 		final ByteTable bt = new DefaultByteTable(4, 3);
 		populateTable(bt, data);
-		final ij.measure.ResultsTable rt = new TableWrapper(bt, convertService);
+		final ResultsTable rt = new TableWrapper(bt, convertService);
 
 		final Converter<?, ?> c = convertService.getHandler(rt, Table.class);
 		assertTrue(c instanceof TableUnwrapper);
@@ -299,25 +300,25 @@ public class ResultsTableConversionTest {
 
 		final ImagePlus imagePlus = IJ.createImage("gradient", "8-bit ramp", 200,
 			200, 5);
-		final ij.measure.ResultsTable measurements = overlay.measure(imagePlus);
+		final ResultsTable measurements = overlay.measure(imagePlus);
 
 		final Table<?, ?> converted = convertService.convert(measurements,
 			Table.class);
 		assertTablesEqual(measurements, converted);
 	}
 
-	// -- Test net.imagej.table.Table to ij.measure.ResultsTable --
+	// -- Test org.scijava.table.Table to ij.measure.ResultsTable --
 
 	@Test
 	public void testConvertDoubleTable() {
 		final Double[][] data = new Double[][] { { 10.5, 20.25, 11.0 }, { -0.125,
 			100.25, -20.5 } };
-		final ResultsTable dt = new DefaultResultsTable(data.length,
+		final DoubleTable dt = new DefaultDoubleTable(data.length,
 			data[0].length);
 		populateTable(dt, data);
 
-		final ij.measure.ResultsTable ijTable = convertService.convert(dt,
-			ij.measure.ResultsTable.class);
+		final ResultsTable ijTable = convertService.convert(dt,
+			ResultsTable.class);
 		assertTablesEqual(dt, ijTable);
 	}
 
@@ -329,8 +330,8 @@ public class ResultsTableConversionTest {
 		populateTable(lt, data);
 
 		// NB: This conversion is lossy!
-		final ij.measure.ResultsTable ijTable = convertService.convert(lt,
-			ij.measure.ResultsTable.class);
+		final ResultsTable ijTable = convertService.convert(lt,
+			ResultsTable.class);
 
 		int ijColumnCount = 0;
 		for (int i = 0; i <= ijTable.getLastColumn(); i++)
@@ -350,16 +351,16 @@ public class ResultsTableConversionTest {
 	@Test
 	public void testConvertGenericTable() {
 		final GenericTable t = createGenericTable();
-		final ij.measure.ResultsTable ijTable = convertService.convert(t,
-			ij.measure.ResultsTable.class);
+		final ResultsTable ijTable = convertService.convert(t,
+			ResultsTable.class);
 		assertTablesEqual(t, ijTable);
 	}
 
 	@Test
 	public void testConvertGenericTableMutating() {
 		final GenericTable t = createGenericTable();
-		final ij.measure.ResultsTable ijTable = convertService.convert(t,
-			ij.measure.ResultsTable.class);
+		final ResultsTable ijTable = convertService.convert(t,
+			ResultsTable.class);
 		assertTablesEqual(t, ijTable);
 
 		ijTable.incrementCounter(); // NB: addValue does not append rows
@@ -392,43 +393,43 @@ public class ResultsTableConversionTest {
 		// Supported
 		final ByteTable byteTable = new DefaultByteTable();
 		assertTrue(convertService.getHandler(byteTable,
-			ij.measure.ResultsTable.class) instanceof
+			ResultsTable.class) instanceof
 			TableToResultsTableConverters.ByteTableToResultsTable);
 
 		final ShortTable shortTable = new DefaultShortTable();
 		assertTrue(convertService.getHandler(shortTable,
-			ij.measure.ResultsTable.class) instanceof
+			ResultsTable.class) instanceof
 			TableToResultsTableConverters.ShortTableToResultsTable);
 
 		final IntTable intTable = new DefaultIntTable();
 		assertTrue(convertService.getHandler(intTable,
-			ij.measure.ResultsTable.class) instanceof
+			ResultsTable.class) instanceof
 			TableToResultsTableConverters.IntTableToResultsTable);
 
 		final LongTable longTable = new DefaultLongTable();
 		assertTrue(convertService.getHandler(longTable,
-			ij.measure.ResultsTable.class) instanceof
+			ResultsTable.class) instanceof
 			TableToResultsTableConverters.LongTableToResultsTable);
 
 		final FloatTable floatTable = new DefaultFloatTable();
 		assertTrue(convertService.getHandler(floatTable,
-			ij.measure.ResultsTable.class) instanceof
+			ResultsTable.class) instanceof
 			TableToResultsTableConverters.FloatTableToResultsTable);
 
-		final ResultsTable doubleTable = new DefaultResultsTable();
+		final DoubleTable doubleTable = new DefaultDoubleTable();
 		assertTrue(convertService.getHandler(doubleTable,
-			ij.measure.ResultsTable.class) instanceof
+			ResultsTable.class) instanceof
 			TableToResultsTableConverters.ResultsTableToResultsTable);
 
 		final GenericTable genericTable = new DefaultGenericTable();
 		assertTrue(convertService.getHandler(genericTable,
-			ij.measure.ResultsTable.class) instanceof
+			ResultsTable.class) instanceof
 			TableToResultsTableConverters.GenericTableToResultsTable);
 
 		// Type not supported
 		final BoolTable boolTable = new DefaultBoolTable();
 		assertNull(convertService.getHandler(boolTable,
-			ij.measure.ResultsTable.class));
+			ResultsTable.class));
 
 		// Not supported: Generic table w/ non-String/Double values
 		final GenericTable invalidTable = createGenericTable();
@@ -437,7 +438,7 @@ public class ResultsTableConversionTest {
 			(byte) -1), new ByteType((byte) -30)));
 		invalidTable.add(byteTypeColumn);
 		assertNull(convertService.getHandler(invalidTable,
-			ij.measure.ResultsTable.class));
+			ResultsTable.class));
 	}
 
 	@Test
@@ -448,10 +449,10 @@ public class ResultsTableConversionTest {
 		duplicateHeadings.setColumnHeader(0, "heading");
 		duplicateHeadings.setColumnHeader(1, "heading");
 		assertTrue(convertService.getHandler(duplicateHeadings,
-			ij.measure.ResultsTable.class) instanceof
+			ResultsTable.class) instanceof
 			TableToResultsTableConverters.ByteTableToResultsTable);
-		final ij.measure.ResultsTable rt = convertService.convert(duplicateHeadings,
-			ij.measure.ResultsTable.class);
+		final ResultsTable rt = convertService.convert(duplicateHeadings,
+			ResultsTable.class);
 
 		assertTablesEqual(duplicateHeadings, rt);
 	}
@@ -460,12 +461,12 @@ public class ResultsTableConversionTest {
 	public void testResultsTableUnwrapping() {
 		final Table<?, ?> wrapped = new ResultsTableWrapper(table);
 		assertTrue(convertService.getHandler(wrapped,
-			ij.measure.ResultsTable.class) instanceof ResultsTableUnwrapper);
+			ResultsTable.class) instanceof ResultsTableUnwrapper);
 	}
 
 	// -- Helper methods --
 
-	private void assertTablesEqual(final ij.measure.ResultsTable expected,
+	private void assertTablesEqual(final ResultsTable expected,
 		final Table<?, ?> actual)
 	{
 		final int ijColumnCount = computeColumnCount(expected);
@@ -491,7 +492,7 @@ public class ResultsTableConversionTest {
 	}
 
 	private void assertTablesEqual(final Table<?, ?> expected,
-		final ij.measure.ResultsTable actual)
+		final ResultsTable actual)
 	{
 		assertEquals(expected.getColumnCount(), computeColumnCount(actual));
 		assertEquals(expected.getRowCount(), actual.size());
@@ -546,7 +547,7 @@ public class ResultsTableConversionTest {
 		return t;
 	}
 
-	private static int computeColumnCount(final ij.measure.ResultsTable table) {
+	private static int computeColumnCount(final ResultsTable table) {
 		int count = 0;
 		for (int i = 0; i <= table.getLastColumn(); i++)
 			if (table.columnExists(i)) count++;

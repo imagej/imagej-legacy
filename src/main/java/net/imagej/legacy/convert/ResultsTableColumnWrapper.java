@@ -42,7 +42,7 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.stream.IntStream;
 
-import net.imagej.table.GenericColumn;
+import org.scijava.table.GenericColumn;
 
 /**
  * Wraps a {@link ResultsTable} column as a {@link GenericColumn}.

@@ -31,20 +31,22 @@
 
 package net.imagej.legacy.convert;
 
+import ij.measure.ResultsTable;
+
 import org.scijava.Priority;
 import org.scijava.convert.AbstractConverter;
 import org.scijava.convert.Converter;
 import org.scijava.plugin.Plugin;
 
 /**
- * Converts a {@link ResultsTableWrapper} to a {@link ij.measure.ResultsTable}
+ * Converts a {@link ResultsTableWrapper} to a {@link ResultsTable}
  * via unwrapping.
  *
  * @author Alison Walter
  */
 @Plugin(type = Converter.class, priority = Priority.VERY_HIGH)
 public class ResultsTableUnwrapper extends
-	AbstractConverter<ResultsTableWrapper, ij.measure.ResultsTable>
+	AbstractConverter<ResultsTableWrapper, ResultsTable>
 {
 
 	@Override
@@ -53,8 +55,8 @@ public class ResultsTableUnwrapper extends
 	}
 
 	@Override
-	public Class<ij.measure.ResultsTable> getOutputType() {
-		return ij.measure.ResultsTable.class;
+	public Class<ResultsTable> getOutputType() {
+		return ResultsTable.class;
 	}
 
 	@Override

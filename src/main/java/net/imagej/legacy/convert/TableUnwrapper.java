@@ -31,12 +31,11 @@
 
 package net.imagej.legacy.convert;
 
-import net.imagej.table.Table;
-
 import org.scijava.Priority;
 import org.scijava.convert.AbstractConverter;
 import org.scijava.convert.Converter;
 import org.scijava.plugin.Plugin;
+import org.scijava.table.Table;
 
 /**
  * Converts a {@link TableWrapper} to a {@link Table}, by unwrapping it.
