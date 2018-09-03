@@ -122,19 +122,29 @@ public class IJ1MacroEngine extends AbstractScriptEngine {
 		inVars.putAll(engineScopeBindings);
 		if (module != null) inVars.putAll(module.getInputs());
 
-		final StringBuilder pre = new StringBuilder();
+		final StringBuilder prefix = new StringBuilder();
+		final StringBuilder suffix = new StringBuilder();
+		
+		// prefix contains var declarations and a call to initializeSciJavaParameters()
+		prefix.append("var ");
+		// suffix contains initializeSciJavaParameters()
+		suffix.append("function initializeSciJavaParameters() {\n");
 
 		// during macro execution, save a reference to the ij.macro.Interpreter
 		final String method = "\"" + getClass().getName() + ".saveInterpreter\"";
-		pre.append("call(" + method + ");\n");
+		suffix.append("  call(" + method + ");\n");
 
 		// prepend variable assignments to the macro
 		for (final Entry<String, Object> entry : inVars.entrySet()) {
-			appendVar(pre, entry.getKey(), entry.getValue());
+			appendDeclaration(prefix, entry.getKey());
+			appendVar(suffix, entry.getKey(), entry.getValue());
 		}
 
+		prefix.append("; initializeSciJavaParameters(); ");
+		suffix.append("}\n");
+
 		// run the macro!
-		final String returnValue = ij1Helper.runMacro(pre + macro);
+		final String returnValue = ij1Helper.runMacro(prefix + macro + "\n" + suffix);
 
 		// retrieve the interpreter used
 		final Object interpreter = interpreters.get();
@@ -142,7 +152,13 @@ public class IJ1MacroEngine extends AbstractScriptEngine {
 
 		// populate bindings with the results
 		for (final String var : ij1Helper.getVariables(interpreter)) {
-			final String name = var.substring(0, var.indexOf('\t'));
+			String name = var.substring(0, var.indexOf('\t'));
+			// global variables contain a ' (g)' suffix, see:
+			// https://github.com/imagej/imagej1/blob/ac613d3/ij/macro/Interpreter.java#L2042-L2044
+			final String globalSuffix = " (g)";
+			if (name.endsWith(globalSuffix)) {
+				name = name.substring(0, name.indexOf(globalSuffix));
+			}
 			engineScopeBindings.put(name, ij1Helper.getVariable(interpreter, name));
 		}
 
@@ -195,7 +211,7 @@ public class IJ1MacroEngine extends AbstractScriptEngine {
 
 	// -- Helper methods --
 
-	private void appendVar(final StringBuilder pre, //
+	private void appendVar(final StringBuilder sb, //
 		final String key, final Object value)
 	{
 		// check for illegal identifiers
@@ -203,7 +219,15 @@ public class IJ1MacroEngine extends AbstractScriptEngine {
 		if (key.matches(".*[^a-zA-Z0-9_].*")) return;
 
 		if (value == null) return;
-		pre.append(key).append(" = ").append(varValue(value, true)).append(";\n");
+		sb.append(key).append(" = ").append(varValue(value, true)).append(";\n");
+	}
+
+	private void appendDeclaration(final StringBuilder pre, final String key) {
+		// check for illegal identifiers
+		if (ArrayUtils.contains(RESERVED_WORDS, key)) return;
+		if (key.matches(".*[^a-zA-Z0-9_].*")) return;
+
+		pre.append(key + ",");
 	}
 
 	private String varValue(final Object v, final boolean top) {
