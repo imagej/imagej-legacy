@@ -35,8 +35,11 @@ import ij.plugin.frame.RoiManager;
 
 import org.scijava.Priority;
 import org.scijava.module.Module;
+import org.scijava.module.ModuleItem;
+import org.scijava.module.ModuleService;
 import org.scijava.module.process.AbstractSingleInputPreprocessor;
 import org.scijava.module.process.PreprocessorPlugin;
+import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 
 /**
@@ -47,18 +50,28 @@ import org.scijava.plugin.Plugin;
  */
 @Plugin(type = PreprocessorPlugin.class, priority = Priority.VERY_HIGH)
 public class RoiManagerPreprocessor extends AbstractSingleInputPreprocessor {
+	
+	@Parameter
+	private ModuleService moduleService;
 
 	// -- ModuleProcessor methods --
 
 	@Override
 	public void process(final Module module) {
 		// assign singleton RoiManager to single RoiManager input
-		final String roiManagerInput = getSingleInput(module, RoiManager.class);
+		final ModuleItem<RoiManager> roiManagerInput = moduleService.getSingleInput(
+			module, RoiManager.class);
 		if (roiManagerInput != null) {
-			final RoiManager roiManager = RoiManager.getInstance();
+			RoiManager roiManager;
+			if (roiManagerInput.isRequired()) {
+				roiManager = RoiManager.getRoiManager();
+			}
+			else {
+				roiManager = RoiManager.getInstance();
+			}
 			if (roiManager == null) return;
-			module.setInput(roiManagerInput, roiManager);
-			module.resolveInput(roiManagerInput);
+			module.setInput(roiManagerInput.getName(), roiManager);
+			module.resolveInput(roiManagerInput.getName());
 		}
 	}
 }
