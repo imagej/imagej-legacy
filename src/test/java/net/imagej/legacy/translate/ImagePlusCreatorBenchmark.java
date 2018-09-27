@@ -77,6 +77,7 @@ public class ImagePlusCreatorBenchmark
 	private final Dataset deepPlanarImg = makeDataset( PlanarImgs.unsignedBytes( deepDims ) );
 	private final Dataset small2dArrayImg = makeDataset( ArrayImgs.unsignedBytes( 10, 10 ) );
 	private final Dataset big2dArrayImg = makeDataset( ArrayImgs.unsignedBytes( 10000, 10000 ) );
+	private final Dataset cubicCellImgWithPlanarCells = makeDataset( new CellImgFactory<>( new UnsignedByteType(), 1000, 1000, 1 ).create( cubicDims ) );
 
 	@Benchmark
 	public void testSmallCellImg() {
@@ -116,6 +117,11 @@ public class ImagePlusCreatorBenchmark
 	@Benchmark
 	public void testLarge2dArrayImg() {
 		creator.createLegacyImage( big2dArrayImg );
+	}
+
+	@Benchmark
+	public void testCubicCellImageWithPlanarCells() {
+		creator.createLegacyImage( cubicCellImgWithPlanarCells );
 	}
 
 	private Dataset makeDataset( Img< UnsignedByteType > deepPlanarImg )
