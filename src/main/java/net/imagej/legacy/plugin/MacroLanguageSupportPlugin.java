@@ -39,6 +39,8 @@ import javax.swing.SwingUtilities;
 
 import org.fife.rsta.ac.AbstractLanguageSupport;
 import org.fife.ui.autocomplete.AutoCompletion;
+import org.fife.ui.autocomplete.CompletionProvider;
+import org.fife.ui.autocomplete.LanguageAwareCompletionProvider;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rtextarea.ToolTipSupplier;
 import org.scijava.module.ModuleService;
@@ -70,7 +72,7 @@ public class MacroLanguageSupportPlugin extends AbstractLanguageSupport
 
 	@Override
 	public void install(final RSyntaxTextArea rSyntaxTextArea) {
-		final AutoCompletion ac = createAutoCompletion(getMacroAutoCompletionProvider());
+		final AutoCompletion ac = createAutoCompletion(getCompletionProvider());
 		ac.setAutoActivationDelay(100);
 		ac.setAutoActivationEnabled(true);
 		ac.setShowDescWindow(true);
@@ -81,6 +83,11 @@ public class MacroLanguageSupportPlugin extends AbstractLanguageSupport
 			rSyntaxTextArea));
 
 		rSyntaxTextArea.setToolTipSupplier(getMacroAutoCompletionProvider());
+	}
+
+	private CompletionProvider getCompletionProvider() {
+		CompletionProvider provider = new LanguageAwareCompletionProvider(getMacroAutoCompletionProvider());
+		return provider;
 	}
 
 	private MacroAutoCompletionProvider getMacroAutoCompletionProvider() {
