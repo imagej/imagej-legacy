@@ -209,7 +209,7 @@ public class ScriptingAutoCompleteProvider extends DefaultCompletionProvider
         } else if (canonicalClassName.startsWith("net.imglib2.")) {
             return "https://javadoc.scijava.org/ImgLib2";
         } else if (canonicalClassName.startsWith("java.awt.")) {
-            return "https://docs.oracle.com/javase/8/docs/api/";
+            return "https://docs.oracle.com/javase/8/docs/api";
         } else {
             return "https://javadoc.scijava.org/" + defaultLibrary;
         }
