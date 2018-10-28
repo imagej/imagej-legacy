@@ -56,114 +56,24 @@ import org.scijava.ui.swing.script.LanguageSupportPlugin;
  * @author Robert Haase
  */
 @Plugin(type = LanguageSupportPlugin.class)
-public class MacroLanguageSupportPlugin extends AbstractLanguageSupport
+public class MacroLanguageSupportPlugin extends AbstractLanguageSupportPlugin
 	implements LanguageSupportPlugin
 {
+
 	@Parameter
 	ModuleService moduleService;
-
-	private final static int MINIMUM_WORD_LENGTH_TO_OPEN_PULLDOWN = 1;
 
 	@Override
 	public String getLanguageName() {
 		return "IJ1 Macro";
 	}
 
-	@Override
-	public void install(final RSyntaxTextArea rSyntaxTextArea) {
-		final AutoCompletion ac = createAutoCompletion(getCompletionProvider());
-		ac.setAutoActivationDelay(100);
-		ac.setAutoActivationEnabled(true);
-		ac.setShowDescWindow(true);
-		ac.install(rSyntaxTextArea);
-		installImpl(rSyntaxTextArea, ac);
-
-		rSyntaxTextArea.addKeyListener(new MacroAutoCompletionKeyListener(ac,
-			rSyntaxTextArea));
-
-		rSyntaxTextArea.setToolTipSupplier(getMacroAutoCompletionProvider());
-	}
-
-	private CompletionProvider getCompletionProvider() {
-		CompletionProvider provider = new LanguageAwareCompletionProvider(getMacroAutoCompletionProvider());
-		return provider;
-	}
-
-	private MacroAutoCompletionProvider getMacroAutoCompletionProvider() {
+	CompletionProvider getCompletionProvider() {
 		MacroAutoCompletionProvider provider = MacroAutoCompletionProvider
 				.getInstance();
 		provider.addModuleCompletions(moduleService);
 
 		return provider;
-	}
-
-	@Override
-	public void uninstall(final RSyntaxTextArea rSyntaxTextArea) {
-		uninstallImpl(rSyntaxTextArea);
-
-		final ArrayList<KeyListener> toRemove = new ArrayList<>();
-		for (final KeyListener keyListener : rSyntaxTextArea.getKeyListeners()) {
-			if (keyListener instanceof MacroAutoCompletionKeyListener) {
-				toRemove.add(keyListener);
-			}
-		}
-		for (final KeyListener keyListener : toRemove) {
-			rSyntaxTextArea.removeKeyListener(keyListener);
-		}
-
-	}
-
-	private class MacroAutoCompletionKeyListener implements KeyListener {
-
-		AutoCompletion ac;
-		RSyntaxTextArea textArea;
-		ArrayList<Character> disabledChars;
-
-		public MacroAutoCompletionKeyListener(final AutoCompletion ac,
-			final RSyntaxTextArea textArea)
-		{
-			this.ac = ac;
-			this.textArea = textArea;
-
-			disabledChars = new ArrayList<>();
-			disabledChars.add(' ');
-			disabledChars.add('\n');
-			disabledChars.add('\t');
-			disabledChars.add(';');
-		}
-
-		@Override
-		public void keyTyped(final KeyEvent e) {
-
-		}
-
-		@Override
-		public void keyPressed(final KeyEvent e) {
-
-		}
-
-		@Override
-		public void keyReleased(final KeyEvent e) {
-			SwingUtilities.invokeLater(() -> {
-				if (disabledChars.contains(e.getKeyChar())) {
-					if (!e.isControlDown()) {
-						// the pulldown should not be hidden if CTRL+SPACE are pressed
-						ac.hideChildWindows();
-					}
-				}
-				else if (e.getKeyCode() >= 65 // a
-				&& e.getKeyCode() <= 90 // z
-				) {
-					if (MacroAutoCompletionProvider.getInstance().getAlreadyEnteredText(
-						textArea).length() >= MINIMUM_WORD_LENGTH_TO_OPEN_PULLDOWN &&
-						MacroAutoCompletionProvider.getInstance()
-							.getCompletions(textArea).size() > 1)
-					{
-						ac.doCompletion();
-					}
-				}
-			});
-		}
 	}
 
 }

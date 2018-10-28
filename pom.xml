@@ -105,6 +105,11 @@
 			<url>http://imagej.net/User:Bnorthan</url>
 			<properties><id>bnorthan</id></properties>
 		</contributor>
+		<contributor>
+			<name>Robert Haase</name>
+			<url>http://imagej.net/User:haesleinhuepf</url>
+			<properties><id>haesleinhuepf</id></properties>
+		</contributor>
 	</contributors>
 
 	<mailingLists>
