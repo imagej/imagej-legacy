@@ -119,7 +119,7 @@ public class ScriptingAutoCompleteProvider extends DefaultCompletionProvider
         addClassToAutoCompletion(WindowService.class, "ij.window().", "ImageJ");
 
         // ij ops
-        for (String prefix : new String[]{"ops", "ij.op()."}){
+        for (String prefix : new String[]{"ops.", "ij.op()."}){
             addClassToAutoCompletion(Ops.class, prefix, "ImageJ");
 
             addClassToAutoCompletion(ColocNamespace.class, prefix + "coloc().", "ImageJ");
