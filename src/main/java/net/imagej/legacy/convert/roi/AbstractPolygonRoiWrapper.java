@@ -144,4 +144,9 @@ public abstract class AbstractPolygonRoiWrapper implements
 		return poly;
 	}
 
+	@Override
+	public int numDimensions() {
+		return 2;
+	}
+
 }

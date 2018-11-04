@@ -219,6 +219,11 @@ public class PointRoiWrapper implements IJRealRoiWrapper<PointRoi>,
 		return pts;
 	}
 
+	@Override
+	public long size() {
+		return points.getNCoordinates();
+	}
+
 	/**
 	 * {@inheritDoc}
 	 * <p>

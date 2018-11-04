@@ -36,6 +36,8 @@ import ij.gui.PolygonRoi;
 import ij.gui.Roi;
 import ij.process.FloatPolygon;
 
+import java.util.Collection;
+
 import net.imagej.legacy.convert.roi.AbstractPolygonRoiWrapper;
 import net.imagej.legacy.convert.roi.Rois;
 import net.imglib2.RealLocalizable;
@@ -142,6 +144,20 @@ public class PolylineRoiWrapper extends AbstractPolygonRoiWrapper implements
 	@Override
 	public void addVertex(final int index, final RealLocalizable vertex) {
 		throw new UnsupportedOperationException("addVertex");
+	}
+
+	/**
+	 * This will <strong>always</strong> throw an
+	 * {@code UnsupportedOperationException}.
+	 *
+	 * @throws UnsupportedOperationException cannot add new vertices to the
+	 *           underlying {@link PolygonRoi}
+	 */
+	@Override
+	public void addVertices(final int index,
+		final Collection<RealLocalizable> vertices)
+	{
+		throw new UnsupportedOperationException("addVertices");
 	}
 
 	/**
