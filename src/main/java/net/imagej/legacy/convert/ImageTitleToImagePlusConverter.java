@@ -36,7 +36,6 @@ import ij.WindowManager;
 
 import java.util.Collection;
 
-import org.scijava.convert.AbstractConverter;
 import org.scijava.convert.ConvertService;
 import org.scijava.convert.Converter;
 import org.scijava.plugin.Plugin;
@@ -63,7 +62,7 @@ import org.scijava.widget.WidgetModel;
  */
 @Plugin(type = Converter.class)
 public class ImageTitleToImagePlusConverter extends
-	AbstractConverter<ImageTitleToImagePlusConverter.ImageTitle, ImagePlus>
+	AbstractLegacyConverter<ImageTitleToImagePlusConverter.ImageTitle, ImagePlus>
 {
 
 	// -- Converter methods --
@@ -71,6 +70,7 @@ public class ImageTitleToImagePlusConverter extends
 	@Override
 	@SuppressWarnings("unchecked")
 	public <T> T convert(final Object src, final Class<T> dest) {
+		if (!legacyEnabled()) throw new UnsupportedOperationException();
 		return src instanceof ImageTitle ? (T) ((ImageTitle) src).imp : null;
 	}
 

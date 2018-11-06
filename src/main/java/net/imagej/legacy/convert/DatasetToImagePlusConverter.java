@@ -33,20 +33,15 @@ package net.imagej.legacy.convert;
 
 import ij.ImagePlus;
 
-import java.lang.reflect.Type;
 import java.util.Collection;
 
 import net.imagej.Dataset;
-import net.imagej.legacy.LegacyService;
 
 import org.scijava.Priority;
-import org.scijava.convert.AbstractConverter;
 import org.scijava.convert.Converter;
 import org.scijava.object.ObjectService;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
-import org.scijava.util.ConversionUtils;
-import org.scijava.util.GenericUtils;
 
 /**
  * {@link Converter} implementation for converting {@link Dataset} to a
@@ -57,14 +52,12 @@ import org.scijava.util.GenericUtils;
  * </p>
  *
  * @author Mark Hiner
+ * @author Curtis Rueden
  */
 @Plugin(type = Converter.class, priority = Priority.LOW)
 public class DatasetToImagePlusConverter extends
-	AbstractConverter<Dataset, ImagePlus>
+	AbstractLegacyConverter<Dataset, ImagePlus>
 {
-
-	@Parameter(required = false)
-	private LegacyService legacyService;
 
 	@Parameter(required = false)
 	private ObjectService objectService;
@@ -72,39 +65,13 @@ public class DatasetToImagePlusConverter extends
 	// -- Converter methods --
 
 	@Override
-	public boolean canConvert(final Class<?> src, final Type dest) {
-		return canConvert(src, GenericUtils.getClass(dest));
-	}
-
-	@Override
-	public boolean canConvert(final Class<?> src, final Class<?> dest) {
-		if (legacyService == null || legacyService.getIJ1Helper() == null) return false;
-		return ConversionUtils.canCast(src, Dataset.class) &&
-			legacyService.getIJ1Helper().isImagePlus(dest);
-	}
-
-	@Override
-	public boolean canConvert(final Object src, final Type dest) {
-		return canConvert(src.getClass(), dest);
-	}
-
-	@Override
-	public boolean canConvert(final Object src, final Class<?> dest) {
-		return canConvert(src.getClass(), dest);
-	}
-
-	@Override
-	public Object convert(final Object src, final Type dest) {
-		return convert(src, GenericUtils.getClass(dest));
-	}
-
-	@SuppressWarnings("unchecked")
-	@Override
 	public <T> T convert(final Object src, final Class<T> dest) {
-		if (legacyService == null) throw new UnsupportedOperationException();
+		if (!legacyEnabled()) throw new UnsupportedOperationException();
 		final Dataset d = (Dataset) src;
 		final Object imp = legacyService.getImageMap().registerDataset(d);
-		return (T) imp;
+		@SuppressWarnings("unchecked")
+		final T typedImp = (T) imp;
+		return typedImp;
 	}
 
 	@Override
