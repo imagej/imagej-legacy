@@ -71,7 +71,7 @@ public class ImagePlusToImageDisplayConverter extends
 
 	@Override
 	public boolean canConvert(final Class<?> src, final Class<?> dest) {
-		if (legacyService == null) return false;
+		if (legacyService == null || legacyService.getIJ1Helper() == null) return false;
 		return legacyService.getIJ1Helper().isImagePlus(src) &&
 			ConversionUtils.canCast(dest, ImageDisplay.class);
 	}
