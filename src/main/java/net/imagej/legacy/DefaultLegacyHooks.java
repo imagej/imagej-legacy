@@ -152,7 +152,7 @@ public class DefaultLegacyHooks extends LegacyHooks {
 					final Object o = interceptFileOpen(null);
 					if (o != null) {
 						if (o instanceof String) {
-							legacyService.getIJ1Helper().openPathDirectly((String) o);
+							helper.openPathDirectly((String) o);
 						}
 						return o;
 					}
@@ -448,7 +448,7 @@ public class DefaultLegacyHooks extends LegacyHooks {
 			final Window win = windows[w];
 
 			// Skip the ImageJ 1.x main window
-			if (win == null || win == legacyService.getIJ1Helper().getIJ()) {
+			if (win == null || win == helper.getIJ()) {
 				continue;
 			}
 
@@ -496,12 +496,11 @@ public class DefaultLegacyHooks extends LegacyHooks {
 
 	@Override
 	public void interceptImageWindowClose(final Object window) {
-		final IJ1Helper ij1Helper = legacyService.getIJ1Helper();
 		final Frame w = (Frame)window;
 		// When quitting, IJ1 doesn't dispose closing ImageWindows.
 		// If the quit is later canceled this would leave orphaned windows.
 		// Thus we queue any closed windows for disposal.
-		if (ij1Helper.isWindowClosed(w) && ij1Helper.quitting()) {
+		if (helper.isWindowClosed(w) && helper.quitting()) {
 			threadService().queue(new Runnable() {
 				@Override
 				public void run() {
@@ -517,7 +516,7 @@ public class DefaultLegacyHooks extends LegacyHooks {
 		// within its ij.ImageJ#run() method, which is typically, but not always,
 		// called on a separate thread by ij.ImageJ#quit(). The question is: did
 		// the shutdown originate from an IJ1 code path, or a SciJava one?
-		if (legacyService.getIJ1Helper().isDisposing()) {
+		if (helper.isDisposing()) {
 			// NB: ImageJ1 is in the process of a hard shutdown via an API call on
 			// the SciJava level. It was probably either LegacyService#dispose() or
 			// LegacyUI#dispose(), either of which triggers IJ1Helper#dispose().

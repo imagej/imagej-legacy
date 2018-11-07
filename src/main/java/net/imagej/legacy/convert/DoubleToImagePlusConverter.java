@@ -34,7 +34,6 @@ package net.imagej.legacy.convert;
 import ij.ImagePlus;
 import ij.WindowManager;
 
-import org.scijava.convert.AbstractConverter;
 import org.scijava.convert.Converter;
 import org.scijava.plugin.Plugin;
 
@@ -60,27 +59,25 @@ import org.scijava.plugin.Plugin;
  */
 @Plugin(type = Converter.class)
 public class DoubleToImagePlusConverter extends
-	AbstractConverter<Double, ImagePlus>
+	AbstractLegacyConverter<Double, ImagePlus>
 {
 
 	// -- Converter methods --
 
 	@Override
 	public boolean canConvert(final Object src, final Class<?> dest) {
-		return convert(src, ImagePlus.class) != null;
+		return legacyEnabled() && convert(src, ImagePlus.class) != null;
 	}
 
 	@Override
 	public <T> T convert(final Object src, final Class<T> dest) {
+		if (!legacyEnabled()) throw new UnsupportedOperationException();
 		if (!(src instanceof Double)) return null;
 		final Double imageID = (Double) src;
 		final ImagePlus imp = WindowManager.getImage(imageID.intValue());
-		if (imp != null) {
-			@SuppressWarnings("unchecked")
-			final T typedImp = (T) imp;
-			return typedImp;
-		}
-		return null;
+		@SuppressWarnings("unchecked")
+		final T typedImp = (T) imp;
+		return typedImp;
 	}
 
 	@Override

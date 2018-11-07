@@ -33,23 +33,18 @@ package net.imagej.legacy.convert;
 
 import ij.ImagePlus;
 
-import java.lang.reflect.Type;
 import java.util.Collection;
 
 import net.imagej.Dataset;
 import net.imagej.display.ImageDisplay;
 import net.imagej.display.ImageDisplayService;
 import net.imagej.legacy.IJ1Helper;
-import net.imagej.legacy.LegacyService;
 
 import org.scijava.Priority;
-import org.scijava.convert.AbstractConverter;
 import org.scijava.convert.Converter;
 import org.scijava.object.ObjectService;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
-import org.scijava.util.ConversionUtils;
-import org.scijava.util.GenericUtils;
 
 /**
  * {@link Converter} implementation for converting {@link ImagePlus} to a
@@ -60,54 +55,25 @@ import org.scijava.util.GenericUtils;
  * </p>
  *
  * @author Mark Hiner
+ * @author Curtis Rueden
  */
 @Plugin(type = Converter.class, priority = Priority.LOW)
 public class ImagePlusToDatasetConverter extends
-	AbstractConverter<ImagePlus, Dataset>
+	AbstractLegacyConverter<ImagePlus, Dataset>
 {
 
 	@Parameter(required = false)
 	private ImageDisplayService imageDisplayService;
 
 	@Parameter(required = false)
-	private LegacyService legacyService;
-
-	@Parameter(required = false)
 	private ObjectService objectService;
 
 	// -- Converter methods --
 
-	@Override
-	public boolean canConvert(final Class<?> src, final Type dest) {
-		return canConvert(src, GenericUtils.getClass(dest));
-	}
-
-	@Override
-	public boolean canConvert(final Class<?> src, final Class<?> dest) {
-		if (noLegacy()) return false;
-		return legacyService.getIJ1Helper().isImagePlus(src) &&
-			ConversionUtils.canCast(dest, Dataset.class);
-	}
-
-	@Override
-	public boolean canConvert(final Object src, final Type dest) {
-		return canConvert(src.getClass(), dest);
-	}
-
-	@Override
-	public boolean canConvert(final Object src, final Class<?> dest) {
-		return canConvert(src.getClass(), dest);
-	}
-
-	@Override
-	public Object convert(final Object src, final Type dest) {
-		return convert(src, GenericUtils.getClass(dest));
-	}
-
 	@SuppressWarnings("unchecked")
 	@Override
 	public <T> T convert(final Object src, final Class<T> dest) {
-		if (noLegacy() || imageDisplayService == null) {
+		if (!legacyEnabled() || imageDisplayService == null) {
 			throw new UnsupportedOperationException();
 		}
 
@@ -121,7 +87,7 @@ public class ImagePlusToDatasetConverter extends
 
 	@Override
 	public void populateInputCandidates(final Collection<Object> objects) {
-		if (noLegacy()) return;
+		if (!legacyEnabled()) return;
 
 		final IJ1Helper ij1Helper = legacyService.getIJ1Helper();
 
@@ -146,12 +112,5 @@ public class ImagePlusToDatasetConverter extends
 	@Override
 	public Class<ImagePlus> getInputType() {
 		return ImagePlus.class;
-	}
-
-	// -- Helper methods --
-
-	private boolean noLegacy() {
-		return legacyService == null || legacyService.getIJ1Helper() == null ||
-			legacyService.getImageMap() == null;
 	}
 }

@@ -51,12 +51,14 @@ public class ResultsTableToGenericTableConverter extends
 {
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public <T> T convert(final Object src, final Class<T> dest) {
 		if (src == null || dest == null) throw new NullPointerException();
 		if (!(src instanceof ResultsTable)) return null;
 
-		return (T) new ResultsTableWrapper((ResultsTable) src);
+		final ResultsTableWrapper wrapper = new ResultsTableWrapper((ResultsTable) src);
+		@SuppressWarnings("unchecked")
+		final T typedWrapper = (T) wrapper;
+		return typedWrapper;
 	}
 
 	@Override

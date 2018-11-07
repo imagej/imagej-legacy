@@ -41,6 +41,7 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 
+import net.imagej.legacy.IJ1Helper;
 import net.imagej.legacy.LegacyService;
 
 import org.scijava.MenuEntry;
@@ -71,11 +72,14 @@ public class LegacyCommandFinder {
 
 	public List<CommandInfo> findCommands() {
 		final List<CommandInfo> infos = new ArrayList<>();
+
+		if (legacyService == null) return infos;
+		final IJ1Helper ij1Helper = legacyService.getIJ1Helper();
+		if (ij1Helper == null) return infos;
+
 		final Map<String, MenuPath> menuTable = parseMenus();
-		final Hashtable<String, String> commands = //
-			legacyService.getIJ1Helper().getCommands();
-		final ClassLoader classLoader = //
-			legacyService.getIJ1Helper().getClassLoader();
+		final Hashtable<String, String> commands = ij1Helper.getCommands();
+		final ClassLoader classLoader = ij1Helper.getClassLoader();
 		for (final String key : commands.keySet()) {
 			final CommandInfo pe = createEntry(key, commands, menuTable, classLoader);
 			if (pe != null) infos.add(pe);

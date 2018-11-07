@@ -31,57 +31,32 @@
 
 package net.imagej.legacy.convert;
 
-import ij.ImagePlus;
+import net.imagej.legacy.LegacyService;
 
-import java.util.Collection;
-
-import net.imagej.display.ImageDisplay;
-
-import org.scijava.Priority;
+import org.scijava.convert.AbstractConverter;
 import org.scijava.convert.Converter;
-import org.scijava.object.ObjectService;
 import org.scijava.plugin.Parameter;
-import org.scijava.plugin.Plugin;
 
 /**
- * {@link Converter} implementation for converting {@link ImageDisplay} to an
- * {@link ImagePlus}.
+ * Base {@link Converter} class for converting ImageJ 1.x data structures.
  *
  * @author Curtis Rueden
  */
-@Plugin(type = Converter.class, priority = Priority.LOW)
-public class ImageDisplayToImagePlusConverter extends
-	AbstractLegacyConverter<ImageDisplay, ImagePlus>
-{
+public abstract class AbstractLegacyConverter<I, O> extends AbstractConverter<I, O> {
 
 	@Parameter(required = false)
-	private ObjectService objectService;
-
-	// -- Converter methods --
+	protected LegacyService legacyService;
 
 	@Override
-	public <T> T convert(final Object src, final Class<T> dest) {
-		if (!legacyEnabled()) throw new UnsupportedOperationException();
-		final ImageDisplay display = (ImageDisplay) src;
-		final Object imp = legacyService.getImageMap().registerDisplay(display);
-		@SuppressWarnings("unchecked")
-		final T typedImp = (T) imp;
-		return typedImp;
+	public boolean canConvert(final Class<?> src, final Class<?> dest) {
+		return legacyEnabled() && super.canConvert(src, dest);
 	}
 
-	@Override
-	public void populateInputCandidates(final Collection<Object> objects) {
-		if (objectService == null) return;
-		objects.addAll(objectService.getObjects(ImageDisplay.class));
-	}
+	// -- Internal methods --
 
-	@Override
-	public Class<ImagePlus> getOutputType() {
-		return ImagePlus.class;
-	}
-
-	@Override
-	public Class<ImageDisplay> getInputType() {
-		return ImageDisplay.class;
+	protected boolean legacyEnabled() {
+		return legacyService != null && //
+			legacyService.getIJ1Helper() != null && //
+			legacyService.getImageMap() != null;
 	}
 }

@@ -33,20 +33,14 @@ package net.imagej.legacy.convert;
 
 import ij.ImagePlus;
 
-import java.lang.reflect.Type;
 import java.util.Collection;
 
 import net.imagej.display.ImageDisplay;
 import net.imagej.legacy.IJ1Helper;
-import net.imagej.legacy.LegacyService;
 
 import org.scijava.Priority;
-import org.scijava.convert.AbstractConverter;
 import org.scijava.convert.Converter;
-import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
-import org.scijava.util.ConversionUtils;
-import org.scijava.util.GenericUtils;
 
 /**
  * {@link Converter} implementation for converting {@link ImagePlus} to a
@@ -56,56 +50,27 @@ import org.scijava.util.GenericUtils;
  */
 @Plugin(type = Converter.class, priority = Priority.LOW)
 public class ImagePlusToImageDisplayConverter extends
-	AbstractConverter<ImagePlus, ImageDisplay>
+	AbstractLegacyConverter<ImagePlus, ImageDisplay>
 {
-
-	@Parameter(required = false)
-	private LegacyService legacyService;
 
 	// -- Converter methods --
 
 	@Override
-	public boolean canConvert(final Class<?> src, final Type dest) {
-		return canConvert(src, GenericUtils.getClass(dest));
-	}
-
-	@Override
-	public boolean canConvert(final Class<?> src, final Class<?> dest) {
-		if (legacyService == null) return false;
-		return legacyService.getIJ1Helper().isImagePlus(src) &&
-			ConversionUtils.canCast(dest, ImageDisplay.class);
-	}
-
-	@Override
-	public boolean canConvert(final Object src, final Type dest) {
-		return canConvert(src.getClass(), dest);
-	}
-
-	@Override
-	public boolean canConvert(final Object src, final Class<?> dest) {
-		return canConvert(src.getClass(), dest);
-	}
-
-	@Override
-	public Object convert(final Object src, final Type dest) {
-		return convert(src, GenericUtils.getClass(dest));
-	}
-
-	@SuppressWarnings("unchecked")
-	@Override
 	public <T> T convert(final Object src, final Class<T> dest) {
-		if (legacyService == null) throw new UnsupportedOperationException();
+		if (!legacyEnabled()) throw new UnsupportedOperationException();
 
 		// Convert using the LegacyImageMap
 		final ImageDisplay display =
 			legacyService.getImageMap().registerLegacyImage((ImagePlus) src);
 
-		return (T) display;
+		@SuppressWarnings("unchecked")
+		final T typedDisplay = (T) display;
+		return typedDisplay;
 	}
 
 	@Override
 	public void populateInputCandidates(final Collection<Object> objects) {
-		if (legacyService == null) return;
+		if (!legacyEnabled()) return;
 
 		final IJ1Helper ij1Helper = legacyService.getIJ1Helper();
 

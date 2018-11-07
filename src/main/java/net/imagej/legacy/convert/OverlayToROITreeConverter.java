@@ -70,9 +70,11 @@ public class OverlayToROITreeConverter extends
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public <T> T convert(Object src, Class<T> dest) {
-		if (!getInputType().isInstance(src)) throw new IllegalArgumentException(
-			"Unexpected source type: " + src.getClass());
+	public <T> T convert(final Object src, final Class<T> dest) {
+		if (!getInputType().isInstance(src)) {
+			throw new IllegalArgumentException("Unexpected source type: " + //
+				src.getClass());
+		}
 		if (!getOutputType().isAssignableFrom(dest))
 			throw new IllegalArgumentException("Unexpected output class: " + dest);
 
