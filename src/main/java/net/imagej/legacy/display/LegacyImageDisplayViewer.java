@@ -64,7 +64,7 @@ public class LegacyImageDisplayViewer extends AbstractImageDisplayViewer
 	implements LegacyDisplayViewer
 {
 
-	@Parameter
+	@Parameter(required = false)
 	private LegacyService legacyService;
 
 	@Parameter
@@ -91,7 +91,14 @@ public class LegacyImageDisplayViewer extends AbstractImageDisplayViewer
 
 	@Override
 	public boolean canView(final Display<?> d) {
-		if (!(d instanceof ImageDisplay)) return false;
+		if (!(d instanceof ImageDisplay) || //
+			legacyService == null || //
+			!legacyService.isActive() || //
+			legacyService.getIJ1Helper() == null || //
+			legacyService.getImageMap() == null)
+		{
+			return false;
+		}
 		// NB: ImagePlus only supports images with at most five dimensions.
 		return getDataset(((ImageDisplay) d).getActiveView()).numDimensions() <= 5;
 	}
