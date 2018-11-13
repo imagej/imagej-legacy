@@ -73,6 +73,7 @@ import org.scijava.options.OptionsService;
 import org.scijava.ui.awt.AWTColors;
 import org.scijava.util.ClassUtils;
 import org.scijava.util.ColorRGB;
+import org.scijava.util.Types;
 
 /**
  * The options synchronizer bidirectionally synchronizes modern ImageJ options
@@ -608,7 +609,7 @@ public class OptionsSynchronizer {
 
 	private Roi getIJ1DefaultRoi() {
 		final Field field =
-			ClassUtils.getField(ij.plugin.OverlayCommands.class, "defaultRoi");
+			Types.field(ij.plugin.OverlayCommands.class, "defaultRoi");
 		final Object obj = ClassUtils.getValue(field, null);
 		return (Roi) obj;
 	}
@@ -649,33 +650,33 @@ public class OptionsSynchronizer {
 
 	private void setIJ1DefaultStrokeWidth(final double width) {
 		final Field field =
-			ClassUtils.getField(RectToolOptions.class, "defaultStrokeWidth");
+			Types.field(RectToolOptions.class, "defaultStrokeWidth");
 		ClassUtils.setValue(field, null, width);
 	}
 
 	private double getIJ1DefaultStrokeWidth() {
 		final Field field =
-			ClassUtils.getField(RectToolOptions.class, "defaultStrokeWidth");
+			Types.field(RectToolOptions.class, "defaultStrokeWidth");
 		return (Double) ClassUtils.getValue(field, null);
 	}
 
 	private void setIJ1WandMode(final String mode) {
-		final Field field = ClassUtils.getField(WandToolOptions.class, "mode");
+		final Field field = Types.field(WandToolOptions.class, "mode");
 		ClassUtils.setValue(field, null, mode);
 	}
 
 	private String getIJ1WandMode() {
-		final Field field = ClassUtils.getField(WandToolOptions.class, "mode");
+		final Field field = Types.field(WandToolOptions.class, "mode");
 		return (String) ClassUtils.getValue(field, null);
 	}
 
 	private void setIJ1WandTolerance(final double tol) {
-		final Field field = ClassUtils.getField(WandToolOptions.class, "tolerance");
+		final Field field = Types.field(WandToolOptions.class, "tolerance");
 		ClassUtils.setValue(field, null, tol);
 	}
 
 	private double getIJ1WandTolerance() {
-		final Field field = ClassUtils.getField(WandToolOptions.class, "tolerance");
+		final Field field = Types.field(WandToolOptions.class, "tolerance");
 		return (Double) ClassUtils.getValue(field, null);
 	}
 
@@ -688,7 +689,7 @@ public class OptionsSynchronizer {
 	 */
 	private Field getCompilerField(String fieldName) {
 		try {
-			return ClassUtils.getField(ij.plugin.Compiler.class, fieldName);
+			return Types.field(ij.plugin.Compiler.class, fieldName);
 		}
 		catch (Throwable t) {
 			return null;

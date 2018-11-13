@@ -54,10 +54,10 @@ import org.scijava.search.SearchResult;
 import org.scijava.search.module.ModuleSearchResult;
 import org.scijava.ui.UIService;
 import org.scijava.util.AppUtils;
-import org.scijava.util.ClassUtils;
 import org.scijava.util.FileUtils;
 import org.scijava.util.Manifest;
 import org.scijava.util.POM;
+import org.scijava.util.Types;
 import org.xml.sax.SAXException;
 
 /**
@@ -84,7 +84,7 @@ public class SourceSearchActionFactory implements SearchActionFactory {
 
 	@Override
 	public SearchAction create(final SearchResult result) {
-		return new DefaultSearchAction("Source", false, //
+		return new DefaultSearchAction("Source", //
 			() -> source(((ModuleSearchResult) result).info()));
 	}
 
@@ -241,7 +241,7 @@ public class SourceSearchActionFactory implements SearchActionFactory {
 		final String artifactId)
 	{
 		try {
-			final URL location = ClassUtils.getLocation(c);
+			final URL location = Types.location(c);
 			if (!location.getProtocol().equals("file") ||
 				location.toString().endsWith(".jar"))
 			{

@@ -101,7 +101,7 @@ import org.scijava.platform.event.AppPreferencesEvent;
 import org.scijava.platform.event.AppQuitEvent;
 import org.scijava.plugin.Parameter;
 import org.scijava.script.ScriptService;
-import org.scijava.util.ClassUtils;
+import org.scijava.util.Types;
 
 /**
  * A helper class to interact with ImageJ 1.x.
@@ -851,9 +851,18 @@ public class IJ1Helper extends AbstractContextual {
 		Collections.sort(items);
 		for (final Item item : items) {
 			if (ij1Commands.containsKey(item.name)) {
+				String jarPath;
+				try {
+					final URL location = Types.location(item.info.loadDelegateClass());
+					jarPath = location == null ? "<unknown>" : location.toString();
+				}
+				catch (final ClassNotFoundException exc) {
+					log.error(exc);
+					jarPath = "<error>";
+				}
 				log.info("Overriding " + item.name + //
 					"; identifier: " + item.identifier + //
-					"; jar: " + ClassUtils.getLocation(item.info.getDelegateClassName()));
+					"; jar: " + jarPath);
 				if (wrapper != null) try {
 					wrapper.create(item.path, true);
 				}

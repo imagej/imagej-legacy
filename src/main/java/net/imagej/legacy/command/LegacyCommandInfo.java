@@ -38,8 +38,8 @@ import java.util.Map;
 import org.scijava.MenuPath;
 import org.scijava.command.Command;
 import org.scijava.command.CommandInfo;
-import org.scijava.util.ClassUtils;
 import org.scijava.util.Manifest;
+import org.scijava.util.Types;
 
 /**
  * Metadata about an ImageJ 1.x {@code PlugIn}.
@@ -116,7 +116,7 @@ public class LegacyCommandInfo extends CommandInfo {
 	public String getLocation() {
 		final Class<?> c = loadLegacyClass();
 		if (c == null) return "<unknown>";
-		final URL url = ClassUtils.getLocation(c);
+		final URL url = Types.location(c);
 		return url == null ? null : url.toExternalForm();
 	}
 
@@ -154,6 +154,6 @@ public class LegacyCommandInfo extends CommandInfo {
 
 	private synchronized void initCommandClass() {
 		if (ij1Class != null) return;
-		ij1Class = ClassUtils.loadClass(className, classLoader, true);
+		ij1Class = Types.load(className, classLoader, true);
 	}
 }

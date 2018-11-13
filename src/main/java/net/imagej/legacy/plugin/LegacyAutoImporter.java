@@ -45,8 +45,8 @@ import org.scijava.log.StderrLogService;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 import org.scijava.ui.swing.script.AutoImporter;
-import org.scijava.util.ClassUtils;
 import org.scijava.util.FileUtils;
+import org.scijava.util.Types;
 
 @Plugin(type = AutoImporter.class)
 public class LegacyAutoImporter implements AutoImporter {
@@ -79,7 +79,7 @@ public class LegacyAutoImporter implements AutoImporter {
 		final Pattern prefixPattern = Pattern.compile(builder.toString());
 
 		for (String baseClassName : classNames) {
-			URL base = ClassUtils.getLocation(baseClassName);
+			URL base = Types.location(Types.load(baseClassName));
 			if (base == null) {
 				continue;
 			}
