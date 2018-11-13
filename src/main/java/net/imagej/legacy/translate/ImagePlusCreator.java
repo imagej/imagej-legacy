@@ -114,8 +114,11 @@ public class ImagePlusCreator extends AbstractContextual
 			return PlanarImgToVirtualStack.wrap( imgPlus );
 		if( ArrayImgToVirtualStack.isSupported( imgPlus ) )
 			return ArrayImgToVirtualStack.wrap( imgPlus );
-		if( Util.getTypeFromInterval( imgPlus ) instanceof BitType )
-			return ImgToVirtualStack.wrapAndScaleBitType( (ImgPlus<BitType>) imgPlus );
+		if( Util.getTypeFromInterval( imgPlus ) instanceof BitType ) {
+			@SuppressWarnings("unchecked")
+			final ImgPlus<BitType> bitImgPlus = (ImgPlus<BitType>) imgPlus;
+			return ImgToVirtualStack.wrapAndScaleBitType( bitImgPlus );
+		}
 		if( dataset.isRGBMerged() && ImgPlusViews.canFuseColor( imgPlus ) )
 			return ImgToVirtualStack.wrap( ImgPlusViews.fuseColor( imgPlus ) );
 		return ImgToVirtualStack.wrap( imgPlus );
