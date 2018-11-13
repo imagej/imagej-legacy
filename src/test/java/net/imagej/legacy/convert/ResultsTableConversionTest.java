@@ -546,7 +546,7 @@ public class ResultsTableConversionTest {
 		return t;
 	}
 
-	private int computeColumnCount(final ij.measure.ResultsTable table) {
+	private static int computeColumnCount(final ij.measure.ResultsTable table) {
 		int count = 0;
 		for (int i = 0; i <= table.getLastColumn(); i++)
 			if (table.columnExists(i)) count++;
