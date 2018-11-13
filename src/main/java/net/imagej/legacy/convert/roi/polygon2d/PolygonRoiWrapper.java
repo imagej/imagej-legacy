@@ -43,6 +43,7 @@ import net.imagej.legacy.convert.roi.Rois;
 import net.imglib2.RealLocalizable;
 import net.imglib2.roi.geom.GeomMaths;
 import net.imglib2.roi.geom.real.Polygon2D;
+import net.imglib2.roi.geom.real.Polyshape;
 import net.imglib2.roi.geom.real.WritablePolygon2D;
 import net.imglib2.roi.util.RealLocalizableRealPositionable;
 
@@ -181,4 +182,15 @@ public class PolygonRoiWrapper extends AbstractPolygonRoiWrapper implements
 		}
 		else Rois.unsupported("removeVertex");
 	}
+
+	@Override
+	public int hashCode() {
+		return Polygon2D.hashCode(this);
+	}
+
+	@Override
+	public boolean equals(final Object obj) {
+		return obj instanceof Polygon2D && Polyshape.equals(this, (Polygon2D) obj);
+	}
+
 }

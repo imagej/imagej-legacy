@@ -43,6 +43,7 @@ import net.imagej.legacy.convert.roi.Rois;
 import net.imglib2.RealLocalizable;
 import net.imglib2.roi.geom.GeomMaths;
 import net.imglib2.roi.geom.real.Polyline;
+import net.imglib2.roi.geom.real.Polyshape;
 import net.imglib2.roi.geom.real.WritablePolyline;
 import net.imglib2.roi.util.RealLocalizableRealPositionable;
 import net.imglib2.util.Intervals;
@@ -175,4 +176,15 @@ public class PolylineRoiWrapper extends AbstractPolygonRoiWrapper implements
 		}
 		else throw new UnsupportedOperationException("removeVertex");
 	}
+
+	@Override
+	public int hashCode() {
+		return Polyline.hashCode(this);
+	}
+
+	@Override
+	public boolean equals(final Object obj) {
+		return obj instanceof Polyline && Polyshape.equals(this, (Polyline) obj);
+	}
+
 }

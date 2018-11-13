@@ -142,6 +142,16 @@ public class RoiWrapper implements IJRealRoiWrapper<Roi>, WritableBox {
 		return rect;
 	}
 
+	@Override
+	public int hashCode() {
+		return Box.hashCode(this);
+	}
+
+	@Override
+	public boolean equals(final Object obj) {
+		return obj instanceof Box && Box.equals(this, (Box) obj);
+	}
+
 	// -- Helper classes --
 
 	private class BoxCenter extends AbstractRealMaskPoint {

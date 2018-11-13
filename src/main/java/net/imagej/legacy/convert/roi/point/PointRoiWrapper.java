@@ -264,4 +264,15 @@ public class PointRoiWrapper implements IJRealRoiWrapper<PointRoi>,
 		return points;
 	}
 
+	@Override
+	public int hashCode() {
+		return RealPointCollection.hashCode(this);
+	}
+
+	@Override
+	public boolean equals(final Object obj) {
+		return obj instanceof RealPointCollection && //
+			RealPointCollection.equals(this, (RealPointCollection<?>) obj);
+	}
+
 }

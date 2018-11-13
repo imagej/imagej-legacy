@@ -40,6 +40,7 @@ import net.imglib2.AbstractRealLocalizable;
 import net.imglib2.RealLocalizable;
 import net.imglib2.roi.geom.GeomMaths;
 import net.imglib2.roi.geom.real.Polygon2D;
+import net.imglib2.roi.geom.real.Polyshape;
 
 import gnu.trove.list.array.TDoubleArrayList;
 
@@ -95,6 +96,16 @@ public class UnmodifiablePolygonRoiWrapper extends AbstractPolygonRoiWrapper
 		return new AbstractRealLocalizable(new double[] { fp.xpoints[pos],
 			fp.ypoints[pos] })
 		{};
+	}
+
+	@Override
+	public int hashCode() {
+		return Polygon2D.hashCode(this);
+	}
+
+	@Override
+	public boolean equals(final Object obj) {
+		return obj instanceof Polygon2D && Polyshape.equals(this, (Polygon2D) obj);
 	}
 
 }
