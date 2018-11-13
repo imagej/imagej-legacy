@@ -224,7 +224,7 @@ public class ImagePlusCreatorTest
 
 	@Test
 	public void testPlanarImgWrapping() {
-		PlanarImg< UnsignedByteType, ? > image = new PlanarImgFactory< UnsignedByteType >().create( new long[] { 2, 2, 2 }, new UnsignedByteType() );
+		PlanarImg< UnsignedByteType, ? > image = new PlanarImgFactory< >(new UnsignedByteType()).create( 2, 2, 2 );
 		AxisType[] axes = { Axes.X, Axes.Y, Axes.Z }; // TODO make giving axes superfluous
 		ImgPlus< UnsignedByteType > imgPlus = new ImgPlus<>( image, "image", axes );
 		Dataset ds = datasetService.create( imgPlus );

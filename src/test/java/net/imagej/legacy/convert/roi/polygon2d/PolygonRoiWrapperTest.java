@@ -107,7 +107,7 @@ public class PolygonRoiWrapperTest {
 	@Test
 	public void testPolygonRoiWrapperAddVertex() {
 		exception.expect(UnsupportedOperationException.class);
-		wrap.addVertex(3, new double[] { 0, 0 });
+		wrap.addVertex(3, new RealPoint(0, 0));
 	}
 
 	@Test
