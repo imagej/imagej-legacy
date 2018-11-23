@@ -40,6 +40,7 @@ import net.imagej.axis.Axes;
 import net.imagej.display.ImageDisplay;
 import net.imagej.display.ImageDisplayService;
 import net.imglib2.img.display.imagej.ArrayImgToVirtualStack;
+import net.imglib2.img.display.imagej.CellImgToVirtualStack;
 import net.imglib2.img.display.imagej.ImgPlusViews;
 import net.imglib2.img.display.imagej.ImgToVirtualStack;
 import net.imglib2.img.display.imagej.PlanarImgToVirtualStack;
@@ -110,6 +111,8 @@ public class ImagePlusCreator extends AbstractContextual
 	private static ImagePlus createImagePlus( Dataset dataset )
 	{
 		ImgPlus< ? extends RealType< ? > > imgPlus = dataset.getImgPlus();
+		if( CellImgToVirtualStack.isSupported( imgPlus ) )
+			return CellImgToVirtualStack.wrap( imgPlus );
 		if( PlanarImgToVirtualStack.isSupported( imgPlus ) )
 			return PlanarImgToVirtualStack.wrap( imgPlus );
 		if( ArrayImgToVirtualStack.isSupported( imgPlus ) )
