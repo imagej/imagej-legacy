@@ -36,11 +36,14 @@ import ij.gui.PolygonRoi;
 import ij.gui.Roi;
 import ij.process.FloatPolygon;
 
+import java.util.Collection;
+
 import net.imagej.legacy.convert.roi.AbstractPolygonRoiWrapper;
 import net.imagej.legacy.convert.roi.Rois;
 import net.imglib2.RealLocalizable;
 import net.imglib2.roi.geom.GeomMaths;
 import net.imglib2.roi.geom.real.Polyline;
+import net.imglib2.roi.geom.real.Polyshape;
 import net.imglib2.roi.geom.real.WritablePolyline;
 import net.imglib2.roi.util.RealLocalizableRealPositionable;
 import net.imglib2.util.Intervals;
@@ -145,6 +148,20 @@ public class PolylineRoiWrapper extends AbstractPolygonRoiWrapper implements
 	}
 
 	/**
+	 * This will <strong>always</strong> throw an
+	 * {@code UnsupportedOperationException}.
+	 *
+	 * @throws UnsupportedOperationException cannot add new vertices to the
+	 *           underlying {@link PolygonRoi}
+	 */
+	@Override
+	public void addVertices(final int index,
+		final Collection<RealLocalizable> vertices)
+	{
+		throw new UnsupportedOperationException("addVertices");
+	}
+
+	/**
 	 * If the wrapped {@link PolygonRoi} is not associated with an
 	 * {@link ImagePlus}, then this method will always throw an
 	 * {@code UnsupportedOperationException}. Otherwise, the vertex will be
@@ -159,4 +176,15 @@ public class PolylineRoiWrapper extends AbstractPolygonRoiWrapper implements
 		}
 		else throw new UnsupportedOperationException("removeVertex");
 	}
+
+	@Override
+	public int hashCode() {
+		return Polyline.hashCode(this);
+	}
+
+	@Override
+	public boolean equals(final Object obj) {
+		return obj instanceof Polyline && Polyshape.equals(this, (Polyline) obj);
+	}
+
 }

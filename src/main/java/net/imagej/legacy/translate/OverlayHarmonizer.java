@@ -98,6 +98,7 @@ import org.scijava.ui.awt.AWTColors;
  * @author Curtis Rueden
  * @author Barry DeZonia
  */
+@Deprecated
 public class OverlayHarmonizer extends AbstractContextual implements
 	DisplayHarmonizer
 {

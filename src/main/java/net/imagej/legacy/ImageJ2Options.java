@@ -39,6 +39,7 @@ import java.net.URL;
 import org.scijava.app.AppService;
 import org.scijava.display.DisplayService;
 import org.scijava.io.IOService;
+import org.scijava.log.LogLevel;
 import org.scijava.log.LogService;
 import org.scijava.menu.MenuConstants;
 import org.scijava.options.OptionsPlugin;
@@ -207,53 +208,11 @@ public class ImageJ2Options extends OptionsPlugin {
 
 	@SuppressWarnings("unused")
 	private void initializeLogLevel() {
-		logLevel = parseLogLevel(log.getLevel());
+		logLevel = LogLevel.prefix(log.getLevel());
 	}
 
 	@SuppressWarnings("unused")
 	private void setLogLevel() {
-		log.setLevel(parseLogLevel(logLevel));
-	}
-
-	/**
-	 * Parses a log level from a {@code String}.
-	 * 
-	 * @param level
-	 * @return the {@code int} associated with the level
-	 */
-	private int parseLogLevel(final String level) {
-		switch (level) {
-			case "NONE": return LogService.NONE;
-			case "ERROR": return LogService.ERROR;
-			case "WARN": return LogService.WARN;
-			case "INFO": return LogService.INFO;
-			case "DEBUG": return LogService.DEBUG;
-			case "TRACE": return LogService.TRACE;
-		}
-
-		return LogService.WARN;
-	}
-
-	/**
-	 * Parses a log level from an {@code int}.
-	 * 
-	 * @param level
-	 * @return the {@code String} associated with the level
-	 */
-	private String parseLogLevel(int level) {
-		if (level == LogService.NONE)
-			return "NONE";
-		if (level == LogService.ERROR)
-			return "ERROR";
-		if (level == LogService.WARN)
-			return "WARN";
-		if (level == LogService.INFO)
-			return "INFO";
-		if (level == LogService.DEBUG)
-			return "DEBUG";
-		if (level == LogService.TRACE)
-			return "TRACE";
-
-		return "" + level;
+		log.setLevel(LogLevel.value(logLevel));
 	}
 }

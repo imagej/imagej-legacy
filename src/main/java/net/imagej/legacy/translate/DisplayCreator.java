@@ -113,12 +113,9 @@ public class DisplayCreator extends AbstractContextual
 			// when an ImagePlus is created as the output of a command.
 			return imp.getTitle();
 		}
-		else {
-			if (fileInfo.url == null || fileInfo.url.isEmpty())
-				return fileInfo.directory + fileInfo.fileName;
-			else
-				return fileInfo.url;
-		}
+		if (fileInfo.url == null || fileInfo.url.isEmpty())
+			return fileInfo.directory + fileInfo.fileName;
+		return fileInfo.url;
 	}
 
 	private ImageDisplay harmonizeExceptPixels( ImagePlus imp, Dataset ds )
@@ -161,9 +158,7 @@ public class DisplayCreator extends AbstractContextual
 			// TODO: This special treatment of Img<ARGBType> is wrongly placed.
 			return splitColorChannels(colored);
 		}
-		else {
-			return VirtualStackAdapter.wrap( imp );
-		}
+		return VirtualStackAdapter.wrap( imp );
 	}
 
 	private ImgPlus<UnsignedByteType> splitColorChannels(ImgPlus<ARGBType> input) {

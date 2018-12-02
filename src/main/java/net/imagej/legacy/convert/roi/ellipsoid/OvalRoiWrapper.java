@@ -38,6 +38,7 @@ import net.imagej.legacy.convert.roi.Rois;
 import net.imglib2.RealLocalizable;
 import net.imglib2.roi.BoundaryType;
 import net.imglib2.roi.geom.real.Ellipsoid;
+import net.imglib2.roi.geom.real.SuperEllipsoid;
 import net.imglib2.roi.geom.real.WritableEllipsoid;
 import net.imglib2.roi.util.AbstractRealMaskPoint;
 import net.imglib2.roi.util.RealLocalizableRealPositionable;
@@ -171,6 +172,16 @@ public class OvalRoiWrapper implements IJRealRoiWrapper<OvalRoi>,
 	@Override
 	public OvalRoi getRoi() {
 		return oval;
+	}
+
+	@Override
+	public int hashCode() {
+		return SuperEllipsoid.hashCode(this);
+	}
+
+	@Override
+	public boolean equals(final Object obj) {
+		return obj instanceof SuperEllipsoid && SuperEllipsoid.equals(this, (SuperEllipsoid) obj);
 	}
 
 	// -- Helper classes --

@@ -174,10 +174,10 @@ public class ImagePlusCreatorTest
 		Img< UnsignedByteType > image = ArrayImgs.unsignedBytes( byteRange(1, 12), 2, 2, 3);
 		AxisType[] axes = { Axes.X, Axes.Y, Axes.CHANNEL };
 		ImgPlus< UnsignedByteType > imgPlus = new ImgPlus<>( image, "image", axes );
-		ImagePlusCreator creator = new ImagePlusCreator( context );
+		ImagePlusCreator ipc = new ImagePlusCreator( context );
 		Dataset ds = datasetService.create( imgPlus );
 		ds.setRGBMerged( true );
-		ImagePlus imagePlus = creator.createLegacyImage( ds );
+		ImagePlus imagePlus = ipc.createLegacyImage( ds );
 		ImageProcessor processor = imagePlus.getProcessor();
 		assertTrue( processor instanceof ColorProcessor );
 		assertEquals( 0xff010509, processor.getPixel(0,0) );
@@ -191,10 +191,10 @@ public class ImagePlusCreatorTest
 		Img< UnsignedByteType > image = ArrayImgs.unsignedBytes( byteRange(1, 12), 2, 1, 3, 2);
 		AxisType[] axes = { Axes.X, Axes.Y, Axes.CHANNEL, Axes.Z };
 		ImgPlus< UnsignedByteType > imgPlus = new ImgPlus<>( image, "image", axes );
-		ImagePlusCreator creator = new ImagePlusCreator( context );
+		ImagePlusCreator ipc = new ImagePlusCreator( context );
 		Dataset ds = datasetService.create( imgPlus );
 		ds.setRGBMerged( true );
-		ImagePlus imagePlus = creator.createLegacyImage( ds );
+		ImagePlus imagePlus = ipc.createLegacyImage( ds );
 		ImageProcessor processor = imagePlus.getStack().getProcessor( 1 );
 		assertTrue( processor instanceof ColorProcessor );
 		assertEquals( 0xff010305, processor.getPixel(0,0) );
@@ -209,10 +209,10 @@ public class ImagePlusCreatorTest
 		Img< UnsignedByteType > image = ArrayImgs.unsignedBytes( byteRange(1, 12), 2, 1, 2, 3);
 		AxisType[] axes = { Axes.X, Axes.Y, Axes.Z, Axes.CHANNEL };
 		ImgPlus< UnsignedByteType > imgPlus = new ImgPlus<>( image, "image", axes );
-		ImagePlusCreator creator = new ImagePlusCreator( context );
+		ImagePlusCreator ipc = new ImagePlusCreator( context );
 		Dataset ds = datasetService.create( imgPlus );
 		ds.setRGBMerged( true );
-		ImagePlus imagePlus = creator.createLegacyImage( ds );
+		ImagePlus imagePlus = ipc.createLegacyImage( ds );
 		ImageProcessor processor = imagePlus.getStack().getProcessor( 1 );
 		assertTrue( processor instanceof ColorProcessor );
 		assertEquals( 0xff010509, processor.getPixel(0,0) );
@@ -224,7 +224,7 @@ public class ImagePlusCreatorTest
 
 	@Test
 	public void testPlanarImgWrapping() {
-		PlanarImg< UnsignedByteType, ? > image = new PlanarImgFactory< UnsignedByteType >().create( new long[] { 2, 2, 2 }, new UnsignedByteType() );
+		PlanarImg< UnsignedByteType, ? > image = new PlanarImgFactory< >(new UnsignedByteType()).create( 2, 2, 2 );
 		AxisType[] axes = { Axes.X, Axes.Y, Axes.Z }; // TODO make giving axes superfluous
 		ImgPlus< UnsignedByteType > imgPlus = new ImgPlus<>( image, "image", axes );
 		Dataset ds = datasetService.create( imgPlus );
@@ -261,8 +261,8 @@ public class ImagePlusCreatorTest
 		imgPlus.setCompositeChannelCount( 7 );
 		Dataset ds = datasetService.create( imgPlus );
 		assertTrue( LegacyUtils.isColorCompatible( ds ) );
-		ImagePlusCreator creator = new ImagePlusCreator( context );
-		ImagePlus imagePlus = creator.createLegacyImage( ds );
+		ImagePlusCreator ipc = new ImagePlusCreator( context );
+		ImagePlus imagePlus = ipc.createLegacyImage( ds );
 		assertTrue( imagePlus instanceof CompositeImage );
 		ImageProcessor processor = imagePlus.getProcessor();
 		assertArrayEquals( Arrays.copyOf( values, 2 ) , ((byte[]) processor.getPixels()) );
@@ -278,8 +278,8 @@ public class ImagePlusCreatorTest
 		imgPlus.setCompositeChannelCount( 7 );
 		Dataset ds = datasetService.create( imgPlus );
 		assertTrue( LegacyUtils.isColorCompatible( ds ) );
-		ImagePlusCreator creator = new ImagePlusCreator( context );
-		ImagePlus imagePlus = creator.createLegacyImage( ds );
+		ImagePlusCreator ipc = new ImagePlusCreator( context );
+		ImagePlus imagePlus = ipc.createLegacyImage( ds );
 		assertTrue( imagePlus instanceof CompositeImage );
 	}
 

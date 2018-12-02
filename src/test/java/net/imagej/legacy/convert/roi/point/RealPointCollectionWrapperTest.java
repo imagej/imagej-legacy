@@ -76,7 +76,7 @@ public class RealPointCollectionWrapperTest {
 		wrap = new RealPointCollectionWrapper(rpc);
 
 		// NB: can't remove points without associated image
-		final ImagePlus i = IJ.createImage("Ramp", "8-bit ramp", 128, 128, 1);;
+		final ImagePlus i = IJ.createImage("Ramp", "8-bit ramp", 128, 128, 1);
 		i.setRoi(wrap);
 		wrap.setImage(i);
 	}

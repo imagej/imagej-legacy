@@ -40,6 +40,7 @@ import net.imglib2.AbstractRealLocalizable;
 import net.imglib2.RealLocalizable;
 import net.imglib2.roi.geom.GeomMaths;
 import net.imglib2.roi.geom.real.Polyline;
+import net.imglib2.roi.geom.real.Polyshape;
 import net.imglib2.util.Intervals;
 
 /**
@@ -91,6 +92,16 @@ public class UnmodifiablePolylineRoiWrapper extends AbstractPolygonRoiWrapper
 		return new AbstractRealLocalizable(new double[] { fp.xpoints[pos],
 			fp.ypoints[pos] })
 		{};
+	}
+
+	@Override
+	public int hashCode() {
+		return Polyline.hashCode(this);
+	}
+
+	@Override
+	public boolean equals(final Object obj) {
+		return obj instanceof Polyline && Polyshape.equals(this, (Polyline) obj);
 	}
 
 }

@@ -107,7 +107,7 @@ public class PolygonRoiWrapperTest {
 	@Test
 	public void testPolygonRoiWrapperAddVertex() {
 		exception.expect(UnsupportedOperationException.class);
-		wrap.addVertex(3, new double[] { 0, 0 });
+		wrap.addVertex(3, new RealPoint(0, 0));
 	}
 
 	@Test
@@ -118,7 +118,7 @@ public class PolygonRoiWrapperTest {
 
 	@Test
 	public void testPolygonRoiWrapperRemoveVertexWithImagePlus() {
-		final ImagePlus i = IJ.createImage("Ramp", "8-bit ramp", 128, 128, 1);;
+		final ImagePlus i = IJ.createImage("Ramp", "8-bit ramp", 128, 128, 1);
 		i.setRoi(poly);
 		poly.setImage(i);
 
@@ -145,7 +145,7 @@ public class PolygonRoiWrapperTest {
 
 	@Test
 	public void testUpdatedAfterPolygonRoiWrapperModified() {
-		final ImagePlus i = IJ.createImage("Ramp", "8-bit ramp", 128, 128, 1);;
+		final ImagePlus i = IJ.createImage("Ramp", "8-bit ramp", 128, 128, 1);
 		i.setRoi(poly);
 		poly.setImage(i);
 

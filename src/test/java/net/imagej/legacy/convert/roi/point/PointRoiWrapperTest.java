@@ -130,7 +130,7 @@ public class PointRoiWrapperTest {
 
 	@Test
 	public void testPointRoiWrapperRemovePointWithImagePlus() {
-		final ImagePlus i = IJ.createImage("Ramp", "8-bit ramp", 128, 128, 1);;
+		final ImagePlus i = IJ.createImage("Ramp", "8-bit ramp", 128, 128, 1);
 		i.setRoi(point);
 		point.setImage(i);
 
@@ -193,7 +193,7 @@ public class PointRoiWrapperTest {
 		assertEquals(100.25, wrap.realMax(1), 0);
 
 		// removePoint
-		final ImagePlus i = IJ.createImage("Ramp", "8-bit ramp", 128, 128, 1);;
+		final ImagePlus i = IJ.createImage("Ramp", "8-bit ramp", 128, 128, 1);
 		i.setRoi(point);
 		point.setImage(i); // wrapper needs associated ImagePlus in order to
 		// removePoint

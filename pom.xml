@@ -146,6 +146,8 @@ Institute of Molecular Cell Biology and Genetics.</license.copyrightOwners>
 		<jmh.version>1.19</jmh.version>
 		<jmh-core.version>${jmh.version}</jmh-core.version>
 		<jmh-generator-annprocess.version>${jmh.version}</jmh-generator-annprocess.version>
+
+		<imglib2-roi.version>0.7.0</imglib2-roi.version>
 	</properties>
 
 	<repositories>

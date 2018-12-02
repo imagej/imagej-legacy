@@ -36,8 +36,8 @@ import java.net.URL;
 import net.imagej.patcher.LegacyInjector;
 
 import org.junit.Test;
-import org.scijava.util.ClassUtils;
 import org.scijava.util.FileUtils;
+import org.scijava.util.Types;
 
 import javassist.ClassPool;
 import javassist.CtClass;
@@ -76,7 +76,7 @@ public class ImageJ1EncapsulationTest {
 	public void verifyEncapsulation() throws Exception {
 		final ClassPool pool = ClassPool.getDefault();
 
-		final URL directory = ClassUtils.getLocation(IJ1Helper.class);
+		final URL directory = Types.location(IJ1Helper.class);
 		final int prefixLength = directory.toString().length();
 		for (final URL url : FileUtils.listContents(directory)) {
 			final String path = url.toString().substring(prefixLength);

@@ -121,7 +121,7 @@ public class PolylineRoiWrapperTest {
 
 	@Test
 	public void testPolylineRoiWrapperRemoveVertexWithImagePlus() {
-		final ImagePlus i = IJ.createImage("Ramp", "8-bit ramp", 128, 128, 1);;
+		final ImagePlus i = IJ.createImage("Ramp", "8-bit ramp", 128, 128, 1);
 		i.setRoi(poly);
 		poly.setImage(i);
 
@@ -151,7 +151,7 @@ public class PolylineRoiWrapperTest {
 
 	@Test
 	public void testUpdatedAfterPolylineRoiWrapperModified() {
-		final ImagePlus i = IJ.createImage("Ramp", "8-bit ramp", 128, 128, 1);;
+		final ImagePlus i = IJ.createImage("Ramp", "8-bit ramp", 128, 128, 1);
 		i.setRoi(poly);
 		poly.setImage(i);
 

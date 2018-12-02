@@ -126,4 +126,14 @@ public class IJLineWrapper implements IJRealRoiWrapper<ij.gui.Line>, Line {
 		return line;
 	}
 
+	@Override
+	public int hashCode() {
+		return Line.hashCode(this);
+	}
+
+	@Override
+	public boolean equals(final Object obj) {
+		return obj instanceof Line && Line.equals(this, (Line) obj);
+	}
+
 }

@@ -331,6 +331,11 @@ public class PointRoiConversionTest {
 			pts.add(new RealPoint(new double[] { 100.5, -0.25 }));
 			return pts;
 		}
+
+		@Override
+		public long size() {
+			return 3;
+		}
 	}
 
 	private static final class TestPointMask extends AbstractRealLocalizable

@@ -38,7 +38,7 @@ import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 import org.scijava.run.AbstractCodeRunner;
 import org.scijava.run.CodeRunner;
-import org.scijava.util.ClassUtils;
+import org.scijava.util.Types;
 
 /**
  * Runs the given ImageJ 1.x {@code PlugIn} class.
@@ -101,7 +101,7 @@ public class LegacyCodeRunner extends AbstractCodeRunner {
 	// Or... make it a Converter plugin?
 	private Class<?> asClass(final Object code) {
 		if (code instanceof Class) return (Class<?>) code;
-		if (code instanceof String) return ClassUtils.loadClass((String) code);
+		if (code instanceof String) return Types.load((String) code);
 		return null;
 	}
 

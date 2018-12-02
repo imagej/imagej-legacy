@@ -36,11 +36,14 @@ import ij.gui.PolygonRoi;
 import ij.gui.Roi;
 import ij.process.FloatPolygon;
 
+import java.util.Collection;
+
 import net.imagej.legacy.convert.roi.AbstractPolygonRoiWrapper;
 import net.imagej.legacy.convert.roi.Rois;
 import net.imglib2.RealLocalizable;
 import net.imglib2.roi.geom.GeomMaths;
 import net.imglib2.roi.geom.real.Polygon2D;
+import net.imglib2.roi.geom.real.Polyshape;
 import net.imglib2.roi.geom.real.WritablePolygon2D;
 import net.imglib2.roi.util.RealLocalizableRealPositionable;
 
@@ -146,8 +149,22 @@ public class PolygonRoiWrapper extends AbstractPolygonRoiWrapper implements
 	 *           underlying {@link PolygonRoi}
 	 */
 	@Override
-	public void addVertex(final int index, final double[] vertex) {
+	public void addVertex(final int index, final RealLocalizable vertex) {
 		Rois.unsupported("addVertex");
+	}
+
+	/**
+	 * This will <strong>always</strong> throw an
+	 * {@code UnsupportedOperationException}.
+	 *
+	 * @throws UnsupportedOperationException cannot add new vertices to the
+	 *           underlying {@link PolygonRoi}
+	 */
+	@Override
+	public void addVertices(final int index,
+		final Collection<RealLocalizable> vertices)
+	{
+		Rois.unsupported("addVertices");
 	}
 
 	/**
@@ -164,6 +181,16 @@ public class PolygonRoiWrapper extends AbstractPolygonRoiWrapper implements
 			getRoi().deleteHandle(x, y);
 		}
 		else Rois.unsupported("removeVertex");
+	}
+
+	@Override
+	public int hashCode() {
+		return Polygon2D.hashCode(this);
+	}
+
+	@Override
+	public boolean equals(final Object obj) {
+		return obj instanceof Polygon2D && Polyshape.equals(this, (Polygon2D) obj);
 	}
 
 }

@@ -36,6 +36,7 @@ import ij.gui.Roi;
 import ij.process.FloatPolygon;
 
 import net.imagej.legacy.convert.roi.MaskPredicateWrapper;
+import net.imglib2.RealPoint;
 import net.imglib2.roi.geom.real.WritablePolygon2D;
 
 /**
@@ -71,7 +72,8 @@ public final class Polygon2DWrapper extends PolygonRoi implements
 		}
 		if (polygon.numVertices() < nPoints) {
 			while (polygon.numVertices() != nPoints)
-				polygon.addVertex(polygon.numVertices(), new double[] { 0, 0 });
+				polygon.addVertex(polygon.numVertices(), //
+					RealPoint.wrap(new double[] { 0, 0 }));
 		}
 
 		for (int i = 0; i < polygon.numVertices(); i++) {

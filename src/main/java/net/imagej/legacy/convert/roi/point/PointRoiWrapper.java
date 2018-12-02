@@ -219,6 +219,11 @@ public class PointRoiWrapper implements IJRealRoiWrapper<PointRoi>,
 		return pts;
 	}
 
+	@Override
+	public long size() {
+		return points.getNCoordinates();
+	}
+
 	/**
 	 * {@inheritDoc}
 	 * <p>
@@ -257,6 +262,17 @@ public class PointRoiWrapper implements IJRealRoiWrapper<PointRoi>,
 	@Override
 	public PointRoi getRoi() {
 		return points;
+	}
+
+	@Override
+	public int hashCode() {
+		return RealPointCollection.hashCode(this);
+	}
+
+	@Override
+	public boolean equals(final Object obj) {
+		return obj instanceof RealPointCollection && //
+			RealPointCollection.equals(this, (RealPointCollection<?>) obj);
 	}
 
 }
