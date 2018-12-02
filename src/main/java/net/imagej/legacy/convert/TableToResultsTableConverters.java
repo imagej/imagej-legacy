@@ -35,22 +35,21 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.imagej.table.ByteTable;
-import net.imagej.table.Column;
-import net.imagej.table.FloatTable;
-import net.imagej.table.GenericTable;
-import net.imagej.table.IntTable;
-import net.imagej.table.LongTable;
-import net.imagej.table.ResultsTable;
-import net.imagej.table.ShortTable;
-import net.imagej.table.Table;
-
 import org.scijava.convert.AbstractConverter;
 import org.scijava.convert.ConvertService;
 import org.scijava.convert.Converter;
 import org.scijava.log.LogService;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
+import org.scijava.table.ByteTable;
+import org.scijava.table.Column;
+import org.scijava.table.DoubleTable;
+import org.scijava.table.FloatTable;
+import org.scijava.table.GenericTable;
+import org.scijava.table.IntTable;
+import org.scijava.table.LongTable;
+import org.scijava.table.ShortTable;
+import org.scijava.table.Table;
 
 /**
  * Converters which convert {@link Table} to {@link ij.measure.ResultsTable}.
@@ -198,15 +197,15 @@ public final class TableToResultsTableConverters {
 		}
 	}
 
-	/** Converts a {@link ResultsTable} to a {@link ij.measure.ResultsTable}. */
+	/** Converts a {@link DoubleTable} to a {@link ij.measure.ResultsTable}. */
 	@Plugin(type = Converter.class)
 	public static final class ResultsTableToResultsTable extends
-		AbstractTableToResultsTableConverter<ResultsTable>
+		AbstractTableToResultsTableConverter<DoubleTable>
 	{
 
 		@Override
-		public Class<ResultsTable> getInputType() {
-			return ResultsTable.class;
+		public Class<DoubleTable> getInputType() {
+			return DoubleTable.class;
 		}
 	}
 

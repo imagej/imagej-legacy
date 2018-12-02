@@ -37,9 +37,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 
-import net.imagej.table.Table;
-
 import org.scijava.convert.ConvertService;
+import org.scijava.table.Table;
 
 public class TableListWrapper implements List<ij.measure.ResultsTable> {
 

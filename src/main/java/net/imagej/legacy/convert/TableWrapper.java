@@ -38,10 +38,9 @@ import ij.measure.ResultsTable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
-import net.imagej.table.Column;
-import net.imagej.table.Table;
-
 import org.scijava.convert.ConvertService;
+import org.scijava.table.Column;
+import org.scijava.table.Table;
 
 /**
  * Wraps an {@link Table} as a {@link ij.measure.ResultsTable}.
