@@ -1,12 +1,14 @@
 package net.imagej.legacy.plugin;
 
-import org.fife.ui.autocomplete.AutoCompletion;
-import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
-
-import javax.swing.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.ArrayList;
+
+import javax.swing.SwingUtilities;
+
+import org.fife.ui.autocomplete.AutoCompletion;
+import org.fife.ui.autocomplete.CompletionProvider;
+import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 
 /**
  * AutoCompletionKeyListener
@@ -24,11 +26,15 @@ class AutoCompletionKeyListener implements KeyListener {
     RSyntaxTextArea textArea;
     ArrayList<Character> disabledChars;
 
+		private CompletionProvider provider;
+
     public AutoCompletionKeyListener(final AutoCompletion ac,
-                                     final RSyntaxTextArea textArea)
+                                     final RSyntaxTextArea textArea,
+                                     final CompletionProvider provider)
     {
         this.ac = ac;
         this.textArea = textArea;
+        this.provider = provider;
 
         disabledChars = new ArrayList<>();
         disabledChars.add(' ');
@@ -59,10 +65,9 @@ class AutoCompletionKeyListener implements KeyListener {
             else if (e.getKeyCode() >= 65 // a
                     && e.getKeyCode() <= 90 // z
             ) {
-                if (ScriptingAutoCompleteProvider.getInstance().getAlreadyEnteredText(
+                if (provider.getAlreadyEnteredText(
                         textArea).length() >= MINIMUM_WORD_LENGTH_TO_OPEN_PULLDOWN &&
-                        ScriptingAutoCompleteProvider.getInstance()
-                                .getCompletions(textArea).size() > 1)
+                        provider.getCompletions(textArea).size() > 1)
                 {
                     ac.doCompletion();
                 }

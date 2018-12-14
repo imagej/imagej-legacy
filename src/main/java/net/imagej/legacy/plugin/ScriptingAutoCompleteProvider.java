@@ -1,62 +1,17 @@
 package net.imagej.legacy.plugin;
 
-import ij.IJ;
-import ij.plugin.frame.RoiManager;
-import io.scif.SCIFIOService;
-import net.imagej.DatasetService;
-import net.imagej.ImageJ;
-import ij.ImagePlus;
-import ij.gui.Roi;
-import ij.process.ImageProcessor;
-import net.imagej.animation.AnimationService;
-import net.imagej.display.ImageDisplayService;
-import net.imagej.display.ScreenCaptureService;
-import net.imagej.display.WindowService;
-import net.imagej.lut.LUTService;
-import net.imagej.ops.Ops;
-import net.imagej.ops.coloc.ColocNamespace;
-import net.imagej.ops.convert.ConvertNamespace;
-import net.imagej.ops.copy.CopyNamespace;
-import net.imagej.ops.create.CreateNamespace;
-import net.imagej.ops.deconvolve.DeconvolveNamespace;
-import net.imagej.ops.features.haralick.HaralickNamespace;
-import net.imagej.ops.features.lbp2d.LBPNamespace;
-import net.imagej.ops.features.tamura2d.TamuraNamespace;
-import net.imagej.ops.features.zernike.ZernikeNamespace;
-import net.imagej.ops.filter.FilterNamespace;
-import net.imagej.ops.geom.GeomNamespace;
-import net.imagej.ops.image.ImageNamespace;
-import net.imagej.ops.imagemoments.ImageMomentsNamespace;
-import net.imagej.ops.labeling.LabelingNamespace;
-import net.imagej.ops.logic.LogicNamespace;
-import net.imagej.ops.math.MathNamespace;
-import net.imagej.ops.morphology.MorphologyNamespace;
-import net.imagej.ops.stats.StatsNamespace;
-import net.imagej.ops.threshold.ThresholdNamespace;
-import net.imagej.ops.topology.TopologyNamespace;
-import net.imagej.ops.transform.TransformNamespace;
-import net.imagej.render.RenderingService;
-import net.imagej.sampler.SamplerService;
-import net.imglib2.Cursor;
-import net.imglib2.IterableInterval;
-import net.imglib2.RandomAccessibleInterval;
-import net.imglib2.img.Img;
-import net.imglib2.img.array.ArrayImgs;
-import net.imglib2.img.display.imagej.ImageJFunctions;
-import net.imglib2.roi.Regions;
-import net.imglib2.view.Views;
-import org.fife.ui.autocomplete.BasicCompletion;
-import org.fife.ui.autocomplete.DefaultCompletionProvider;
-import org.scijava.command.CommandService;
-import org.scijava.display.DisplayService;
-import org.scijava.log.LogService;
-import org.scijava.module.ModuleService;
-import org.scijava.script.ScriptService;
-import org.scijava.ui.UIService;
-
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
-import java.util.RandomAccess;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.fife.ui.autocomplete.BasicCompletion;
+import org.fife.ui.autocomplete.DefaultCompletionProvider;
+import org.scijava.Context;
+import org.scijava.InstantiableException;
+import org.scijava.plugin.PluginInfo;
+import org.scijava.ui.swing.script.TextEditor;
 
 /**
  * ScriptingAutoCompleteProvider
@@ -68,86 +23,57 @@ import java.util.RandomAccess;
  */
 public class ScriptingAutoCompleteProvider extends DefaultCompletionProvider
 {
-    private static ScriptingAutoCompleteProvider instance = null;
-
-    public static ScriptingAutoCompleteProvider getInstance () {
-        if (instance == null) {
-            instance = new ScriptingAutoCompleteProvider();
-        }
-        return instance;
+    public ScriptingAutoCompleteProvider(final Context context) {
+    	List<PluginInfo<?>> plugins = context.getPluginIndex().getAll();
+    	int i = 0, size = plugins.size();
+			for (final PluginInfo<?> plugin : plugins) {
+    		if (i++ % 100 == 0) System.out.println(100f * i / size + "%");
+				try {
+					Class<?> c = plugin.loadClass();
+					final String prefix = shortName(c);
+					addClassToAutoCompletion(c, prefix + ".");
+				}
+				catch (InstantiableException exc) {
+					// FIXME
+					exc.printStackTrace();
+				}
+    	}
     }
 
-    private ScriptingAutoCompleteProvider() {
-        // imagej1
-        addClassToAutoCompletion(IJ.class, "IJ.", "ImageJ1");
-        addClassToAutoCompletion(ImagePlus.class, "imp.", "ImageJ1");
-        addClassToAutoCompletion(ImageProcessor.class, "ip.", "ImageJ1");
-        addClassToAutoCompletion(Roi.class, "roi.", "ImageJ1");
-        addClassToAutoCompletion(RoiManager.class, "roimanager.", "ImageJ1");
+    private static final Map<String, String> specialCaseNames = specialCases();
+		private static Map<String, String> specialCases() {
+			final Map<String, String> specialCases = new HashMap<>();
+			specialCases.put("net.imagej.ImageJ", "ij");
+			specialCases.put("org.scijava.SciJava", "sj");
+			return specialCases;
+		}
 
-        // image2
-        addClassToAutoCompletion(Cursor.class, "cur.", "ImageJ");
-        addClassToAutoCompletion(RandomAccess.class, "ra.", "ImageJ");
-        addClassToAutoCompletion(RandomAccessibleInterval.class, "rai.", "ImageJ");
-        addClassToAutoCompletion(Img.class, "img.", "ImageJ");
-        addClassToAutoCompletion(IterableInterval.class, "ii.", "ImageJ");
+		private String shortName(final Class<?> c) {
+			final String specialCase = specialCaseNames.get(c.getName());
+			if (specialCase != null) return specialCase;
+			final String simpleName = c.getSimpleName();
+			if (!isCapital(simpleName, 0)) return simpleName;
+			if (simpleName.length() < 2) return simpleName.toLowerCase();
+			if (isCapital(simpleName, 1)) {
+				// N>=2 capital chars followed by non-capital char: lower case first N-1 chars.
+				// Ex: PNGFormat -> pngFormat
+				int index = 2; // first non-capital index
+				while (isCapital(simpleName, index)) index++;
+				return simpleName.substring(0, index - 1).toLowerCase() + //
+					simpleName.substring(index - 1);
+			}
+			// One capital char followed by non-capital char: lower case first char.
+			// Ex: ImageJ -> imageJ
+			return simpleName.substring(0, 1).toLowerCase() + simpleName.substring(1);
+		}
 
-        // static classes
-        addClassToAutoCompletion(ArrayImgs.class, "ArrayImgs.", "ImgLib2");
-        addClassToAutoCompletion(Views.class, "Views.", "ImgLib2");
-        addClassToAutoCompletion(Regions.class, "Regions.", "ImgLib2");
-        addClassToAutoCompletion(ImageJFunctions.class, "ImageJFunctions.", "ImgLib2");
+		private boolean isCapital(String s, int index) {
+			if (index >= s.length()) return false;
+			final String ch = s.substring(index, index + 1);
+			return ch.toUpperCase().equals(ch);
+		}
 
-        // ij services and ops
-        addClassToAutoCompletion(ImageJ.class, "ij.", "ImageJ");
-        addClassToAutoCompletion(AnimationService.class, "ij.animation().", "ImageJ");
-        addClassToAutoCompletion(CommandService.class, "ij.command().", "ImageJ");
-        addClassToAutoCompletion(DatasetService.class, "ij.dataset().", "ImageJ");
-        addClassToAutoCompletion(DisplayService.class, "ij.display().", "ImageJ");
-        addClassToAutoCompletion(DisplayService.class, "display.", "ImageJ");
-        addClassToAutoCompletion(ImageDisplayService.class, "ij.imageDisplay().", "ImageJ");
-        addClassToAutoCompletion(LogService.class, "ij.log().", "ImageJ");
-        addClassToAutoCompletion(LUTService.class, "ij.lut().", "ImageJ");
-        addClassToAutoCompletion(ModuleService.class, "ij.module().", "ImageJ");
-        addClassToAutoCompletion(RenderingService.class, "ij.render().", "ImageJ");
-        addClassToAutoCompletion(SamplerService.class, "ij.sampler().", "ImageJ");
-        addClassToAutoCompletion(ScreenCaptureService.class, "ij.screenCapture().", "ImageJ");
-        addClassToAutoCompletion(SCIFIOService.class, "ij.scifio().", "ImageJ");
-        addClassToAutoCompletion(ScriptService.class, "ij.script().", "ImageJ");
-        addClassToAutoCompletion(UIService.class, "ij.ui().", "ImageJ");
-        addClassToAutoCompletion(UIService.class, "ui.", "ImageJ");
-        addClassToAutoCompletion(WindowService.class, "ij.window().", "ImageJ");
-
-        // ij ops
-        for (String prefix : new String[]{"ops.", "ij.op()."}){
-            addClassToAutoCompletion(Ops.class, prefix, "ImageJ");
-
-            addClassToAutoCompletion(ColocNamespace.class, prefix + "coloc().", "ImageJ");
-            addClassToAutoCompletion(ConvertNamespace.class, prefix + "convert().", "ImageJ");
-            addClassToAutoCompletion(CopyNamespace.class, prefix + "copy().", "ImageJ");
-            addClassToAutoCompletion(CreateNamespace.class, prefix + "create().", "ImageJ");
-            addClassToAutoCompletion(DeconvolveNamespace.class, prefix + "deconvolve().", "ImageJ");
-            addClassToAutoCompletion(FilterNamespace.class, prefix + "filter().", "ImageJ");
-            addClassToAutoCompletion(GeomNamespace.class, prefix + "geom().", "ImageJ");
-            addClassToAutoCompletion(HaralickNamespace.class, prefix + "haralick().", "ImageJ");
-            addClassToAutoCompletion(MathNamespace.class, prefix + "math().", "ImageJ");
-            addClassToAutoCompletion(MorphologyNamespace.class, prefix + "morphology().", "ImageJ");
-            addClassToAutoCompletion(ImageNamespace.class, prefix + "image().", "ImageJ");
-            addClassToAutoCompletion(ImageMomentsNamespace.class, prefix + "imagemoments().", "ImageJ");
-            addClassToAutoCompletion(LabelingNamespace.class, prefix + "labeling().", "ImageJ");
-            addClassToAutoCompletion(LBPNamespace.class, prefix + "lbp().", "ImageJ");
-            addClassToAutoCompletion(LogicNamespace.class, prefix + "logic().", "ImageJ");
-            addClassToAutoCompletion(StatsNamespace.class, prefix + "stats().", "ImageJ");
-            addClassToAutoCompletion(TamuraNamespace.class, prefix + "tamura().", "ImageJ");
-            addClassToAutoCompletion(ThresholdNamespace.class, prefix + "threshold().", "ImageJ");
-            addClassToAutoCompletion(TopologyNamespace.class, prefix + "topology().", "ImageJ");
-            addClassToAutoCompletion(TransformNamespace.class, prefix + "transform().", "ImageJ");
-            addClassToAutoCompletion(ZernikeNamespace.class, prefix + "zernike().", "ImageJ");
-        }
-
-    }
-
-    private void addClassToAutoCompletion(Class c, String prefix, String library) {
+		private void addClassToAutoCompletion(Class<?> c, String prefix) {
         Method[] methods = c.getDeclaredMethods();
         for (Method method : methods) {
 
@@ -174,9 +100,9 @@ public class ScriptingAutoCompleteProvider extends DefaultCompletionProvider
                 parameters = parameters + "-";
             }
 
-            String classLink = getUrlPrefix(c.getCanonicalName(), library) + "/" + c.getCanonicalName().replace(".", "/") + ".html";
+            String classLink = getJavadocPrefix(c.getCanonicalName()) + "/" + c.getCanonicalName().replace(".", "/") + ".html";
             String methodLink = classLink + "#" + method.getName() + parameters;
-            ////System.out.println("Link: " + link);
+            //System.out.println("Link: " + methodLink);
 
             description = "<a href=\"" + methodLink + "\">" + method.getName() + "</a><br>" + description;
 
@@ -191,15 +117,17 @@ public class ScriptingAutoCompleteProvider extends DefaultCompletionProvider
 
         }
         if (c.getSuperclass() != null && c.getSuperclass() != Object.class) {
-            addClassToAutoCompletion(c.getSuperclass(), prefix, library);
+            addClassToAutoCompletion(c.getSuperclass(), prefix);
         }
     }
 
-    protected boolean isValidChar(char ch) {
+    @Override
+		protected boolean isValidChar(char ch) {
         return Character.isLetterOrDigit(ch) || ch == '.' || ch == '"' || ch == '(' ||  ch == ')';
     }
 
-    String getUrlPrefix(String canonicalClassName, String defaultLibrary) {
+    String getJavadocPrefix(String canonicalClassName) {
+    	// TODO: Think about a more extensible way of doing this.
         if (canonicalClassName.startsWith("org.scijava.")) {
             return "https://javadoc.scijava.org/SciJava";
         } else if (canonicalClassName.startsWith("net.imagej.")) {
@@ -208,10 +136,16 @@ public class ScriptingAutoCompleteProvider extends DefaultCompletionProvider
             return "https://javadoc.scijava.org/ImageJ1";
         } else if (canonicalClassName.startsWith("net.imglib2.")) {
             return "https://javadoc.scijava.org/ImgLib2";
-        } else if (canonicalClassName.startsWith("java.awt.")) {
-            return "https://docs.oracle.com/javase/8/docs/api";
+        } else if (canonicalClassName.startsWith("io.scif.")) {
+            return "https://javadoc.scijava.org/SCIFIO";
+        } else if (canonicalClassName.startsWith("sc.fiji.")) {
+            return "https://javadoc.scijava.org/Fiji";
+        } else if (canonicalClassName.startsWith("java.")) {
+            return "https://javadoc.scijava.org/Java";
+        } else if (canonicalClassName.startsWith("javax.")) {
+            return "https://javadoc.scijava.org/Java";
         } else {
-            return "https://javadoc.scijava.org/" + defaultLibrary;
+            return null;
         }
     }
 
@@ -225,6 +159,8 @@ public class ScriptingAutoCompleteProvider extends DefaultCompletionProvider
     }
 
     public static void main(String... args){
-        ScriptingAutoCompleteProvider.getInstance();
+    	Context context = new Context();
+//        new ScriptingAutoCompleteProvider(context);
+			new TextEditor(context).setVisible(true);
     }
 }

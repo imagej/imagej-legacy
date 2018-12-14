@@ -1,6 +1,8 @@
 package net.imagej.legacy.plugin;
 
 import org.fife.ui.autocomplete.CompletionProvider;
+import org.scijava.Context;
+import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 import org.scijava.ui.swing.script.LanguageSupportPlugin;
 
@@ -14,8 +16,12 @@ import org.scijava.ui.swing.script.LanguageSupportPlugin;
  */
 @Plugin(type = LanguageSupportPlugin.class)
 public class GroovyLanguageSupportPlugin extends AbstractLanguageSupportPlugin
-        implements LanguageSupportPlugin
 {
+	@Parameter
+	private Context context;
+
+	private CompletionProvider provider;
+
     @Override
     public String getLanguageName() {
         return "groovy";
@@ -24,6 +30,7 @@ public class GroovyLanguageSupportPlugin extends AbstractLanguageSupportPlugin
 
     @Override
     CompletionProvider getCompletionProvider() {
-        return ScriptingAutoCompleteProvider.getInstance();
+    	if (provider == null) provider = new ScriptingAutoCompleteProvider(context);
+    	return provider;
     }
 }
