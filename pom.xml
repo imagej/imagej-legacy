@@ -212,11 +212,17 @@ Institute of Molecular Cell Biology and Genetics.</license.copyrightOwners>
 		</dependency>
 		<dependency>
 			<groupId>org.scijava</groupId>
+			<artifactId>scijava-plot</artifactId>
+			<version>0.1.2-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.scijava</groupId>
 			<artifactId>scijava-ui-awt</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.scijava</groupId>
 			<artifactId>scijava-ui-swing</artifactId>
+			<version>0.12.1-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.scijava</groupId>
