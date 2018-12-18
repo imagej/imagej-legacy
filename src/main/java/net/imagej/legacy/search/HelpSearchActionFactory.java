@@ -66,7 +66,7 @@ public class HelpSearchActionFactory implements SearchActionFactory {
 
 	@Override
 	public SearchAction create(final SearchResult result) {
-		return new DefaultSearchAction("Help", false, //
+		return new DefaultSearchAction("Help", //
 			() -> help(((ModuleSearchResult) result)));
 	}
 
