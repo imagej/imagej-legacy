@@ -62,6 +62,9 @@ public class MacroLanguageSupportPlugin extends AbstractLanguageSupport
 	@Parameter
 	ModuleService moduleService;
 
+	@Parameter
+	MacroExtensionAutoCompletionService macroExtensionAutoCompletionService;
+
 	private final static int MINIMUM_WORD_LENGTH_TO_OPEN_PULLDOWN = 1;
 
 	@Override
@@ -93,6 +96,7 @@ public class MacroLanguageSupportPlugin extends AbstractLanguageSupport
 		MacroAutoCompletionProvider provider = MacroAutoCompletionProvider
 				.getInstance();
 		provider.addModuleCompletions(moduleService);
+		provider.addMacroExtensionAutoCompletions(macroExtensionAutoCompletionService);
 
 		return provider;
 	}

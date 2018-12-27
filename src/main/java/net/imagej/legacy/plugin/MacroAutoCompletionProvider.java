@@ -59,6 +59,7 @@ class MacroAutoCompletionProvider extends DefaultCompletionProvider implements
 	ToolTipSupplier
 {
 	private ModuleService moduleService;
+	private MacroExtensionAutoCompletionService macroExtensionAutoCompletionService;
 
 	private static MacroAutoCompletionProvider instance = null;
 
@@ -69,6 +70,8 @@ class MacroAutoCompletionProvider extends DefaultCompletionProvider implements
 			parseFunctionsHtmlDoc("/doc/ij1macro/functions.html");
 		}
 		parseFunctionsHtmlDoc("/doc/ij1macro/functions_extd.html");
+
+
 	}
 
 	public static synchronized MacroAutoCompletionProvider getInstance() {
@@ -242,6 +245,18 @@ class MacroAutoCompletionProvider extends DefaultCompletionProvider implements
 
 				addCompletion(makeListEntry(this, headline, null, description));
 			}
+		}
+	}
+
+	public void addMacroExtensionAutoCompletions(MacroExtensionAutoCompletionService macroExtensionAutoCompletionService) {
+		if (this.macroExtensionAutoCompletionService != null) {
+			return;
+		}
+		this.macroExtensionAutoCompletionService = macroExtensionAutoCompletionService;
+
+		List<BasicCompletion> completions = macroExtensionAutoCompletionService.getCompletions(this);
+		for (BasicCompletion completion : completions) {
+			addCompletion(completion);
 		}
 	}
 }
