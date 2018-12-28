@@ -79,9 +79,7 @@ public class MacroExtensionAutoCompletionService extends
 	{
 		initializeService();
 		final ArrayList<BasicCompletion> completions = new ArrayList<>();
-		System.out.println("Completions search");
 		for (final String key : macroExtensionAutoCompletionPlugins.keySet()) {
-			System.out.println("macroext " + key);
 			final PluginInfo<MacroExtensionAutoCompletionPlugin> info =
 				macroExtensionAutoCompletionPlugins.get(key);
 
