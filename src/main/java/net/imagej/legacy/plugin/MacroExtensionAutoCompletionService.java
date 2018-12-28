@@ -27,8 +27,12 @@ public class MacroExtensionAutoCompletionService  extends AbstractPTService<Macr
 
     private HashMap<String, PluginInfo<MacroExtensionAutoCompletionPlugin>> macroExtensionAutoCompletionPlugins = new HashMap<>();
 
-    @Override
-    public void initialize() {
+    boolean initialized = false;
+
+    private void initializeService() {
+        if (initialized) {
+            return;
+        }
         for (final PluginInfo<MacroExtensionAutoCompletionPlugin> info : getPlugins()) {
             String name = info.getName();
             if (name == null || name.isEmpty()) {
@@ -36,9 +40,11 @@ public class MacroExtensionAutoCompletionService  extends AbstractPTService<Macr
             }
             macroExtensionAutoCompletionPlugins.put(name, info);
         }
+        initialized = true;
     }
 
     public List<BasicCompletion> getCompletions(CompletionProvider completionProvider) {
+        initializeService();
         ArrayList<BasicCompletion> completions = new ArrayList<BasicCompletion>();
         System.out.println("Completions search");
         for (String key : macroExtensionAutoCompletionPlugins.keySet()) {
