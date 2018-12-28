@@ -60,24 +60,10 @@ public class MacroExtensionAutoCompletionService extends
 
 	boolean initialized = false;
 
-	private void initializeService() {
-		if (initialized) {
-			return;
-		}
-		for (final PluginInfo<MacroExtensionAutoCompletionPlugin> info : getPlugins()) {
-			String name = info.getName();
-			if (name == null || name.isEmpty()) {
-				name = info.getClassName();
-			}
-			macroExtensionAutoCompletionPlugins.put(name, info);
-		}
-		initialized = true;
-	}
-
 	public List<BasicCompletion> getCompletions(
 		final CompletionProvider completionProvider)
 	{
-		initializeService();
+		if (!initialized) initializeService();
 		final ArrayList<BasicCompletion> completions = new ArrayList<>();
 		for (final String key : macroExtensionAutoCompletionPlugins.keySet()) {
 			final PluginInfo<MacroExtensionAutoCompletionPlugin> info =
@@ -94,5 +80,17 @@ public class MacroExtensionAutoCompletionService extends
 	@Override
 	public Class<MacroExtensionAutoCompletionPlugin> getPluginType() {
 		return MacroExtensionAutoCompletionPlugin.class;
+	}
+
+	private synchronized void initializeService() {
+		if (initialized) return;
+		for (final PluginInfo<MacroExtensionAutoCompletionPlugin> info : getPlugins()) {
+			String name = info.getName();
+			if (name == null || name.isEmpty()) {
+				name = info.getClassName();
+			}
+			macroExtensionAutoCompletionPlugins.put(name, info);
+		}
+		initialized = true;
 	}
 }
