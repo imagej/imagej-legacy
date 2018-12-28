@@ -15,11 +15,11 @@
 
 	<name>ImageJ Legacy Bridge</name>
 	<description>The legacy component enables backward compatibility with the legacy version of ImageJ (1.x). It contains the code necessary to translate ImageJ images into ImageJ1 format and back, so that legacy plugins can be executed faithfully.</description>
-	<url>http://imagej.net/ImageJ_Legacy</url>
+	<url>https://imagej.net/ImageJ_Legacy</url>
 	<inceptionYear>2009</inceptionYear>
 	<organization>
 		<name>ImageJ</name>
-		<url>http://imagej.net/</url>
+		<url>https://imagej.net/</url>
 	</organization>
 	<licenses>
 		<license>
@@ -32,7 +32,7 @@
 		<developer>
 			<id>ctrueden</id>
 			<name>Curtis Rueden</name>
-			<url>http://imagej.net/User:Rueden</url>
+			<url>https://imagej.net/User:Rueden</url>
 			<roles>
 				<role>founder</role>
 				<role>lead</role>
@@ -47,62 +47,62 @@
 	<contributors>
 		<contributor>
 			<name>Johannes Schindelin</name>
-			<url>http://imagej.net/User:Schindelin</url>
+			<url>https://imagej.net/User:Schindelin</url>
 			<roles><role>founder</role></roles>
 			<properties><id>dscho</id></properties>
 		</contributor>
 		<contributor>
 			<name>Barry DeZonia</name>
-			<url>http://imagej.net/User:Bdezonia</url>
+			<url>https://imagej.net/User:Bdezonia</url>
 			<properties><id>bdezonia</id></properties>
 		</contributor>
 		<contributor>
 			<name>Lee Kamentsky</name>
-			<url>http://imagej.net/User:Leek</url>
+			<url>https://imagej.net/User:Leek</url>
 			<properties><id>LeeKamentsky</id></properties>
 		</contributor>
 		<contributor>
 			<name>Jan Eglinger</name>
-			<url>http://imagej.net/User:Eglinger</url>
+			<url>https://imagej.net/User:Eglinger</url>
 			<properties><id>imagejan</id></properties>
 		</contributor>
 		<contributor>
 			<name>Tiago Ferreira</name>
-			<url>http://imagej.net/User:Tiago</url>
+			<url>https://imagej.net/User:Tiago</url>
 			<properties><id>tferr</id></properties>
 		</contributor>
 		<contributor>
 			<name>Aivar Grislis</name>
-			<url>http://imagej.net/User:Grislis</url>
+			<url>https://imagej.net/User:Grislis</url>
 			<properties><id>grislis</id></properties>
 		</contributor>
 		<contributor>
 			<name>Grant Harris</name>
-			<url>http://imagej.net/User:Harris</url>
+			<url>https://imagej.net/User:Harris</url>
 			<properties><id>tnargsirrah</id></properties>
 		</contributor>
 		<contributor>
 			<name>Mark Hiner</name>
-			<url>http://imagej.net/User:Hinerm</url>
+			<url>https://imagej.net/User:Hinerm</url>
 			<properties><id>hinerm</id></properties>
 		</contributor>
 		<contributor>
 			<name>Florian Jug</name>
-			<url>http://imagej.net/User:Jug</url>
+			<url>https://imagej.net/User:Jug</url>
 			<properties><id>fjug</id></properties>
 		</contributor>
 		<contributor>
 			<name>Rick Lentz</name>
-			<url>http://imagej.net/User:Lentz</url>
+			<url>https://imagej.net/User:Lentz</url>
 		</contributor>
 		<contributor>
 			<name>Benjamin Nanes</name>
-			<url>http://imagej.net/User:Bnanes</url>
+			<url>https://imagej.net/User:Bnanes</url>
 			<properties><id>bnanes</id></properties>
 		</contributor>
 		<contributor>
 			<name>Brian Northan</name>
-			<url>http://imagej.net/User:Bnorthan</url>
+			<url>https://imagej.net/User:Bnorthan</url>
 			<properties><id>bnorthan</id></properties>
 		</contributor>
 	</contributors>
@@ -147,7 +147,7 @@ Institute of Molecular Cell Biology and Genetics.</license.copyrightOwners>
 	<repositories>
 		<repository>
 			<id>imagej.public</id>
-			<url>http://maven.imagej.net/content/groups/public</url>
+			<url>https://maven.imagej.net/content/groups/public</url>
 		</repository>
 	</repositories>
 
