@@ -8,13 +8,13 @@
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright notice,
  *    this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
  *    and/or other materials provided with the distribution.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -28,24 +28,24 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+
 package net.imagej.legacy.plugin;
+
+import java.util.List;
 
 import org.fife.ui.autocomplete.BasicCompletion;
 import org.fife.ui.autocomplete.CompletionProvider;
 import org.scijava.plugin.SciJavaPlugin;
 
-import java.util.List;
-
 /**
- * MacroExtensionAutoCompletionPlugin
+ * MacroExtensionAutoCompletionPlugin This interface must be implemented in
+ * order to extend the auto completion list of the Script editor. Furthermore,
+ * the implementing class must be annotated with @Plugin(type =
+ * MacroExtensionAutoCompletionPlugin.class).
  *
- * This interface must be implemented in order to extend the auto completion list of the Script editor.
- * Furthermore, the implementing class must be annotated with @Plugin(type = MacroExtensionAutoCompletionPlugin.class).
- *
- * Author: @haesleinhuepf
- * December 2018
+ * @author Robert Haase
  */
+public interface MacroExtensionAutoCompletionPlugin extends SciJavaPlugin {
 
-public interface MacroExtensionAutoCompletionPlugin  extends SciJavaPlugin {
-    List<BasicCompletion> getCompletions(CompletionProvider completionProvider);
+	List<BasicCompletion> getCompletions(CompletionProvider completionProvider);
 }

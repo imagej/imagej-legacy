@@ -28,9 +28,15 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+
 package net.imagej.legacy.plugin;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
 import net.imagej.ImageJService;
+
 import org.fife.ui.autocomplete.BasicCompletion;
 import org.fife.ui.autocomplete.CompletionProvider;
 import org.scijava.plugin.AbstractPTService;
@@ -38,58 +44,57 @@ import org.scijava.plugin.Plugin;
 import org.scijava.plugin.PluginInfo;
 import org.scijava.service.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-
 /**
- * MacroExtensionAutoCompletionService
- *
- * This service manages extensions to the auto-complete pull down of the script editor.
- *
- * Author: @haesleinhuepf
- * December 2018
+ * This service manages extensions to the auto-complete pull down of the script
+ * editor.
+ * 
+ * @author Robert Haase
  */
-
-
 @Plugin(type = Service.class)
-public class MacroExtensionAutoCompletionService  extends AbstractPTService<MacroExtensionAutoCompletionPlugin> implements ImageJService {
+public class MacroExtensionAutoCompletionService extends
+	AbstractPTService<MacroExtensionAutoCompletionPlugin> implements ImageJService
+{
 
-    private HashMap<String, PluginInfo<MacroExtensionAutoCompletionPlugin>> macroExtensionAutoCompletionPlugins = new HashMap<>();
+	private final HashMap<String, PluginInfo<MacroExtensionAutoCompletionPlugin>> macroExtensionAutoCompletionPlugins =
+		new HashMap<>();
 
-    boolean initialized = false;
+	boolean initialized = false;
 
-    private void initializeService() {
-        if (initialized) {
-            return;
-        }
-        for (final PluginInfo<MacroExtensionAutoCompletionPlugin> info : getPlugins()) {
-            String name = info.getName();
-            if (name == null || name.isEmpty()) {
-                name = info.getClassName();
-            }
-            macroExtensionAutoCompletionPlugins.put(name, info);
-        }
-        initialized = true;
-    }
+	private void initializeService() {
+		if (initialized) {
+			return;
+		}
+		for (final PluginInfo<MacroExtensionAutoCompletionPlugin> info : getPlugins()) {
+			String name = info.getName();
+			if (name == null || name.isEmpty()) {
+				name = info.getClassName();
+			}
+			macroExtensionAutoCompletionPlugins.put(name, info);
+		}
+		initialized = true;
+	}
 
-    public List<BasicCompletion> getCompletions(CompletionProvider completionProvider) {
-        initializeService();
-        ArrayList<BasicCompletion> completions = new ArrayList<BasicCompletion>();
-        System.out.println("Completions search");
-        for (String key : macroExtensionAutoCompletionPlugins.keySet()) {
-            System.out.println("macroext " + key);
-            PluginInfo<MacroExtensionAutoCompletionPlugin> info = macroExtensionAutoCompletionPlugins.get(key);
+	public List<BasicCompletion> getCompletions(
+		final CompletionProvider completionProvider)
+	{
+		initializeService();
+		final ArrayList<BasicCompletion> completions = new ArrayList<>();
+		System.out.println("Completions search");
+		for (final String key : macroExtensionAutoCompletionPlugins.keySet()) {
+			System.out.println("macroext " + key);
+			final PluginInfo<MacroExtensionAutoCompletionPlugin> info =
+				macroExtensionAutoCompletionPlugins.get(key);
 
-            List<BasicCompletion> list = pluginService().createInstance(info).getCompletions(completionProvider);
-            completions.addAll(list);
+			final List<BasicCompletion> list = pluginService().createInstance(info)
+				.getCompletions(completionProvider);
+			completions.addAll(list);
 
-        }
-        return completions;
-    }
+		}
+		return completions;
+	}
 
-    @Override
-    public Class<MacroExtensionAutoCompletionPlugin> getPluginType() {
-        return MacroExtensionAutoCompletionPlugin.class;
-    }
+	@Override
+	public Class<MacroExtensionAutoCompletionPlugin> getPluginType() {
+		return MacroExtensionAutoCompletionPlugin.class;
+	}
 }
