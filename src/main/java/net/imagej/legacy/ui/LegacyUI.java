@@ -270,7 +270,7 @@ public class LegacyUI extends AbstractUserInterface implements SwingUI {
 	}
 
 	@Override
-	public File chooseFile(final File file, final String style) {
+	public File chooseFile(final String title, final File file, final String style) {
 		final File[] chosenFile = new File[1];
 
 		// Run on the EDT to avoid deadlocks, per ij.io.Opener
@@ -281,21 +281,21 @@ public class LegacyUI extends AbstractUserInterface implements SwingUI {
 				public void run() {
 					if (FileWidget.DIRECTORY_STYLE.equals(style)) {
 						// Use ImageJ1's DirectoryChooser.
-						final String dir = ij1Helper().getDirectory("Choose Folder", file);
+						final String dir = ij1Helper().getDirectory(title, file);
 						if (dir != null) {
 							chosenFile[0] = new File(dir);
 						}
 					}
 					else if (FileWidget.SAVE_STYLE.equals(style)) {
 						// Use ImageJ1's SaveDialog.
-						final File chosen = ij1Helper().saveDialog("Save", file, null);
+						final File chosen = ij1Helper().saveDialog(title, file, null);
 						if (chosen != null) {
 							chosenFile[0] = chosen;
 						}
 					}
 					else { // FileWidget.OPEN_STYLE / default behavior
 						// Use ImageJ1's OpenDialog.
-						final File chosen = ij1Helper().openDialog("Open", file);
+						final File chosen = ij1Helper().openDialog(title, file);
 						if (chosen != null) {
 							chosenFile[0] = chosen;
 						}
