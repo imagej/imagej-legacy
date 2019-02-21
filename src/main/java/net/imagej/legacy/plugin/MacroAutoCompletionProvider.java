@@ -225,7 +225,7 @@ class MacroAutoCompletionProvider extends DefaultCompletionProvider implements
 	}
 
 	protected boolean isValidChar(char ch) {
-		return Character.isLetterOrDigit(ch) || ch == '_' || ch == '.' || ch == '"' || ch == '(';
+		return Character.isLetterOrDigit(ch) || ch == '_' || ch == '.' || ch == '"';
 	}
 
 	void addModuleCompletions(ModuleService moduleService) {
