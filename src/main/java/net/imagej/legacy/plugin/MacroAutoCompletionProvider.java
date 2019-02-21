@@ -38,6 +38,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.fife.ui.autocomplete.BasicCompletion;
@@ -48,6 +50,8 @@ import org.fife.ui.rtextarea.ToolTipSupplier;
 
 import org.scijava.module.ModuleInfo;
 import org.scijava.module.ModuleService;
+
+import javax.swing.text.JTextComponent;
 
 /**
  * Creates the list of auto-completion suggestions from functions.html
@@ -240,6 +244,52 @@ class MacroAutoCompletionProvider extends DefaultCompletionProvider implements
 				addCompletion(makeListEntry(this, headline, null, description));
 			}
 		}
+	}
+
+	/**
+	 * Returns a list of <tt>Completion</tt>s in this provider with the
+	 * specified input text.
+	 *
+	 * @param inputText The input text to search for.
+	 * @return A list of {@link Completion}s, or <code>null</code> if there
+	 *         are no matching <tt>Completion</tt>s.
+	 */
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<Completion> getCompletionByInputText(String inputText) {
+		System.out.println("Searching for " + inputText);
+		ArrayList<Completion> result = new ArrayList<Completion>();
+
+		int count = 0;
+		for (Completion completion : completions) {
+			String text = completion.getInputText();
+			if (text.contains(inputText)) {
+				if (text.startsWith(inputText)) {
+					result.add(count, completion);
+				} else {
+					result.add(completion);
+				}
+			}
+		}
+
+		return result;
+	}
+
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	@SuppressWarnings("unchecked")
+	protected List<Completion> getCompletionsImpl(JTextComponent comp) {
+
+		List<Completion> retVal = new ArrayList<Completion>();
+		String text = getAlreadyEnteredText(comp);
+
+		if (text != null) {
+			retVal = getCompletionByInputText(text);
+		}
+		return retVal;
 	}
 
 	public void addMacroExtensionAutoCompletions(MacroExtensionAutoCompletionService macroExtensionAutoCompletionService) {
