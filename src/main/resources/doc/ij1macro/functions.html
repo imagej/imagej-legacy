@@ -257,6 +257,14 @@ images except the front image are closed. The most recent macro
 window is never closed.
 </p><p>
 
+<b>close("*")</b><br>
+Closes all image windows.
+</p><p>
+
+<b>close("\\Others")</b><br>
+Closes all images except for the front image.
+</p><p>
+
 <a name="cos"></a>
 <b>cos(angle)</b><br>
 Returns the cosine of an angle (in radians).
@@ -350,8 +358,8 @@ a help page for this dialog or macro. With v1.46b or later, displays an HTML for
 <a name="Dialog.addToSameRow"></a>
 <b>Dialog.addToSameRow()</b> -
 Makes the next item added appear on the same row as the previous item.
-May be used for addNumericField, addSlider, addChoice, addCheckbox, addStringField,
-addMessage, addPanel, and before the showDialog() method. In the latter case,
+May be used for addNumericField, addSlider, addChoice, addCheckbox, addString,
+addMessage, and before the showDialog() method. In the latter case,
 the buttons appear to the right of the previous item.
 Note that <i>addMessage</i> (and <i>addString</i> if a width of more than 8 is specified)
 use the remaining width, so it must be the last item of a row.
@@ -423,6 +431,8 @@ Traces the boundary of the area with pixel values within
 'mode' can be "4-connected", "8-connected" or "Legacy".
 "Legacy" is for compatibility with previous versions of ImageJ;
 it is ignored if 'tolerance' &gt; 0.
+If 'mode' contains 'smooth', the contour is smoothed by interpolation
+(<a href="https://imagej.net/macros/examples/SmoothLetters.txt">example</a>).
 </p><p>
 
 <a name="drawLine"></a>
@@ -504,9 +514,21 @@ See also:
 <b>eval("script", javascript)</b><br>
 Evaluates the
 <a href="https://imagej.net/developer/javascript.html">JavaScript</a>
-code contained in the string <i>javascript</i>, for example
+code contained in the string <i>javascript</i> and returns,
+as a string, the value of the last statement executed.
+For example
 <i>eval("script","IJ.getInstance().setAlwaysOnTop(true);")</i>.
 See also: <a href="https://imagej.net/developer/macro/functions.html#runMacro">runMacro(path,arg)</a>.
+</p><p>
+
+<b>eval("js", script)</b><br>
+Evaluates the
+<a href="https://imagej.net/developer/javascript.html">JavaScript</a>
+code contained in the string <i>script</i> and returns,
+as a string, the value of the last statement executed.
+For example
+<i>eval("js","Prefs.blackBackground")</i> returns
+either "true" or "false".
 </p><p>
 
 <b>eval("bsh", script)</b><br>
@@ -696,7 +718,7 @@ if there any error, including host or file not found.
 <a name="File.openDialog"></a>
 <b>File.openDialog(title)</b> - 
 Displays a file open dialog and returns the path to the
-file choosen by the user
+file chosen by the user
 (<a href="https://imagej.net/macros/OpenDialogDemo.txt">example</a>). 
 The macro exits if
 the user cancels the dialog.
@@ -1200,8 +1222,11 @@ See also: <a href="https://imagej.net/developer/macro/functions.html#dialog">Dia
 
 <a name="getPixel"></a>
 <b>getPixel(x, y)</b><br>
-Returns the value of the pixel at <i>(x,y)</i>. Note that pixels in RGB images
-contain red, green and blue components that need to be extracted using shifting
+Returns the raw value of the pixel at <i>(x,y)</i>. Use
+<a href="https://imagej.net/developer/macro/functions.html#calibrate">calibrate(value)</a> to convert
+raw values from 8 and 16 bit images into calibrated values.
+Note that pixels in RGB images contain red, green and 
+blue components that need to be extracted using shifting
 and masking. See the <a href="https://imagej.net/macros/tools/ColorPickerTool.txt">Color Picker Tool</a>
 macro for an example that shows how to do this.
 </p><p>
@@ -1372,13 +1397,13 @@ command.
 
 <a name="get-foreground"></a>
 <b>getValue("rgb.foreground")</b><br>
-Returns the current foregound color as an RGB pixel value
+Returns the current foreground color as an RGB pixel value
 (<a href="https://imagej.net/macros/examples/ForegroundBackgroundColors.txt">example</a>).
 </p><p>
 
 <a name="get-background"></a>
 <b>getValue("rgb.background")</b><br>
-Returns the current backgound color as an RGB pixel value.
+Returns the current background color as an RGB pixel value.
 </p><p>
 
 <a name="font-size"></a>
@@ -1401,7 +1426,6 @@ Returns the stroke width of the current selection.
 Returns the number of lines in the current results table. Unlike
 <a href="https://imagej.net/developer/macro/functions.html#nResults">nResults</a>, works with tables that
 are not named "Results".
-Requires 1.49t.
 </p><p>
 
 <a name="getVoxelSize"></a>
@@ -1437,11 +1461,6 @@ Returns the magnification of the active image, a number in the range 0.03125 to 
 <a name="IJ.deleteRows"></a>
 <b>IJ.deleteRows(index1, index2)</b> - 
 Deletes rows <i>index1</i> through <i>index2</i> in the results table.
-<br>
-
-<a name="IJ.deleteRows"></a>
-<b>IJ.deleteRows(index1, index2)</b> - 
-Returns the ImageJ version and build number as a string (e.g., "1.52d11").
 <br>
 
 <a name="IJ.getToolName"></a>
@@ -1605,7 +1624,7 @@ See also:
 <b>isNaN(n)</b><br>
 Returns <i>true</i> if the value of the number <i>n</i> is NaN (Not-a-Number).
 A common way to create a NaN is to divide zero by zero. Comparison with a NaN always
-returns <i>false</i> so "if (n!=n)" is equilvalent to (isNaN(n))". Note that the numeric constant
+returns <i>false</i> so "if (n!=n)" is equivalent to (isNaN(n))". Note that the numeric constant
 NaN is predefined in the macro language. The
 <a href="https://imagej.net/macros/examples/NaNs.txt">NaNs</a>
 macro demonstrates how to remove NaNs from an image.
@@ -1746,7 +1765,6 @@ Creates an arrow selection, where 'style' is a string containing
 (<a href="https://imagej.net/macros/examples/Arrows.txt">example</a>).
 See also: <a href="https://imagej.net/developer/macro/functions.html#Roi.setStrokeWidth">Roi.setStrokeWidth</a>
 and <a href="https://imagej.net/developer/macro/functions.html#Roi.setStrokeColor">Roi.setStrokeColor</a>.
-Requires 1.49a.
 </p><p>
 
 <a name="makeEllipse"></a>
@@ -1761,11 +1779,21 @@ Creates a new straight line selection. The origin (0,0) is assumed to be the upp
 corner of the image. Coordinates are in pixels. You can create
 segmented line selections by specifying more than two coordinate pairs, for example
 <i>makeLine(25,34,44,19,69,30,71,56)</i>. 
+After creating the selection, use <a href="https://imagej.net/developer/macro/functions.html#Roi.setStrokeWidth">Roi.setStrokeWidth</a>
+to set the width and <a href="https://imagej.net/developer/macro/functions.html#Roi.setStrokeColor">Roi.setStrokeColor</a>
+to set the color.
 </p><p>
 
 <b>makeLine(x1, y1, x2, y2, lineWidth)</b><br>
 Creates a straight line selection with the specified width.
 See also: <a href="https://imagej.net/developer/macro/functions.html#getLine">getLine</a>.
+</p><p>
+
+<b>makeLine(x1, y1, x2, y2, x3, y3, ...)</b><br>
+Creates a segmented line selection.
+After creating the selection, use <a href="https://imagej.net/developer/macro/functions.html#Roi.setStrokeWidth">Roi.setStrokeWidth</a>
+to set the width and <a href="https://imagej.net/developer/macro/functions.html#Roi.setStrokeColor">Roi.setStrokeColor</a>
+to set the color.
 </p><p>
 
 <a name="makeOval"></a>
@@ -1775,6 +1803,18 @@ corner of the bounding rectangle of the ellipse.
 </p><p>
 
 <a name="makePoint"></a>
+<b>makePoint(x, y, options)</b><br>
+Creates a point selection at the specified location, with the type ('hybrd', 'cross',
+'dot' or 'circle'), color ('red', 'white', etc.) and size ('tiny', 'small', 'medium', 'large'
+or 'extra large') of the point defined in the 'options' string
+(<a href="https://imagej.net/macros/PointsToOverlayDemo.txt">example</a>).
+The point is added to an overlay if the options string contains 'add'.
+Requires 1.52i.
+</p><p> 
+Create a multi-point selection by using <i>makeSelection("point",xpoints,ypoints)</i>.
+All the makePoint() options ('cross', 'small', 'red', etc.) can be added to first argument.
+</p><p>
+
 <b>makePoint(x, y)</b><br>
 Creates a point selection at the specified location. Create
 a multi-point selection by using
@@ -1816,6 +1856,11 @@ The <i>xcoord</i> and <i>ycoord</i> arguments
 are numeric arrays that contain the X and Y coordinates.
 See the <a href="https://imagej.net/macros/MakeSelectionDemo.txt">MakeSelectionDemo</a>
 macro for examples.
+</p><p>
+When creating a multi-point selection and using ImageJ 1.52i or later, the first argument
+can include words that define the type ('hybrd', 'cross',
+'dot' or 'circle'), color ('red', 'white', etc.) and size ('tiny', 'small', 'medium', 'large'
+or 'extra large') of the points (e.g., "point small red cross").
 </p><p>
 
 <a name="makeText"></a>
@@ -1979,10 +2024,13 @@ overlay without updating the display.
 <b>Overlay.setPosition(n)</b><br>
 Sets the stack position (slice number) of the last item added to the overlay
 (<a href="https://imagej.net/macros/examples/StackOverlay.txt">example</a>).
+Set the position to 0 and the item will be displayed on all stack slices.
 <br>
 
 <b>Overlay.setPosition(c, z, t)</b><br>
-Sets the hyperstack position (channel, slice, frame) of the last item added to the overlay.
+Sets the hyperstack position (channel, slice, frame) of the
+last item added to the overlay. Set a position to 0 and the item
+will be displayed on all the corresponding channels, slices or frames.
 <br>
 
 <a name="Overlay.drawRect"></a>
@@ -2090,6 +2138,19 @@ Copies the overlay on the overlay clipboard to the current image.
 Enables/disables overlay labels.
 <br>
 
+<a name="Overlay.setLabelFontSize"></a>
+<b>Overlay.setLabelFontSize(size, options)</b><br>
+Sets the label font size. The options string can contain
+'scale' (enlarge labels when image zoomed), 'bold'
+(display bold labels) or 'back' (display labels with contrasting
+background color.
+<br>
+
+<a name="Overlay.setLabelColor"></a>
+<b>Overlay.setLabelColor(color)</b><br>
+Sets the color used to draw labels.
+<br>
+
 <a name="Overlay.selectable"></a>
 <b>Overlay.selectable(false)</b><br>
 Prevents the selections in this overlay from being activated 
@@ -2100,6 +2161,16 @@ Requires 1.51r.
 <a name="Overlay.measure"></a>
 <b>Overlay.measure</b><br>
 Measures all the selections in the current overlay.
+<br>
+
+<a name="Overlay.setStrokeColor"></a>
+<b>Overlay.setStrokeColor(color)</b><br>
+Sets the stroke color all the selections in the current overlay.
+<br>
+
+<a name="Overlay.setStrokeWidth"></a>
+<b>Overlay.setStrokeWidth(width)</b><br>
+Sets the stroke width all the selections in the current overlay.
 <br>
 
 <a name="Overlay.flatten"></a>
@@ -2139,7 +2210,7 @@ Returns NaN if the string cannot be converted into a integer. For examples, see
 
 <a name="PI"></a>
 <b>PI</b><br>
-Returns the constant π (3.14159265), the ratio of the circumference to the diameter of a circle.
+Returns the constant &#960; (3.14159265), the ratio of the circumference to the diameter of a circle.
 </p><p>
 
 <a name="Plot"></a>
@@ -2164,17 +2235,26 @@ the macro exits.
 <br>
 <b>Plot.create("Title", "{cat1,cat2,cat3}", "Y-axis Label")</b><br>
 Draws category labels instead of x-axis numbers 0, 1, 2.
-Requires 1.49u.
 <br>
 
 <a name="Plot.add"></a>
 <b>Plot.add(type, xValues, yValues)</b><br>
 Adds a curve, set of points or error bars to a plot created using <i>Plot.create()</i>.
 If only one array is specified it is assumed to contain the Y values and a 0..n-1 sequence is used
-as the X values. The first argument (<i>type</i>) can be  "line", filled", "bars",
-"circles", "boxes", "triangles", "crosses", "diamonds", "dots",
-"x", "connected", "error bars" (in y direction) or "xerror bars".
-In 1.49t or later, error bars apply to the last dataset provided by <i>Plot.create</i> or <i>Plot.add</i>.
+as the X values. The first argument (<i>type</i>) can be
+"line", "connected circle", "filled", "bar", "separated bar", "circle", "box", "triangle",
+"diamond", "cross", "x", "dot", "error bars" (in y direction) or "xerror bars".
+Run <i>Help&gt;Examples&gt;JavaScript&gt;Graph Types</i> to see examples.
+Error bars apply to the last dataset provided by <i>Plot.create</i> or <i>Plot.add</i>.
+<br>
+
+<a name="Plot.addHistogram"></a>
+<b>Plot.addHistogram(values, binWidth, binCenter)</b><br>
+Creates a 'staircase' histogram from array 'values'. 
+If 'binWidth' is 0, automatic binning is applied. 
+'binCenter' is optional with default=0. BinCenter can, for example,
+be set to an expected symmetry point for avoiding artificial asymmetry.
+Requires 1.52f. 
 <br>
 
 <a name="Plot.drawVectors"></a>
@@ -2211,12 +2291,12 @@ have been added so far.
 <a name="Plot.getLimits"></a>
 <b>Plot.getLimits(xMin, xMax, yMin, yMax)</b><br>
 Returns the current axis limits. Note that min&gt;max if the
-axis is reversed. Requires 1.49t.
+axis is reversed.
 <br>
 
 <a name="Plot.setLimitsToFit"></a>
 <b>Plot.setLimitsToFit()</b><br>
-Sets the range of the x and y axes to fit all data. Requires 1.49t.
+Sets the range of the x and y axes to fit all data.
 <br>
 
 <a name="Plot.setColor"></a>
@@ -2231,21 +2311,19 @@ Note that the curve specified in <i>Plot.create()</i> is drawn last.
 <b>Plot.setColor(color1, color2)</b><br>
 This is a two argument version of Plot.setColor, where the second argument
 is used for filling symbols or as the line color for connected points.
-Requires 1.49t.
 <br>
 
 <a name="Plot.setBackgroundColor"></a>
 <b>Plot.setBackgroundColor(color)</b><br>
 Sets the background color of the plot frame
 (<a href="https://imagej.net/macros/examples/PlotBackgroundColorDemo.txt">example</a>).
-Requires 1.49h.
 <br>
 
 <a name="Plot.setLineWidth"></a>
 <b>Plot.setLineWidth(width)</b><br>
 Specifies the width of the line used to draw a curve. Points (circle, box, etc.) are also drawn larger if a line width greater than one is specified. 
 Note that the curve specified in <i>Plot.create()</i>
-is the last one drawn before the plot is dispayed or updated.
+is the last one drawn before the plot is displayed or updated.
 <br>
 
 <a name="Plot.setJustification"></a>
@@ -2262,7 +2340,6 @@ separated with tab or newline characters. The optional second argument can conta
 the legend position ("top-left", "top-right", "bottom-left", "bottom-right";
 default is automatic positioning), "bottom-to-top" for reversed sequence of the labels,
 and "transparent" to make the legend background transparent.
-Requires 1.49t.
 <br>
 
 <a name="Plot.setFrameSize"></a>
@@ -2293,7 +2370,6 @@ Sets the y axis scale to Logarithmic, or back to linear if the optional boolean 
 <a name="Plot.setXYLabels"></a>
 <b>Plot.setXYLabels("x Label", "y Label")</b><br>
 Sets the axis labels.
-Requires 1.49t.
 <br>
 
 <a name="Plot.setFontSize"></a>
@@ -2301,27 +2377,31 @@ Requires 1.49t.
 Sets the default font size in the plot (otherwise specified in <i>Profile Plot Options</i>),
 used e.g. for axes labels. Can be also called prior to <i>Plot.addText</i>.
 The optional second argument can include "bold" and/or "italic".
-Requires 1.49t.
 <br>
 
 <a name="Plot.setAxisLabelSize"></a>
 <b>Plot.setAxisLabelSize(size, "options")</b><br>
 Sets the fort size of the axis labels. The optional second argument
 can include "bold" and/or "italic".
-Requires 1.49t.
 
 <a name="Plot.setFormatFlags"></a>
 <b>Plot.setFormatFlags("11001100001111")</b><br>
 Controls whether to draw axes labels, grid lines and ticks
 (major/minor/ticks for log axes). Use the macro recorder and
 <i>More&gt;&gt;Axis Options</i> in any plot window to determine the binary code.
-Requires 1.49t.
+<br>
+
+<a name="Plot.setStyle"></a>
+<b>Plot.setStyle(index, styleString)</b><br>
+Set the style of the plot object (curve, label, etc.) with the specified index, using
+a comma-delimiterd string ("color1,color2,line width,symbol").
+For an example, run the <i>Help&gt;Examples&gt;Plots&gt;Plot Styles</i>
+command. Requires 1.52h.
 <br>
 
 <a name="Plot.useTemplate"></a>
 <b>Plot.useTemplate("plot name" or id)</b><br>
 Transfers the formatting of an open plot window to the current plot.
-Requires 1.49t.
 <br>
 
 <a name="Plot.makeHighResolution"></a>
@@ -2329,7 +2409,6 @@ Requires 1.49t.
 Creates a high-resolution image of the plot enlarged by
 <i>factor</i>. Add the second argument "disable" to
 avoid antialiased text.
-Requires 1.49t.
 
 <a name="Plot.show"></a>
 <b>Plot.show()</b><br>
@@ -2354,12 +2433,12 @@ preceded by <i>Plot.show</i>.
 <a name="Plot.drawGrid"></a>
 <b>Plot.drawGrid()</b><br>
 Redraws the grid above previous plots.
-Requires 1.49u.
 <br>
+
 <a name="Plot.drawShapes"></a>
 <b>Plot.drawShapes("rectangles", lefts, tops, rights, bottoms)</b><br>
 Draws one or more rectangles. The four arguments (values or arrays) hold rectangle coordinates.
-Requires 1.49u.
+
 <br>
 <a name="Plot.drawBoxes"></a>
 <b>Plot.drawBoxes("boxes width=30", x, y1, y2, y3, y4, y5)</b><br>
@@ -2367,7 +2446,6 @@ Draws a boxplot, where 'width' is in pixels, array 'x' holds x-positions
 and arrays 'y1'..'y5' hold the quartile borders in ascending order.
 Secondary color will fill the box. For horizontal boxes,
 use  "boxesx width=30" instead.
-Requires 1.49u.
 <br>
 
 </blockquote>
@@ -2425,11 +2503,16 @@ macros for examples.
  
 <a name="random"></a>
 <b>random</b><br>
-Returns a random number between 0 and 1.
+Returns a uniformly distributed pseudorandom number between 0 and 1.
+</p><p>
+
+<b>random("gaussian")</b><br>
+Returns a Gaussian ("normally") distributed pseudorandom number with mean 0.0 and standard deviation 1.0.
 </p><p>
 
 <b>random("seed", seed)</b><br>
-Sets the seed (a whole number) used by the <i>random()</i> function.
+Sets the seed (a whole number) used by the <i>random()</i> and <i>random("gaussian")</i> functions.
+Set a specific seed to get a reproducible pseudorandom sequence.
 </p><p>
 
 <a name="rename"></a>
@@ -2507,7 +2590,8 @@ macro for examples. These functions require ImageJ 1.48h or later.
 <a name="Roi.contains"></a>
 <b>Roi.contains(x, y)</b><br>
 Returns "1" if the point <i>x,y</i> is inside the current selection or "0" if it is not.
-Aborts the macro if there is no selection. Requires 1.49h. See also: 
+Aborts the macro if there is no selection. See also:
+<a href="https://imagej.net/developer/macro/functions.html#Roi.getContainedPoints">Roi.getContainedPoints</a> and
 <a href="https://imagej.net/developer/macro/functions.html#selectionContains">selectionContains</a>.
 <br>
 
@@ -2519,6 +2603,12 @@ Returns the location and size of the selection's bounding rectangle.
 <a name="Roi.getCoordinates"></a>
 <b>Roi.getCoordinates(xpoints, ypoints)</b><br>
 Returns, as two arrays, the x and y coordinates that define this selection.
+<br>
+
+<a name="Roi.getContainedPoints"></a>
+<b>Roi.getContainedPoints(xpoints, ypoints)</b><br>
+Returns, as two arrays, the x and y coordinates of the pixels inside
+the current selection. Aborts the macro if there is no selection.
 <br>
 
 <a name="Roi.getDefaultColor"></a>
@@ -2636,7 +2726,7 @@ Deletes the selection, if any, from the active image.
 These function run ROI Manager commands.
 The ROI Manager is opened if it is not already open.
 Use <i>roiManager("reset")</i> to delete all ROIs on the list.
-Use <a href="https://imagej.net/developer/macro/functions.html#setOption" "="">setOption("Show All", boolean)</a>
+Use <a href="https://imagej.net/developer/macro/functions.html#setOption">setOption("Show All", boolean)</a>
 to enable/disable "Show All" mode.
 For examples, refer to the
 <a href="https://imagej.net/macros/RoiManagerMacros.txt">RoiManagerMacros</a>,
@@ -2824,7 +2914,7 @@ See also:
 Executes an ImageJ menu command. The optional second argument contains values that 
 are automatically entered into dialog boxes (must be GenericDialog or OpenDialog). Use
 the Command Recorder (<i>Plugins&gt;Macros&gt;Record</i>) to generate run() function calls.
-Use string concatentation to pass a variable as an argument. With ImageJ 1.43 and later,
+Use string concatenation to pass a variable as an argument. With ImageJ 1.43 and later,
 variables can be passed without using string concatenation by adding "&amp;" to the variable name.
 For examples, see the
 <a href="https://imagej.net/macros/ArgumentPassingDemo.txt">ArgumentPassingDemo</a> macro.
@@ -3134,75 +3224,100 @@ do not have a LUT for each channel.
 
 <a name="setOption"></a>
 <b>setOption(option, boolean)</b><br>
-Enables or disables an ImageJ option, where <i>option</i> is one of the following options
-and <i>boolean</i> is either <i>true</i> or <i>false</i>.
+These functions enable or disable ImageJ options, where
+<i>boolean</i> is either <i>true</i> or <i>false</i>.
  </p><blockquote>
-<i>"AutoContrast"</i> enables/disables the <i>Edit&gt;Options&gt;Appearance</i>
+ <b>setOption("AutoContrast", boolean)</b><br>
+Enables/disables the <i>Edit&gt;Options&gt;Appearance</i>
 "Auto contrast stacks" option. You can also have newly displayed stack slices contrast
 enhanced by holding the shift key down when navigating stacks.
-<p>
-<i>"Bicubic"</i> provides a way to force commands like <i>Edit&gt;Selection&gt;Straighten</i>, that normally use
+<br>
+<b>setOption("Bicubic", boolean)</b><br>
+Provides a way to force commands like <i>Edit&gt;Selection&gt;Straighten</i>, that normally use
 bilinear interpolation, to use bicubic interpolation.
-</p><p>
-<i>"BlackBackground"</i> enables/disables the <i>Process&gt;Binary&gt;Options</i>
+<br>
+<b>setOption("BlackBackground", boolean)</b><br>
+Enables/disables the <i>Process&gt;Binary&gt;Options</i>
 "Black background" option.
- </p><p>
-<i>"Changes"</i> sets/resets the 'changes' flag of the current image. Set this option <i>false</i> to
+ <br>
+<b>setOption("Changes", boolean)</b><br>
+Sets/resets the 'changes' flag of the current image. Set this option <i>false</i> to
 avoid  "Save Changes?" dialog boxes when closing images.
-</p><p>
-<i>"DebugMode"</i> enables/disables the ImageJ debug mode. ImageJ displays information, such
+<br>
+<b>setOption("DebugMode", boolean)</b><br>
+Enables/disables the ImageJ debug mode. ImageJ displays information, such
 as TIFF tag values, when it is in debug mode.
- </p><p>
-<i> "DisablePopupMenu"</i> enables/disables the the menu displayed when
+ <br>
+<b>setOption("DisablePopupMenu", boolean)</b><br>
+Enables/disables the the menu displayed when
 you right click on an image.
-   </p><p>
-  <i>"DisableUndo"</i> enables/disables the <i>Edit&gt;Undo</i> command. Note
+<br>
+<b>setOption("DisableUndo", boolean)</b><br>
+ Enables/disables the <i>Edit&gt;Undo</i> command. Note
   that a <i>setOption("DisableUndo",true)</i> call without a corresponding <i>setOption("DisableUndo",false)</i> will cause 
   <i>Edit&gt;Undo</i> to not work as expected until ImageJ is restarted.
-</p><p>
-  <i>"Display label"</i>, <i>"Limit to threshold"</i>, <i>"Area"</i>,
-  <i>"Mean"</i> and <i>"Std"</i>, <i>"Perimeter"</i>, <i>"Stack position"</i> and <i>"Add to overlay"</i>
-  enable/disable the corresponding <i>Analyze&gt;Set Measurements</i> options.
-</p><p>
- <i>"ExpandableArrays"</i> enables/disables support for auto-expanding arrays
+<br>
+<b>setOption(measurement, boolean)</b><br>
+ Enable/disables <i>Analyze&gt;Set Measurements</i> options where
+ 'measurement' can be <i>"Display label"</i>, <i>"Limit to threshold"</i>,
+ <i>"Area"</i>, <i>"Mean"</i>, <i>"Std"</i>, <i>"Perimeter"</i>,
+ <i>"Stack position"</i> or <i>"Add to overlay"</i>.
+ <br>
+<b>setOption("ExpandableArrays", boolean)</b><br>
+Enables/disables support for auto-expanding arrays
   (<a href="https://imagej.net/macros/examples/ExpandableArrays.txt">example</a>).
-</p><p>
- <i>"InvertY"</i> sets/resets the 'invertY' option of the active image.
-</p><p>
- <i>"JFileChooser"</i> enables/disables use of the Java JFileChooser to open and save files
+<br>
+<b>setOption("InvertY", boolean)</b><br>
+Sets/resets the 'invertY' option of the active image.
+<br>
+<b>setOption("JFileChooser", boolean)</b><br>
+Enables/disables use of the Java JFileChooser to open and save files
  instead of the native OS file chooser.
- </p><p>
- <i>"Loop"</i> enables/disables the <i>Image&gt;Stacks&gt;Tools&gt;Animation Options</i> "Loop back and forth" option.
- </p><p>
- <i>"OpenUsingPlugins"</i>
- controls whether standard file types (TIFF, JPEG, GIF, etc.) are opened by external
+ <br>
+<b>setOption("Loop", boolean)</b><br>
+Enables/disables the <i>Image&gt;Stacks&gt;Tools&gt;Animation Options</i> "Loop back and forth" option.
+ <br>
+<b>setOption("OpenUsingPlugins", boolean)</b><br>
+ Controls whether standard file types (TIFF, JPEG, GIF, etc.) are opened by external
  plugins or by ImageJ
  (<a href="https://imagej.net/macros/ToggleOpenUsingPlugins.txt">example</a>).
- </p><p>
- <i>"QueueMacros"</i> controls whether macros invoked using keyboard shortcuts
+ <br>
+<b>setOption("QueueMacros", boolean)</b><br>
+Controls whether macros invoked using keyboard shortcuts
  run sequentially on the event dispatch thread (EDT) or in separate, possibly concurrent, threads
   (<a href="https://imagej.net/macros/DodgeBurnAndSmooth.txt">example</a>). 
   In "QueueMacros" mode, screen updates, which also run on the EDT, are delayed until the macro finishes.
- </p><p>
- <i>"Show All"</i> enables/disables the the "Show All" mode in the ROI Manager.
-</p><p>
-<i>"ShowAngle"</i> determines whether or not  the "Angle" value is displayed in the Results window
-when measuring straight line lengths. Requires 1.49c.
-</p><p>
-<i>"ShowMin"</i> determines whether or not  the "Min" value is displayed in the Results window
+ <br>
+<b>setOption("Show All", boolean)</b><br>
+Enables/disables the the "Show All" mode in the ROI Manager.
+<br>
+<b>setOption("ShowAngle", boolean)</b><br>
+Determines whether or not  the "Angle" value is displayed in the Results window
+when measuring straight line lengths.
+<br>
+<b>setOption("ShowMin", boolean)</b><br>
+Determines whether or not  the "Min" value is displayed in the Results window
 when "Min &amp; Max Gray Value" is enabled in the <i>Analyze&gt;Set Measurements</i> dialog box.
-</p><p>
- <i>"ShowRowNumbers"</i> enables/disables display of Results table row numbers
+<br>
+<b>setOption("ShowRowNumbers", boolean)</b><br>
+Enables/disables display of Results table row numbers
   (<a href="https://imagej.net/macros/SineCosineTable.txt">example</a>). 
-</p><p>
- <i>"AntialiasedText"</i> controls the "Antialiased text" option in the
+<br>
+<b>setOption("AntialiasedText", boolean)</b><br>
+Controls the "Antialiased text" option in the
  <i>Edit&gt;Options&gt;Fonts</i> dialog. Requires v1.51h.
-</p><p>
- <i>"WandAllPoints"</i> enables/disables the Wand tool's "all points" option.
+<br>
+<b>setOption("WandAllPoints", boolean)</b><br>
+ Controls whether Wand selections with straight lines longer
+ than one pixel should have intermediate points with single-pixel spacing.
  Requires v1.51q.
+<br>
+<b>setOption("ScaleConversions", boolean)</b><br>
+Enables/disables the "Scale when converting" option in the
+<i>Edit&gt;Options&gt;Conversons</i> dialog.
+Requires v1.52k.
 
-
-</p></blockquote>
+</blockquote>
 
 <a name="setPasteMode"></a>
 <b>setPasteMode(mode)</b><br>
@@ -3469,7 +3584,7 @@ Returns the current position.
 
 <a name="Stack.setPosition"></a>
 <b>Stack.setPosition(channel, slice, frame)</b> - 
-Sets the position.
+Displays the specified channel, slice and frame.
 <br>
 
 <a name="Stack.getFrameRate"></a>
@@ -3510,7 +3625,7 @@ Sets the Z-dimension unit.
 <a name="Stack.setDisplayMode"></a>
 <b>Stack.setDisplayMode(mode)</b> - 
 Sets the display mode, where <i>mode</i> is "composite", "color" or "grayscale".
-Requires a multi-channel stack and v1.40a or later.
+Requires a multi-channel stack.
 <br>
 
 <a name="Stack.getDisplayMode"></a>
@@ -3723,6 +3838,21 @@ Updates the window displaying the current table.
 <b>Table.rename(oldName, newName)</b> - 
 Renames a table.
 <br>
+<a name="Table.setSelection"></a>
+<b>Table.setSelection(firstRowIndex, lastRowIndex, title)</b> - 
+Selects a range of rows in the table identified by "title".
+Use range (-1, -1) for selecting none. 
+<br>
+<a name="Table.getSelectionStart"></a>
+<b>Table.getSelectionStart(title)</b> - 
+Returns the index of first selected row in the table identified by "title",
+or - 1 if there is no selection.
+<br>
+<a name="Table.getSelectionEnd"></a>
+<b>Table.getSelectionEnd(title)</b> - 
+Returns the index of last selected row in the table identified by "title",
+or -1 if there is no selection.
+<br>
 <a name="Table.save"></a>
 <b>Table.save(filePath)</b> - 
 Saves a table.
@@ -3735,6 +3865,11 @@ Opens a table.
 <b>Table.deleteRows(firstIndex, lastIndex)</b> - 
 Deletes specified rows.
 <br>
+<a name="Table.sort"></a>
+<b>Table.sort(column)</b> - 
+Sorts the table on the specified column
+(<a href="http://wsr.imagej.net/macros/LabelParticlesBySize.txt">example</a>).
+<br>
 <a name="Table.showRowNumbers"></a>
 <b>Table.showRowNumbers(boolean)</b> - 
 Enable/disable row numbers. Default is 'false'.
@@ -3745,11 +3880,13 @@ Displays arrays in a table (same as <a href="https://imagej.net/developer/macro/
 <br>
 <a name="Table.applyMacro"></a>
 <b>Table.applyMacro(code)</b> - 
-Applies macro code to each row of the table. Columns are assigned
-variable names as given by Table.headings. New variables starting with
-an uppercase letter create a new column with this name. The variable
-'row' (row index) is pre-defined. Currently only supports numeric values
-except for row labels.
+Applies macro code to each row of the table.
+Columns are assigned variable names as given by Table.headings.
+For columns (%Area, Perim. and Circ.), special characters are replaced by
+underscores (_Area, Perim_ and Circ_). New variables starting with an
+uppercase letter create a new column with this name.
+The variable 'row' (row index) is pre-defined. Currently only supports
+numeric values except for row labels.
 <br>
 
 </blockquote>
@@ -3806,13 +3943,17 @@ Converts scaled (x,y,z) pixel coordinates to unscaled (raw) coordinates.
 </p><p>
 
 <b>toScaled(length)</b><br>
-Converts (in place) a length in pixels to a scaled length using
-the properties of the current image.
+Converts (in place) a horizontal length in pixels to a scaled
+length using the properties of the current image.
+In a plot with Log scale, the scaled value is regarded
+as an exponent of 10.
 </p><p>
 
 <b>toUnscaled(length)</b><br>
-Converts (in place) a scaled length to a length in pixels using
-the properties of the current image.
+Converts (in place) a scaled horizontal length to a length
+in pixels using the properties of the current image.
+In a plot with Log scale, the scaled value is regarded
+as an exponent of 10.
 </p><p>
 
 <a name="toString"></a>
@@ -3873,7 +4014,7 @@ Example:
 
 <b>waitForUser(title, message)</b><br>
 This is a two argument version of <i>waitForUser</i>, where <i>title</i> is the dialog box title
-and <i>message</i> is the text dispayed in the dialog.
+and <i>message</i> is the text displayed in the dialog.
 </p><p>
 
 <b>waitForUser</b><br>
@@ -3885,7 +4026,7 @@ in the dialog box.
 
 <p class="navbar"> <a href="https://imagej.net/developer/macro/functions.html">top</a> | <a href="https://imagej.net/index.html">home</a> | <a href="https://imagej.net/notes.html">news</a> | <a href="https://imagej.net/docs/index.html">docs</a> | <a href="https://imagej.net/download.html">download</a> | <a href="https://imagej.net/plugins/index.html">plugins</a> | <a href="https://imagej.net/developer/index.html">resources</a> | <a href="https://imagej.net/list.html">list</a> | <a href="https://imagej.net/links.html">links</a></p>
 
-<small>Last updated 2018/06/13</small>
+<small>Last updated 2019/01/27</small>
 
 
 

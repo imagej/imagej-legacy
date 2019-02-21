@@ -64,14 +64,8 @@ class MacroAutoCompletionProvider extends DefaultCompletionProvider implements
 	private static MacroAutoCompletionProvider instance = null;
 
 	private MacroAutoCompletionProvider() {
-		if (!parseFunctionsHtmlDoc(
-			"https://imagej.net/developer/macro/functions.html"))
-		{
-			parseFunctionsHtmlDoc("/doc/ij1macro/functions.html");
-		}
+		parseFunctionsHtmlDoc("/doc/ij1macro/functions.html");
 		parseFunctionsHtmlDoc("/doc/ij1macro/functions_extd.html");
-
-
 	}
 
 	public static synchronized MacroAutoCompletionProvider getInstance() {
