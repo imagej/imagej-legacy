@@ -154,8 +154,13 @@ public class MacroLanguageSupportPlugin extends AbstractLanguageSupport
 						// the pulldown should not be hidden if CTRL+SPACE are pressed
 						ac.hideChildWindows();
 					}
-				}
-				else if (e.getKeyCode() >= 65 // a
+				} else if ((e.isControlDown() && e.getKeyCode() != KeyEvent.VK_SPACE) || // control pressed but not space
+					e.getKeyCode() == KeyEvent.VK_LEFT || // arrow keys left/right were pressed
+					e.getKeyCode() == KeyEvent.VK_RIGHT
+				) {
+					System.out.println("cloooose");
+					ac.hideChildWindows();
+				} else if (e.getKeyCode() >= 65 // a
 				&& e.getKeyCode() <= 90 // z
 				) {
 					if (MacroAutoCompletionProvider.getInstance().getAlreadyEnteredText(
