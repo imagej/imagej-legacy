@@ -257,12 +257,14 @@ class MacroAutoCompletionProvider extends DefaultCompletionProvider implements
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<Completion> getCompletionByInputText(String inputText) {
-		System.out.println("Searching for " + inputText);
+
+		inputText = inputText.toLowerCase();
+
 		ArrayList<Completion> result = new ArrayList<Completion>();
 
 		int count = 0;
 		for (Completion completion : completions) {
-			String text = completion.getInputText();
+			String text = completion.getInputText().toLowerCase();
 			if (text.contains(inputText)) {
 				if (text.startsWith(inputText)) {
 					result.add(count, completion);
