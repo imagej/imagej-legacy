@@ -143,6 +143,45 @@ class MacroAutoCompletionProvider extends DefaultCompletionProvider implements
 		return true;
 	}
 
+	void addModuleCompletions(ModuleService moduleService) {
+		if (this.moduleService == moduleService) {
+			return;
+		}
+		sorted = false;
+		this.moduleService = moduleService;
+
+		for (ModuleInfo info : moduleService.getModules()) {
+			if(info.getMenuPath().getLeaf() != null) {
+				String name = info.getMenuPath().getLeaf().getName().trim();
+				String headline = "run(\"" + name +"\")";
+				String description = "<b>" + headline + "</b><p>" +
+						"<a href=\"https://imagej.net/Special:Search/" + name.replace(" ", "%20") + "\">Search imagej wiki for help</a>";
+
+				addCompletion(makeListEntry(this, headline, null, description));
+			}
+		}
+	}
+
+	public void addMacroExtensionAutoCompletions(MacroExtensionAutoCompletionService macroExtensionAutoCompletionService) {
+		if (this.macroExtensionAutoCompletionService != null) {
+			return;
+		}
+		sorted = false;
+		this.macroExtensionAutoCompletionService = macroExtensionAutoCompletionService;
+
+		List<BasicCompletion> completions = macroExtensionAutoCompletionService.getCompletions(this);
+		for (BasicCompletion completion : completions) {
+			addCompletion(completion);
+		}
+	}
+
+	public void sort() {
+		if (!sorted) {
+			Collections.sort(completions, new SortByRelevanceComparator());
+			sorted = true;
+		}
+	}
+	
 	private boolean checkCompletion(final String headline, final String name, final String description) {
 		return headline.length() > 0 && //
 			name.length() > 1 && //
@@ -232,24 +271,7 @@ class MacroAutoCompletionProvider extends DefaultCompletionProvider implements
 		return Character.isLetterOrDigit(ch) || ch == '_' || ch == '.' || ch == '"';
 	}
 
-	void addModuleCompletions(ModuleService moduleService) {
-		if (this.moduleService == moduleService) {
-			return;
-		}
-		sorted = false;
-		this.moduleService = moduleService;
 
-		for (ModuleInfo info : moduleService.getModules()) {
-			if(info.getMenuPath().getLeaf() != null) {
-				String name = info.getMenuPath().getLeaf().getName().trim();
-				String headline = "run(\"" + name +"\")";
-				String description = "<b>" + headline + "</b><p>" +
-						"<a href=\"https://imagej.net/Special:Search/" + name.replace(" ", "%20") + "\">Search imagej wiki for help</a>";
-
-				addCompletion(makeListEntry(this, headline, null, description));
-			}
-		}
-	}
 
 	/**
 	 * Returns a list of <tt>Completion</tt>s in this provider with the
@@ -307,23 +329,4 @@ class MacroAutoCompletionProvider extends DefaultCompletionProvider implements
 		return completions;
 	}
 
-	public void addMacroExtensionAutoCompletions(MacroExtensionAutoCompletionService macroExtensionAutoCompletionService) {
-		if (this.macroExtensionAutoCompletionService != null) {
-			return;
-		}
-		sorted = false;
-		this.macroExtensionAutoCompletionService = macroExtensionAutoCompletionService;
-
-		List<BasicCompletion> completions = macroExtensionAutoCompletionService.getCompletions(this);
-		for (BasicCompletion completion : completions) {
-			addCompletion(completion);
-		}
-	}
-
-	public void sort() {
-		if (!sorted) {
-			Collections.sort(completions, new SortByRelevanceComparator());
-			sorted = true;
-		}
-	}
 }
