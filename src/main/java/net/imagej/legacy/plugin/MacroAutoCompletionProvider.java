@@ -45,6 +45,7 @@ import java.util.List;
 import org.fife.ui.autocomplete.BasicCompletion;
 import org.fife.ui.autocomplete.Completion;
 import org.fife.ui.autocomplete.DefaultCompletionProvider;
+import org.fife.ui.autocomplete.SortByRelevanceComparator;
 import org.fife.ui.rtextarea.RTextArea;
 import org.fife.ui.rtextarea.ToolTipSupplier;
 
@@ -67,6 +68,8 @@ class MacroAutoCompletionProvider extends DefaultCompletionProvider implements
 
 	private static MacroAutoCompletionProvider instance = null;
 
+	private boolean sorted = false;
+
 	private MacroAutoCompletionProvider() {
 		parseFunctionsHtmlDoc("/doc/ij1macro/functions.html");
 		parseFunctionsHtmlDoc("/doc/ij1macro/functions_extd.html");
@@ -82,6 +85,7 @@ class MacroAutoCompletionProvider extends DefaultCompletionProvider implements
 	private boolean parseFunctionsHtmlDoc(final String filename) {
 		InputStream resourceAsStream;
 
+		sorted = false;
 		try {
 			if (filename.startsWith("http")) {
 				final URL url = new URL(filename);
@@ -232,6 +236,7 @@ class MacroAutoCompletionProvider extends DefaultCompletionProvider implements
 		if (this.moduleService == moduleService) {
 			return;
 		}
+		sorted = false;
 		this.moduleService = moduleService;
 
 		for (ModuleInfo info : moduleService.getModules()) {
@@ -267,7 +272,9 @@ class MacroAutoCompletionProvider extends DefaultCompletionProvider implements
 			String text = completion.getInputText().toLowerCase();
 			if (text.contains(inputText)) {
 				if (text.startsWith(inputText)) {
+					System.out.println("add at beginning");
 					result.add(count, completion);
+					count++;
 				} else {
 					result.add(completion);
 				}
@@ -294,15 +301,29 @@ class MacroAutoCompletionProvider extends DefaultCompletionProvider implements
 		return retVal;
 	}
 
+	@Override
+	public List<Completion> getCompletions(JTextComponent comp) {
+		List<Completion> completions = this.getCompletionsImpl(comp);
+		return completions;
+	}
+
 	public void addMacroExtensionAutoCompletions(MacroExtensionAutoCompletionService macroExtensionAutoCompletionService) {
 		if (this.macroExtensionAutoCompletionService != null) {
 			return;
 		}
+		sorted = false;
 		this.macroExtensionAutoCompletionService = macroExtensionAutoCompletionService;
 
 		List<BasicCompletion> completions = macroExtensionAutoCompletionService.getCompletions(this);
 		for (BasicCompletion completion : completions) {
 			addCompletion(completion);
+		}
+	}
+
+	public void sort() {
+		if (!sorted) {
+			Collections.sort(completions, new SortByRelevanceComparator());
+			sorted = true;
 		}
 	}
 }
