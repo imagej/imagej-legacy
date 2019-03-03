@@ -294,29 +294,20 @@ public final class LegacyService extends AbstractService implements
 		checkActive();
 		final ModuleInfo info = legacyCompatible.get(key);
 		if (info == null) return null;
-		if (info instanceof CommandInfo) try {
-			final Future<?> future = commandService.run((CommandInfo) info, true);
+		if (info instanceof ScriptInfo) {
+			if (ij1Helper.shiftKeyDown()) {
+				// open the script in the script editor
+				return openScriptInTextEditor((ScriptInfo) info);
+			}
+		}
+		try {
+			final Future<?> future = moduleService.run(info, true);
 			return future == null ? null : future.get();
 		}
 		catch (final Exception e) {
 			if (e instanceof RuntimeException) throw (RuntimeException) e;
 			throw new RuntimeException(e);
 		}
-		if (info instanceof ScriptInfo) {
-			if (ij1Helper.shiftKeyDown()) {
-				// open the script in the script editor
-				return openScriptInTextEditor((ScriptInfo) info);
-			}
-			try {
-				return scriptService.run((ScriptInfo) info, true).get();
-			}
-			catch (final Exception e) {
-				if (e instanceof RuntimeException) throw (RuntimeException) e;
-				throw new RuntimeException(e);
-			}
-		}
-		throw new IllegalArgumentException("Unhandled info for '" + key + "': " +
-			info);
 	}
 
 	/**
