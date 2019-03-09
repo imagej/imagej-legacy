@@ -38,16 +38,21 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.fife.ui.autocomplete.BasicCompletion;
 import org.fife.ui.autocomplete.Completion;
 import org.fife.ui.autocomplete.DefaultCompletionProvider;
+import org.fife.ui.autocomplete.SortByRelevanceComparator;
 import org.fife.ui.rtextarea.RTextArea;
 import org.fife.ui.rtextarea.ToolTipSupplier;
 
 import org.scijava.module.ModuleInfo;
 import org.scijava.module.ModuleService;
+
+import javax.swing.text.JTextComponent;
 
 /**
  * Creates the list of auto-completion suggestions from functions.html
@@ -62,6 +67,8 @@ class MacroAutoCompletionProvider extends DefaultCompletionProvider implements
 	private MacroExtensionAutoCompletionService macroExtensionAutoCompletionService;
 
 	private static MacroAutoCompletionProvider instance = null;
+
+	private boolean sorted = false;
 
 	private MacroAutoCompletionProvider() {
 		parseFunctionsHtmlDoc("/doc/ij1macro/functions.html");
@@ -78,6 +85,7 @@ class MacroAutoCompletionProvider extends DefaultCompletionProvider implements
 	private boolean parseFunctionsHtmlDoc(final String filename) {
 		InputStream resourceAsStream;
 
+		sorted = false;
 		try {
 			if (filename.startsWith("http")) {
 				final URL url = new URL(filename);
@@ -135,6 +143,45 @@ class MacroAutoCompletionProvider extends DefaultCompletionProvider implements
 		return true;
 	}
 
+	void addModuleCompletions(ModuleService moduleService) {
+		if (this.moduleService == moduleService) {
+			return;
+		}
+		sorted = false;
+		this.moduleService = moduleService;
+
+		for (ModuleInfo info : moduleService.getModules()) {
+			if(info.getMenuPath().getLeaf() != null) {
+				String name = info.getMenuPath().getLeaf().getName().trim();
+				String headline = "run(\"" + name +"\")";
+				String description = "<b>" + headline + "</b><p>" +
+						"<a href=\"https://imagej.net/Special:Search/" + name.replace(" ", "%20") + "\">Search imagej wiki for help</a>";
+
+				addCompletion(makeListEntry(this, headline, null, description));
+			}
+		}
+	}
+
+	public void addMacroExtensionAutoCompletions(MacroExtensionAutoCompletionService macroExtensionAutoCompletionService) {
+		if (this.macroExtensionAutoCompletionService != null) {
+			return;
+		}
+		sorted = false;
+		this.macroExtensionAutoCompletionService = macroExtensionAutoCompletionService;
+
+		List<BasicCompletion> completions = macroExtensionAutoCompletionService.getCompletions(this);
+		for (BasicCompletion completion : completions) {
+			addCompletion(completion);
+		}
+	}
+
+	public void sort() {
+		if (!sorted) {
+			Collections.sort(completions, new SortByRelevanceComparator());
+			sorted = true;
+		}
+	}
+	
 	private boolean checkCompletion(final String headline, final String name, final String description) {
 		return headline.length() > 0 && //
 			name.length() > 1 && //
@@ -221,36 +268,65 @@ class MacroAutoCompletionProvider extends DefaultCompletionProvider implements
 	}
 
 	protected boolean isValidChar(char ch) {
-		return Character.isLetterOrDigit(ch) || ch == '_' || ch == '.' || ch == '"' || ch == '(';
+		return Character.isLetterOrDigit(ch) || ch == '_' || ch == '.' || ch == '"';
 	}
 
-	void addModuleCompletions(ModuleService moduleService) {
-		if (this.moduleService == moduleService) {
-			return;
-		}
-		this.moduleService = moduleService;
 
-		for (ModuleInfo info : moduleService.getModules()) {
-			if(info.getMenuPath().getLeaf() != null) {
-				String name = info.getMenuPath().getLeaf().getName().trim();
-				String headline = "run(\"" + name +"\")";
-				String description = "<b>" + headline + "</b><p>" +
-						"<a href=\"https://imagej.net/Special:Search/" + name.replace(" ", "%20") + "\">Search imagej wiki for help</a>";
 
-				addCompletion(makeListEntry(this, headline, null, description));
+	/**
+	 * Returns a list of <tt>Completion</tt>s in this provider with the
+	 * specified input text.
+	 *
+	 * @param inputText The input text to search for.
+	 * @return A list of {@link Completion}s, or <code>null</code> if there
+	 *         are no matching <tt>Completion</tt>s.
+	 */
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<Completion> getCompletionByInputText(String inputText) {
+
+		inputText = inputText.toLowerCase();
+
+		ArrayList<Completion> result = new ArrayList<Completion>();
+
+		int count = 0;
+		for (Completion completion : completions) {
+			String text = completion.getInputText().toLowerCase();
+			if (text.contains(inputText)) {
+				if (text.startsWith(inputText)) {
+					System.out.println("add at beginning");
+					result.add(count, completion);
+					count++;
+				} else {
+					result.add(completion);
+				}
 			}
 		}
+
+		return result;
 	}
 
-	public void addMacroExtensionAutoCompletions(MacroExtensionAutoCompletionService macroExtensionAutoCompletionService) {
-		if (this.macroExtensionAutoCompletionService != null) {
-			return;
-		}
-		this.macroExtensionAutoCompletionService = macroExtensionAutoCompletionService;
 
-		List<BasicCompletion> completions = macroExtensionAutoCompletionService.getCompletions(this);
-		for (BasicCompletion completion : completions) {
-			addCompletion(completion);
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	@SuppressWarnings("unchecked")
+	protected List<Completion> getCompletionsImpl(JTextComponent comp) {
+
+		List<Completion> retVal = new ArrayList<Completion>();
+		String text = getAlreadyEnteredText(comp);
+
+		if (text != null) {
+			retVal = getCompletionByInputText(text);
 		}
+		return retVal;
 	}
+
+	@Override
+	public List<Completion> getCompletions(JTextComponent comp) {
+		List<Completion> completions = this.getCompletionsImpl(comp);
+		return completions;
+	}
+
 }

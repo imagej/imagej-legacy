@@ -34,11 +34,14 @@ package net.imagej.legacy.plugin;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.SwingUtilities;
+import javax.swing.text.JTextComponent;
 
 import org.fife.rsta.ac.AbstractLanguageSupport;
 import org.fife.ui.autocomplete.AutoCompletion;
+import org.fife.ui.autocomplete.Completion;
 import org.fife.ui.autocomplete.CompletionProvider;
 import org.fife.ui.autocomplete.LanguageAwareCompletionProvider;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
@@ -88,8 +91,21 @@ public class MacroLanguageSupportPlugin extends AbstractLanguageSupport
 	}
 
 	private CompletionProvider getCompletionProvider() {
-		CompletionProvider provider = new LanguageAwareCompletionProvider(getMacroAutoCompletionProvider());
+		CompletionProvider provider = new CustomLanguageAwareCompletionProvider(getMacroAutoCompletionProvider());
 		return provider;
+	}
+
+	// this class is necessary to prevent the language aware provider to sort the result list; we have our own sorting
+	private class CustomLanguageAwareCompletionProvider extends LanguageAwareCompletionProvider{
+		public CustomLanguageAwareCompletionProvider(CompletionProvider provider){
+			super(provider);
+		}
+
+		@Override
+		public List<Completion> getCompletions(JTextComponent comp) {
+			List<Completion> completions = this.getCompletionsImpl(comp);
+			return completions;
+		}
 	}
 
 	private MacroAutoCompletionProvider getMacroAutoCompletionProvider() {
@@ -97,7 +113,7 @@ public class MacroLanguageSupportPlugin extends AbstractLanguageSupport
 				.getInstance();
 		provider.addModuleCompletions(moduleService);
 		provider.addMacroExtensionAutoCompletions(macroExtensionAutoCompletionService);
-
+		provider.sort();
 		return provider;
 	}
 
@@ -154,8 +170,13 @@ public class MacroLanguageSupportPlugin extends AbstractLanguageSupport
 						// the pulldown should not be hidden if CTRL+SPACE are pressed
 						ac.hideChildWindows();
 					}
-				}
-				else if (e.getKeyCode() >= 65 // a
+				} else if ((e.isControlDown() && e.getKeyCode() != KeyEvent.VK_SPACE) || // control pressed but not space
+					e.getKeyCode() == KeyEvent.VK_LEFT || // arrow keys left/right were pressed
+					e.getKeyCode() == KeyEvent.VK_RIGHT
+				) {
+					System.out.println("cloooose");
+					ac.hideChildWindows();
+				} else if (e.getKeyCode() >= 65 // a
 				&& e.getKeyCode() <= 90 // z
 				) {
 					if (MacroAutoCompletionProvider.getInstance().getAlreadyEnteredText(
