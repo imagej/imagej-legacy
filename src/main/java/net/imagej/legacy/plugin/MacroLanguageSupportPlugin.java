@@ -68,7 +68,7 @@ public class MacroLanguageSupportPlugin extends AbstractLanguageSupport
 	@Parameter
 	MacroExtensionAutoCompletionService macroExtensionAutoCompletionService;
 
-	private final static int MINIMUM_WORD_LENGTH_TO_OPEN_PULLDOWN = 1;
+	private final static int MINIMUM_WORD_LENGTH_TO_OPEN_PULLDOWN = 2;
 
 	@Override
 	public String getLanguageName() {

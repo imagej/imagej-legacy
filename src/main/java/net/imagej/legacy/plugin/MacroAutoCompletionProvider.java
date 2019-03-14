@@ -69,6 +69,7 @@ class MacroAutoCompletionProvider extends DefaultCompletionProvider implements
 	private static MacroAutoCompletionProvider instance = null;
 
 	private boolean sorted = false;
+	private final long TIME_OUT = 250;
 
 	private MacroAutoCompletionProvider() {
 		parseFunctionsHtmlDoc("/doc/ij1macro/functions.html");
@@ -284,11 +285,11 @@ class MacroAutoCompletionProvider extends DefaultCompletionProvider implements
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<Completion> getCompletionByInputText(String inputText) {
-
 		inputText = inputText.toLowerCase();
 
 		ArrayList<Completion> result = new ArrayList<Completion>();
 
+		long time = System.currentTimeMillis();
 		int count = 0;
 		for (Completion completion : completions) {
 			String text = completion.getInputText().toLowerCase();
@@ -300,6 +301,9 @@ class MacroAutoCompletionProvider extends DefaultCompletionProvider implements
 				} else {
 					result.add(completion);
 				}
+			}
+			if (System.currentTimeMillis() - time > TIME_OUT) {
+				break; // if a search takes too long, exit to not annoy the user
 			}
 		}
 
