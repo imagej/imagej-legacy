@@ -69,7 +69,6 @@ class MacroAutoCompletionProvider extends DefaultCompletionProvider implements
 	private static MacroAutoCompletionProvider instance = null;
 
 	private boolean sorted = false;
-	private final long TIME_OUT = 250;
 	private final int maximumSearchResults = 100;
 
 	private MacroAutoCompletionProvider() {
@@ -303,9 +302,6 @@ class MacroAutoCompletionProvider extends DefaultCompletionProvider implements
 					result.add(completion);
 					secondaryCount++;
 				}
-			}
-			if (System.currentTimeMillis() - time > TIME_OUT) {
-				break; // if a search takes too long, exit to not annoy the user
 			}
 			if (secondaryCount + count > maximumSearchResults) {
 				break; // if too many results are found, exit to not annoy the user
