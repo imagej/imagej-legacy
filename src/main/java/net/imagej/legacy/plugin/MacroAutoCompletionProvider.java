@@ -70,6 +70,7 @@ class MacroAutoCompletionProvider extends DefaultCompletionProvider implements
 
 	private boolean sorted = false;
 	private final long TIME_OUT = 250;
+	private final int maximumSearchResults = 100;
 
 	private MacroAutoCompletionProvider() {
 		parseFunctionsHtmlDoc("/doc/ij1macro/functions.html");
@@ -291,19 +292,23 @@ class MacroAutoCompletionProvider extends DefaultCompletionProvider implements
 
 		long time = System.currentTimeMillis();
 		int count = 0;
+		int secondaryCount = 0;
 		for (Completion completion : completions) {
 			String text = completion.getInputText().toLowerCase();
 			if (text.contains(inputText)) {
 				if (text.startsWith(inputText)) {
-					System.out.println("add at beginning");
 					result.add(count, completion);
 					count++;
 				} else {
 					result.add(completion);
+					secondaryCount++;
 				}
 			}
 			if (System.currentTimeMillis() - time > TIME_OUT) {
 				break; // if a search takes too long, exit to not annoy the user
+			}
+			if (secondaryCount + count > maximumSearchResults) {
+				break; // if too many results are found, exit to not annoy the user
 			}
 		}
 
