@@ -289,7 +289,6 @@ class MacroAutoCompletionProvider extends DefaultCompletionProvider implements
 
 		ArrayList<Completion> result = new ArrayList<Completion>();
 
-		long time = System.currentTimeMillis();
 		int count = 0;
 		int secondaryCount = 0;
 		for (Completion completion : completions) {
