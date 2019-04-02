@@ -69,6 +69,7 @@ class MacroAutoCompletionProvider extends DefaultCompletionProvider implements
 	private static MacroAutoCompletionProvider instance = null;
 
 	private boolean sorted = false;
+	private final int maximumSearchResults = 100;
 
 	private MacroAutoCompletionProvider() {
 		parseFunctionsHtmlDoc("/doc/ij1macro/functions.html");
@@ -284,22 +285,25 @@ class MacroAutoCompletionProvider extends DefaultCompletionProvider implements
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<Completion> getCompletionByInputText(String inputText) {
-
 		inputText = inputText.toLowerCase();
 
 		ArrayList<Completion> result = new ArrayList<Completion>();
 
 		int count = 0;
+		int secondaryCount = 0;
 		for (Completion completion : completions) {
 			String text = completion.getInputText().toLowerCase();
 			if (text.contains(inputText)) {
 				if (text.startsWith(inputText)) {
-					System.out.println("add at beginning");
 					result.add(count, completion);
 					count++;
 				} else {
 					result.add(completion);
+					secondaryCount++;
 				}
+			}
+			if (secondaryCount + count > maximumSearchResults) {
+				break; // if too many results are found, exit to not annoy the user
 			}
 		}
 
