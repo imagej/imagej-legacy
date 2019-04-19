@@ -220,6 +220,7 @@ public class IJ1Helper extends AbstractContextual {
 			// the time the IJ1Helper is initialized. Ideally we would like to handle
 			// positioning via the LegacyUI though, so that we can restore positions
 			// on secondary monitors and such.
+			ij1.pack();
 			ij1.setLocation(ij1.getPreferredLocation());
 		}
 	}
