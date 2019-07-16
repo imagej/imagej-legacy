@@ -52,6 +52,7 @@ import org.fife.ui.rtextarea.ToolTipSupplier;
 import org.scijava.module.ModuleInfo;
 import org.scijava.module.ModuleService;
 
+import javax.swing.text.BadLocationException;
 import javax.swing.text.JTextComponent;
 
 /**
@@ -310,6 +311,40 @@ class MacroAutoCompletionProvider extends DefaultCompletionProvider implements
 		return result;
 	}
 
+	private void appendMacroSpecificCompletions(String inputText, List<Completion> result, JTextComponent comp) {
+		String text = null;
+		try {
+			text = comp.getDocument().getText(0, comp.getDocument().getLength());
+		} catch (BadLocationException e) {
+			e.printStackTrace();
+			return;
+		}
+
+		int linecount = 0;
+		for (String line : text.split("\n")){
+			linecount++;
+
+			String trimmedline = line.trim();
+			String lcaseline = trimmedline.toLowerCase();
+			if (lcaseline.startsWith("function ")) {
+				String command = trimmedline.substring(8).trim().replace("{", "");
+				if (command.contains(inputText)) {
+					String description = "user defined function " + command + "\n as specified in line " + linecount;
+
+					result.add(new BasicCompletion(this, command, null, description));
+				}
+			}
+			if (lcaseline.contains("=")) {
+				String command = trimmedline.substring(0, lcaseline.indexOf("=")).trim();
+				if (command.contains(inputText) && command.matches("[a-zA-Z]+")) {
+					String description = "user defined variable " + command + "\n as specified in line " + linecount;
+
+					result.add(new BasicCompletion(this, command, null, description));
+				}
+			}
+		}
+	}
+
 
 	/**
 	 * {@inheritDoc}
@@ -323,6 +358,7 @@ class MacroAutoCompletionProvider extends DefaultCompletionProvider implements
 
 		if (text != null) {
 			retVal = getCompletionByInputText(text);
+			appendMacroSpecificCompletions(text, retVal, comp);
 		}
 		return retVal;
 	}
