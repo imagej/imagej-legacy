@@ -311,7 +311,11 @@ class MacroAutoCompletionProvider extends DefaultCompletionProvider implements
 		return result;
 	}
 
-	private void appendMacroSpecificCompletions(String inputText, List<Completion> result, JTextComponent comp) {
+	private void appendMacroSpecificCompletions(String input, List<Completion> result, JTextComponent comp) {
+
+		List<Completion> completions = new ArrayList<Completion>();
+		String lcaseinput = input.toLowerCase();
+
 		String text = null;
 		try {
 			text = comp.getDocument().getText(0, comp.getDocument().getLength());
@@ -328,21 +332,27 @@ class MacroAutoCompletionProvider extends DefaultCompletionProvider implements
 			String lcaseline = trimmedline.toLowerCase();
 			if (lcaseline.startsWith("function ")) {
 				String command = trimmedline.substring(8).trim().replace("{", "");
-				if (command.contains(inputText)) {
+				String lcasecommand = command.toLowerCase();
+				if (lcasecommand.contains(lcaseinput)) {
 					String description = "user defined function " + command + "\n as specified in line " + linecount;
 
-					result.add(new BasicCompletion(this, command, null, description));
+					completions.add(new BasicCompletion(this, command, null, description));
 				}
 			}
 			if (lcaseline.contains("=")) {
 				String command = trimmedline.substring(0, lcaseline.indexOf("=")).trim();
-				if (command.contains(inputText) && command.matches("[a-zA-Z]+")) {
+				String lcasecommand = command.toLowerCase();
+				if (lcasecommand.contains(lcaseinput) && command.matches("[_a-zA-Z]+")) {
 					String description = "user defined variable " + command + "\n as specified in line " + linecount;
 
-					result.add(new BasicCompletion(this, command, null, description));
+					completions.add(new BasicCompletion(this, command, null, description));
 				}
 			}
 		}
+
+		Collections.sort(completions, new SortByRelevanceComparator());
+
+		result.addAll(0, completions);
 	}
 
 
