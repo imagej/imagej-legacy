@@ -598,6 +598,11 @@ public class IJ1Helper extends AbstractContextual {
 		return Interpreter.getInstance();
 	}
 
+	/** Gets the result of {@link Interpreter#getAdditionalFunctions()}. */
+	public static String getAdditionalMacroFunctions() {
+		return Interpreter.getAdditionalFunctions();
+	}
+
 	/**
 	 * Gets the value of the specified variable, from the given macro
 	 * {@link Interpreter}.
