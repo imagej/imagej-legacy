@@ -14,12 +14,16 @@ Jump back to the beginning of a while() or for() loop.
 <b>else {</b><br>
 All commands inside an else block are executed if the expression in the earlier if block is false.
 
+<a name="forfilesinafolder"></a>
+<b>filelist = getFileList(directory) <br>for (i = 0; i < lengthOf(filelist); i++) {<br>    if (endsWith(filelist[i], ".tif") { <br>        open(directory + File.separator + filelist[i]);<br>    } <br>}</b>
+A for loop which opens all files ending with ".tif" in a folder.
+
 <a name="for"></a>
 <b>for (i = 0; i < 10; i++) {</b><br>
 All commands inside a for loop block are repeatedly executed.
 
 <a name="function"></a>
-<b>function doSomething() {</b><br>
+<b>function doSomething() { <br>// function description</b><br>
 Defines a list of commands as function which can be called.
 
 <a name="if"></a>
