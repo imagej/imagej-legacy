@@ -216,7 +216,7 @@ class MacroAutoCompletionProvider extends DefaultCompletionProvider implements
 			.replace("</b>", "") //
 			.replace("<i>", "") //
 			.replace("</i>", "") //
-			.replace("<br>", "");
+			.replace("<br>", "\n");
 	}
 
 	private BasicCompletion makeListEntry(
