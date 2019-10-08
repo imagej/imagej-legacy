@@ -14,12 +14,16 @@ Jump back to the beginning of a while() or for() loop.
 <b>else {</b><br>
 All commands inside an else block are executed if the expression in the earlier if block is false.
 
+<a name="forfilesinafolder"></a>
+<b>filelist = getFileList(directory) <br>for (i = 0; i < lengthOf(filelist); i++) {<br>    if (endsWith(filelist[i], ".tif") { <br>        open(directory + File.separator + filelist[i]);<br>    } <br>}</b>
+A for loop which opens all files ending with ".tif" in a folder.
+
 <a name="for"></a>
 <b>for (i = 0; i < 10; i++) {</b><br>
 All commands inside a for loop block are repeatedly executed.
 
 <a name="function"></a>
-<b>function doSomething() {</b><br>
+<b>function doSomething() { <br>// function description</b><br>
 Defines a list of commands as function which can be called.
 
 <a name="if"></a>
@@ -50,6 +54,58 @@ The <pre>var</pre> statement allows defining global variables which are availabl
 <b>while (expression) {</b><br>
 All commands inside a while loop block are repeatedly executed until expression becomes false.
 
+
+<a name="param1"></a>
+<b>#@ String text</b>
+Ask the user to enter a string when starting macro execution.
+
+<a name="param2"></a>
+<b>#@ String(value="Useful hints", visibility="MESSAGE") hint</b>
+Show a message to the user when starting macro execution.
+
+<a name="param3"></a>
+<b>#@ String(label="Analyst name", description="Your name") name</b>
+Ask the user to enter a string explained in a label when starting macro execution.
+
+<a name="param4"></a>
+<b>#@ String(choices={"A","B"}, style="radioButtonHorizontal") location</b>
+Ask the user to make a choice with radio buttons when starting macro execution.
+
+<a name="param5"></a>
+<b>#@ String(choices={"Mutant", "Control"}, style="list") experimGroup</b>
+Ask the user to make a choice in a pulldown when starting macro execution.
+
+<a name="param6"></a>
+<b>#@ int number</b>
+Ask the user to enter a number when starting macro execution.
+
+<a name="param7"></a>
+<b>#@ int(value=25, min=0, max=100, style="slider") ratio2</b>
+Ask the user to enter a number within a given range using a slider when starting macro execution.
+
+<a name="param8"></a>
+<b>#@ double(value=25, min=0, max=1, style="spinner") realNumber</b>
+Ask the user to enter a number within a given range using a spinner when starting macro execution.
+
+<a name="param9"></a>
+<b>#@ File (style="open") inputFile</b>
+Ask the user to select a file to open when starting macro execution.
+
+<a name="param10"></a>
+<b>#@ File (style="save") outputFile</b>
+Ask the user to select a file to save when starting macro execution.
+
+<a name="param11"></a>
+<b>#@ File (style="directory") imageFolder</b>
+Ask the user to select a folder when starting macro execution.
+
+<a name="param12"></a>
+<b>#@ ColorRGB(value="red") color</b>
+Ask the user to select a colour when starting macro execution.
+
+<a name="param14"></a>
+<b>#@ boolean checkbox</b>
+Offer the user to activate a checkbox when starting macro execution.
 
 
 
