@@ -169,7 +169,6 @@
 	</ciManagement>
 
 	<properties>
-		<imagej.app.directory>C:/Users/Nico/Desktop/Fiji.app</imagej.app.directory>
 		<package-name>net.imagej.legacy</package-name>
 		<premain-class>net.imagej.legacy.LegacyJavaAgent</premain-class>
 
