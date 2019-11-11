@@ -328,6 +328,10 @@ class MacroAutoCompletionProvider extends DefaultCompletionProvider implements
 		int codeLength = text.length();
 		text = text + "\n" + IJ1Helper.getAdditionalMacroFunctions();
 
+		List<String> userVariables = new ArrayList<String>();
+		List<String> varLines = new ArrayList<String>();
+		List<Boolean> globalVarStatus = new ArrayList<Boolean>();
+		
 		int linecount = 0;
 		int charcount = 0;
 		String[] textArray = text.split("\n");
@@ -346,22 +350,34 @@ class MacroAutoCompletionProvider extends DefaultCompletionProvider implements
 			}
 			if ((lcaseline.contains("=")) && (charcount < codeLength)) {
 				String command = trimmedline.substring(0, lcaseline.indexOf("=")).trim();
-				String globalVarDescription = "";
+				boolean globalVar = false;
 				if(command.startsWith("var ")) { 
 					command = command.substring(4).trim();
-					globalVarDescription = "global ";
+					globalVar= true;
 				}
 				String lcasecommand = command.toLowerCase();
 				if (lcasecommand.contains(lcaseinput) && command.matches("[_a-zA-Z]+")) {
-					String description = "User defined " + globalVarDescription + "variable " + command + "\n as specified in line " + (linecount + 1);
-
-					completions.add(new BasicCompletion(this, command, null, description));
+					if (!userVariables.contains(command)) {
+						userVariables.add(command);
+						varLines.add(String.valueOf(linecount + 1));						
+						globalVarStatus.add(globalVar);
+					} else {
+						int index=userVariables.indexOf(command);
+						varLines.set(index, varLines.get(index) + ", " + String.valueOf(linecount + 1));
+						globalVarStatus.set(index, globalVarStatus.get(index) && globalVar);
+					}
 				}
 			}
 			linecount++;
 			charcount += line.length() + 1;
 		}
 
+		for (int i=0; i<userVariables.size(); i++) {
+			boolean manyLines = varLines.get(i).contains(",");
+			String description = "User defined " + (globalVarStatus.get(i)? "":"GLOBAL ") + "variable " + userVariables.get(i) + "\n as specified in line"+(manyLines? "s":"")+": " + varLines.get(i);
+			completions.add(new BasicCompletion(this, userVariables.get(i), null, description));
+		}
+		
 		Collections.sort(completions, new SortByRelevanceComparator());
 
 		result.addAll(0, completions);
