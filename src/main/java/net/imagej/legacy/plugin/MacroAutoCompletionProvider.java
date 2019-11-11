@@ -343,7 +343,7 @@ class MacroAutoCompletionProvider extends DefaultCompletionProvider implements
 			}
 			if (lcaseline.contains("=")) {
 				String command = trimmedline.substring(0, lcaseline.indexOf("=")).trim();
-				if(command.startsWith("var ")) command=command.substring(4).trim();
+				if(command.startsWith("var ")) command = command.substring(4).trim();
 				String lcasecommand = command.toLowerCase();
 				if (lcasecommand.contains(lcaseinput) && command.matches("[_a-zA-Z]+")) {
 					String description = "User defined variable " + command + "\n as specified in line " + (linecount + 1);
