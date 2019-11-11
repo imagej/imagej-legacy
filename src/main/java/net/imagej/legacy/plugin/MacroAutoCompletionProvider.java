@@ -342,7 +342,7 @@ class MacroAutoCompletionProvider extends DefaultCompletionProvider implements
 				String command = trimmedline.substring(8).trim().replace("{", "");
 				String lcasecommand = command.toLowerCase();
 				if (lcasecommand.contains(lcaseinput)) {
-					String description = findDescription(textArray, linecount, "User defined function " + command + "\n as specified in line " + (linecount + 1));
+					String description = findDescription(textArray, linecount, "User defined function <b>" + command + "</b> as specified in line " + (linecount + 1));
 
 
 					completions.add(new BasicCompletion(this, command, null, description));
@@ -364,7 +364,7 @@ class MacroAutoCompletionProvider extends DefaultCompletionProvider implements
 					} else {
 						int index=userVariables.indexOf(command);
 						varLines.set(index, varLines.get(index) + ", " + String.valueOf(linecount + 1));
-						globalVarStatus.set(index, globalVarStatus.get(index) && globalVar);
+						globalVarStatus.set(index, globalVarStatus.get(index) || globalVar);
 					}
 				}
 			}
@@ -374,7 +374,7 @@ class MacroAutoCompletionProvider extends DefaultCompletionProvider implements
 
 		for (int i=0; i<userVariables.size(); i++) {
 			boolean manyLines = varLines.get(i).contains(",");
-			String description = "User defined " + (globalVarStatus.get(i)? "":"GLOBAL ") + "variable " + userVariables.get(i) + "\n as specified in line"+(manyLines? "s":"")+": " + varLines.get(i);
+			String description = "User defined " + (globalVarStatus.get(i)? "<i>GLOBAL</i> ":"") + "variable &lt;<b>" + userVariables.get(i) + "</b>&gt; as specified in line"+(manyLines? "s":"")+": " + varLines.get(i);
 			completions.add(new BasicCompletion(this, userVariables.get(i), null, description));
 		}
 		
