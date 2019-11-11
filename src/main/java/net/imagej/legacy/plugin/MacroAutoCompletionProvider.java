@@ -324,9 +324,12 @@ class MacroAutoCompletionProvider extends DefaultCompletionProvider implements
 			e.printStackTrace();
 			return;
 		}
+		
+		int codeLength = text.length();
 		text = text + "\n" + IJ1Helper.getAdditionalMacroFunctions();
 
 		int linecount = 0;
+		int charcount = 0;
 		String[] textArray = text.split("\n");
 		for (String line : textArray){
 			String trimmedline = line.trim();
@@ -341,7 +344,7 @@ class MacroAutoCompletionProvider extends DefaultCompletionProvider implements
 					completions.add(new BasicCompletion(this, command, null, description));
 				}
 			}
-			if (lcaseline.contains("=")) {
+			if ((lcaseline.contains("=")) && (charcount < codeLength)) {
 				String command = trimmedline.substring(0, lcaseline.indexOf("=")).trim();
 				if(command.startsWith("var ")) command = command.substring(4).trim();
 				String lcasecommand = command.toLowerCase();
@@ -352,6 +355,7 @@ class MacroAutoCompletionProvider extends DefaultCompletionProvider implements
 				}
 			}
 			linecount++;
+			charcount += line.length() + 1;
 		}
 
 		Collections.sort(completions, new SortByRelevanceComparator());
