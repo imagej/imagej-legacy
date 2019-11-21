@@ -356,7 +356,7 @@ class MacroAutoCompletionProvider extends DefaultCompletionProvider implements
 					globalVar= true;
 				}
 				String lcasecommand = command.toLowerCase();
-				if (lcasecommand.contains(lcaseinput) && command.matches("([_a-zA-Z]+[_a-zA-Z0-9]*|[_a-zA-Z0-9]*[a-zA-Z]+[a-zA-Z0-9])")) { // [_a-zA-Z0-9]+,  excluding [0-9]+[_0-9]*
+				if (lcasecommand.contains(lcaseinput) && command.matches("[_a-zA-Z]+[_a-zA-Z0-9]*")) { // First character cannot be a digit ([_a-zA-Z]+), while the rest can be any valid character ([_a-zA-Z0-9]*)
 					if (!userVariables.contains(command)) {
 						userVariables.add(command);
 						varLines.add(String.valueOf(linecount + 1));						
