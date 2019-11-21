@@ -348,7 +348,7 @@ class MacroAutoCompletionProvider extends DefaultCompletionProvider implements
 					completions.add(new BasicCompletion(this, command, null, description));
 				}
 			}
-			if ((lcaseline.contains("=")) && (charcount < codeLength)) {
+			if ((lcaseline.contains("=")) && (charcount < codeLength)) { // possible variable assignment AND within user code block (not in additional functions)
 				String command = trimmedline.substring(0, lcaseline.indexOf("=")).trim();
 				boolean globalVar = false;
 				if(command.startsWith("var ")) { 
