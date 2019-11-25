@@ -342,9 +342,9 @@ class MacroAutoCompletionProvider extends DefaultCompletionProvider implements
 				String command = trimmedline.substring(8).trim().replace("{", "");
 				String lcasecommand = command.toLowerCase();
 				if (lcasecommand.contains(lcaseinput)) {
-					String description = findDescription(textArray, linecount, "User defined function <b>" + command + "</b> as specified in line " + (linecount + 1));
-
-
+					Boolean isAdditional = !(charcount < codeLength);  // function is outside user code block (in additional functions)
+					String description = "<b>" + command + "</b><br>" + findDescription(textArray, linecount, "<i>User defined " + (isAdditional?"additional ":"") + "function" + (isAdditional?"":" as specified in line " + (linecount + 1)) + ".</i>");
+					
 					completions.add(new BasicCompletion(this, command, null, description));
 				}
 			}
