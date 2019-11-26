@@ -318,8 +318,10 @@ class MacroAutoCompletionProvider extends DefaultCompletionProvider implements
 		String lcaseinput = input.toLowerCase();
 
 		String text = null;
+		int carPos = 0;
 		try {
 			text = comp.getDocument().getText(0, comp.getDocument().getLength());
+			carPos = comp.getCaretPosition();
 		} catch (BadLocationException e) {
 			e.printStackTrace();
 			return;
@@ -336,6 +338,7 @@ class MacroAutoCompletionProvider extends DefaultCompletionProvider implements
 		int charcount = 0;
 		String[] textArray = text.split("\n");
 		for (String line : textArray){
+			if(carPos<charcount || carPos>charcount+line.length() + 1) { // the caret is not in the current line
 			String trimmedline = line.trim();
 			String lcaseline = trimmedline.toLowerCase();
 			if (lcaseline.startsWith("function ")) {
@@ -368,6 +371,7 @@ class MacroAutoCompletionProvider extends DefaultCompletionProvider implements
 						globalVarStatus.set(index, globalVarStatus.get(index) || globalVar);
 					}
 				}
+			}
 			}
 			linecount++;
 			charcount += line.length() + 1;
