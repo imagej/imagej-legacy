@@ -339,9 +339,9 @@ class MacroAutoCompletionProvider extends DefaultCompletionProvider implements
 			String trimmedline = line.trim();
 			String lcaseline = trimmedline.toLowerCase();
 			if (lcaseline.startsWith("function ")) {
-				String command = trimmedline.substring(8).trim().replace("{", "");
+				String command = trimmedline.substring(8).trim().replace("{", "").trim();
 				String lcasecommand = command.toLowerCase();
-				if (lcasecommand.contains(lcaseinput)) {
+				if (lcasecommand.contains(lcaseinput) && command.matches("[_a-zA-Z]+[_a-zA-Z0-9]*\\(.*\\)")) { // the function name is valid and the statement includes parenthesis
 					Boolean isAdditional = !(charcount < codeLength);  // function is outside user code block (in additional functions)
 					String description = "<b>" + command + "</b><br>" + findDescription(textArray, linecount, "<i>User defined " + (isAdditional?"additional ":"") + "function" + (isAdditional?"":" as specified in line " + (linecount + 1)) + ".</i>");
 					
