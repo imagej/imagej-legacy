@@ -348,11 +348,12 @@ class MacroAutoCompletionProvider extends DefaultCompletionProvider implements
 					completions.add(new BasicCompletion(this, command, null, description));
 				}
 			}
-			if ((lcaseline.contains("=")) && (charcount < codeLength)) { // possible variable assignment AND within user code block (not in additional functions)
-				String command = trimmedline.substring(0, lcaseline.indexOf("=")).trim();
+			if ((lcaseline.contains("=") || trimmedline.startsWith("var ")) && (charcount < codeLength)) { // possible variable assignment (= OR var) AND within user code block (not in additional functions)
+				String command = trimmedline;
+				if(command.contains("=")) command=command.substring(0, lcaseline.indexOf("=")).trim();
 				boolean globalVar = false;
 				if(command.startsWith("var ")) { 
-					command = command.substring(4).trim();
+					command = command.substring(4).trim().replace(";", ""); // in case of var declaration w/o assignment the trailing semicolon will be removed
 					globalVar= true;
 				}
 				String lcasecommand = command.toLowerCase();
