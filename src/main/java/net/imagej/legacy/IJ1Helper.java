@@ -791,6 +791,44 @@ public class IJ1Helper extends AbstractContextual {
 		return Menus.getCommands();
 	}
 
+	private Method getMenuMethod;
+	private Field nPluginsField;
+	private Method addItemMethod;
+
+	public void addCommand(final String menuPath, final String label, final String command) {
+		// Register the command in the table.
+		final Hashtable<String, String> commands = getCommands();
+		if (commands.containsKey(label)) return;
+		commands.put(label, command);
+
+		// Try to add the command to the menu bar.
+		try {
+			if (getMenuMethod == null) {
+				getMenuMethod = Menus.class.getDeclaredMethod("getMenu", String.class);
+				getMenuMethod.setAccessible(true);
+			}
+			if (nPluginsField == null) {
+				nPluginsField = Menus.class.getDeclaredField("nPlugins");
+				nPluginsField.setAccessible(true);
+			}
+			if (addItemMethod == null) {
+				addItemMethod = Menus.class.getDeclaredMethod("addItem", Menu.class,
+					String.class, int.class, boolean.class);
+				addItemMethod.setAccessible(true);
+			}
+			final Object menu = getMenuMethod.invoke(null, menuPath);
+			final int nPlugins = (int) nPluginsField.get(null);
+			nPluginsField.set(null, nPlugins + 1);
+			if (menu != null) addItemMethod.invoke(null, menu, label, 0, false);
+		}
+		catch (final NoSuchMethodException | NoSuchFieldException
+				| SecurityException | IllegalAccessException | IllegalArgumentException
+				| InvocationTargetException exc)
+		{
+			log.error(exc);
+		}
+	}
+
 	@SuppressWarnings("unchecked")
 	public Hashtable<Integer, String> getShortcuts() {
 		return Menus.getShortcuts();

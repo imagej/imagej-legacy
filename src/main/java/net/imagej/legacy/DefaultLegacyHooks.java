@@ -36,22 +36,27 @@ import ij.ImagePlus;
 import java.awt.Frame;
 import java.awt.Window;
 import java.awt.event.KeyEvent;
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.swing.KeyStroke;
 
@@ -312,6 +317,46 @@ public class DefaultLegacyHooks extends LegacyHooks {
 	public boolean createInEditor(final String title, final String content) {
 		if (editor == null) return false;
 		return editor.create(title, content);
+	}
+
+	@Override
+	public void addMenuItem(final String menuPath, final String command) {
+		super.addMenuItem(menuPath, command);
+
+		// We want to parse plugins.config classpath resources once per menu
+		// initialization, after local plugins from plugins.dir et al. have been
+		// populated. A convenient time to do it is when this method is called for
+		// the final time, which will be for the File>Quit command.
+		if (!"File>Quit".equals(menuPath)) return;
+
+		// Parse plugins.config files from the system classpath, to make them
+		// available in more scenarios, such as when no plugins.dir is set.
+		final Pattern pattern = Pattern.compile("^\\s*([^,]*),\\s*\"([^\"]*)\",\\s*([^\\s]*)");
+		final ClassLoader cl = Thread.currentThread().getContextClassLoader();
+		try {
+			final Enumeration<URL> pluginsConfigs = cl.getResources("plugins.config");
+			while (pluginsConfigs.hasMoreElements()) {
+				final URL pluginsConfig = pluginsConfigs.nextElement();
+				try (final BufferedReader r = new BufferedReader( //
+					new InputStreamReader(pluginsConfig.openStream())))
+				{
+					while (true) {
+						final String line = r.readLine();
+						if (line == null) break;
+						if (line.startsWith("#")) continue; // skip comments
+						final Matcher m = pattern.matcher(line);
+						if (!m.matches()) continue;
+						final String mPath = m.group(1);
+						final String label = m.group(2);
+						final String plugin = m.group(3);
+						helper.addCommand(mPath, label, plugin);
+					}
+				}
+			}
+		}
+		catch (final IOException exc) {
+			log.error(exc);
+		}
 	}
 
 	@Override

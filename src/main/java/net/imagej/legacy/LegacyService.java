@@ -449,25 +449,27 @@ public final class LegacyService extends AbstractService implements
 			// part of another simultaneously existing application context.
 			return;
 		}
-		try {
-			final ClassLoader loader = Thread.currentThread().getContextClassLoader();
-			final boolean ij1Initialized = //
-				LegacyEnvironment.isImageJ1Initialized(loader);
-			if (!ij1Initialized) {
-				getLegacyEnvironment(loader).newImageJ1(true);
-			}
-			ij1Helper = new IJ1Helper(this);
-		}
-		catch (final Throwable t) {
-			log.error("Failed to instantiate IJ1.", t);
-			return;
-		}
-
 		synchronized (LegacyService.class) {
-			instance = this;
-			final ClassLoader loader = Thread.currentThread().getContextClassLoader();
-			LegacyInjector.installHooks(loader, new DefaultLegacyHooks(this,
-				ij1Helper));
+			if (instance != null) return; // double-checked locking
+			try {
+				// Install the default legacy hooks before ImageJ 1.x initializes.
+				// Otherwise, the legacy hooks that fire during IJ1 initialization
+				// won't include DefaultLegacyHooks overrides of EssentialLegacyHooks.
+				final ClassLoader loader = Thread.currentThread().getContextClassLoader();
+				ij1Helper = new IJ1Helper(this);
+				LegacyInjector.installHooks(loader, //
+					new DefaultLegacyHooks(this, ij1Helper));
+				instance = this;
+
+				// Initialize ImageJ 1.x, if needed.
+				final boolean ij1Initialized = //
+					LegacyEnvironment.isImageJ1Initialized(loader);
+				if (!ij1Initialized) getLegacyEnvironment(loader).newImageJ1(true);
+			}
+			catch (final Throwable t) {
+				log.error("Failed to instantiate IJ1.", t);
+				return;
+			}
 		}
 
 		ij1Helper.initialize();
@@ -519,9 +521,9 @@ public final class LegacyService extends AbstractService implements
 
 		ij1Helper.dispose();
 
-		final ClassLoader loader = Thread.currentThread().getContextClassLoader();
-		LegacyInjector.installHooks(loader, null);
 		synchronized (LegacyService.class) {
+			final ClassLoader loader = Thread.currentThread().getContextClassLoader();
+			LegacyInjector.installHooks(loader, null);
 			instance = null;
 		}
 
