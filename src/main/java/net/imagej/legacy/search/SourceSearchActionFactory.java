@@ -156,60 +156,64 @@ public class SourceSearchActionFactory implements SearchActionFactory {
 	}
 
 	private void sourceForClass(final ModuleInfo info, final Class<?> c) {
+		final POM pom = getPOM(c, null, null);
+		if (pom == null) {
+			log.debug("No Maven POM found for class: " + c.getName());
+			errorMessage(info);
+			return;
+		}
+
+		final String scmURL = pom.getSCMURL();
+		if (scmURL == null) {
+			if (log.isDebug()) log.debug("No <scm><url> for " + coord(pom));
+			errorMessage(info);
+			return;
+		}
+		if (!scmURL.matches("^(git|http|https)://github.com/[^/]+/[^/]+/?$")) {
+			log.debug("Not a standard GitHub project URL: " + scmURL);
+			openURL(scmURL);
+			return;
+		}
+
+		// Try to extract a tag or commit hash.
+		final String tag;
+		final String scmTag = pom.getSCMTag();
+		if (scmTag == null || scmTag.equals("HEAD")) {
+			if (log.isDebug()) {
+				log.debug(scmTag == null ? //
+					"No SCM tag available; using commit hash." : //
+					"Weird SCM tag '" + scmTag + "'; using commit hash.");
+			}
+			final Manifest m = Manifest.getManifest(c);
+			tag = m == null ? null : m.getImplementationBuild();
+			if (tag == null) log.debug("No commit hash found.");
+		}
+		else tag = scmTag;
+		if (tag == null) {
+			// No tag or commit hash could be extracted.
+			openURL(scmURL);
+			return;
+		}
+
+		// Build a precise GitHub URL.
+		final StringBuilder url = new StringBuilder();
+		url.append(scmURL);
+		if (!scmURL.endsWith("/")) url.append("/");
+		url.append("blob/");
+		url.append(tag);
+		url.append("/src/main/java/");
+		url.append(c.getName().replaceAll("\\.", "/"));
+		url.append(".java");
+		openURL(url.toString());
+	}
+
+	private void openURL(final String urlPath) {
 		try {
-			final POM pom = getPOM(c, null, null);
-			if (pom == null) {
-				log.debug("No Maven POM found for class: " + c.getName());
-				errorMessage(info);
-				return;
-			}
-
-			final String scmURL = pom.getSCMURL();
-			if (scmURL == null) {
-				if (log.isDebug()) log.debug("No <scm><url> for " + coord(pom));
-				errorMessage(info);
-				return;
-			}
-			if (!scmURL.matches("^(git|http|https)://github.com/[^/]+/[^/]+/?$")) {
-				log.debug("Not a standard GitHub project URL: " + scmURL);
-				platformService.open(new URL(scmURL));
-				return;
-			}
-
-			// Try to extract a tag or commit hash.
-			final String tag;
-			final String scmTag = pom.getSCMTag();
-			if (scmTag == null || scmTag.equals("HEAD")) {
-				if (log.isDebug()) {
-					log.debug(scmTag == null ? //
-						"No SCM tag available; using commit hash." : //
-						"Weird SCM tag '" + scmTag + "'; using commit hash.");
-				}
-				final Manifest m = Manifest.getManifest(c);
-				tag = m == null ? null : m.getImplementationBuild();
-				if (tag == null) log.debug("No commit hash found.");
-			}
-			else tag = scmTag;
-			if (tag == null) {
-				// No tag or commit hash could be extracted.
-				platformService.open(new URL(scmURL));
-				return;
-			}
-
-			// Build a precise GitHub URL.
-			final StringBuilder url = new StringBuilder();
-			url.append(scmURL);
-			if (!scmURL.endsWith("/")) url.append("/");
-			url.append("blob/");
-			url.append(tag);
-			url.append("/src/main/java/");
-			url.append(c.getName().replaceAll("\\.", "/"));
-			url.append(".java");
-			platformService.open(new URL(url.toString()));
+			platformService.open(new URL(urlPath));
 		}
 		catch (final IOException exc) {
-			log.debug(exc);
-			errorMessage(info);
+			log.error(exc);
+			uiService.showDialog("Platform error opening source URL: " + urlPath);
 		}
 	}
 
