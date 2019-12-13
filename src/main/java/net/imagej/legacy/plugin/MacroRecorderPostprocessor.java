@@ -63,6 +63,7 @@ public class MacroRecorderPostprocessor extends AbstractPostprocessorPlugin {
 	@Override
 	public void process(final Module module) {
 		if (legacyService == null) return;
+		if (module.getInfo().is("no-record")) return; // module wants to be skipped
 		final IJ1Helper ij1Helper = legacyService.getIJ1Helper();
 		if (ij1Helper == null) return;
 		if (ij1Helper.isMacro()) return; // do not record while in macro mode
