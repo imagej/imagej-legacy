@@ -153,6 +153,8 @@ class MacroAutoCompletionProvider extends DefaultCompletionProvider implements
 		sorted = false;
 		this.moduleService = moduleService;
 
+		ArrayList<Completion> list = new ArrayList<Completion>();
+
 		for (ModuleInfo info : moduleService.getModules()) {
 			if(info.getMenuPath().getLeaf() != null) {
 				String name = info.getMenuPath().getLeaf().getName().trim();
@@ -160,9 +162,10 @@ class MacroAutoCompletionProvider extends DefaultCompletionProvider implements
 				String description = "<b>" + headline + "</b><p>" +
 						"<a href=\"https://imagej.net/Special:Search/" + name.replace(" ", "%20") + "\">Search imagej wiki for help</a>";
 
-				addCompletion(makeListEntry(this, headline, null, description));
+				list.add(makeListEntry(this, headline, null, description));
 			}
 		}
+		addCompletions(list);
 	}
 
 	public void addMacroExtensionAutoCompletions(MacroExtensionAutoCompletionService macroExtensionAutoCompletionService) {
@@ -173,9 +176,12 @@ class MacroAutoCompletionProvider extends DefaultCompletionProvider implements
 		this.macroExtensionAutoCompletionService = macroExtensionAutoCompletionService;
 
 		List<BasicCompletion> completions = macroExtensionAutoCompletionService.getCompletions(this);
+		List<Completion> completionsCopy = new ArrayList<Completion>();
 		for (BasicCompletion completion : completions) {
-			addCompletion(completion);
+			completionsCopy.add(completion);
 		}
+		addCompletions(completionsCopy);
+
 	}
 
 	public void sort() {
