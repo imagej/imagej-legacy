@@ -153,7 +153,7 @@ class MacroAutoCompletionProvider extends DefaultCompletionProvider implements
 		sorted = false;
 		this.moduleService = moduleService;
 
-		ArrayList<Completion> list = new ArrayList<Completion>();
+		ArrayList<Completion> completions = new ArrayList<>();
 
 		for (ModuleInfo info : moduleService.getModules()) {
 			if(info.getMenuPath().getLeaf() != null) {
