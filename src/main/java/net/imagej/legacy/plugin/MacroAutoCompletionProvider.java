@@ -165,7 +165,7 @@ class MacroAutoCompletionProvider extends DefaultCompletionProvider implements
 				completions.add(makeListEntry(this, headline, null, description));
 			}
 		}
-		addCompletions(list);
+		addCompletions(completions);
 	}
 
 	public void addMacroExtensionAutoCompletions(MacroExtensionAutoCompletionService macroExtensionAutoCompletionService) {
