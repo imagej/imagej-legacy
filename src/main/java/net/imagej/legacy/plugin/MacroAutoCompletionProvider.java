@@ -176,7 +176,7 @@ class MacroAutoCompletionProvider extends DefaultCompletionProvider implements
 		this.macroExtensionAutoCompletionService = macroExtensionAutoCompletionService;
 
 		List<BasicCompletion> completions = macroExtensionAutoCompletionService.getCompletions(this);
-		List<Completion> completionsCopy = new ArrayList<Completion>();
+		List<Completion> completionsCopy = new ArrayList<>();
 		for (BasicCompletion completion : completions) {
 			completionsCopy.add(completion);
 		}
