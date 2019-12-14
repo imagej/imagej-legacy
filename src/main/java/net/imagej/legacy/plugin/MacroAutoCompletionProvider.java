@@ -162,7 +162,7 @@ class MacroAutoCompletionProvider extends DefaultCompletionProvider implements
 				String description = "<b>" + headline + "</b><p>" +
 						"<a href=\"https://imagej.net/Special:Search/" + name.replace(" ", "%20") + "\">Search imagej wiki for help</a>";
 
-				list.add(makeListEntry(this, headline, null, description));
+				completions.add(makeListEntry(this, headline, null, description));
 			}
 		}
 		addCompletions(list);
