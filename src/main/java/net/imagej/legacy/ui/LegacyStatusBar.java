@@ -78,7 +78,7 @@ public class LegacyStatusBar extends AbstractLegacyAdapter implements
 		// finally block earlier in this stack trace.
 		if (processing) return;
 		try {
-			helper().setProgress(val, max);
+			helper().setProgress(val, max + 1);
 		} finally {
 			getLegacyService().setProcessingEvents(processing);
 		}
