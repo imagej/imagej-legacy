@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.scijava</groupId>
 		<artifactId>pom-scijava</artifactId>
-		<version>27.0.1</version>
+		<version>28.0.0</version>
 		<relativePath />
 	</parent>
 
@@ -183,6 +183,10 @@ Institute of Molecular Cell Biology and Genetics.</license.copyrightOwners>
 		<releaseProfiles>deploy-to-scijava</releaseProfiles>
 
 		<miglayout-swing.version>5.2</miglayout-swing.version>
+		<scijava-search.version>0.7.0</scijava-search.version>
+		<scijava-ui-awt.version>0.1.7</scijava-ui-awt.version>
+		<scijava-ui-swing.version>0.13.1</scijava-ui-swing.version>
+		<script-editor.version>0.5.4</script-editor.version>
 	</properties>
 
 	<repositories>
@@ -239,12 +243,6 @@ Institute of Molecular Cell Biology and Genetics.</license.copyrightOwners>
 		<dependency>
 			<groupId>org.scijava</groupId>
 			<artifactId>scijava-search</artifactId>
-			<exclusions>
-				<exclusion>
-					<groupId>com.miglayout</groupId>
-					<artifactId>miglayout</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.scijava</groupId>
@@ -253,32 +251,14 @@ Institute of Molecular Cell Biology and Genetics.</license.copyrightOwners>
 		<dependency>
 			<groupId>org.scijava</groupId>
 			<artifactId>scijava-ui-awt</artifactId>
-			<exclusions>
-				<exclusion>
-					<groupId>com.miglayout</groupId>
-					<artifactId>miglayout</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.scijava</groupId>
 			<artifactId>scijava-ui-swing</artifactId>
-			<exclusions>
-				<exclusion>
-					<groupId>com.miglayout</groupId>
-					<artifactId>miglayout</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.scijava</groupId>
 			<artifactId>script-editor</artifactId>
-			<exclusions>
-				<exclusion>
-					<groupId>com.miglayout</groupId>
-					<artifactId>miglayout</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 
 		<!-- Third party dependencies -->
