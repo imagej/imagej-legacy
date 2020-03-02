@@ -317,41 +317,71 @@ class MacroAutoCompletionProvider extends DefaultCompletionProvider implements
 		String lcaseinput = input.toLowerCase();
 
 		String text = null;
+		int carPos = 0;
 		try {
 			text = comp.getDocument().getText(0, comp.getDocument().getLength());
+			carPos = comp.getCaretPosition();
 		} catch (BadLocationException e) {
 			e.printStackTrace();
 			return;
 		}
+		
+		int codeLength = text.length();
 		text = text + "\n" + IJ1Helper.getAdditionalMacroFunctions();
 
+		List<String> userVariables = new ArrayList<String>();
+		List<String> varLines = new ArrayList<String>();
+		List<Boolean> globalVarStatus = new ArrayList<Boolean>();
+		
 		int linecount = 0;
+		int charcount = 0;
 		String[] textArray = text.split("\n");
 		for (String line : textArray){
-			String trimmedline = line.trim();
-			String lcaseline = trimmedline.toLowerCase();
-			if (lcaseline.startsWith("function ")) {
-				String command = trimmedline.substring(8).trim().replace("{", "");
-				String lcasecommand = command.toLowerCase();
-				if (lcasecommand.contains(lcaseinput)) {
-					String description = findDescription(textArray, linecount, "User defined function " + command + "\n as specified in line " + (linecount + 1));
-
-
-					completions.add(new BasicCompletion(this, command, null, description));
+			if(carPos<charcount || carPos>charcount+line.length() + 1) { // the caret is not in the current line
+				String trimmedline = line.trim();
+				String lcaseline = trimmedline.toLowerCase();
+				if (lcaseline.startsWith("function ")) {
+					String command = trimmedline.substring(8).trim().replace("{", "").trim();
+					String lcasecommand = command.toLowerCase();
+					if (lcasecommand.contains(lcaseinput) && command.matches("[_a-zA-Z]+[_a-zA-Z0-9]*\\(.*\\)")) { // the function name is valid and the statement includes parenthesis
+						Boolean isAdditional = !(charcount < codeLength);  // function is outside user code block (in additional functions)
+						String description = "<b>" + command + "</b><br>" + findDescription(textArray, linecount, "<i>User defined " + (isAdditional?"additional ":"") + "function" + (isAdditional?"":" as specified in line " + (linecount + 1)) + ".</i>");
+						
+						completions.add(new BasicCompletion(this, command, null, description));
+					}
 				}
-			}
-			if (lcaseline.contains("=")) {
-				String command = trimmedline.substring(0, lcaseline.indexOf("=")).trim();
-				String lcasecommand = command.toLowerCase();
-				if (lcasecommand.contains(lcaseinput) && command.matches("[_a-zA-Z]+")) {
-					String description = "User defined variable " + command + "\n as specified in line " + (linecount + 1);
-
-					completions.add(new BasicCompletion(this, command, null, description));
+				if ((lcaseline.contains("=") || trimmedline.startsWith("var ")) && (charcount < codeLength)) { // possible variable assignment (= OR var) AND within user code block (not in additional functions)
+					String command = trimmedline;
+					if(command.contains("=")) command=command.substring(0, lcaseline.indexOf("=")).trim();
+					boolean globalVar = false;
+					if(command.startsWith("var ")) { 
+						command = command.substring(4).trim().replace(";", ""); // in case of var declaration w/o assignment the trailing semicolon will be removed
+						globalVar= true;
+					}
+					String lcasecommand = command.toLowerCase();
+					if (lcasecommand.contains(lcaseinput) && command.matches("[_a-zA-Z]+[_a-zA-Z0-9]*")) { // First character cannot be a digit ([_a-zA-Z]+), while the rest can be any valid character ([_a-zA-Z0-9]*)
+						if (!userVariables.contains(command)) {
+							userVariables.add(command);
+							varLines.add(String.valueOf(linecount + 1));						
+							globalVarStatus.add(globalVar);
+						} else {
+							int index=userVariables.indexOf(command);
+							varLines.set(index, varLines.get(index) + ", " + String.valueOf(linecount + 1));
+							globalVarStatus.set(index, globalVarStatus.get(index) || globalVar);
+						}
+					}
 				}
 			}
 			linecount++;
+			charcount += line.length() + 1;
 		}
 
+		for (int i=0; i<userVariables.size(); i++) {
+			boolean manyLines = varLines.get(i).contains(",");
+			String description = "User defined " + (globalVarStatus.get(i)? "<i>GLOBAL</i> ":"") + "variable &lt;<b>" + userVariables.get(i) + "</b>&gt; as specified in line"+(manyLines? "s":"")+": " + varLines.get(i);
+			completions.add(new BasicCompletion(this, userVariables.get(i), null, description));
+		}
+		
 		Collections.sort(completions, new SortByRelevanceComparator());
 
 		result.addAll(0, completions);
