@@ -117,7 +117,7 @@ class MacroAutoCompletionProvider extends DefaultCompletionProvider implements
 				}
 				else {
 					if (headline.length() == 0) {
-						headline = htmlToText(line);
+						headline = htmlToText(line + ";");
 					}
 					else {
 						description = description + line + "\n";
@@ -154,7 +154,7 @@ class MacroAutoCompletionProvider extends DefaultCompletionProvider implements
 		for (ModuleInfo info : moduleService.getModules()) {
 			if(info.getMenuPath().getLeaf() != null) {
 				String name = info.getMenuPath().getLeaf().getName().trim();
-				String headline = "run(\"" + name +"\")";
+				String headline = "run(\"" + name +"\");";
 				String description = "<b>" + headline + "</b><p>" +
 						"<a href=\"https://imagej.net/Special:Search/" + name.replace(" ", "%20") + "\">Search imagej wiki for help</a>";
 
@@ -214,7 +214,8 @@ class MacroAutoCompletionProvider extends DefaultCompletionProvider implements
 			.replace("</b>", "") //
 			.replace("<i>", "") //
 			.replace("</i>", "") //
-			.replace("<br>", "\n");
+			.replace("<br>", "\n").
+				replace(")\n;", ");");
 	}
 
 	private BasicCompletion makeListEntry(
