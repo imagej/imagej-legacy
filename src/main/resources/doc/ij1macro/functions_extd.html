@@ -19,15 +19,15 @@ All commands inside an else block are executed if the expression in the earlier 
 A for loop which opens all files ending with ".tif" in a folder.
 
 <a name="forslicesinastack"></a>
-<b>for(i = 1; i <= nSlices; i++) {<br>    setSlice(i);<br>    // do something here;<br>}</b>
+<b>for (i = 1; i <= nSlices; i++) {<br>    setSlice(i);<br>    // do something here;<br>}</b>
 A for loop which loops over slices in a stack.
 
 <a name="forroisintheroimanager"></a>
-<b>n = roiManager('count');<br>for (i = 0; i < n; i++) {<br>    roiManager('select', i);<br>    // process roi here}<br>  </b>
+<b>n = roiManager('count');<br>for (i = 0; i < n; i++) {<br>    roiManager('select', i);<br>    // process roi here;<br>}</b>
 A for loop which loops over ROIs in the ROI Manager.
 
 <a name="forresultsintheresultstable"></a>
-<b>for(i = 0; i < nResults(); i++) {<br>    v=getResult('Area',i);<br>    setResult('myColumn',i,v);<br>}<br>updateResults();<br></b>
+<b>for (i = 0; i < nResults(); i++) {<br>    v = getResult('Area', i);<br>    setResult('myColumn', i, v);<br>}<br>updateResults();<br></b>
 A for loop which loops over results in the Results Table.
 
 <a name="for"></a>
