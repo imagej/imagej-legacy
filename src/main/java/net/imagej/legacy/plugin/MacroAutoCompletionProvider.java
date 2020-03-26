@@ -209,7 +209,8 @@ class MacroAutoCompletionProvider extends DefaultCompletionProvider implements
 			name.compareTo("Ext") != 0 && //
 			name.compareTo("ext") != 0 && //
 			name.compareTo("alphabar") != 0 && //
-			name.compareTo("ext") != 0;
+			name.compareTo("ext") != 0 && //
+			name.compareTo("Math") != 0;
 	}
 
 	private String htmlToText(final String text) {

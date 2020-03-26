@@ -98,13 +98,11 @@ Calculates and returns the Fourier amplitudes of <i>array</i>.
 or "flat-top", or may be omitted (meaning "none").
 See the <a href="https://imagej.net/macros/examples/TestArrayFourier.txt">TestArrayFourier</a>
 macro for an example and more documentation.
-Requires 1.49i.
 <br>
 
 <a name="Array.getSequence"></a>
 <b>Array.getSequence(n)</b> - 
 Returns an array containing the numeric sequence 0,1,2...n-1.
-Requires 1.49u.
 <br>
 
 <a name="Array.getStatistics"></a>
@@ -159,7 +157,15 @@ Extracts a part of an array and returns it.
 <a name="Array.sort"></a>
 <b>Array.sort(array)</b> - 
 Sorts <i>array</i>, which must contain all numbers or all strings.
-String sorts are case-insensitive in v1.44i or later.
+String sorts are case-insensitive.
+<br>
+
+<a name="Array.sort2"></a>
+<b>Array.sort(array1, array2, array3...)</b> - 
+Sorts multiple arrays, where all the arrays adopt the sort
+order of <i>array1</i>
+(<a href="https://imagej.nih.gov/ij/macros/examples/ArraySortDemo.txt">example</a>).
+Requires 1.52u.
 <br>
 
 <a name="Array.trim"></a>
@@ -184,7 +190,6 @@ Requires 1.51n.
 <a name="asin"></a>
 <b>asin(n)</b><br>
 Returns the inverse sine (in radians) of <i>n</i>.
-
 <p>
 
 <a name="atan"></a>
@@ -330,7 +335,7 @@ macro for an example.
 
 <a name="Dialog.createNonBlocking"></a>
 <b>Dialog.createNonBlocking("Title")</b> - 
-Creates a non-model dialog box with the specified title.
+Creates a non-modal dialog box with the specified title.
 <br>
 <a name="Dialog.addMessage"></a>
 <b>Dialog.addMessage(string)</b> - 
@@ -700,13 +705,37 @@ Returns "1" (true) if the specified file exists.<br>
 
 <a name="File.getName"></a>
 <b>File.getName(path)</b> - 
-Returns the last name in <i>path</i>'s name  sequence.<br>
+Returns the file name (e.g., "blobs.tif") from <i>path</i>.<br>
+
+<a name="File.getNameWithoutExtension"></a>
+<b>File.getNameWithoutExtension(path)</b> - 
+Returns the name (e.g., "blobs") from <i>path</i> without the extension.
+Requires 1.52r.
+<br>
+
+<a name="File.getDirectory"></a>
+<b>File.getDirectory(path)</b> - 
+Returns the directory (e.g., "C:/Users/wayne/images/") from <i>path</i>.
+Requires 1.52r.
+<br>
+
+<a name="File.getDefaultDir"></a>
+<b>File.getDefaultDir</b> - 
+Returns the current working directory.
+Requires 1.52s.
+<br>
+
+<a name="File.setDefaultDir"></a>
+<b>File.setDefaultDir(directoryPath)</b> - 
+Set the default working directory.
+Requires 1.52s.
+<br>
 
 <a name="File.getParent"></a>
 <b>File.getParent(path)</b> - 
 Returns the parent of the file specified by <i>path</i>.<br>
 
-<a name="File.getDirectory"></a>
+<a name="File.isDirectory"></a>
 <b>File.isDirectory(path)</b> - 
 Returns "1" (true) if the specified file is a directory.<br>
 
@@ -918,7 +947,8 @@ This function is used to implement the
 Returns the largest value that is not greater than
 <i>n</i> and is equal to an integer.
 See also: 
-<a href="https://imagej.net/developer/macro/functions.html#round">round</a>. 
+<a href="https://imagej.nih.gov/ij/developer/macro/functions.html#Math.ceil">Math.ceil</a> and
+<a href="https://imagej.nih.gov/ij/developer/macro/functions.html#round">round</a>. 
 </p><p>
 
 <a name="fromCharCode"></a>
@@ -988,9 +1018,18 @@ For examples, see the
 <a href="https://imagej.net/macros/ListFilesRecursively.txt">ListFilesRecursively</a> macros.
 See also: <a href="https://imagej.net/developer/macro/functions.html#getFileList">getFileList</a> and the <a href="https://imagej.net/developer/macro/functions.html#file">File functions</a>.
 
-</p><blockquote>
+<a name="getDir"></a>
+<b>getDir(string)</b><br>
+Displays a "choose directory" dialog and returns the selected directory, or returns
+the path to a specified directory, such as "plugins", "home", etc.
+The returned path ends with a file separator, either "\" (Windows) or "/".
+Returns an empty string if the specified directory is not found or 
+aborts the macro if the user cancels the "choose directory" dialog box.
+For examples, see the
+<a href="https://imagej.net/macros/GetDirectoryDemo.txt">GetDirectoryDemo</a> and
+<a href="https://imagej.net/macros/ListFilesRecursively.txt">ListFilesRecursively</a> macros.
+See also: <a href="https://imagej.net/ij/developer/macro/functions.html#getFileList">getFileList</a> and the <a href="https://imagej.nih.gov/ij/developer/macro/functions.html#file">File functions</a>.
 
-<a name="getDirectory"></a>
 <b>getDirectory("Choose a Directory")</b> - 
 Displays a file open dialog, using the argument as a title, and
 returns the path to the directory selected by the user.<br>
@@ -1016,6 +1055,9 @@ Returns the path to the directory that ImageJ was launched from.<br>
 <b>getDirectory("home")</b> - 
 Returns the path to users home directory.<br>
 <a name="getDirectory8"></a>
+<b>getDirectory("downloads")</b> - 
+Returns the path to users downloads directory.<br>
+<a name="getDirectory9"></a>
 <b>getDirectory("temp")</b> - 
 Returns the path to the temporary directory (/tmp on Linux and Mac OS X).<br>
 </blockquote>
@@ -1123,7 +1165,11 @@ Returns the name of the file that the current image was loaded
 from, or an empty string if the file name is not available.
 </p><p>
 
-<a name="getInfo6"></a>
+<b>getInfo("image.title")</b><br>
+Returns the title of the current image. Same as
+<a href="https://imagej.net/ij/developer/macro/functions.html#getTitle">getTitle</a>.
+</p><p>
+
 <b>getInfo("image.subtitle")</b><br>
 Returns the subtitle of the current image. This is the line of
 information displayed above the image and below the title bar.
@@ -1138,6 +1184,9 @@ or "" if the Log window is not open.
 <a name="getInfo8"></a>
 <b>getInfo("macro.filepath")</b><br>
 Returns the filepath of the most recently loaded macro or script.
+Use <i>File.getName(getInfo("macro.filepath"))</i> to get the file name
+and <i>File.getDirectory(getInfo("macro.filepath"))</i> to get
+the directory.
 </p><p>
 
 <a name="getInfo9"></a>
@@ -1159,12 +1208,13 @@ Returns information about the current image's overlay.
 <b>getInfo("selection.name")</b><br>
 Returns the name of the current selection, or "" if there is no selection
 or the selection does not have a name. The argument can also be
-"roi.name".
+"roi.name". See also: <a href="https://imagej.net/ij/developer/macro/functions.html#Roi.getName">Roi.getName</a>.
 </p><p>
 
 <a name="getInfo14"></a>
 <b>getInfo("selection.color")</b><br>
 Returns the color of the current selection.
+See also: <a href="https://imagej.net/ij/developer/macro/functions.html#Roi.getStrokeColor">Roi.getStrokeColor</a>.
 </p><p>
 
 <a name="getInfo-label"></a>
@@ -1200,6 +1250,8 @@ Replaces the getInfo() function.
 <a name="getInfo18"></a>
 <b>getInfo("window.title")</b><br>
 Returns the title of the front-most window.
+Use <a href="https://imagej.net/ij/developer/macro/functions.html#getTitle">getTitle</a> to
+get the title of the current batch mode image.
 </p><p>
 
 <a name="getInfo19"></a>
@@ -1523,11 +1575,13 @@ Returns the height, in pixels, of the current font.
 <b>getValue("selection.size")</b><br>
 Returns the number of points in the current selection, 
 or 0 if there is no selection.
+See also: <a href="https://imagej.net/ij/developer/macro/functions.html#Roi.size">Roi.size</a>.
 </p><p>
 
 <a name="selection-width"></a>
 <b>getValue("selection.width")</b><br>
 Returns the stroke width of the current selection.
+See also: <a href="https://imagej.net/ij/developer/macro/functions.html#Roi.getStrokeWidth">Roi.getStrokeWidth</a>.
 </p><p>
 
 <a name="results-count"></a>
@@ -1543,6 +1597,12 @@ Returns the current <i>Image&gt;Transform&gt;Rotate</i> angle.
 Requires 1.52p.
 </p><p>
 
+<a name="image.size"></a>
+<b>getValue("image.size")</b><br>
+Returns the size of the current image in bytes.
+Requires 1.52u.
+</p><p>
+
 <a name="getMeasurementValue"></a>
 <b>getValue("Mean, Median, Feret, etc.")</b><br>
 Returns a measurement result, where the argument is
@@ -1550,7 +1610,7 @@ Returns a measurement result, where the argument is
 "Perim.", "BX", "BY", "Width", "Height", "Major", "Minor", "Angle", "Circ.",
 "Feret", "IntDen", "Median", "Skew", "Kurt", "%Area", "RawIntDen", "Ch", "Slice",
 "Frame", "FeretX", "FeretY", "FeretAngle", "MinFeret", "AR", "Round", "Solidity",
-"MinThr" or "MaxThr".
+"MinThr", "MaxThr" or "Length".
 Add " raw" to the argument to disable calibration, for example getValue("Mean raw").
 Add " limit" to the argument to enable the "limit to threshold" option.
 Requires 1.52p.
@@ -1813,7 +1873,9 @@ See also:
 
 <a name="lengthOf"></a>
 <b>lengthOf(str)</b><br>
-Returns the length of a string or array.
+Returns the length of a string or array. Can be replaced with
+str.length (1.52t or later) or arr.length, where is 'str' is a
+string variable and 'arr' is an array variable.
 </p><p>
 
 <a name="lineTo"></a>
@@ -1910,7 +1972,7 @@ Note that this function, as well as List.size, returns a string.
 <a name="log"></a>
 <b>log(n)</b><br>
 Returns the natural logarithm (base e) of <i>n</i>. Note that log10(n) = log(n)/log(10).
-
+See also: <a href="https://imagej.net/ij/developer/macro/functions.html#Math.log10">Math.log10</a>. 
 <p>
 
 
@@ -1986,14 +2048,14 @@ to an existing point selection.
 
 <a name="makePolygon"></a>
 <b>makePolygon(x1, y1, x2, y2, x3, y3, ...)</b><br>
-Creates a polygonal selection. At least three coordinate pairs must be specified, 
-but not more than 200. As an example, <i>makePolygon(20,48,59,13,101,40,75,77,38,70)</i>
+Creates a polygonal selection, where at least three coordinate pairs must be specified. 
+As an example, <i>makePolygon(20,48,59,13,101,40,75,77,38,70)</i>
 creates a polygon selection with five sides.
 </p><p>
 
 <a name="makeRectangle"></a>
 <b>makeRectangle(x, y, width, height)</b><br>
-Creates a rectangular selection. The <i>x</i> and <i>y</i> arguments are the coordinates 
+Creates a rectangular selection, where <i>x</i> and <i>y</i> are the coordinates 
 (in pixels) of the upper left corner of the selection. The origin (0,0) of the 
 coordinate system is the upper left corner of the image.
 </p><p>
@@ -2041,6 +2103,7 @@ macro provides an example.
 <b>matches(string, regex)</b><br>
 Returns <i>true</i> if <i>string</i> matches the specified 
 <a href="http://en.wikipedia.org/wiki/Regular_expression">regular expression</a>.
+Can be replaced with string.matches(regex) in ImageJ 1.52t or later.
 See also: 
 <a href="https://imagej.net/developer/macro/functions.html#startsWith">startsWith</a>, 
 <a href="https://imagej.net/developer/macro/functions.html#endsWith">endsWith</a>, 
@@ -2048,7 +2111,114 @@ See also:
 <a href="https://imagej.net/developer/macro/functions.html#replace">replace</a>. 
 </p><p>
 
-<a name="mmaxOff"></a>
+<a name="Math"></a>
+ <b>Math Functions</b><br>
+Functions for performing basic numeric operations,
+available in ImageJ 1.52u or later.
+<br>
+
+<a name="Math.abs"></a>
+<b>Math.abs(n)</b><br>
+Returns the absolute value of <i>n</i>.
+<br>
+
+<a name="Math.acos"></a>
+<b>Math.acos(n)</b><br>
+Returns the inverse cosine (in radians) of <i>n</i>.
+<br>
+
+<a name="Math.asin"></a>
+<b>Math.asin(n)</b><br>
+Returns the inverse sine (in radians) of <i>n</i>.
+<br>
+
+<a name="Math.atan"></a>
+<b>Math.atan(n)</b><br>
+Returns the inverse tangent (arctangent) of <i>n</i>,
+a value in the range -PI/2 through PI/2.
+<br>
+
+<a name="Math.atan2"></a>
+<b>Math.atan2(y, x)</b><br>
+Calculates the inverse tangent of <i>y/x</i> and returns an angle in the 
+range -PI to PI, using the signs of the arguments 
+to determine the quadrant. Multiply the result by 180/PI to convert to degrees.
+<br>
+
+<a name="Math.ceil"></a>
+<b>Math.ceil(n)</b><br>
+Returns the smallest (closest to negative infinity) value that is greater
+than or equal to <i>n</i> and is an integer. 
+<br>
+
+<a name="Math.cos"></a>
+<b>Math.cos(angle)</b><br>
+Returns the cosine of an angle (in radians).
+<br>
+
+<a name="Math.exp"></a>
+<b>Math.exp(n)</b><br>
+Returns the exponential number e (i.e., 2.718...) raised to the power of <i>n</i>.
+<br>
+
+<a name="Math.floor"></a>
+<b>Math.floor(n)</b><br>
+Returns the largest value that is not greater than
+<i>n</i> and is equal to an integer.
+<br>
+
+<a name="Math.log"></a>
+<b>Math.log(n)</b><br>
+Returns the natural logarithm (base e) of <i>n</i>.
+<br>
+
+<a name="Math.log10"></a>
+<b>Math.log10(n)</b><br>
+Returns the base 10 logarithm of <i>n</i>.
+<br>
+
+<a name="Math.min"></a>
+<b>Math.min(n1, n2)</b><br>
+Returns the smaller of two values.
+<br>
+
+<a name="Math.max"></a>
+<b>Math.max(n1, n2)</b><br>
+Returns the larger of two values.
+<br>
+
+<a name="Math.pow"></a>
+<b>Math.pow(base, exponent)</b><br>
+Returns the value of <i>base</i> raised to the power of <i>exponent</i>.
+<br>
+
+<a name="Math.round"></a>
+<b>Math.round(n)</b><br>
+Returns the closest integer to <i>n</i>.
+<br>
+
+<a name="Math.sin"></a>
+<b>Math.sin(angle)</b><br>
+Returns the sine of an angle (in radians).
+<br>
+
+<a name="Math.sqr"></a>
+<b>Math.sqr(n)</b><br>
+Returns the square of <i>n</i>.
+<br>
+
+<a name="Math.sqrt"></a>
+<b>Math.sqrt(n)</b><br>
+Returns the square root of <i>n</i>, or NaN if <i>n</i> is less than zero.
+<br>
+
+<a name="Math.tan"></a>
+<b>Math.tan(n)</b><br>
+Returns the tangent of an angle (in radians).
+<br>
+
+
+<a name="maxOff"></a>
 <b>maxOf(n1, n2)</b><br>
 Returns the greater of two values.
 </p><p>
@@ -2708,7 +2878,7 @@ Changes the title of the active image to the string <i>name</i>.
 
 <a name="replace"></a>
 <b>replace(string, old, new)</b><br>
-Returns the new string that results from replacing all occurrences of
+Returns a string that results from replacing all occurrences of
 <i>old</i> in <i>string</i> with <i>new</i>, where <i>old</i> and <i>new</i> 
 are single character strings. If <i>old</i> or <i>new</i> are longer than
 one character, each substring of 
@@ -2719,6 +2889,7 @@ When doing a simple string replacement, and <i>old</i> contains
 regular expression metacharacters ('.', '[', ']', '^', '$', etc.), you must escape
 them with a "\\". For example, to replace "[xx]" with "yy", use
 <i>string=replace(string,"\\[xx\\]","yy")</i>.
+Can be replaced with string.replace(old,new) in ImageJ 1.52t or later.
 See also:
 <a href="https://imagej.net/developer/macro/functions.html#matches">matches</a>. 
 </p><p>
@@ -2767,18 +2938,21 @@ the <a href="https://imagej.net/developer/macro/functions.html#saveSettings">sav
 
 <a name="Roi"></a>
  <b>ROI Functions</b><br>
-Use these functions to get information about the current selection or to get or set selection properties.
-Use <a href="https://imagej.net/ij/developer/macro/functions.html#selection-size">getValue("selection.size")</a> to get
-the selection size in points. Use <a href="https://imagej.net/ij/developer/macro/functions.html#selection-width">getValue("selection.width")</a> to get
-the stroke width of the selection.
-Refer to the
+Use these functions to get information about the current selection or to
+get or set selection properties. Refer to the
 <a href="https://imagej.net/macros/examples/RoiFunctionsDemo.txt">RoiFunctionsDemo</a>
-macro for examples. These functions require ImageJ 1.48h or later.
+macro for examples.
 </p><blockquote>
+
+<a name="Roi.size"></a>
+<b>Roi.size</b><br>
+Returns the size of the current selection in points.
+Requires 1.52r.
+<br>
 
 <a name="Roi.contains"></a>
 <b>Roi.contains(x, y)</b><br>
-Returns "1" if the point <i>x,y</i> is inside the current selection or "0" if it is not.
+Returns <i>true</i> if the point <i>x,y</i> is inside the current selection.
 Aborts the macro if there is no selection. See also:
 <a href="https://imagej.net/developer/macro/functions.html#Roi.getContainedPoints">Roi.getContainedPoints</a> and
 <a href="https://imagej.net/developer/macro/functions.html#selectionContains">selectionContains</a>.
@@ -2802,17 +2976,17 @@ the current selection. Aborts the macro if there is no selection.
 
 <a name="Roi.getDefaultColor"></a>
 <b>Roi.getDefaultColor</b><br>
-Returns the current default selection color.
+Returns the current default selection color as a string.
 <br>
 
 <a name="Roi.getStrokeColor"></a>
 <b>Roi.getStrokeColor</b><br>
-Returns the selection stroke color.
+Returns the selection stroke color as a string.
 <br>
 
 <a name="Roi.getFillColor"></a>
 <b>Roi.getFillColor</b><br>
-Returns the selection fill color.
+Returns the selection fill color as a string.
 <br>
 
 <a name="Roi.getName"></a>
@@ -2913,6 +3087,44 @@ Sets the selection name.
 <a name="Roi.setStrokeWidth"></a>
 <b>Roi.setStrokeWidth(width)</b><br>
 Sets the selection stroke width.
+<br>
+
+<a name="Roi.getStrokeWidth"></a>
+<b>Roi.getStrokeWidth</b><br>
+Returns the stroke width of the current selection.
+Requires 1.52r.
+<br>
+
+<a name="Roi.setGroup"></a>
+<b>Roi.setGroup(group)</b> - 
+Sets the group (a positive number) of the current selection. Zero sets the group to "none".
+Requires 1.52t.
+<br>
+
+<a name="Roi.getGroup"></a>
+<b>Roi.getGroup(group)</b> - 
+Returns the group (a positive number) of the current selection, or zero if
+the selection is not in a group.
+Requires 1.52t.
+<br>
+
+<a name="Roi.setPosition"></a>
+<b>Roi.setPosition(channel, slice, frame)</b> - 
+Sets the selection position.
+Requires 1.52r.
+<br>
+
+<a name="Roi.getPosition"></a>
+<b>Roi.getPosition(channel, slice, frame)</b> - 
+Returns the selection position.
+Requires 1.52r.
+<br>
+
+<a name="Roi.getPointPosition"></a>
+<b>Roi.getPointPosition(index)</b><br>
+Returns the stack position of the point with the
+specified index in the current point selection.
+Requires 1.52r.
 <br>
 
 <a name="Roi.remove"></a>
@@ -3179,6 +3391,7 @@ Returns the screen width in pixels.
 <b>selectionContains(x, y)</b><br>
 Returns <i>true</i> if the point <i>x,y</i> is inside the current selection.
 Aborts the macro if there is no selection.
+See also: <a href="https://imagej.net/ij/developer/macro/functions.html#Roi.contains">Roi.contains</a>
 </p><p>
 
 <a name="selectionName"></a>
@@ -3443,8 +3656,23 @@ do not have a LUT for each channel.
 These functions enable or disable ImageJ options, where
 <i>boolean</i> is either <i>true</i> or <i>false</i>.
  </p><blockquote>
-<a name="setOption1"></a>
- <b>setOption("AutoContrast", boolean)</b><br>
+ 
+<a name="setOption1a"></a>
+<b>setOption(measurement, boolean)</b><br>
+ Enable/disables <i>Analyze&gt;Set Measurements</i> options where
+ 'measurement' can be <i>"Display label"</i>, <i>"Limit to threshold"</i>,
+ <i>"Area"</i>, <i>"Mean"</i>, <i>"Std"</i>, <i>"Perimeter"</i>,
+ <i>"Stack position"</i> or <i>"Add to overlay"</i>.
+ <br>
+
+<a name="setOption1b"></a>
+<b>setOption("AntialiasedText", boolean)</b><br>
+Controls the "Antialiased text" option in the
+ <i>Edit&gt;Options&gt;Fonts</i> dialog. Requires v1.51h.
+<br>
+
+<a name="setOption1c"></a>
+<b>setOption("AutoContrast", boolean)</b><br>
 Enables/disables the <i>Edit&gt;Options&gt;Appearance</i>
 "Auto contrast stacks" option. You can also have newly displayed stack slices contrast
 enhanced by holding the shift key down when navigating stacks.
@@ -3465,6 +3693,13 @@ Sets/resets the 'changes' flag of the current image. Set this option <i>false</i
 avoid  "Save Changes?" dialog boxes when closing images.
 <br>
 <a name="setOption5"></a>
+<b>setOption("CopyHeaders", boolean)</b><br>
+Enables/disables the "Copy column headers" option in the
+<i>Edit&gt;Options&gt;Input/Output</i> dialog.
+See <a href="https://imagej.net/ij/developer/macro/functions.html#String.copyResults">String.copyResults</a>
+Requires v1.52p.
+<br>
+<a name="setOption5b"></a>
 <b>setOption("DebugMode", boolean)</b><br>
 Enables/disables the ImageJ debug mode. ImageJ displays information, such
 as TIFF tag values, when it is in debug mode.
@@ -3519,6 +3754,12 @@ Controls whether macros invoked using keyboard shortcuts
   In "QueueMacros" mode, screen updates, which also run on the EDT, are delayed until the macro finishes.
  <br>
 <a name="setOption15"></a>
+<b>setOption("ScaleConversions", boolean)</b><br>
+Enables/disables the "Scale when converting" option in the
+<i>Edit&gt;Options&gt;Conversons</i> dialog.
+Requires v1.52k.
+<br>
+<a name="setOption15a"></a>
 <b>setOption("Show All", boolean)</b><br>
 Enables/disables the the "Show All" mode in the ROI Manager.
 <br>
@@ -3545,6 +3786,13 @@ Enables/disables display of Results table row indexes.
 <b>setOption("AntialiasedText", boolean)</b><br>
 Controls the "Antialiased text" option in the
  <i>Edit&gt;Options&gt;Fonts</i> dialog. Requires v1.51h.
+ <br>
+<a name="setOption20a"></a> 
+<b>setOption("WaitForCompletion", boolean)</b><br>
+Set <i>false</i> and the next <a href="https://imagej.nih.gov/ij/developer/macro/functions.html#exec">exec()</a>
+call will return null and not wait for the command being
+executed to finish.
+Requires v1.52u.
 <br>
 <a name="setOption21"></a>
 <b>setOption("WandAllPoints", boolean)</b><br>
@@ -3742,6 +3990,9 @@ The bar is erased if <i>currentIndex</i>&gt;<i>finalIndex</i> or
 <a name="showStatus"></a>
 <b>showStatus("message")</b><br>
 Displays a message in the ImageJ status bar.
+If <i>message</i> starts with '!', subsequent
+process messages are suppressed
+(<a href="https://imagej.nih.gov/ij/macros/examples/NonVolatileShowStatus.txt">example</a>).
 </p><p>
 
 <a name="showText"></a>
@@ -3779,7 +4030,7 @@ and delimiters at the start or end of the <i>string</i> are ignored unless the d
 is a single comma, a single semicolon or a regular expression.
 With ImageJ 1.49f or later, <i>delimiters</i> can be also a regular expression enclosed in
 parentheses, e.g. <i>delimiters</i>="(\n\n)" splits only at empty lines (two newline characters
-following each other).
+following each other). See also: <a href="https://imagej.nih.gov/ij/developer/macro/functions.html#String.join">String.join</a>. 
 </p><p>
 Note that split() may return empty strings when the second argument is
 ",", ";' or "\n". To avoid empty strings, use ",,", ";;" and "\n\n" as the second argument.
@@ -3864,14 +4115,30 @@ Sets the frame interval in time (T) units.
 Returns the x, y, z, time and value units.
 <br>
 
-<a name="Stack.setTUnit"></a>
-<b>Stack.setTUnit(string)</b> - 
-Sets the time unit.
+<a name="Stack.setUnits"></a>
+<b>Stack.setUnits(X, Y, Z, Time, Value)</b> -
+Sets the x, y, z, time and value units.
+Requires 1.52r.
+<br>
+
+<a name="Stack.setXUnit"></a>
+<b>Stack.setXUnit(string)</b> - 
+Sets the X-dimension unit.
+<br>
+
+<a name="Stack.setYUnit"></a>
+<b>Stack.setYUnit(string)</b> - 
+Sets the Y-dimension unit.
 <br>
 
 <a name="Stack.setZUnit"></a>
 <b>Stack.setZUnit(string)</b> - 
 Sets the Z-dimension unit.
+<br>
+
+<a name="Stack.setTUnit"></a>
+<b>Stack.setTUnit(string)</b> - 
+Sets the time unit.
 <br>
 
 <a name="Stack.setDisplayMode"></a>
@@ -3916,9 +4183,22 @@ If an <i>Orthogonal Views</i> is active, its crosspoint is set to x, y, z
 (<a href="https://imagej.net/macros/OrthogonalViewsDemo.txt">example</a>).
 <br>
 
+<a name="Stack.getOrthoViews"></a>
+<b>Stack.getOrthoViews(x, y, z)</b> - 
+If an <i>Orthogonal Views</i> is active, its crosspoint is returned as x, y, z values.
+Requires 1.52r.
+<br>
+
 <a name="Stack.getOrthoViewsID"></a>
 <b>Stack.getOrthoViewsID</b> - 
 Returns the image ID of the current <i>Orthogonal Views</i>, or zero if none is active.
+<br>
+
+<a name="Stack.getOrthoViewsIDs"></a>
+<b>Stack.getOrthoViewsIDs(XY, YZ, XZ)</b> - 
+If an <i>Orthogonal Views</i> is active, the three views are returned as
+XY, YZ, XZ image ID values.
+Requires 1.52r.
 <br>
 
 <a name="Stack.stopOrthoViews"></a>
@@ -3945,15 +4225,14 @@ See also:
  <b>String Functions</b><br>
 These functions do string buffering and copy strings to and from
 the system clipboard. The
-<a href="https://imagej.net/macros/CopyResultsToClipboard.txt">CopyResultsToClipboard</a>
-macro demonstrates their use.
-See also: 
-<a href="https://imagej.net/developer/macro/functions.html#endsWith">endsWith</a>, 
-<a href="https://imagej.net/developer/macro/functions.html#indexOf">indexOf</a>, 
-<a href="https://imagej.net/developer/macro/functions.html#lastIndexOf">lastIndexOf</a>, 
-<a href="https://imagej.net/developer/macro/functions.html#lengthOf">lengthOf</a>, 
-<a href="https://imagej.net/developer/macro/functions.html#startsWith">startsWith</a> and
-<a href="https://imagej.net/developer/macro/functions.html#substring">substring</a>.
+<a href="https://imagej.net/ij/macros/CopyResultsToClipboard.txt">CopyResultsToClipboard</a>
+macro demonstrates their use. These string functions, where 's' is a string variable,
+are also available:
+s.<b>charAt</b>(i), s.<b>contains(s2)</b>, s.<b>endsWith(s2)</b>,
+s.<b>indexOf(s2)</b>, s.<b>lastIndexOf(s2)</b>,
+s.<b>length</b>, s.<b>matches(s2)</b>, s.<b>replace(s1,s2)</b>, 
+s.<b>startsWith(s2)</b>, s.<b>substring(i1,i2)</b>, s.<b>substring(i)</b>,
+s.<b>toLowerCase</b>, s.<b>toUpperCase</b>, s.<b>trim</b>.
 </p><blockquote>
 
 <a name="String.resetBuffer"></a>
@@ -3997,6 +4276,24 @@ Returns the Results window headers.
 Returns the contents of the clipboard.
 <br>
 
+<a name="String.join"></a>
+<b>String.join(array)</b> - 
+Creates a ", " delimited string from the elements of 'array'.
+See also: <a href="https://imagej.nih.gov/ij/developer/macro/functions.html#split">split</a>.
+Requires 1.52s.
+<br>
+
+<a name="String.join"></a>
+<b>String.join(array, delimiter)</b> - 
+Creates a string from the elements of 'array', using the specified string delimiter.
+<br>
+
+<a name="String.trim"></a>
+<b>String.trim(string)</b> - 
+Returns a copy of 'string' that has leading and trailing whitespace omitted.
+Requires 1.52s. Can be replaced with string.trim() in ImageJ 1.52t and later.
+<br>
+
 <a name="String.show"></a>
 <b>String.show(str)</b><br>
 Displays <i>str</i> in a text window.
@@ -4013,7 +4310,8 @@ Displays <i>str</i> in a text window using <i>title</i> as the title.
 <a name="substring"></a>
 <b>substring(string, index1, index2)</b><br>
 Returns a new string that is a substring of <i>string</i>. The 
-substring begins at <i>index1</i> and extends to the character at <i>index2</i> - 1. 
+substring begins at <i>index1</i> and extends to the character at <i>index2</i> - 1.
+Can be replaced with str.substring(i1,i2) in ImageJ 1.52t and later.
 See also: 
 <a href="https://imagej.net/developer/macro/functions.html#indexOf">indexOf</a>,
 <a href="https://imagej.net/developer/macro/functions.html#startsWith">startsWith</a>,
@@ -4025,6 +4323,7 @@ See also:
 <b>substring(string, index)</b><br>
 Returns a substring of <i>string</i> that
 begins at <i>index</i> and extends to the end of <i>string</i>. 
+Can be replaced with str.substring(i) in ImageJ 1.52t and later.
 </p><p>
 
  <b> T  </b><a name="T"></a><a href="https://imagej.net/developer/macro/functions.html#Top">[&nbsp;Top&nbsp;]</a></p><p>
@@ -4317,5 +4616,7 @@ in the dialog box.
 </p><p>
 
 
+
+<small>Last updated 2020/03/26</small>
 
 </body></html>
