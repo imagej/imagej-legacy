@@ -93,6 +93,7 @@ import org.scijava.MenuPath;
 import org.scijava.event.EventHandler;
 import org.scijava.log.LogService;
 import org.scijava.module.ModuleInfo;
+import org.scijava.object.ObjectService;
 import org.scijava.platform.event.AppAboutEvent;
 import org.scijava.platform.event.AppOpenFilesEvent;
 import org.scijava.platform.event.AppPreferencesEvent;
@@ -123,6 +124,10 @@ public class IJ1Helper extends AbstractContextual {
 
 	@Parameter
 	private LogService log;
+
+	/** A reference to ObjectService in order to get the name of Object in the ObjectService */
+	@Parameter
+	private ObjectService objectService;
 
 	/** Search bar in the main window. */
 	private Object searchBar;
@@ -647,6 +652,12 @@ public class IJ1Helper extends AbstractContextual {
 	/** Returns true if the class is assignable to {@link ImagePlus}. */
 	public boolean isImagePlus(final Class<?> c) {
 		return ImagePlus.class.isAssignableFrom(c);
+	}
+
+	/** Returns the name of the object in the object service
+	 * - return non null even if the object is not in the object service */
+	public String getObjectName(final Object o) {
+		return objectService.getName(o);
 	}
 
 	/**
