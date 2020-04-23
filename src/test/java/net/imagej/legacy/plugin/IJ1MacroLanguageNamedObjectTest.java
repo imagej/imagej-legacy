@@ -77,45 +77,6 @@ public class IJ1MacroLanguageNamedObjectTest {
 	}
 
 	@Test
-	public void testGroovyNamedObject() throws InterruptedException,
-			ExecutionException
-	{
-		// TODO : Do we want this behaviour with groovy ? But do we have a choice ?
-		// Puts a named Pet object into the ObjectService
-		Pet pet = new Pet("Felix", "Cat");
-		objectService.addObject(pet,pet.getName());
-
-		// Makes Pet class easily discoverable be the script service
-		scriptService.addAlias(Pet.class);
-
-		// Execute a script.
-		final String script = "" + //
-				"#@ Pet animal\n" + //
-				"#@ ObjectService objectService\n" + //
-				"#@output String greeting\n" + //
-				"greeting = 'Oh, '+objectService.getName(animal)+' is so cute!'\n" + //
-				"";
-
-		final ScriptModule m = scriptService.run("greet.groovy", script, true, //
-				"animal", "Felix").get(); // Felix is given -> needs String to Pet conversion
-
-		final Object returnValue = m.getReturnValue();
-
-		// Verify that the input has been found - felix the cat
-		// Correct class
-		assertSame(m.getInput("animal").getClass(), Pet.class);
-		// Correct instance
-		assertSame(m.getInput("animal"), pet);
-
-		// Verify that the script executed correctly - with the correct object being
-		// given to the script (groovy behaviour)
-		assertEquals("Oh, Felix is so cute!", //
-				m.getOutput("greeting"));
-
-	}
-
-
-	@Test
 	public void testIJ1MacroLanguageNamedObject() throws InterruptedException,
 			ExecutionException
 	{
