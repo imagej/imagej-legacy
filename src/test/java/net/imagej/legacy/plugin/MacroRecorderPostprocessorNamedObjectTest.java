@@ -53,13 +53,16 @@ import java.util.concurrent.ExecutionException;
 import static org.junit.Assert.assertEquals;
 
 /**
- * Tests whether {@link MacroRecorderPostprocessor} uses the name of {@link NamedObjectIindex}
+ * Tests whether {@link MacroRecorderPostprocessor} uses the name of {@link org.scijava.object.NamedObjectIndex}
  * in the MacroRecorder. This allows to conveniently use IJ1 MacroRecorder for objects present in the
  * {@link ObjectService}, which do not have a proper overriden toString() method.
  *
+ * This class tests whether a Command being recorded outputs the correct name of an object, it works
+ * in combination with the test {@link IJ1MacroLanguageNamedObjectTest}.
+ *
  * @author Nicolas Chiaruttini
  */
-public class MacroRecorderPostprocessorNamedObjectIndexTest {
+public class MacroRecorderPostprocessorNamedObjectTest {
 
 	private Context context;
 	private ScriptService scriptService;
@@ -96,7 +99,7 @@ public class MacroRecorderPostprocessorNamedObjectIndexTest {
 		final EideticIJ1Helper ij1Helper = new EideticIJ1Helper();
 		legacyService.setIJ1Helper(ij1Helper);
 
-		// Puts a Pet object into the ObjectService
+		// Puts a named Pet object into the ObjectService
 		Pet pet = new Pet("Felix", "Cat");
 		objectService.addObject(pet,pet.getName());
 
@@ -115,6 +118,7 @@ public class MacroRecorderPostprocessorNamedObjectIndexTest {
 			scriptService.run("greet.groovy", script, true).get();
 
 		// Verify that Felix name is correctly registered in the ObjectService.
+		// TODO : is this necessary ? That's probably tested elsewhere
 		assertEquals("Felix", //
 					 objectService.getName(pet));
 
@@ -125,7 +129,7 @@ public class MacroRecorderPostprocessorNamedObjectIndexTest {
 		// Verify that the animal was recorded ...
 		assertEquals(1, ij1Helper.recordedArgs.size());
 
-		// ... with the named defined when added in the objectService
+		// ... with the recorder properly outputing the named defined when added in the objectService
 		assertEquals("animal=Felix", ij1Helper.recordedArgs.get(0));
 	}
 
@@ -171,6 +175,9 @@ public class MacroRecorderPostprocessorNamedObjectIndexTest {
 		}
 	}
 
+	/*
+		Simple "custom" object
+	 */
 	static class Pet {
 
 		private String name;
