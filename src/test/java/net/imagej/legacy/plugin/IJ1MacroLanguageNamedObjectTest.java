@@ -80,6 +80,7 @@ public class IJ1MacroLanguageNamedObjectTest {
 	public void testGroovyNamedObject() throws InterruptedException,
 			ExecutionException
 	{
+		// TODO : Do we want this behaviour with groovy ? But do we have a choice ?
 		// Puts a named Pet object into the ObjectService
 		Pet pet = new Pet("Felix", "Cat");
 		objectService.addObject(pet,pet.getName());
