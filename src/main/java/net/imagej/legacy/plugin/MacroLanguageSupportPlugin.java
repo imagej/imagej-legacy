@@ -141,6 +141,7 @@ public class MacroLanguageSupportPlugin extends AbstractLanguageSupport
 			final RSyntaxTextArea textArea)
 		{
 			this.ac = ac;
+			this.ac.setAutoCompleteSingleChoices(false);
 			this.textArea = textArea;
 
 			disabledChars = new ArrayList<>();
@@ -179,7 +180,7 @@ public class MacroLanguageSupportPlugin extends AbstractLanguageSupport
 					if (MacroAutoCompletionProvider.getInstance().getAlreadyEnteredText(
 						textArea).length() >= MINIMUM_WORD_LENGTH_TO_OPEN_PULLDOWN &&
 						MacroAutoCompletionProvider.getInstance()
-							.getCompletions(textArea).size() > 1)
+							.getCompletions(textArea).size() > 0)
 					{
 						ac.doCompletion();
 					}
