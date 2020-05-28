@@ -80,6 +80,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.Callable;
 
+import javax.imageio.ImageIO;
 import javax.swing.SwingUtilities;
 
 import net.imagej.display.ImageDisplay;
@@ -189,8 +190,7 @@ public class IJ1Helper extends AbstractContextual {
 				ij1.setTitle(hooks.getAppName());
 				final URL iconURL = hooks.getIconURL();
 				if (iconURL != null) try {
-					final Object producer = iconURL.getContent();
-					final Image image = ij1.createImage((ImageProducer) producer);
+					final Image image = ImageIO.read(iconURL);
 					ij1.setIconImage(image);
 					if (IJ.isMacOSX()) try {
 						// NB: We also need to set the dock icon
