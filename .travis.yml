@@ -5,6 +5,8 @@ branches:
   - master
   - "/.*-[0-9]+\\..*/"
 install: true
+services:
+  - xvfb
 script: ".travis/build.sh"
 cache:
   directories:
