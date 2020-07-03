@@ -511,7 +511,7 @@ public class DefaultLegacyHooks extends LegacyHooks {
 				final Package winPackage = winClass.getPackage();
 				final String name = winPackage == null ? null : winPackage.getName();
 
-				// Whitelist any classes from ij.* to be disposed. This should get
+				// Allowlist any classes from ij.* to be disposed. This should get
 				// around any offenders in core ImageJ that leave windows open when
 				// closing.
 				// External classes should just implement CloseConfirmable!

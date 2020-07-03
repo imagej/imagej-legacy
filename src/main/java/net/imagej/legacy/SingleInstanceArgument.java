@@ -191,10 +191,10 @@ public class SingleInstanceArgument extends AbstractConsoleArgument {
 			}
 
 			// Some arguments preclude deferring to another instance.
-			final String[] blacklistedArgs = {"-batch", "-ijpath", "--headless"};
+			final String[] blocklistedArgs = {"-batch", "-ijpath", "--headless"};
 			for (final String arg : otherArgs) {
-				for (final String blacklisted : blacklistedArgs) {
-					if (blacklisted.equals(arg)) {
+				for (final String blocklisted : blocklistedArgs) {
+					if (blocklisted.equals(arg)) {
 						log().debug("Skipping single instance logic due to argument: " + arg);
 						return result;
 					}

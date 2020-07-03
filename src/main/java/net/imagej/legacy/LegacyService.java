@@ -489,9 +489,9 @@ public final class LegacyService extends AbstractService implements
 			scriptService.addScriptDirectory(plugins, new MenuPath("Plugins"));
 		}
 
-		// remove modules blacklisted from the legacy UI
+		// remove modules blocklisted from the legacy UI
 		if (Boolean.getBoolean(ENABLE_MODERN_ONLY_COMMANDS_PROPERTY)) {
-			log.info("Skipping blacklist of no-legacy commands");
+			log.info("Skipping blocklist of no-legacy commands");
 		}
 		else {
 			final List<ModuleInfo> noLegacyModules = //

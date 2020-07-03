@@ -73,16 +73,16 @@ public class LegacyUtils {
 	 * the axes of a modern ImageJ Dataset. Incompatible modern axes are encoded
 	 * as extra planes in the legacy ImageJ image.
 	 */
-	static long ij1PlaneCount(ImgPlus imgPlus, final AxisType whiteList) {
+	static long ij1PlaneCount(ImgPlus imgPlus, final AxisType allowList) {
 		long planeCount = 1;
 		int axisIndex = 0;
 		for ( int i = 0; i < imgPlus.numDimensions(); i++) {
 			Axis axisType = imgPlus.axis(i);
 			final long axisSize = imgPlus.dimension(axisIndex++);
 			// we want to skip the X,Y,C,Z,T axes, unless that axis is the white list.
-			// this will cause planeCount to be the product of the whiteList axis and
+			// this will cause planeCount to be the product of the allowList axis and
 			// all other axes
-			if (axisType == whiteList) {} // DON'T continue
+			if (axisType == allowList) {} // DON'T continue
 			else if (axisType == Axes.X) continue;
 			else if (axisType == Axes.Y) continue;
 			else if (axisType == Axes.CHANNEL) continue;
