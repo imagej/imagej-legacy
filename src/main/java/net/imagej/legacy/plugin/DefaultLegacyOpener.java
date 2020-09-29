@@ -128,8 +128,9 @@ public class DefaultLegacyOpener implements LegacyOpener {
 		try {
 			final IOPlugin<?> opener = ioService.getOpener(path);
 			if (opener == null) {
-				logService.warn("No appropriate format found: " + path);
-				return path;
+				logService.info("No SciJava IO format found: " + path);
+				logService.info("Falling back to default IO.");
+				return null;
 			}
 			data = opener.open(path);
 			if (data == null) {
