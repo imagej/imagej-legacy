@@ -29,8 +29,6 @@
 
 package net.imagej.legacy.plugin;
 
-import ij.ImagePlus;
-
 import io.scif.Metadata;
 import io.scif.app.SCIFIOApp;
 import io.scif.img.SCIFIOImgPlus;
@@ -62,6 +60,8 @@ import org.scijava.module.ModuleService;
 import org.scijava.options.OptionsService;
 import org.scijava.plugin.Plugin;
 import org.scijava.service.Service;
+
+import ij.ImagePlus;
 
 /**
  * The default {@link LegacyOpener} plugin.
