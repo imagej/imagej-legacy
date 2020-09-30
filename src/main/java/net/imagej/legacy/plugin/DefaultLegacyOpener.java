@@ -60,6 +60,7 @@ import org.scijava.module.ModuleService;
 import org.scijava.options.OptionsService;
 import org.scijava.plugin.Plugin;
 import org.scijava.service.Service;
+import org.scijava.ui.UIService;
 
 import ij.ImagePlus;
 
@@ -84,6 +85,7 @@ public class DefaultLegacyOpener implements LegacyOpener {
 	private AppService appService;
 	private IOService ioService;
 	private LogService logService;
+	private UIService uiService;
 
 	@Override
 	public Object open(String path, final int planeIndex,
@@ -198,6 +200,10 @@ public class DefaultLegacyOpener implements LegacyOpener {
 					return imp;
 				}
 			}
+			else if (displayResult) {
+				// Attempt to display non-dataset data
+				uiService.show(data);
+			}
 			return data;
 		}
 		return path;
@@ -215,6 +221,7 @@ public class DefaultLegacyOpener implements LegacyOpener {
 		appService = getCached(appService, AppService.class, c);
 		ioService = getCached(ioService, IOService.class, c);
 		logService = getCached(logService, LogService.class, c);
+		uiService = getCached(uiService, UIService.class, c);
 	}
 
 	private <T extends Service> T getCached(T service, Class<T> serviceClass, Context ctx) {
