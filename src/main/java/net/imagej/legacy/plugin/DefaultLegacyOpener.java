@@ -92,14 +92,7 @@ public class DefaultLegacyOpener implements LegacyOpener {
 		final Context c = IJ1Helper.getLegacyContext();
 		ImagePlus imp = null;
 
-		legacyService = getCached(legacyService, LegacyService.class, c);
-		displayService = getCached(displayService, DisplayService.class, c);
-		moduleService = getCached(moduleService, ModuleService.class, c);
-		commandService = getCached(commandService, CommandService.class, c);
-		optionsService = getCached(optionsService, OptionsService.class, c);
-		appService = getCached(appService, AppService.class, c);
-		ioService = getCached(ioService, IOService.class, c);
-		logService = getCached(logService, LogService.class, c);
+		initServices(c);
 
 		// Check to see if SCIFIO has been disabled
 		final boolean newStyleIO =
@@ -210,7 +203,19 @@ public class DefaultLegacyOpener implements LegacyOpener {
 		return path;
 	}
 
+
 	// -- Helper methods --
+
+	private void initServices(final Context c) {
+		legacyService = getCached(legacyService, LegacyService.class, c);
+		displayService = getCached(displayService, DisplayService.class, c);
+		moduleService = getCached(moduleService, ModuleService.class, c);
+		commandService = getCached(commandService, CommandService.class, c);
+		optionsService = getCached(optionsService, OptionsService.class, c);
+		appService = getCached(appService, AppService.class, c);
+		ioService = getCached(ioService, IOService.class, c);
+		logService = getCached(logService, LogService.class, c);
+	}
 
 	private <T extends Service> T getCached(T service, Class<T> serviceClass, Context ctx) {
 		if (service != null) return service;
