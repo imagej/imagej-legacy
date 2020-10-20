@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.scijava</groupId>
 		<artifactId>pom-scijava</artifactId>
-		<version>28.0.0</version>
+		<version>29.2.1</version>
 		<relativePath />
 	</parent>
 
@@ -180,11 +180,7 @@
 		<!-- NB: Deploy releases to the SciJava Maven repository. -->
 		<releaseProfiles>deploy-to-scijava</releaseProfiles>
 
-		<miglayout-swing.version>5.2</miglayout-swing.version>
-		<scijava-search.version>0.7.0</scijava-search.version>
-		<scijava-ui-awt.version>0.1.7</scijava-ui-awt.version>
-		<scijava-ui-swing.version>0.13.1</scijava-ui-swing.version>
-		<script-editor.version>0.5.4</script-editor.version>
+		<maven-surefire-plugin.version>3.0.0-M5</maven-surefire-plugin.version>
 	</properties>
 
 	<repositories>
