@@ -31,8 +31,7 @@ package net.imagej.legacy;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assume.assumeTrue;
-
+import static org.junit.Assert.assertTrue;
 import java.net.URL;
 
 import net.imagej.patcher.LegacyInjector;
@@ -62,7 +61,7 @@ public class LegacyOpenerTest {
 	public void testPaulsMacro() throws Exception {
 		final URL url = getClass().getResource("/icons/imagej-256.png");
 		assertNotNull(url);
-		assumeTrue("file".equals(url.getProtocol()));
+		assertTrue("file".equals(url.getProtocol()));
 		final String path = url.getPath();
 		final String macro = "" + //
 			"// @OUTPUT int numResults\n" + //
@@ -107,7 +106,7 @@ public class LegacyOpenerTest {
 	public void testSliceLabels() throws Exception {
 		final URL url = getClass().getResource("/with-slice-label.tif");
 		assertNotNull(url);
-		assumeTrue("file".equals(url.getProtocol()));
+		assertTrue("file".equals(url.getProtocol()));
 
 		final String path = url.getPath();
 		final String macro = "" + //

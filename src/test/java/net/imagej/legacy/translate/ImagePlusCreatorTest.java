@@ -118,7 +118,6 @@ public class ImagePlusCreatorTest
 		testArrayImage( UnsignedShortType::new, ShortProcessor.class );
 	}
 
-	@Ignore("currently broken")
 	@Test
 	public void testSignedShorts() {
 		testArrayImage( ShortType::new, FloatProcessor.class );
@@ -266,7 +265,6 @@ public class ImagePlusCreatorTest
 		assertArrayEquals( Arrays.copyOf( values, 2 ) , ((byte[]) processor.getPixels()) );
 	}
 
-	@Ignore("not working yet")
 	@Test
 	public void testCompositeImageLong() {
 		long[] values = { 1, 2, 3, 4 };

@@ -31,6 +31,7 @@ package net.imagej.legacy;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeTrue;
 
 import ij.IJ;
@@ -76,7 +77,7 @@ public class LegacyServiceTest {
 		context = new Context(LegacyService.class);
 		final LegacyService legacyService =
 			context.getService(LegacyService.class);
-		assumeTrue(legacyService != null);
+		assertTrue(legacyService != null);
 
 		Context context2 = (Context)IJ.runPlugIn(Context.class.getName(), null);
 		assertNotNull(context2);
@@ -88,7 +89,7 @@ public class LegacyServiceTest {
 		context = new Context(LegacyService.class);
 		final LegacyService legacyService =
 			context.getService(LegacyService.class);
-		assumeTrue(legacyService != null);
+		assertTrue(legacyService != null);
 	}
 
 }
