@@ -57,7 +57,6 @@ public class FromImagePlusConversionTest {
 
 	@SuppressWarnings("unchecked")
 	@Test
-	@Ignore
 	public void testImagePlusToImgPlus() {
 		Object imp = createImagePlus();
 		ImgPlus<RealType<?>> imgPlus = convertService.convert(imp, ImgPlus.class);
