@@ -32,6 +32,8 @@ package net.imagej.legacy;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import java.net.URL;
 
 import net.imagej.patcher.LegacyInjector;
@@ -85,6 +87,13 @@ public class LegacyOpenerTest {
 			// it is because you have enabled the "Use SCIFIO when opening files"
 			// option in Edit > Options > ImageJ2. On fresh systems, this option
 			// is off; the value returned by ImageJ 1.x's built-in behavior is 3.
+			if (numResults == 10) {
+				// NB: We have the ImageJ2Options plugin.. could we disable scifio for
+				// the scope of this test?
+				fail(
+					"Return value (10) suggests SCIFIO was used instead of ImageJ 1.x. " +
+						"Please disable \"Use SCIFIO when opening files\" in Edit > Options > ImageJ2");
+			}
 			assertEquals(3, (int) numResults);
 		}
 		finally {
