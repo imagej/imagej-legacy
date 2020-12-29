@@ -32,6 +32,8 @@ package net.imagej.legacy.convert;
 import ij.ImagePlus;
 import ij.WindowManager;
 
+import java.lang.reflect.Type;
+
 import org.scijava.convert.AbstractConverter;
 import org.scijava.convert.Converter;
 import org.scijava.plugin.Plugin;
@@ -69,6 +71,11 @@ public class StringToImagePlusConverter extends
 
 	@Override
 	public boolean canConvert(final Object src, final Class<?> dest) {
+		return convert(src, ImagePlus.class) != null;
+	}
+
+	@Override
+	public boolean canConvert(final Object src, final Type dest) {
 		return convert(src, ImagePlus.class) != null;
 	}
 
