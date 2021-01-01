@@ -13,13 +13,14 @@ import ij.ImagePlus;
 import ij.WindowManager;
 import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
+import net.imagej.Dataset;
 
 public class StringToImageConversionTest {
 
 	private Context context;
 	private ConvertService convertService;
 
-	private String title1 = "Image 1";
+	private String title1 = "Some other title";
 	private String title2 = "Image 2";
 	private String nonExistentTitle = "Non-existent Image";
 	private String nonExistentIDString = "-123456789";
@@ -66,7 +67,7 @@ public class StringToImageConversionTest {
 	 * title or ID.
 	 */
 	@Test
-	public void testNonExistentImage() {
+	public void testNonExistentImagePlus() {
 		// assertFalse(convertService.supports(nonExistentTitle, ImagePlus.class)); // fails
 		Converter<?, ?> converterByTitle = convertService.getHandler(nonExistentTitle, ImagePlus.class);
 		// NB: this returns org.scijava.convert.DefaultConverter
@@ -84,7 +85,7 @@ public class StringToImageConversionTest {
 	 * Assert we can get an opened image by its title.
 	 */
 	@Test
-	public void testOpenedImageFromTitle() {
+	public void testOpenedImagePlusFromTitle() {
 		assertTrue(convertService.supports(title1, ImagePlus.class));
 		
 		Converter<?, ?> converter = convertService.getHandler(title1, ImagePlus.class);
@@ -102,7 +103,7 @@ public class StringToImageConversionTest {
 	 * Assert we can get an opened image by its ID.
 	 */
 	@Test
-	public void testOpenedImageFromID() {
+	public void testOpenedImagePlusFromID() {
 		assertTrue(convertService.supports("" + id1, ImagePlus.class));
 		Converter<?, ?> converter = convertService.getHandler("" + id1, ImagePlus.class);
 		assertEquals(StringToImagePlusConverter.class, converter.getClass());
@@ -110,6 +111,34 @@ public class StringToImageConversionTest {
 		ImagePlus converted = convertService.convert("" + id1, ImagePlus.class);
 		assertEquals(title1, converted.getTitle());
 		assertEquals(id1, converted.getID());
+
+		assertEquals(width1, converted.getWidth());
+		assertEquals(height1, converted.getHeight());
+	}
+
+	/**
+	 * Assert we can get an opened image by its title.
+	 */
+	@Test
+	public void testOpenedDatasetFromTitle() {
+		assertTrue(convertService.supports(title1, Dataset.class));
+		
+		Dataset converted = convertService.convert(title1, Dataset.class);
+		assertEquals(title1, converted.getName());
+
+		assertEquals(width1, converted.getWidth());
+		assertEquals(height1, converted.getHeight());
+	}
+
+	/**
+	 * Assert we can get an opened image by its ID.
+	 */
+	@Test
+	public void testOpenedDatasetFromID() {
+		assertTrue(convertService.supports("" + id1, Dataset.class));
+
+		Dataset converted = convertService.convert("" + id1, Dataset.class);
+		assertEquals(title1, converted.getName());
 
 		assertEquals(width1, converted.getWidth());
 		assertEquals(height1, converted.getHeight());
