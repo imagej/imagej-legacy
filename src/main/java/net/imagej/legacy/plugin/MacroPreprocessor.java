@@ -40,6 +40,7 @@ import org.scijava.module.process.AbstractPreprocessorPlugin;
 import org.scijava.module.process.PreprocessorPlugin;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
+import org.scijava.widget.Button;
 
 /**
  * Populates the module's input values, when the command is invoked from an
@@ -67,12 +68,16 @@ public class MacroPreprocessor extends AbstractPreprocessorPlugin {
 		if (!ij1Helper.isMacro()) return;
 		for (final ModuleItem<?> input : module.getInfo().inputs()) {
 			final String name = input.getName();
+			final Class<?> type = input.getType();
 			final String value = ij1Helper.getMacroParameter(name);
 			if (value == null) {
 				// no macro parameter value provided
+				if (type.equals(Button.class)) {
+					// skip if input is a button
+					module.resolveInput(name);
+				}
 				continue;
 			}
-			final Class<?> type = input.getType();
 			if (!convertService.supports(value, type)) {
 				// cannot convert macro value into the input's actual type
 				continue;
