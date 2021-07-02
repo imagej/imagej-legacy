@@ -1,4 +1,4 @@
-[![](https://travis-ci.org/imagej/imagej-legacy.svg?branch=master)](https://travis-ci.org/imagej/imagej-legacy)
+[![](https://github.com/imagej/imagej-legacy/actions/workflows/build-main.yml/badge.svg)](https://github.com/imagej/imagej-legacy/actions/workflows/build-main.yml)
 
 ImageJ Legacy Bridge
 --------------------
