@@ -341,7 +341,7 @@ public class DefaultLegacyHooks extends LegacyHooks {
 		// Note that we currently ignore line separator lines such as:
 		// Plugins>Image5D, "-"
 		final Pattern pattern = Pattern.compile(
-			"^\\s*([^,]*),\\s*\"([^\"]*)\",\\s*([^\\s]*(\\(.*\\))?)");
+			"^\\s*([^,]*),\\s*\"([^\"]*)\",\\s*([^\\s]*(\\(.*\\))?)\\s*");
 		final ClassLoader cl = Thread.currentThread().getContextClassLoader();
 		try {
 			final Enumeration<URL> pluginsConfigs = cl.getResources("plugins.config");
