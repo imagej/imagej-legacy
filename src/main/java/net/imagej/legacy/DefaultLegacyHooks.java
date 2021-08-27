@@ -29,8 +29,6 @@
 
 package net.imagej.legacy;
 
-import ij.ImagePlus;
-
 import java.awt.Frame;
 import java.awt.Window;
 import java.awt.event.KeyEvent;
@@ -75,6 +73,8 @@ import org.scijava.plugin.SciJavaPlugin;
 import org.scijava.thread.ThreadService;
 import org.scijava.ui.CloseConfirmable;
 import org.scijava.util.ListUtils;
+
+import ij.ImagePlus;
 
 /**
  * The {@link LegacyHooks} encapsulating an active {@link LegacyService} for use
@@ -329,7 +329,19 @@ public class DefaultLegacyHooks extends LegacyHooks {
 
 		// Parse plugins.config files from the system classpath, to make them
 		// available in more scenarios, such as when no plugins.dir is set.
-		final Pattern pattern = Pattern.compile("^\\s*([^,]*),\\s*\"([^\"]*)\",\\s*([^\\s]*)");
+		// Plugins are detected on non-comment (#) lines, one plugin per line
+		// Each plugin definition consists of three parts separated by commas:
+		// Menu path without spaces, Menu Entry in quotes, Java class with optional
+		// parameters
+		//
+		// For example, both of these are valid plugin lines:
+		// File>Import, "My Plugin (Win)", my.Plugin("location=[Local machine] ")
+		// Image>Video Editing, "Move Roi", video2.Move_Roi
+		//
+		// Note that we currently ignore line separator lines such as:
+		// Plugins>Image5D, "-"
+		final Pattern pattern = Pattern.compile(
+			"^\\s*([^,]*),\\s*\"([^\"]*)\",\\s*([^\\s]*(\\(.*\\))?)\\s*");
 		final ClassLoader cl = Thread.currentThread().getContextClassLoader();
 		try {
 			final Enumeration<URL> pluginsConfigs = cl.getResources("plugins.config");
