@@ -29,8 +29,6 @@
 
 package net.imagej.legacy;
 
-import ij.ImagePlus;
-
 import java.awt.Frame;
 import java.awt.Window;
 import java.awt.event.KeyEvent;
@@ -75,6 +73,8 @@ import org.scijava.plugin.SciJavaPlugin;
 import org.scijava.thread.ThreadService;
 import org.scijava.ui.CloseConfirmable;
 import org.scijava.util.ListUtils;
+
+import ij.ImagePlus;
 
 /**
  * The {@link LegacyHooks} encapsulating an active {@link LegacyService} for use
