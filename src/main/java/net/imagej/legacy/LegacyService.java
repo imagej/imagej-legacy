@@ -473,8 +473,6 @@ public final class LegacyService extends AbstractService implements
 		ij1Helper.initialize();
 		ij1Helper.addAliases(scriptService);
 
-		SwitchToModernMode.registerMenuItem();
-
 		// NB: We cannot call appService.getApp().getBaseDirectory(), because
 		// that prevents the net.imagej.app.ToplevelImageJApp from getting its
 		// LegacyService parameter injected properly.
