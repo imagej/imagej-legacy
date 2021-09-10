@@ -14,7 +14,7 @@
 	<version>0.38.0-SNAPSHOT</version>
 
 	<name>ImageJ Legacy Bridge</name>
-	<description>The legacy component enables backward compatibility with the legacy version of ImageJ (1.x). It contains the code necessary to translate ImageJ images into ImageJ1 format and back, so that legacy plugins can be executed faithfully.</description>
+	<description>The legacy component enables backward compatibility with the original version of ImageJ (1.x). It contains the code necessary to translate between ImageJ and ImageJ2 images, so that ImageJ plugins can be executed faithfully.</description>
 	<url>https://imagej.net/ImageJ_Legacy</url>
 	<inceptionYear>2009</inceptionYear>
 	<organization>
@@ -173,8 +173,8 @@
 		<premain-class>net.imagej.legacy.LegacyJavaAgent</premain-class>
 
 		<license.licenseName>bsd_2</license.licenseName>
-		<license.copyrightOwners>ImageJ developers.</license.copyrightOwners>
-		<license.projectName>ImageJ software for multidimensional image processing and analysis.</license.projectName>
+		<license.copyrightOwners>ImageJ2 developers.</license.copyrightOwners>
+		<license.projectName>ImageJ2 software for multidimensional image processing and analysis.</license.projectName>
 		<license.excludes>**/script_templates/**,**/doc/**</license.excludes>
 
 		<!-- NB: Deploy releases to the SciJava Maven repository. -->
