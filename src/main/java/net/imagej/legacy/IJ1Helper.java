@@ -1308,7 +1308,7 @@ public class IJ1Helper extends AbstractContextual {
 			if (dotIndex > 0) {
 				// split filename from extension
 				defaultName = file.getName().substring(0, dotIndex);
-				defaultExtension = extension == null ? //
+				defaultExtension = extension == null ? 
 					file.getName().substring(dotIndex) : extension;
 			}
 			else {
@@ -1316,6 +1316,7 @@ public class IJ1Helper extends AbstractContextual {
 				defaultName = file.getName();
 				defaultExtension = extension;
 			}
+			
 		}
 		final SaveDialog saveDialog = //
 			new SaveDialog(title, defaultName, defaultExtension);
@@ -1329,10 +1330,15 @@ public class IJ1Helper extends AbstractContextual {
 		Recorder.record = false;
 		final String fileName = saveDialog.getFileName();
 		Recorder.record = recording;
-
+		
 		if (directory != null && fileName != null) {
-			return new File(directory, fileName);
+			File newFile = new File(directory, fileName);
+			if(newFile.exists()) {
+				newFile.delete();
+			}
+			return newFile;
 		}
+		
 		return null;
 	}
 
