@@ -792,7 +792,9 @@ public class IJ1Helper extends AbstractContextual {
 	private Field nPluginsField;
 	private Method addItemMethod;
 
-	public void addCommand(final String menuPath, final String label, final String command) {
+	public void addCommand(final String menuPath, final String label,
+		final String command)
+	{
 		// Register the command in the table.
 		final Hashtable<String, String> commands = getCommands();
 		if (commands.containsKey(label)) return;
@@ -1308,15 +1310,15 @@ public class IJ1Helper extends AbstractContextual {
 			if (dotIndex > 0) {
 				// split filename from extension
 				defaultName = file.getName().substring(0, dotIndex);
-				defaultExtension = extension == null ? 
-					file.getName().substring(dotIndex) : extension;
+				defaultExtension = extension == null ? file.getName().substring(
+					dotIndex) : extension;
 			}
 			else {
 				// file had no extension
 				defaultName = file.getName();
 				defaultExtension = extension;
 			}
-			
+
 		}
 		final SaveDialog saveDialog = //
 			new SaveDialog(title, defaultName, defaultExtension);
@@ -1330,15 +1332,15 @@ public class IJ1Helper extends AbstractContextual {
 		Recorder.record = false;
 		final String fileName = saveDialog.getFileName();
 		Recorder.record = recording;
-		
+
 		if (directory != null && fileName != null) {
 			File newFile = new File(directory, fileName);
-			if(newFile.exists()) {
+			if (newFile.exists()) {
 				newFile.delete();
 			}
 			return newFile;
 		}
-		
+
 		return null;
 	}
 
