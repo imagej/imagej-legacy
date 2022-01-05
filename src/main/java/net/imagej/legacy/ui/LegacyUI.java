@@ -351,7 +351,7 @@ public class LegacyUI extends AbstractUserInterface implements SwingUI {
 					chooser.setFileFilter(fileFilter);
 					chooser.setAcceptAllFileFilterUsed(false);
 				}
-				int rval = chooser.showOpenDialog(ij1Helper.getIJ());
+				int rval = chooser.showOpenDialog(ij1Helper().getIJ());
 				if (rval == JFileChooser.APPROVE_OPTION) {
 					result[0] = chooser.getSelectedFiles();
 				}
