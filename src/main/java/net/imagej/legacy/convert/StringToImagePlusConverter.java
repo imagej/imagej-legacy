@@ -104,29 +104,4 @@ public class StringToImagePlusConverter extends
 		return String.class;
 	}
 
-	// -- Helper classes --
-
-	/**
-	 * Adapter for {@link ImagePlus} that emits the image title when
-	 * {@link #toString()} is called.
-	 *
-	 * @author Curtis Rueden
-	 */
-	public static class ImageTitle {
-
-		private final ImagePlus imp;
-
-		public ImageTitle(final ImagePlus imp) {
-			this.imp = imp;
-		}
-
-		// -- Object methods --
-
-		@Override
-		public String toString() {
-			return imp.getTitle();
-		}
-
-	}
-
 }
