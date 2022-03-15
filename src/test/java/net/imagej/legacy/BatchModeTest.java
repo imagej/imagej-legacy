@@ -18,7 +18,10 @@ import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 import org.scijava.ui.UIService;
 
+import java.awt.*;
+
 import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assume.assumeFalse;
 
 /**
  * Test if a {@link Command} that returns a {@link Dataset} behaves as expected
@@ -34,6 +37,9 @@ public class BatchModeTest {
 
 	@Before
 	public void setUp() {
+		// only run the tests if a graphics environment is present
+		assumeFalse(GraphicsEnvironment.isHeadless());
+
 		context = new Context();
 		UIService service = context.service(UIService.class);
 		service.showUI();
@@ -41,7 +47,8 @@ public class BatchModeTest {
 
 	@After
 	public void tearDown() {
-		context.dispose();
+		if(context != null)
+			context.dispose();
 	}
 
 	/** Just for comparison, see how plain IJ1 behaves in batch mode. */
