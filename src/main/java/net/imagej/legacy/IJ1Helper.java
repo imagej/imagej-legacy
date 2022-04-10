@@ -85,6 +85,7 @@ import javax.swing.SwingUtilities;
 
 import net.imagej.display.ImageDisplay;
 import net.imagej.legacy.search.SearchBarHacker;
+import net.imagej.legacy.task.TaskMonitorButtonHacker;
 import net.imagej.patcher.LegacyHooks;
 
 import org.scijava.AbstractContextual;
@@ -128,6 +129,9 @@ public class IJ1Helper extends AbstractContextual {
 	/** Search bar in the main window. */
 	private Object searchBar;
 
+	/** Task bar in the main window. */
+	private Object taskBar;
+
 	/** Whether we are in the process of forcibly shutting down ImageJ1. */
 	private boolean disposing;
 
@@ -143,6 +147,15 @@ public class IJ1Helper extends AbstractContextual {
 		// add the quick search bar
 		try {
 			searchBar = new SearchBarHacker(getContext()).addSearchBar(ij1, this);
+		}
+		catch (final Throwable t) {
+			// NB: Do not let this crash ImageJ on startup!
+			log.error(t);
+		}
+
+		// add the task monitor icon
+		try {
+			taskBar = new TaskMonitorButtonHacker(getContext()).addTaskBar(ij1);
 		}
 		catch (final Throwable t) {
 			// NB: Do not let this crash ImageJ on startup!
@@ -385,6 +398,10 @@ public class IJ1Helper extends AbstractContextual {
 
 	public Object getSearchBar() {
 		return searchBar;
+	}
+
+	public Object getTaskBar() {
+		return taskBar;
 	}
 
 	public Frame getIJ() {
