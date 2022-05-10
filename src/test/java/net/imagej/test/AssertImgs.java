@@ -51,7 +51,7 @@ public class AssertImgs
 			RandomAccessibleInterval< ? extends ValueEquals< T > > expected,
 			RandomAccessibleInterval< T > actual )
 	{
-		pairedForEach( expected, actual, ValueEquals::valueEquals );
+		assertImageEquals( expected, actual, ValueEquals::valueEquals );
 	}
 
 	public static void assertRealTypeImageEquals(
