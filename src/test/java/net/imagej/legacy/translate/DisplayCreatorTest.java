@@ -49,9 +49,9 @@ import net.imagej.Dataset;
 import net.imagej.axis.Axes;
 import net.imagej.display.ImageDisplay;
 import net.imagej.patcher.LegacyInjector;
-import net.imagej.test.AssertImgs;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.img.array.ArrayImgs;
+import net.imglib2.test.ImgLib2Assert;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
 
@@ -111,7 +111,7 @@ public class DisplayCreatorTest
 		{
 			Dataset dataset = toDataset( context, image );
 			assertEquals( expected.randomAccess().get().getClass(), dataset.getType().getClass() );
-			AssertImgs.assertRealTypeImageEquals( expected, dataset );
+			ImgLib2Assert.assertImageEqualsRealType(expected, dataset, 0);
 		}
 
 		private static ImagePlus createColorImagePlus( int width, int height, int c, int z, int t, int[][] pixels )
