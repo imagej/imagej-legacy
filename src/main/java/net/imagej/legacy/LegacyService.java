@@ -55,6 +55,7 @@ import net.imagej.patcher.LegacyEnvironment;
 import net.imagej.patcher.LegacyInjector;
 import net.imagej.ui.viewer.image.ImageDisplayViewer;
 
+import org.scijava.Context;
 import org.scijava.Identifiable;
 import org.scijava.MenuPath;
 import org.scijava.Priority;
@@ -453,7 +454,7 @@ public final class LegacyService extends AbstractService implements
 				// Install the default legacy hooks before ImageJ 1.x initializes.
 				// Otherwise, the legacy hooks that fire during IJ1 initialization
 				// won't include DefaultLegacyHooks overrides of EssentialLegacyHooks.
-				final ClassLoader loader = Thread.currentThread().getContextClassLoader();
+				final ClassLoader loader = Context.getClassLoader();
 				ij1Helper = new IJ1Helper(this);
 				LegacyInjector.installHooks(loader, //
 					new DefaultLegacyHooks(this, ij1Helper));
@@ -518,7 +519,7 @@ public final class LegacyService extends AbstractService implements
 		ij1Helper.dispose();
 
 		synchronized (LegacyService.class) {
-			final ClassLoader loader = Thread.currentThread().getContextClassLoader();
+			final ClassLoader loader = Context.getClassLoader();
 			LegacyInjector.installHooks(loader, null);
 			instance = null;
 		}
@@ -799,7 +800,7 @@ public final class LegacyService extends AbstractService implements
 	@Deprecated
 	public static void preinit() {
 		try {
-			getLegacyEnvironment(Thread.currentThread().getContextClassLoader());
+			getLegacyEnvironment(Context.getClassLoader());
 		}
 		catch (final Throwable t) {
 			t.printStackTrace();

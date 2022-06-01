@@ -342,7 +342,7 @@ public class DefaultLegacyHooks extends LegacyHooks {
 		// Plugins>Image5D, "-"
 		final Pattern pattern = Pattern.compile(
 			"^\\s*([^,]*),\\s*\"([^\"]*)\",\\s*([^\\s]*(\\(.*\\))?)\\s*");
-		final ClassLoader cl = Thread.currentThread().getContextClassLoader();
+		final ClassLoader cl = Context.getClassLoader();
 		try {
 			final Enumeration<URL> pluginsConfigs = cl.getResources("plugins.config");
 			while (pluginsConfigs.hasMoreElements()) {

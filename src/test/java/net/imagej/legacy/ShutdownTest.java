@@ -69,7 +69,7 @@ public class ShutdownTest {
 
 		// NB: Save a reference to the context class loader _before_ the test.
 		// This will help avoid class loaders bleeding from one test to another.
-		originalLoader = Thread.currentThread().getContextClassLoader();
+		originalLoader = Context.getClassLoader();
 
 		context = new Context(LegacyService.class, UIService.class);
 	}
