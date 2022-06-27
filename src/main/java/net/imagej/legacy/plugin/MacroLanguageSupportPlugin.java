@@ -70,7 +70,7 @@ public class MacroLanguageSupportPlugin extends AbstractLanguageSupport
 
 	@Override
 	public String getLanguageName() {
-		return "IJ1 Macro";
+		return "ImageJ Macro";
 	}
 
 	@Override

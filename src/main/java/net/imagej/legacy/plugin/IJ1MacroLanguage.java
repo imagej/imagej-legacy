@@ -46,7 +46,7 @@ import org.scijava.script.ScriptLanguage;
  * 
  * @author Johannes Schindelin
  */
-@Plugin(type = ScriptLanguage.class, name = "IJ1 Macro")
+@Plugin(type = ScriptLanguage.class, name = "ImageJ Macro")
 public class IJ1MacroLanguage extends AbstractScriptLanguage {
 
 	@Parameter(required = false)
