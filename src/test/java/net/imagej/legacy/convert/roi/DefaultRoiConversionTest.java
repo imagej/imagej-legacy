@@ -106,8 +106,8 @@ public class DefaultRoiConversionTest {
 		// Changing the line width does not cause the bounding box to update
 		assertEquals(10, w.min(0));
 		assertEquals(10, w.min(1));
-		assertEquals(100, w.max(0));
-		assertEquals(100, w.max(1));
+		assertEquals(101, w.max(0));
+		assertEquals(101, w.max(1));
 
 		// Check contains
 		test.setPosition(new int[] { 71, 71 });
