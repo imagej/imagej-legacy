@@ -133,8 +133,8 @@ public class IrregularPolylineRoiWrapperTest {
 		// Test bounds
 		assertEquals(115 - 5.25, freeWrap.realMin(0), 0);
 		assertEquals(34 - 5.25, freeWrap.realMin(1), 0);
-		assertEquals(183 + 5.25, freeWrap.realMax(0), 0);
-		assertEquals(129 + 5.25, freeWrap.realMax(1), 0);
+		assertEquals(184 + 5.25, freeWrap.realMax(0), 0);
+		assertEquals(130 + 5.25, freeWrap.realMax(1), 0);
 	}
 
 	@Test
