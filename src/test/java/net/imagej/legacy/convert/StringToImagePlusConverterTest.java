@@ -58,7 +58,8 @@ public class StringToImagePlusConverterTest {
 		LegacyInjector.preinit();
 	}
 
-	private final String IMAGE_TITLE = "image title";
+	private final static String IMAGE_TITLE = "image title";
+	private final static String NON_IMAGE_TITLE = "no image";
 
 	private Context context;
 	private ConvertService convertService;
@@ -105,7 +106,7 @@ public class StringToImagePlusConverterTest {
 	@Test
 	public void testNonImageTitle()
 	{
-		assertFalse(convertService.getHandler("no image", ImagePlus.class)
+		assertFalse(convertService.getHandler(NON_IMAGE_TITLE, ImagePlus.class)
 			instanceof StringToImagePlusConverter);
 	}
 
@@ -116,7 +117,7 @@ public class StringToImagePlusConverterTest {
 	public void testCanConvertTitle() {
 		assertTrue(converter.canConvert(IMAGE_TITLE, ImagePlus.class));
 		assertFalse(converter.canConvert(IMAGE_TITLE, Dataset.class));
-		assertFalse(converter.canConvert("no image", ImagePlus.class));
+		assertFalse(converter.canConvert(NON_IMAGE_TITLE, ImagePlus.class));
 	}
 
 	/**
@@ -138,6 +139,6 @@ public class StringToImagePlusConverterTest {
 	public void testCanConvert2() {
 		assertTrue(converter.canConvert(IMAGE_TITLE, (Type) ImagePlus.class));
 		assertFalse(converter.canConvert(IMAGE_TITLE, (Type) Dataset.class));
-		assertFalse(converter.canConvert("no image", (Type) ImagePlus.class));
+		assertFalse(converter.canConvert(NON_IMAGE_TITLE, (Type) ImagePlus.class));
 	}
 }

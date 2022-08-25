@@ -57,8 +57,9 @@ public class StringToDatasetConverterTest {
 		LegacyInjector.preinit();
 	}
 
-	private final String IMAGE_TITLE = "image title";
-	private final int PIXEL_VALUE = 45;
+	private final static String NON_IMAGE_TITLE = "no image";
+	private final static String IMAGE_TITLE = "image title";
+	private final static int PIXEL_VALUE = 45;
 
 	private Context context;
 	private ConvertService convertService;
@@ -104,8 +105,8 @@ public class StringToDatasetConverterTest {
 	@Test
 	public void testNonImageTitle()
 	{
-		assertFalse(convertService.supports("no image", Dataset.class));
-		assertNull(convertService.convert("no image", Dataset.class));
+		assertFalse(convertService.supports(NON_IMAGE_TITLE, Dataset.class));
+		assertNull(convertService.convert(NON_IMAGE_TITLE, Dataset.class));
 	}
 
 	/**
@@ -118,7 +119,7 @@ public class StringToDatasetConverterTest {
 		assertTrue(
 			converter.canConvert(IMAGE_TITLE, RandomAccessibleInterval.class));
 		assertFalse(converter.canConvert(IMAGE_TITLE, ImagePlus.class));
-		assertFalse(converter.canConvert("no image", Dataset.class));
+		assertFalse(converter.canConvert(NON_IMAGE_TITLE, Dataset.class));
 	}
 
 	/**
@@ -140,6 +141,6 @@ public class StringToDatasetConverterTest {
 	public void testCanConvert2() {
 		assertTrue(converter.canConvert(IMAGE_TITLE, (Type) Dataset.class));
 		assertFalse(converter.canConvert(IMAGE_TITLE, (Type) ImagePlus.class));
-		assertFalse(converter.canConvert("no image", (Type) Dataset.class));
+		assertFalse(converter.canConvert(NON_IMAGE_TITLE, (Type) Dataset.class));
 	}
 }
