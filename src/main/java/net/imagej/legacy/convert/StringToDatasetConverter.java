@@ -29,17 +29,16 @@
 
 package net.imagej.legacy.convert;
 
-import ij.ImagePlus;
-import net.imagej.Dataset;
-import net.imglib2.util.Cast;
-import org.scijava.convert.AbstractConverter;
+import java.lang.reflect.Type;
+
+import org.scijava.convert.AbstractDelegateConverter;
 import org.scijava.convert.ConvertService;
 import org.scijava.convert.Converter;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
-import org.scijava.util.Types;
 
-import java.lang.reflect.Type;
+import ij.ImagePlus;
+import net.imagej.Dataset;
 
 /**
  * Converts a string that matches an {@link ImagePlus} title or ID to {@link Dataset}.
@@ -52,36 +51,29 @@ import java.lang.reflect.Type;
  */
 @Plugin(type = Converter.class)
 public class StringToDatasetConverter
-	extends AbstractConverter<String, Dataset>
+	extends AbstractDelegateConverter<String, ImagePlus, Dataset>
 {
-
 	@Parameter
-	ConvertService cs;
+	private ConvertService convertService;
 
 	private final Converter<String, ImagePlus> toImagePlus =
 		new StringToImagePlusConverter();
 
 	@Override
-	public boolean canConvert(Object src, Type dest)
-	{
-		return canConvert(src, Types.raw(dest));
+	public boolean canConvert(Object src, Class<?> dest) {
+		if (!super.canConvert(src, dest)) return false;
+		return srcImageSupported((String) src);
 	}
 
 	@Override
-	public boolean canConvert(Object src, Class<?> dest)
-	{
-		return super.canConvert(src, dest) &&
-			toImagePlus.canConvert(src, ImagePlus.class);
+	public boolean canConvert(Object src, Type dest) {
+		if (!super.canConvert(src, dest)) return false;
+		return srcImageSupported((String) src);
 	}
 
-	@Override
-	public <T> T convert(Object src, Class<T> dest)
-	{
-		if (!(src instanceof String) || !Dataset.class.equals(dest))
-			return null;
-		ImagePlus imp = toImagePlus.convert(src, ImagePlus.class);
-		if (imp == null) return null;
-		return Cast.unchecked(cs.convert(imp, Dataset.class));
+	private boolean srcImageSupported(String src) {
+		ImagePlus srcImage = toImagePlus.convert(src, getDelegateType());
+		return srcImage != null && convertService.supports(srcImage, getOutputType());
 	}
 
 	@Override
@@ -94,5 +86,10 @@ public class StringToDatasetConverter
 	public Class<Dataset> getOutputType()
 	{
 		return Dataset.class;
+	}
+
+	@Override
+	protected Class<ImagePlus> getDelegateType() {
+		return ImagePlus.class;
 	}
 }
