@@ -32,9 +32,13 @@ package net.imagej.legacy.convert;
 import ij.ImagePlus;
 import ij.WindowManager;
 
+import net.imglib2.util.Cast;
 import org.scijava.convert.AbstractConverter;
 import org.scijava.convert.Converter;
 import org.scijava.plugin.Plugin;
+import org.scijava.util.Types;
+
+import java.lang.reflect.Type;
 
 /**
  * Converts a string to the corresponding {@link ImagePlus} object. Both image
@@ -69,29 +73,30 @@ public class StringToImagePlusConverter extends
 
 	@Override
 	public boolean canConvert(final Object src, final Class<?> dest) {
-		return convert(src, ImagePlus.class) != null;
+		return canConvert(src, (Type) dest);
+	}
+
+	@Override
+	public boolean canConvert(final Object src, final Type dest) {
+		return convert(src, Types.raw(dest)) != null;
 	}
 
 	@Override
 	public <T> T convert(final Object src, final Class<T> dest) {
-		if (!(src instanceof String)) return null;
+		if (!super.canConvert(src, dest))
+			return null;
 		final String s = (String) src;
 		try {
 			final int imageID = Integer.parseInt(s);
 			final ImagePlus imp = WindowManager.getImage(imageID);
 			if (imp != null) {
-				@SuppressWarnings("unchecked")
-				final T typedImp = (T) imp;
-				return typedImp;
+				return Cast.unchecked(imp);
 			}
 		}
 		catch (final NumberFormatException exc) {
 			// NB: Not a valid image ID; try image title.
 		}
-		final ImagePlus imp = WindowManager.getImage(s);
-		@SuppressWarnings("unchecked")
-		final T typedImp = (T) imp;
-		return typedImp;
+		return Cast.unchecked( WindowManager.getImage(s) );
 	}
 
 	@Override
@@ -102,31 +107,6 @@ public class StringToImagePlusConverter extends
 	@Override
 	public Class<String> getInputType() {
 		return String.class;
-	}
-
-	// -- Helper classes --
-
-	/**
-	 * Adapter for {@link ImagePlus} that emits the image title when
-	 * {@link #toString()} is called.
-	 *
-	 * @author Curtis Rueden
-	 */
-	public static class ImageTitle {
-
-		private final ImagePlus imp;
-
-		public ImageTitle(final ImagePlus imp) {
-			this.imp = imp;
-		}
-
-		// -- Object methods --
-
-		@Override
-		public String toString() {
-			return imp.getTitle();
-		}
-
 	}
 
 }
