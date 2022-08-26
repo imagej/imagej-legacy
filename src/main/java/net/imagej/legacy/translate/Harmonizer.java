@@ -179,6 +179,8 @@ public class Harmonizer extends AbstractContextual {
 		final ImagePlus imp)
 	{
 		final ImagePlus newImp = legacyService.getImageMap().registerDisplay(display);
+		if(imp == newImp)
+			return;
 		imp.setStack(newImp.getStack());
 		final int c = newImp.getNChannels();
 		final int z = newImp.getNSlices();
