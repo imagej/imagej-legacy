@@ -62,7 +62,6 @@ import java.awt.MenuBar;
 import java.awt.MenuItem;
 import java.awt.Panel;
 import java.awt.Window;
-import java.awt.image.ImageProducer;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -101,6 +100,7 @@ import org.scijava.platform.event.AppPreferencesEvent;
 import org.scijava.platform.event.AppQuitEvent;
 import org.scijava.plugin.Parameter;
 import org.scijava.script.ScriptService;
+import org.scijava.ui.swing.laf.SwingLookAndFeelService;
 import org.scijava.util.Types;
 
 /**
@@ -317,7 +317,14 @@ public class IJ1Helper extends AbstractContextual {
 		if (batchMode) return;
 		final ImageJ ij = IJ.getInstance();
 		if (ij != null) {
-			if (toggle) ij.pack();
+			if (toggle) {
+				// Before displaying UI components, initialize the Look and Feel.
+				final SwingLookAndFeelService lafService = //
+					legacyService.context().getService(SwingLookAndFeelService.class);
+				if (lafService != null) lafService.initLookAndFeel();
+
+				ij.pack();
+			}
 			ij.setVisible(toggle);
 		}
 
