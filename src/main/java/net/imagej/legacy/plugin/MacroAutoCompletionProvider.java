@@ -403,7 +403,6 @@ class MacroAutoCompletionProvider extends DefaultCompletionProvider implements
 		int l = linecount - 1;
 		while (l > 0) {
 			String lineBefore = textArray[l].trim();
-			System.out.println("Scanning B " + lineBefore);
 			if (lineBefore.startsWith("//")) {
 				resultDescription = lineBefore.substring(2) + "\n" + resultDescription;
 			} else {
@@ -414,7 +413,6 @@ class MacroAutoCompletionProvider extends DefaultCompletionProvider implements
 		l = linecount + 1;
 		while (l < textArray.length - 1) {
 			String lineAfter = textArray[l].trim();
-			System.out.println("Scanning A " + lineAfter);
 			if (lineAfter.startsWith("//")) {
 				resultDescription = resultDescription + "\n" + lineAfter.substring(2);
 			} else {
