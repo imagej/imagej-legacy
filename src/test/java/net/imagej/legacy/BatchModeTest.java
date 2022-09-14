@@ -53,7 +53,7 @@ import static org.junit.Assume.assumeFalse;
 
 /**
  * Test if a {@link Command} that returns a {@link Dataset} behaves as expected
- * when a IJ1 macro is run in batch mode.
+ * when an ImageJ macro is run in batch mode.
  *
  * @author Matthias Arzt
  */
@@ -76,9 +76,9 @@ public class BatchModeTest {
 			context.dispose();
 	}
 
-	/** Just for comparison, see how plain IJ1 behaves in batch mode. */
+	/** Just for comparison, see how the original ImageJ behaves in batch mode. */
 	@Test
-	public void testIJ1() {
+	public void testOriginalImageJ() {
 		WindowManager.closeAllWindows();
 		IJ.runMacro(
 			"setBatchMode(true);\n" +

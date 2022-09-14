@@ -47,7 +47,7 @@ import org.scijava.plugin.Plugin;
 
 /**
  * Remembers which inputs are resolved extremely early in the preprocessing
- * chain. These inputs will be excluded from IJ1 macro recording by the
+ * chain. These inputs will be excluded from ImageJ macro recording by the
  * {@link MacroRecorderPostprocessor}.
  * <p>
  * In particular, we want to exclude {@link org.scijava.service.Service} and
