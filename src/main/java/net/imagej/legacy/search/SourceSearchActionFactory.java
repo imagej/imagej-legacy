@@ -197,9 +197,10 @@ public class SourceSearchActionFactory implements SearchActionFactory {
 		final StringBuilder url = new StringBuilder();
 		url.append(scmURL);
 		if (!scmURL.endsWith("/")) url.append("/");
+		final boolean originalImageJ = url.toString().endsWith("imagej/ImageJ/");
 		url.append("blob/");
 		url.append(tag);
-		url.append("/src/main/java/");
+		url.append(originalImageJ ? "/" : "/src/main/java/");
 		url.append(c.getName().replaceAll("\\.", "/"));
 		url.append(".java");
 		openURL(url.toString());
