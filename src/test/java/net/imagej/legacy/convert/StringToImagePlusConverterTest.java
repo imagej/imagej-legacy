@@ -29,23 +29,24 @@
 
 package net.imagej.legacy.convert;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import ij.IJ;
 import ij.ImagePlus;
+
+import java.lang.reflect.Type;
+
 import net.imagej.Dataset;
-import net.imagej.ImgPlus;
 import net.imagej.patcher.LegacyInjector;
-import net.imglib2.RandomAccessibleInterval;
-import net.imglib2.img.Img;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.scijava.Context;
 import org.scijava.convert.ConvertService;
 import org.scijava.convert.Converter;
-
-import java.lang.reflect.Type;
-
-import static org.junit.Assert.*;
 
 /**
  * Tests if an image title and ID can be converted to ImagePlus.
