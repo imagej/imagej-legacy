@@ -123,32 +123,6 @@ public class LegacyImageDisplayService extends AbstractService implements
 	}
 
 	@Override
-	public Dataset getActiveDataset() {
-		// Always want to go check the current ImagePlus
-		return getActiveDataset(getActiveImageDisplay());
-	}
-
-	@Override
-	public DatasetView getActiveDatasetView() {
-		return imageDisplayService().getActiveDatasetView();
-	}
-
-	@Override
-	public Position getActivePosition() {
-		return imageDisplayService().getActivePosition();
-	}
-
-	@Override
-	public Dataset getActiveDataset(final ImageDisplay display) {
-		return imageDisplayService().getActiveDataset(display);
-	}
-
-	@Override
-	public DatasetView getActiveDatasetView(final ImageDisplay display) {
-		return imageDisplayService().getActiveDatasetView(display);
-	}
-
-	@Override
 	public List<ImageDisplay> getImageDisplays() {
 		// Register all ImagePlus instances. This will generate ensure no
 		// ImagePluses are missed by the standard getImageDisplays.
@@ -161,11 +135,6 @@ public class LegacyImageDisplayService extends AbstractService implements
 		}
 
 		return imageDisplayService().getImageDisplays();
-	}
-
-	@Override
-	public Position getActivePosition(final ImageDisplay display) {
-		return imageDisplayService().getActivePosition(display);
 	}
 
 	// -- Heleper methods --
