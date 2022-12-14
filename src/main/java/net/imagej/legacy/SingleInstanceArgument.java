@@ -155,7 +155,7 @@ public class SingleInstanceArgument extends AbstractConsoleArgument {
 
 		// If --forbid-single-instance override was passed, stop now!
 		if (forbidSingleInstance) {
-			log().debug("--allow-multiple given; skipping single instance logic.");
+			log().debug("--forbid-single-instance given; skipping single instance logic.");
 			return result;
 		}
 
