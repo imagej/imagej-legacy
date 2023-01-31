@@ -93,6 +93,7 @@ import org.scijava.MenuEntry;
 import org.scijava.MenuPath;
 import org.scijava.event.EventHandler;
 import org.scijava.log.LogService;
+import org.scijava.log.Logger;
 import org.scijava.module.ModuleInfo;
 import org.scijava.platform.event.AppAboutEvent;
 import org.scijava.platform.event.AppOpenFilesEvent;
@@ -871,7 +872,7 @@ public class IJ1Helper extends AbstractContextual {
 			legacyService.getScriptsAndNonLegacyCommands();
 		final Hashtable<String, String> ij1Commands = getCommands();
 		final ImageJ ij1 = hasInstance() ? IJ.getInstance() : null;
-		final IJ1MenuWrapper wrapper = ij1 == null ? null : new IJ1MenuWrapper(ij1);
+		final IJ1MenuWrapper wrapper = ij1 == null ? null : new IJ1MenuWrapper(ij1, log);
 		class Item implements Comparable<Item> {
 
 			private double weight;
@@ -956,12 +957,14 @@ public class IJ1Helper extends AbstractContextual {
 	private static class IJ1MenuWrapper {
 
 		final ImageJ ij1;
+		final Logger log;
 		final MenuBar menuBar = Menus.getMenuBar();
 		final MenuCache menuCache = new MenuCache();
 		final Set<Menu> separators = new HashSet<>();
 
-		private IJ1MenuWrapper(final ImageJ ij1) {
+		private IJ1MenuWrapper(final ImageJ ij1, final Logger log) {
 			this.ij1 = ij1;
+			this.log = log;
 		}
 
 		/**
@@ -978,10 +981,18 @@ public class IJ1Helper extends AbstractContextual {
 		 * </ul>
 		 */
 		private MenuItem create(final MenuPath path, final boolean reuseExisting) {
+			if (path == null) return null; // no menu path
 			// Find the menu structure where we can insert our command.
 			// NB: size - 1 is the leaf position, so we want to go to size - 2 to
 			// find the parent menu location
-			final Menu menu = getParentMenu(path, path.size() - 2);
+			final int index = path.size() - 2;
+			if (index < 0) {
+				final String p = path.getMenuString(true);
+				if (p == null || p.isEmpty()) return null; // no/empty menu path
+				log.warn("Ignoring leaf-only menu path: " + p);
+				return null;
+			}
+			final Menu menu = getParentMenu(path, index);
 			final String label = path.getLeaf().getName();
 			// If we are overriding an item, find the item being overridden
 			if (reuseExisting) {
