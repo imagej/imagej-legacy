@@ -69,11 +69,11 @@ import org.scijava.table.Table;
 import org.scijava.ui.viewer.DisplayWindow;
 
 /**
- * An image map between legacy ImageJ {@link ImagePlus} objects and modern
- * ImageJ {@link ImageDisplay}s. Because every {@link ImagePlus} has a
+ * An image map between ImageJ {@link ImagePlus} objects and ImageJ2
+ * {@link ImageDisplay}s. Because every {@link ImagePlus} has a
  * corresponding {@link ImageWindow} and vice versa, it works out best to
- * associate each {@link ImagePlus} with a {@link ImageDisplay} rather than with
- * a {@link Dataset}.
+ * associate each {@link ImagePlus} with an {@link ImageDisplay} rather than
+ * with a {@link Dataset}.
  * <p>
  * Any {@link Overlay}s present in the {@link ImageDisplay} are translated to a
  * {@link Roi} attached to the {@link ImagePlus}, and vice versa.
@@ -241,8 +241,8 @@ public class LegacyImageMap extends AbstractContextual {
 	}
 
 	/**
-	 * Ensures that the given {@link ImageDisplay} has a corresponding legacy
-	 * image.
+	 * Ensures that the given {@link ImageDisplay} has a corresponding
+	 * {@link ImagePlus}.
 	 * 
 	 * @return the {@link ImagePlus} object shadowing the given
 	 *         {@link ImageDisplay}, creating it if necessary using the
@@ -270,7 +270,7 @@ public class LegacyImageMap extends AbstractContextual {
 	}
 
 	/**
-	 * Ensures that the given legacy image has a corresponding
+	 * Ensures that the given {@link ImagePlus} has a corresponding
 	 * {@link ImageDisplay}.
 	 * 
 	 * @return the {@link ImageDisplay} object shadowing the given
@@ -284,7 +284,7 @@ public class LegacyImageMap extends AbstractContextual {
 		// avoid an infinite loop.
 		if (display == null && !imagePluses.containsKey(imp)) {
 			imagePluses.put(imp, null);
-			// mapping does not exist; mirror legacy image to display
+			// mapping does not exist; mirror ImagePlus to ImageDisplay
 			display = imageTranslator.createDisplay(imp);
 			addMapping(display, imp);
 		}
@@ -388,7 +388,7 @@ public class LegacyImageMap extends AbstractContextual {
 	/**
 	 * Gets a list of {@link ImageDisplay} instances known to this legacy service.
 	 * 
-	 * @return a collection of {@link ImageDisplay} instances linked to legacy
+	 * @return a collection of {@link ImageDisplay} instances linked to
 	 *         {@link ImagePlus} instances.
 	 */
 	public Collection<ImageDisplay> getImageDisplays() {
@@ -401,7 +401,7 @@ public class LegacyImageMap extends AbstractContextual {
 	/**
 	 * Gets a list of {@link ImagePlus} instances known to this legacy service.
 	 * 
-	 * @return a collection of legacy {@link ImagePlus} instances linked to
+	 * @return a collection of {@link ImagePlus} instances linked to
 	 *         {@link ImageDisplay} instances.
 	 */
 	public Collection<ImagePlus> getImagePlusInstances() {
@@ -654,18 +654,14 @@ public class LegacyImageMap extends AbstractContextual {
 	}
 	*/
 
-	/** @param event */
+	/**
+	 * Disposes the {@link ij.ImagePlus} (if any) tied to the deleted
+	 * {@link ImageDisplay}.
+	 *
+	 * @param event Event reporting the {@link ImageDisplay} being deleted.
+	 */
 	@EventHandler
 	private void onEvent(final DisplayDeletedEvent event) {
-
-		/* OLD COMMENT : no longer relevant except for testing purposes
-		// Need to make sure:
-		// - modern IJ Windows always close when legacy IJ close expected
-		// Stack to Images, Split Channels, etc.
-		// - No ImagePlus/Display mapping becomes a zombie in the
-		// LegacyImageMap failing to get garbage collected.
-		// - That modern IJ does not think legacy IJ initiated the ij1.close()
-		 */
 		if (event.getObject() instanceof ImageDisplay) {
 			unregisterDisplay((ImageDisplay) event.getObject());
 		}
