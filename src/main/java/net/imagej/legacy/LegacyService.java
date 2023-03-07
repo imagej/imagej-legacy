@@ -415,8 +415,8 @@ public final class LegacyService extends AbstractService implements
 			// the uiService
 			// hide/show the IJ2 datasets corresponding to legacy ImagePlus instances
 			for (final ImageDisplay display : getImageMap().getImageDisplays()) {
-				final ImageDisplayViewer viewer = (ImageDisplayViewer) uiService
-					.getDisplayViewer(display);
+				final ImageDisplayViewer viewer = //
+					(ImageDisplayViewer) uiService.getDisplayViewer(display);
 				if (viewer == null) continue;
 				final DisplayWindow window = viewer.getWindow();
 				if (window != null) window.showDisplay(!wantIJ1);
