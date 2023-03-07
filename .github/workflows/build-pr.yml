@@ -21,3 +21,5 @@ jobs:
         run: .github/setup.sh
       - name: Execute the build
         run: .github/build.sh
+        env:
+          DISPLAY: :0.0
