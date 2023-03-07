@@ -137,7 +137,7 @@ public class LegacyImageDisplayService extends AbstractService implements
 		return imageDisplayService().getImageDisplays();
 	}
 
-	// -- Heleper methods --
+	// -- Helper methods --
 
 	/**
 	 * Lazy initializer for the delegate {@link ImageDisplayService}.
