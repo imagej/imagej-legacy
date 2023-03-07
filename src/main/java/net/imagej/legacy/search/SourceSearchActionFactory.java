@@ -6,13 +6,13 @@
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright notice,
  *    this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
  *    and/or other materials provided with the distribution.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -44,7 +44,6 @@ import org.scijava.module.ModuleInfo;
 import org.scijava.platform.PlatformService;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
-import org.scijava.script.ScriptInfo;
 import org.scijava.search.DefaultSearchAction;
 import org.scijava.search.SearchAction;
 import org.scijava.search.SearchActionFactory;
@@ -77,7 +76,10 @@ public class SourceSearchActionFactory implements SearchActionFactory {
 
 	@Override
 	public boolean supports(final SearchResult result) {
-		return result instanceof ModuleSearchResult;
+		if (!(result instanceof ModuleSearchResult)) return false;
+		final ModuleInfo info = ((ModuleSearchResult) result).info();
+		final String id = info.getIdentifier();
+		return id != null && id.startsWith("legacy:");
 	}
 
 	@Override
@@ -87,38 +89,6 @@ public class SourceSearchActionFactory implements SearchActionFactory {
 	}
 
 	private void source(final ModuleInfo info) {
-		// HACK: For now, we special case each kind of module.
-		// In the future, we should make it more extensible.
-		// HelpService? ModuleService#help? Some other type of plugin?
-
-		if (info instanceof ScriptInfo) {
-			// SciJava script.
-			sourceForScript((ScriptInfo) info);
-			return;
-		}
-
-		final String id = info.getIdentifier();
-		if (id != null && id.startsWith("legacy:")) {
-			// ImageJ 1.x command.
-			sourceForLegacyCommand(info);
-			return;
-		}
-
-		try {
-			// Some other kind of module; use the delegate class.
-			sourceForClass(info, info.loadDelegateClass());
-		}
-		catch (final ClassNotFoundException exc) {
-			log.debug(exc);
-			errorMessage(info);
-		}
-	}
-
-	private void sourceForScript(final ScriptInfo info) {
-		legacyService().openScriptInTextEditor(info);
-	}
-
-	private void sourceForLegacyCommand(final ModuleInfo info) {
 		if (!(info instanceof CommandInfo)) {
 			log.debug("Not a CommandInfo: " + info.getTitle());
 			errorMessage(info);
@@ -126,7 +96,7 @@ public class SourceSearchActionFactory implements SearchActionFactory {
 		}
 		final CommandInfo cInfo = (CommandInfo) info;
 		final Object className = cInfo.getPresets().get("className");
-		if (className == null || !(className instanceof String)) {
+		if (!(className instanceof String)) {
 			log.debug("Weird class name: " + className);
 			errorMessage(info);
 			return;
@@ -154,7 +124,7 @@ public class SourceSearchActionFactory implements SearchActionFactory {
 	}
 
 	private void sourceForClass(final ModuleInfo info, final Class<?> c) {
-		final POM pom = getPOM(c, null, null);
+		final POM pom = getPOM(c);
 		if (pom == null) {
 			log.debug("No Maven POM found for class: " + c.getName());
 			errorMessage(info);
@@ -235,37 +205,23 @@ public class SourceSearchActionFactory implements SearchActionFactory {
 
 	/**
 	 * Gets the Maven POM associated with the given class.
-	 * 
+	 *
 	 * @param c The class to use as a base when searching for a pom.xml.
-	 * @param groupId The Maven groupId of the desired POM.
-	 * @param artifactId The Maven artifactId of the desired POM.
 	 */
-	private static POM getPOM(final Class<?> c, final String groupId,
-		final String artifactId)
-	{
+	private static POM getPOM(final Class<?> c) {
 		try {
 			final URL location = Types.location(c);
-			if (!location.getProtocol().equals("file") ||
+			if (!location.getProtocol().equals("file") || //
 				location.toString().endsWith(".jar"))
 			{
 				// look for pom.xml in JAR's META-INF/maven subdirectory
-				if (groupId == null || artifactId == null) {
-					// groupId and/or artifactId is unknown; scan for the POM
-					final URL pomBase = new URL("jar:" + //
-						location.toString() + "!/META-INF/maven");
-					for (final URL url : FileUtils.listContents(pomBase, true, true)) {
-						if (url.toExternalForm().endsWith("/pom.xml")) {
-							return new POM(url);
-						}
+				// groupId and/or artifactId is unknown; scan for the POM
+				final URL pomBase = new URL("jar:" + //
+					location + "!/META-INF/maven");
+				for (final URL url : FileUtils.listContents(pomBase, true, true)) {
+					if (url.toExternalForm().endsWith("/pom.xml")) {
+						return new POM(url);
 					}
-				}
-				else {
-					// known groupId and artifactId; grab it directly
-					final String pomPath =
-						"META-INF/maven/" + groupId + "/" + artifactId + "/pom.xml";
-					final URL pomURL =
-						new URL("jar:" + location.toString() + "!/" + pomPath);
-					return new POM(pomURL);
 				}
 			}
 			// look for the POM in the class's base directory
