@@ -374,6 +374,7 @@ public class LegacyImageMap extends AbstractContextual {
 	public void unregisterDisplay(final ImageDisplay display, final boolean deleteImp) {
 		final ImagePlus imp = lookupImagePlus(display);
 		removeMapping(display, imp, deleteImp);
+		if (deleteImp && imp != null) imp.close();
 	}
 
 	/**
@@ -663,7 +664,7 @@ public class LegacyImageMap extends AbstractContextual {
 	@EventHandler
 	private void onEvent(final DisplayDeletedEvent event) {
 		if (event.getObject() instanceof ImageDisplay) {
-			unregisterDisplay((ImageDisplay) event.getObject());
+			unregisterDisplay((ImageDisplay) event.getObject(), true);
 		}
 	}
 
