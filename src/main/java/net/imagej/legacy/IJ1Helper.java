@@ -50,6 +50,7 @@ import ij.plugin.Commands;
 import ij.plugin.PlugIn;
 import ij.plugin.filter.PlugInFilter;
 import ij.plugin.filter.PlugInFilterRunner;
+import ij.plugin.frame.PlugInDialog;
 import ij.plugin.frame.Recorder;
 import ij.plugin.frame.RoiManager;
 
@@ -1438,44 +1439,18 @@ public class IJ1Helper extends AbstractContextual {
 		}
 	}
 
-	private void disposeNonImageWindows() {
-		disposeNonImageFrames();
-		disposeOtherNonImageWindows();
-	}
-
 	/**
 	 * Disposes all the non-image window frames, as given by
-	 * {@link WindowManager#getNonImageWindows()}.
+	 * {@link WindowManager#getAllNonImageWindows()}.
 	 */
-	private void disposeNonImageFrames() {
-		for (final Frame frame : WindowManager.getNonImageWindows()) {
-			frame.dispose();
-		}
-	}
-
-	/**
-	 * Ensures <em>all</em> the non-image windows are closed.
-	 * <p>
-	 * This is a non-trivial problem, as
-	 * {@link WindowManager#getNonImageWindows()} <em>only</em> returns
-	 * {@link Frame}s. However there are non-image, non-{@link Frame} windows that
-	 * are critical to close: for example, the
-	 * {@link ij.plugin.frame.ContrastAdjuster} spawns a polling thread to do its
-	 * work, which will continue to run until the {@code ContrastAdjuster} is
-	 * explicitly closed.
-	 * </p>
-	 */
-	private void disposeOtherNonImageWindows() {
-		// NB: As of v1.49b, getNonImageTitles is not restricted to Frames,
-		// so we can use it to iterate through the available windows.
-		for (final String title : WindowManager.getNonImageTitles()) {
-			final Window window = WindowManager.getWindow(title);
-			// NB: We can NOT set these windows as active and run the Commands
-			// plugin with argument "close", because the default behavior is to
-			// try closing the window as an Image. As we know these are not Images,
-			// that is never the right thing to do.
-			WindowManager.removeWindow(window);
-			window.dispose();
+	private void disposeNonImageWindows() {
+		for (final Window window : WindowManager.getAllNonImageWindows()) {
+			if (window instanceof PlugInDialog) {
+				((PlugInDialog) window).close();
+			}
+			else {
+				window.dispose();
+			}
 		}
 	}
 
