@@ -61,6 +61,7 @@ import org.scijava.module.Module;
 import org.scijava.module.ModuleService;
 import org.scijava.options.OptionsService;
 import org.scijava.plugin.Plugin;
+import org.scijava.plugin.PluginService;
 import org.scijava.service.Service;
 
 /**
@@ -76,6 +77,8 @@ import org.scijava.service.Service;
 @Plugin(type = LegacyOpener.class, priority = Priority.LOW)
 public class DefaultLegacyOpener implements LegacyOpener {
 
+	private static final String EAGER = "eager";
+
 	private LegacyService legacyService;
 	private DisplayService displayService;
 	private ModuleService moduleService;
@@ -84,13 +87,24 @@ public class DefaultLegacyOpener implements LegacyOpener {
 	private AppService appService;
 	private IOService ioService;
 	private LogService logService;
+	private PluginService pluginService;
+
+	private IOPlugin<?> getEagerHandler(String path) {
+		return ioService.getPlugins() //
+			.stream() //
+			.filter(info -> info.is(EAGER)) //
+			// HACK: This crappier map syntax with cast is needed to make javac happy.
+			.map(info -> (IOPlugin<?>) pluginService.createInstance(info)) //
+			.filter(io -> io.supportsOpen(path)) //
+			.findFirst() //
+			.orElse(null);
+	}
 
 	@Override
 	public Object open(String path, final int planeIndex,
 		final boolean displayResult)
 	{
 		final Context c = IJ1Helper.getLegacyContext();
-		ImagePlus imp = null;
 
 		legacyService = getCached(legacyService, LegacyService.class, c);
 		displayService = getCached(displayService, DisplayService.class, c);
@@ -100,11 +114,42 @@ public class DefaultLegacyOpener implements LegacyOpener {
 		appService = getCached(appService, AppService.class, c);
 		ioService = getCached(ioService, IOService.class, c);
 		logService = getCached(logService, LogService.class, c);
+		pluginService = getCached(pluginService, PluginService.class, c);
 
 		// Check to see if SCIFIO has been disabled
 		final boolean newStyleIO =
 			optionsService.getOptions(ImageJ2Options.class).isSciJavaIO();
-		if (!newStyleIO) return null;
+
+		if (!newStyleIO) {
+			// Before giving up, let's give the IOService's *eager* IOPlugins
+			// a chance to handle it, before the original ImageJ kicks in.
+			// An eager plugin is an IOPlugin with attrs = { @Attr("eager") }.
+			// This concept is distinct from a high-priority I/O plugin,
+			// because it partitions the list of IOPlugins into two parts:
+			// those allowed to run here, before the original ImageJ logic,
+			// and those which are not allowed to do so (the default).
+			Object data = null;
+			try {
+				IOPlugin<?> io = getEagerHandler(path);
+
+				if (io == null) {
+					logService.debug("No appropriate eager format found: " + path);
+					return null; // Pass through to original ImageJ.
+				}
+				data = io.open(path);
+				if (data == null) {
+					logService.debug("Eager format '" + io.getClass().getName() + "' opened nothing.");
+					return null; // Pass through to original ImageJ.
+				}
+				return handleData(c, data, path, displayResult);
+			}
+			catch (final IOException exc) {
+				legacyService.handleException(exc);
+			}
+
+			// No eager plugin handled this path, so we give up.
+			return null; // Pass through to original ImageJ.
+		}
 
 		if (path == null) {
 			final CommandInfo command = commandService.getCommand(GetPath.class);
@@ -140,77 +185,80 @@ public class DefaultLegacyOpener implements LegacyOpener {
 		catch (final IOException exc) {
 			legacyService.handleException(exc);
 		}
-
-		if (data != null) {
-			if (data instanceof Dataset) {
-				final Dataset d = (Dataset) data;
-
-				if (displayResult) {
-
-					// --- HACK ---
-					// We should be using the DisplayService here, which would
-					// publish a DisplayCreatedEvent. However right now that
-					// causes deadlock issues due to the EventBus sharing the AWT EDT.
-					// If the ThreadService is converted to using its own off-EDT dedicated
-					// EventBus we can go back to the DisplayService mechanism.
-					// See https://github.com/scijava/scijava-common/issues/144
-
-					final ImageDisplay imageDisplay = new DefaultImageDisplay();
-					imageDisplay.setContext(c);
-					imageDisplay.display(d);
-
-					final LegacyImageMap imageMap = legacyService.getImageMap();
-					imp = imageMap.registerDisplay(imageDisplay);
-					imp.setTitle(d.getName());
-					imp.show();
-					// --- HACK ---
-					// We're not leaning on the IJ1 Framework as much so we have
-					// to reset this field after calling show, which sets it false.
-					legacyService.getIJ1Helper().setCheckNameDuplicates(true);
-
-					legacyService.getIJ1Helper().updateRecentMenu(
-						((Dataset) data).getImgPlus().getSource());
-				}
-				else {
-					// Register the dataset, without creating a display
-					imp = legacyService.getImageMap().registerDataset(d);
-				}
-				// TODO remove usage of SCIFIO classes after migrating ImageMetadata
-				// framework to imagej-common
-				// Set information about how this dataset was opened.
-				String loadingInfo = "";
-				App app = appService.getApp(SCIFIOApp.NAME);
-				// Get the SCIFIO version
-				if (app != null) {
-					loadingInfo +=
-						"SCIFIO version: " + app.getVersion() + "\n";
-				}
-				// Get the SCIFIO format
-				if (((Dataset) data).getImgPlus() instanceof SCIFIOImgPlus) {
-					final SCIFIOImgPlus<?> scifioImp =
-						(SCIFIOImgPlus<?>) ((Dataset) data).getImgPlus();
-					final Metadata metadata = scifioImp.getMetadata();
-					if (metadata != null) {
-						loadingInfo +=
-							"File format: " + metadata.getFormatName() + "\n";
-					}
-				}
-
-				if (imp != null) {
-					final String existingInfo = (String) imp.getProperty("Info");
-					if (existingInfo != null) {
-						loadingInfo += existingInfo;
-					}
-					imp.setProperty("Info", loadingInfo);
-					return imp;
-				}
-			}
-			return data;
-		}
-		return path;
+		return handleData(c, data, path, displayResult);
 	}
 
 	// -- Helper methods --
+
+	private Object handleData(Context c, Object data, String path, boolean displayResult) {
+		if (data == null) return path;
+
+		if (data instanceof Dataset) {
+			final Dataset d = (Dataset) data;
+			ImagePlus imp = null;
+
+			if (displayResult) {
+
+				// --- HACK ---
+				// We should be using the DisplayService here, which would
+				// publish a DisplayCreatedEvent. However right now that
+				// causes deadlock issues due to the EventBus sharing the AWT EDT.
+				// If the ThreadService is converted to using its own off-EDT dedicated
+				// EventBus we can go back to the DisplayService mechanism.
+				// See https://github.com/scijava/scijava-common/issues/144
+
+				final ImageDisplay imageDisplay = new DefaultImageDisplay();
+				imageDisplay.setContext(c);
+				imageDisplay.display(d);
+
+				final LegacyImageMap imageMap = legacyService.getImageMap();
+				imp = imageMap.registerDisplay(imageDisplay);
+				imp.setTitle(d.getName());
+				imp.show();
+				// --- HACK ---
+				// We're not leaning on the IJ1 Framework as much so we have
+				// to reset this field after calling show, which sets it false.
+				legacyService.getIJ1Helper().setCheckNameDuplicates(true);
+
+				legacyService.getIJ1Helper().updateRecentMenu(
+					((Dataset) data).getImgPlus().getSource());
+			}
+			else {
+				// Register the dataset, without creating a display
+				imp = legacyService.getImageMap().registerDataset(d);
+			}
+			// TODO remove usage of SCIFIO classes after migrating ImageMetadata
+			// framework to imagej-common
+			// Set information about how this dataset was opened.
+			String loadingInfo = "";
+			App app = appService.getApp(SCIFIOApp.NAME);
+			// Get the SCIFIO version
+			if (app != null) {
+				loadingInfo +=
+					"SCIFIO version: " + app.getVersion() + "\n";
+			}
+			// Get the SCIFIO format
+			if (((Dataset) data).getImgPlus() instanceof SCIFIOImgPlus) {
+				final SCIFIOImgPlus<?> scifioImp =
+					(SCIFIOImgPlus<?>) ((Dataset) data).getImgPlus();
+				final Metadata metadata = scifioImp.getMetadata();
+				if (metadata != null) {
+					loadingInfo +=
+						"File format: " + metadata.getFormatName() + "\n";
+				}
+			}
+
+			if (imp != null) {
+				final String existingInfo = (String) imp.getProperty("Info");
+				if (existingInfo != null) {
+					loadingInfo += existingInfo;
+				}
+				imp.setProperty("Info", loadingInfo);
+				return imp;
+			}
+		}
+		return data;
+	}
 
 	private <T extends Service> T getCached(T service, Class<T> serviceClass, Context ctx) {
 		if (service != null) return service;
