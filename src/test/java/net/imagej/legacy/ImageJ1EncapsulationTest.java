@@ -159,6 +159,7 @@ public class ImageJ1EncapsulationTest {
 					className.startsWith(net.imagej.legacy.display.ImagePlusDisplayViewer.class.getName()) ||
 					className.startsWith(net.imagej.legacy.display.LegacyImageDisplayService.class.getName()) ||
 					className.startsWith(net.imagej.legacy.display.LegacyImageDisplayViewer.class.getName()) ||
+					className.startsWith(net.imagej.legacy.display.OverlayDisplayViewer.class.getName()) ||
 					className.startsWith(net.imagej.legacy.plugin.ActiveImagePlusPreprocessor.class.getName()) ||
 					className.startsWith(net.imagej.legacy.plugin.DefaultLegacyOpener.class.getName()) ||
 					className.startsWith(net.imagej.legacy.plugin.IJ1MacroEngine.class.getName()) ||
