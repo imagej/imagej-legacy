@@ -40,7 +40,9 @@ import org.scijava.plugin.Parameter;
  *
  * @author Curtis Rueden
  */
-public abstract class AbstractLegacyConverter<I, O> extends AbstractConverter<I, O> {
+public abstract class AbstractLegacyConverter<I, O> extends
+	AbstractConverter<I, O>
+{
 
 	@Parameter(required = false)
 	protected LegacyService legacyService;
