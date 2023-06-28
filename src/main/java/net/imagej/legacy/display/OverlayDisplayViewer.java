@@ -38,15 +38,14 @@ import org.scijava.ui.viewer.AbstractDisplayViewer;
 import org.scijava.ui.viewer.DisplayViewer;
 import org.scijava.ui.viewer.DisplayWindow;
 
-import ij.ImagePlus;
+import ij.gui.Overlay;
 import net.imagej.legacy.ui.LegacyUI;
 
 /**
- * {@link DisplayViewer} implementation for {@link ImagePlus}. Compatible with
+ * {@link DisplayViewer} implementation for {@link Overlay}. Compatible with
  * the {@link LegacyUI}.
  * 
- * @author Mark Hiner
- * @author Curtis Rueden
+ * @author Gabriel Selzer
  */
 @Plugin(type = DisplayViewer.class)
 public class OverlayDisplayViewer extends AbstractDisplayViewer<Overlay> {
