@@ -70,7 +70,8 @@ public class ImageDisplayToImagePlusConverter extends
 	@Override
 	public void populateInputCandidates(final Collection<Object> objects) {
 		if (objectService == null) return;
-		objects.addAll(objectService.getObjects(ImageDisplay.class));
+		populateInputCandidateHelper(objects, objectService.getObjects(
+			ImageDisplay.class));
 	}
 
 	@Override

@@ -29,11 +29,15 @@
 
 package net.imagej.legacy.convert;
 
-import net.imagej.legacy.LegacyService;
+import java.util.Collection;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.scijava.convert.AbstractConverter;
 import org.scijava.convert.Converter;
 import org.scijava.plugin.Parameter;
+
+import net.imagej.legacy.LegacyService;
 
 /**
  * Base {@link Converter} class for converting ImageJ 1.x data structures.
@@ -53,6 +57,26 @@ public abstract class AbstractLegacyConverter<I, O> extends
 	}
 
 	// -- Internal methods --
+
+	/**
+	 * Helper method for implementations whose
+	 * {@link Converter#populateInputCandidates(Collection)} method has the
+	 * potential to add duplicates because multiple converters exist for the same
+	 * output type. Uses {@link Object#toString()} to check for duplicates, so
+	 * only helpful if the different input types produce the same string
+	 * representations.
+	 */
+	protected void populateInputCandidateHelper(Collection<Object> candidates,
+		Collection<I> potentialCandidates)
+	{
+		Set<String> candidateNames = candidates.stream().map(Object::toString)
+			.collect(Collectors.toSet());
+		for (Object o : potentialCandidates) {
+			if (!candidateNames.contains(o.toString())) {
+				candidates.add(o);
+			}
+		}
+	}
 
 	protected boolean legacyEnabled() {
 		return legacyService != null && //

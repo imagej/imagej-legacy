@@ -75,7 +75,8 @@ public class DatasetToImagePlusConverter extends
 	@Override
 	public void populateInputCandidates(final Collection<Object> objects) {
 		if (objectService == null) return;
-		objects.addAll(objectService.getObjects(Dataset.class));
+		populateInputCandidateHelper(objects, objectService.getObjects(
+			Dataset.class));
 	}
 
 	@Override

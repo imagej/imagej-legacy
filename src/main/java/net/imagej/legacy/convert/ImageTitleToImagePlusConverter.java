@@ -29,16 +29,18 @@
 
 package net.imagej.legacy.convert;
 
-import ij.ImagePlus;
-import ij.WindowManager;
-
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import org.scijava.convert.ConvertService;
 import org.scijava.convert.Converter;
 import org.scijava.plugin.Plugin;
 import org.scijava.widget.ObjectWidget;
 import org.scijava.widget.WidgetModel;
+
+import ij.ImagePlus;
+import ij.WindowManager;
 
 /**
  * Converts an image title to the corresponding {@link ImagePlus} object.
@@ -76,10 +78,12 @@ public class ImageTitleToImagePlusConverter extends
 	public void populateInputCandidates(final Collection<Object> objects) {
 		final int[] imageIDs = WindowManager.getIDList();
 		if (imageIDs == null) return;
+		List<ImageTitle> imageTitles = new ArrayList<>();
 		for (final int imageID : imageIDs) {
 			final ImagePlus imp = WindowManager.getImage(imageID);
-			if (imp != null) objects.add(new ImageTitle(imp));
+			if (imp != null) imageTitles.add(new ImageTitle(imp));
 		}
+		populateInputCandidateHelper(objects, imageTitles);
 	}
 
 	@Override
