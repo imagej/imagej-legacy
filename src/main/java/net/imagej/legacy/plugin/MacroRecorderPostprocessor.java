@@ -40,6 +40,7 @@ import org.scijava.module.Module;
 import org.scijava.module.ModuleItem;
 import org.scijava.module.process.AbstractPostprocessorPlugin;
 import org.scijava.module.process.PostprocessorPlugin;
+import org.scijava.object.ObjectService;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 import org.scijava.widget.TextWidget;
@@ -55,6 +56,9 @@ public class MacroRecorderPostprocessor extends AbstractPostprocessorPlugin {
 
 	@Parameter(required = false)
 	private LegacyService legacyService;
+
+	@Parameter(required = false)
+	private ObjectService objectService;
 
 	// -- ModuleProcessor methods --
 
@@ -104,7 +108,7 @@ public class MacroRecorderPostprocessor extends AbstractPostprocessorPlugin {
 		final String title = IJ1Helper.getTitle(value);
 		if (title != null) return title;
 
-		return value.toString();
+		return objectService.getName(value);
 	}
 
 }

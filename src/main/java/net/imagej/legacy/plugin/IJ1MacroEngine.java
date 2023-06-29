@@ -248,7 +248,7 @@ public class IJ1MacroEngine extends AbstractScriptEngine {
 			return v.toString();
 		}
 		else {
-			return "\"" + quote(v.toString()) + "\"";
+			return "\"" + quote(ij1Helper.getObjectName(v)) + "\"";
 		}
 	}
 
