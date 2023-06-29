@@ -194,10 +194,8 @@ public class DefaultLegacyHooks extends LegacyHooks {
 		try {
 			final ImageDisplay disp =
 				legacyService.getImageMap().lookupDisplay(image);
-			if (disp == null) {
-				legacyService.getImageMap().unregisterLegacyImage(image, true);
-			}
-			else {
+			legacyService.getImageMap().unregisterLegacyImage(image, true);
+			if (disp != null) {
 				disp.close();
 			}
 		}
