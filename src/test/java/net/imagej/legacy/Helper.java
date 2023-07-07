@@ -61,8 +61,8 @@ import org.scijava.Context;
 
 /**
  * This class exists purely so that the ij.ImagePlus class is not defined before
- * OverlayHarmonizerTest's methods call new ImageJ() which in turn
- * will initialize the LegacyService that wants to re-define the ImageJ class.
+ * OverlayHarmonizerTest's methods call new ImageJ() which in turn will
+ * initialize the LegacyService that wants to re-define the ImageJ class.
  * 
  * @author Johannes Schindelin
  */
@@ -88,8 +88,8 @@ public class Helper {
 	 * @param y - y coordinates of the pixels
 	 * @return a binary mask overlay with the ROI inside
 	 */
-	public static BinaryMaskOverlay<BitType, Img<BitType>> makeBinaryMaskOverlay(final Context context,
-		final int x, final int y, final boolean[][] mask)
+	public static BinaryMaskOverlay<BitType, Img<BitType>> makeBinaryMaskOverlay(
+		final Context context, final int x, final int y, final boolean[][] mask)
 	{
 		final long w = mask.length;
 		final long h = mask[0].length;
@@ -103,12 +103,11 @@ public class Helper {
 				ra.get().set(mask[i][j]);
 			}
 		}
-		final Img<BitType> offsetImg =
-			new ImgView<>(Views.translate(img, x, y), img.factory());
+		final Img<BitType> offsetImg = new ImgView<>(Views.translate(img, x, y), img
+			.factory());
 		final BinaryMaskOverlay<BitType, Img<BitType>> overlay =
-			new BinaryMaskOverlay<>(context,
-				new BinaryMaskRegionOfInterest<>(
-					offsetImg));
+			new BinaryMaskOverlay<>(context, new BinaryMaskRegionOfInterest<>(
+				offsetImg));
 		return overlay;
 	}
 
@@ -119,8 +118,8 @@ public class Helper {
 	 * @param image - matrix containing image data
 	 * @return the newly created ImagePlus
 	 */
-	public static ImagePlus
-		makeImagePlus(final String name, final byte[][] image)
+	public static ImagePlus makeImagePlus(final String name,
+		final byte[][] image)
 	{
 		final int w = image.length;
 		final int h = image[0].length;
@@ -128,10 +127,9 @@ public class Helper {
 		for (int i = 0; i < data.length; i++) {
 			data[i] = image[i / h][i % h];
 		}
-		final ColorModel cm =
-			new ComponentColorModel(ColorSpace.getInstance(ColorSpace.CS_GRAY),
-				new int[] { 8 }, false, false, Transparency.OPAQUE,
-				DataBuffer.TYPE_BYTE);
+		final ColorModel cm = new ComponentColorModel(ColorSpace.getInstance(
+			ColorSpace.CS_GRAY), new int[] { 8 }, false, false, Transparency.OPAQUE,
+			DataBuffer.TYPE_BYTE);
 		final ByteProcessor ip = new ByteProcessor(w, h, data, cm);
 		final ImagePlus imp = new ImagePlus(name, ip);
 

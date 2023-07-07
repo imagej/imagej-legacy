@@ -145,10 +145,9 @@ public class OverlayHarmonizerTest {
 			// Just test that we get a single overlay of the correct type. Other tests
 			// for particulars of the decoding.
 			final Random r = new Random(1234);
-			final OverlayHarmonizer ot =
-				new OverlayHarmonizer(context);
-			final ImagePlus imagePlus =
-				Helper.makeImagePlus("Bar", Helper.makeRandomByteArray(r, 11, 15));
+			final OverlayHarmonizer ot = new OverlayHarmonizer(context);
+			final ImagePlus imagePlus = Helper.makeImagePlus("Bar", Helper
+				.makeRandomByteArray(r, 11, 15));
 			imagePlus.setRoi(Helper.makePolygonROI(new int[] { 0, 5, 5, 0, 0 },
 				new int[] { 0, 0, 5, 5, 0 }));
 			final List<Overlay> list = ot.getOverlays(imagePlus);
@@ -165,10 +164,9 @@ public class OverlayHarmonizerTest {
 	public void testSetOverlays() {
 		synchronized (LegacyService.class) {
 			final Random r = new Random(1234);
-			final OverlayHarmonizer ot =
-				new OverlayHarmonizer(context);
-			final ImagePlus imagePlus =
-				Helper.makeImagePlus("Bar", Helper.makeRandomByteArray(r, 11, 15));
+			final OverlayHarmonizer ot = new OverlayHarmonizer(context);
+			final ImagePlus imagePlus = Helper.makeImagePlus("Bar", Helper
+				.makeRandomByteArray(r, 11, 15));
 			final ArrayList<Overlay> l = new ArrayList<>();
 			l.add(Helper.makePolygonOverlay(context, new double[] { 0, 5, 5, 0, 0 },
 				new double[] { 0, 0, 5, 5, 0 }));
@@ -185,16 +183,14 @@ public class OverlayHarmonizerTest {
 	public void testPolygonOverlay() {
 		synchronized (LegacyService.class) {
 			final Random r = new Random(1234);
-			final int[][][] vertices =
-				new int[][][] { { { 0, 5, 5, 0 }, { 0, 0, 5, 5 } },
-					{ { 3, 8, 8, 3 }, { 5, 9, 9, 5 } },
-					{ { 1, 2, 3, 4, 5, 6 }, { 2, 4, 8, 16, 32, 64 } } };
+			final int[][][] vertices = new int[][][] { { { 0, 5, 5, 0 }, { 0, 0, 5,
+				5 } }, { { 3, 8, 8, 3 }, { 5, 9, 9, 5 } }, { { 1, 2, 3, 4, 5, 6 }, { 2,
+					4, 8, 16, 32, 64 } } };
 			int index = 1;
 			for (final int[][] testCase : vertices) {
-				final OverlayHarmonizer ot =
-					new OverlayHarmonizer(context);
-				final ImagePlus imagePlus =
-					Helper.makeImagePlus("Bar", Helper.makeRandomByteArray(r, 11, 15));
+				final OverlayHarmonizer ot = new OverlayHarmonizer(context);
+				final ImagePlus imagePlus = Helper.makeImagePlus("Bar", Helper
+					.makeRandomByteArray(r, 11, 15));
 				imagePlus.setRoi(Helper.makePolygonROI(testCase[0], testCase[1]));
 				final List<Overlay> list = ot.getOverlays(imagePlus);
 				assertEquals(1, list.size());
@@ -225,18 +221,16 @@ public class OverlayHarmonizerTest {
 	public void testPolygonROI() {
 		synchronized (LegacyService.class) {
 			final Random r = new Random(1234);
-			final double[][][] vertices =
-				new double[][][] { { { 0, 5, 5, 0 }, { 0, 0, 5, 5 } },
-					{ { 3, 8, 8, 3 }, { 5, 9, 9, 5 } },
-					{ { 1, 2, 3, 4, 5, 6 }, { 2, 4, 8, 16, 32, 64 } } };
+			final double[][][] vertices = new double[][][] { { { 0, 5, 5, 0 }, { 0, 0,
+				5, 5 } }, { { 3, 8, 8, 3 }, { 5, 9, 9, 5 } }, { { 1, 2, 3, 4, 5, 6 }, {
+					2, 4, 8, 16, 32, 64 } } };
 			int index = 1;
 			for (final double[][] testCase : vertices) {
-				final OverlayHarmonizer ot =
-					new OverlayHarmonizer(context);
-				final PolygonOverlay overlay =
-					Helper.makePolygonOverlay(context, testCase[0], testCase[1]);
-				final ImagePlus imagePlus =
-					Helper.makeImagePlus("Bar", Helper.makeRandomByteArray(r, 11, 15));
+				final OverlayHarmonizer ot = new OverlayHarmonizer(context);
+				final PolygonOverlay overlay = Helper.makePolygonOverlay(context,
+					testCase[0], testCase[1]);
+				final ImagePlus imagePlus = Helper.makeImagePlus("Bar", Helper
+					.makeRandomByteArray(r, 11, 15));
 				final ArrayList<Overlay> overlays = new ArrayList<>();
 				overlays.add(overlay);
 				ot.setOverlays(overlays, overlay, imagePlus);
@@ -251,7 +245,8 @@ public class OverlayHarmonizerTest {
 				for (int i = 0; i < testCase[0].length; i++) {
 					boolean found = false;
 					for (int j = 0; j < testCase[0].length; j++) {
-						if ((x[i] + x0 == testCase[0][j]) && (y[i] + y0 == testCase[1][j]))
+						if ((x[i] + x0 == testCase[0][j]) && (y[i] +
+							y0 == testCase[1][j]))
 						{
 							found = true;
 							break;
@@ -271,20 +266,17 @@ public class OverlayHarmonizerTest {
 			/*
 			 * The composite Roi has an offset and its contained Rois are relative to that offset
 			 */
-			final OverlayHarmonizer ot =
-				new OverlayHarmonizer(context);
+			final OverlayHarmonizer ot = new OverlayHarmonizer(context);
 			final Random r = new Random(1234);
-			final ImagePlus imagePlus =
-				Helper.makeImagePlus("Bar", Helper.makeRandomByteArray(r, 11, 15));
+			final ImagePlus imagePlus = Helper.makeImagePlus("Bar", Helper
+				.makeRandomByteArray(r, 11, 15));
 			/*
 			 * Put a rectangular hole inside a rectangle - hopefully this is too much and falls into the default code.
 			 */
-			final Roi r1 =
-				Helper.makePolygonROI(new int[] { 3, 5, 5, 3 }, new int[] { 8, 8, 10,
-					10 });
-			final Roi r2 =
-				Helper.makePolygonROI(new int[] { 8, 8, 10, 10 }, new int[] { 3, 5, 5,
-					3 });
+			final Roi r1 = Helper.makePolygonROI(new int[] { 3, 5, 5, 3 }, new int[] {
+				8, 8, 10, 10 });
+			final Roi r2 = Helper.makePolygonROI(new int[] { 8, 8, 10, 10 },
+				new int[] { 3, 5, 5, 3 });
 			final Roi roi = new ShapeRoi(r1).xor(new ShapeRoi(r2));
 
 			// Is the trailing edge in or out? I suppose a sane person would say that
@@ -296,14 +288,14 @@ public class OverlayHarmonizerTest {
 			// and I don't know if theirs does.
 			// The following are the discrepancies.
 
-			final int[][] questionablePairs =
-				new int[][] { { 3, 10 }, { 4, 10 }, { 5, 10 }, { 5, 8 }, { 5, 9 },
-					{ 8, 5 }, { 9, 5 }, { 10, 5 }, { 10, 3 }, { 10, 4 } };
+			final int[][] questionablePairs = new int[][] { { 3, 10 }, { 4, 10 }, { 5,
+				10 }, { 5, 8 }, { 5, 9 }, { 8, 5 }, { 9, 5 }, { 10, 5 }, { 10, 3 }, {
+					10, 4 } };
 			imagePlus.setRoi(roi);
 			final List<Overlay> list = ot.getOverlays(imagePlus);
 			assertEquals(1, list.size());
-			final RealRandomAccess<BitType> ra =
-				list.get(0).getRegionOfInterest().realRandomAccess();
+			final RealRandomAccess<BitType> ra = list.get(0).getRegionOfInterest()
+				.realRandomAccess();
 			for (int i = 0; i < 11; i++) {
 				ra.setPosition(i, 0);
 				for (int j = 0; j < 11; j++) {
@@ -326,11 +318,10 @@ public class OverlayHarmonizerTest {
 	@Test
 	public void testDonut() {
 		synchronized (LegacyService.class) {
-			final OverlayHarmonizer ot =
-				new OverlayHarmonizer(context);
+			final OverlayHarmonizer ot = new OverlayHarmonizer(context);
 			final Random r = new Random(1234);
-			final ImagePlus imagePlus =
-				Helper.makeImagePlus("Bar", Helper.makeRandomByteArray(r, 11, 15));
+			final ImagePlus imagePlus = Helper.makeImagePlus("Bar", Helper
+				.makeRandomByteArray(r, 11, 15));
 			/*
 			 * Put a rectangular hole inside a rectangle. This should translate to
 			 * a composite ROI that can deal with it.
@@ -359,25 +350,23 @@ public class OverlayHarmonizerTest {
 	@Test
 	public void testCreateBinaryMaskOverlay() {
 		synchronized (LegacyService.class) {
-			final OverlayHarmonizer ot =
-				new OverlayHarmonizer(context);
+			final OverlayHarmonizer ot = new OverlayHarmonizer(context);
 			final Random r = new Random(1234);
-			final ImagePlus imagePlus =
-				Helper.makeImagePlus("Bar", Helper.makeRandomByteArray(r, 11, 15));
+			final ImagePlus imagePlus = Helper.makeImagePlus("Bar", Helper
+				.makeRandomByteArray(r, 11, 15));
 			/*
 			 * Put a rectangular hole inside a rectangle - hopefully this is too much and falls into the default code.
 			 */
-			final Roi roi =
-				Helper.makeFreeROI(new int[] { 6, 11, 11, 6, 6 }, new int[] { 9, 9, 15,
-					15, 9 });
+			final Roi roi = Helper.makeFreeROI(new int[] { 6, 11, 11, 6, 6 },
+				new int[] { 9, 9, 15, 15, 9 });
 
 			imagePlus.setRoi(roi);
 			final List<Overlay> list = ot.getOverlays(imagePlus);
 			assertEquals(1, list.size());
 			assertTrue(list.get(0) instanceof PolygonOverlay);
 			final PolygonOverlay overlay = (PolygonOverlay) list.get(0);
-			final RealRandomAccess<BitType> ra =
-				overlay.getRegionOfInterest().realRandomAccess();
+			final RealRandomAccess<BitType> ra = overlay.getRegionOfInterest()
+				.realRandomAccess();
 			for (int i = 0; i < 9; i++) {
 				ra.setPosition(i, 0);
 				for (int j = 0; j < 14; j++) {
@@ -393,14 +382,13 @@ public class OverlayHarmonizerTest {
 		synchronized (LegacyService.class) {
 			final Random r = new Random(54321);
 			final boolean[][] data = Helper.makeRandomBooleanArray(r, 7, 8);
-			final BinaryMaskOverlay<BitType, Img<BitType>> overlay =
-				Helper.makeBinaryMaskOverlay(context, 5, 6, data);
-			final RealRandomAccess<BitType> ra =
-				overlay.getRegionOfInterest().realRandomAccess();
-			final OverlayHarmonizer ot =
-				new OverlayHarmonizer(context);
-			final ImagePlus imagePlus =
-				Helper.makeImagePlus("Bar", Helper.makeRandomByteArray(r, 15, 20));
+			final BinaryMaskOverlay<BitType, Img<BitType>> overlay = Helper
+				.makeBinaryMaskOverlay(context, 5, 6, data);
+			final RealRandomAccess<BitType> ra = overlay.getRegionOfInterest()
+				.realRandomAccess();
+			final OverlayHarmonizer ot = new OverlayHarmonizer(context);
+			final ImagePlus imagePlus = Helper.makeImagePlus("Bar", Helper
+				.makeRandomByteArray(r, 15, 20));
 			final ArrayList<Overlay> overlays = new ArrayList<>();
 			overlays.add(overlay);
 			ot.setOverlays(overlays, overlay, imagePlus);
