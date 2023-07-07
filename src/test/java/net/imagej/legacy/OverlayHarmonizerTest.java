@@ -32,15 +32,19 @@ package net.imagej.legacy;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import ij.ImagePlus;
-import ij.gui.PolygonRoi;
-import ij.gui.Roi;
-import ij.gui.ShapeRoi;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.scijava.Context;
+
+import ij.ImagePlus;
+import ij.gui.PolygonRoi;
+import ij.gui.Roi;
+import ij.gui.ShapeRoi;
 import net.imagej.display.ImageDisplay;
 import net.imagej.legacy.translate.OverlayHarmonizer;
 import net.imagej.overlay.BinaryMaskOverlay;
@@ -53,11 +57,6 @@ import net.imglib2.img.Img;
 import net.imglib2.roi.PolygonRegionOfInterest;
 import net.imglib2.roi.RegionOfInterest;
 import net.imglib2.type.logic.BitType;
-
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.scijava.Context;
 
 /**
  * Unit tests for {@link OverlayHarmonizer}.

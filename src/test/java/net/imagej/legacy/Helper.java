@@ -31,11 +31,6 @@ package net.imagej.legacy;
 
 import static org.junit.Assert.assertEquals;
 
-import ij.ImagePlus;
-import ij.gui.PolygonRoi;
-import ij.gui.Roi;
-import ij.process.ByteProcessor;
-
 import java.awt.Transparency;
 import java.awt.color.ColorSpace;
 import java.awt.image.ColorModel;
@@ -43,6 +38,12 @@ import java.awt.image.ComponentColorModel;
 import java.awt.image.DataBuffer;
 import java.util.Random;
 
+import org.scijava.Context;
+
+import ij.ImagePlus;
+import ij.gui.PolygonRoi;
+import ij.gui.Roi;
+import ij.process.ByteProcessor;
 import net.imagej.overlay.BinaryMaskOverlay;
 import net.imagej.overlay.PolygonOverlay;
 import net.imglib2.RandomAccess;
@@ -56,8 +57,6 @@ import net.imglib2.roi.BinaryMaskRegionOfInterest;
 import net.imglib2.roi.PolygonRegionOfInterest;
 import net.imglib2.type.logic.BitType;
 import net.imglib2.view.Views;
-
-import org.scijava.Context;
 
 /**
  * This class exists purely so that the ij.ImagePlus class is not defined before
