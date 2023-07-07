@@ -30,12 +30,15 @@
 package net.imagej.legacy;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import net.imagej.autoscale.AutoscaleService;
+import net.imagej.display.DataView;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -45,18 +48,25 @@ import ij.ImagePlus;
 import ij.gui.PolygonRoi;
 import ij.gui.Roi;
 import ij.gui.ShapeRoi;
+import net.imagej.Dataset;
 import net.imagej.display.ImageDisplay;
+import net.imagej.display.ImageDisplayService;
 import net.imagej.legacy.translate.OverlayHarmonizer;
 import net.imagej.overlay.BinaryMaskOverlay;
 import net.imagej.overlay.Overlay;
 import net.imagej.overlay.PolygonOverlay;
 import net.imagej.patcher.LegacyInjector;
+import net.imagej.roi.DefaultROITree;
+import net.imagej.roi.ROIService;
 import net.imglib2.RealLocalizable;
 import net.imglib2.RealRandomAccess;
 import net.imglib2.img.Img;
 import net.imglib2.roi.PolygonRegionOfInterest;
 import net.imglib2.roi.RegionOfInterest;
 import net.imglib2.type.logic.BitType;
+import org.scijava.event.EventService;
+import org.scijava.thread.ThreadService;
+import org.scijava.ui.UIService;
 
 /**
  * Unit tests for {@link OverlayHarmonizer}.
@@ -83,7 +93,8 @@ public class OverlayHarmonizerTest {
 	@Before
 	public void beforeMethod() {
 		synchronized (LegacyService.class) {
-			context = new Context(LegacyService.class);
+			context = new Context(LegacyService.class, ImageDisplayService.class,
+				AutoscaleService.class, ThreadService.class, EventService.class);
 		}
 	}
 
@@ -121,17 +132,18 @@ public class OverlayHarmonizerTest {
 	 */
 	@Test
 	public void testUpdateImagePlus() {
-		// TODO: there are no headless displays at this point, so this pretty much
-		// does nothing.
-		// So someone needs to make it really test something when headless displays
-		// become available
-//		OverlayTranslator ot = new OverlayTranslator();
-//		Random r = new Random(1234);
-//		Dataset ds = Helper.makeDataset(Helper.makeRandomByteArray(r, 11, 15), "Foo");
-//		ImagePlus imagePlus = Helper.makeImagePlus("Bar", Helper.makeRandomByteArray(r, 11, 15));
-//		ot.setImagePlusOverlays(ds, imagePlus);
 		synchronized (LegacyService.class) {
-			// fill me some day
+			final LegacyService ls = context.getService(LegacyService.class);
+			final Random r = new Random(1234);
+			Dataset ds = Helper.makeDataset( //
+				context, //
+				Helper.makeRandomByteArray(r, 11, 15), //
+				"Foo" //
+			);
+			ds.getProperties().put(ROIService.ROI_PROPERTY, new DefaultROITree());
+			// registerDataset will lead to updateImagePlus being called eventually
+			ImagePlus imagePlus = ls.getImageMap().registerDataset(ds);
+			assertNotNull(imagePlus.getOverlay());
 		}
 	}
 

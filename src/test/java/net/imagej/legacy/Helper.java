@@ -44,18 +44,27 @@ import ij.ImagePlus;
 import ij.gui.PolygonRoi;
 import ij.gui.Roi;
 import ij.process.ByteProcessor;
+import net.imagej.Dataset;
+import net.imagej.DatasetService;
+import net.imagej.ImgPlus;
+import net.imagej.axis.Axes;
+import net.imagej.axis.AxisType;
 import net.imagej.overlay.BinaryMaskOverlay;
 import net.imagej.overlay.PolygonOverlay;
 import net.imglib2.RandomAccess;
 import net.imglib2.RealPoint;
 import net.imglib2.img.Img;
 import net.imglib2.img.ImgView;
+import net.imglib2.img.NativeImg;
 import net.imglib2.img.array.ArrayImg;
+import net.imglib2.img.array.ArrayImgFactory;
 import net.imglib2.img.array.ArrayImgs;
+import net.imglib2.img.basictypeaccess.array.ByteArray;
 import net.imglib2.img.basictypeaccess.array.LongArray;
 import net.imglib2.roi.BinaryMaskRegionOfInterest;
 import net.imglib2.roi.PolygonRegionOfInterest;
 import net.imglib2.type.logic.BitType;
+import net.imglib2.type.numeric.integer.ByteType;
 import net.imglib2.view.Views;
 
 /**
@@ -108,6 +117,30 @@ public class Helper {
 			new BinaryMaskOverlay<>(context, new BinaryMaskRegionOfInterest<>(
 				offsetImg));
 		return overlay;
+	}
+
+	public static Dataset makeDataset(final Context context, final byte[][] data,
+		final String name)
+	{
+		final int w = data.length;
+		final int h = data[0].length;
+		final NativeImg<ByteType, ByteArray> img =
+			(NativeImg<ByteType, ByteArray>) new ArrayImgFactory<ByteType>().create(
+				new long[] { w, h }, new ByteType());
+		final ByteType t = new ByteType(img);
+		img.setLinkedType(t);
+		final RandomAccess<ByteType> ra = img.randomAccess();
+		for (int i = 0; i < w; i++) {
+			ra.setPosition(i, 0);
+			for (int j = 0; j < h; j++) {
+				ra.setPosition(j, 1);
+				ra.get().set(data[i][j]);
+			}
+		}
+		final DatasetService datasetService = context.getService(
+			DatasetService.class);
+		return datasetService.create(new ImgPlus<ByteType>(img, name,
+			new AxisType[] { Axes.X, Axes.Y }));
 	}
 
 	/**
