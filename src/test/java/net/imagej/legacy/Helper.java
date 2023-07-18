@@ -31,11 +31,6 @@ package net.imagej.legacy;
 
 import static org.junit.Assert.assertEquals;
 
-import ij.ImagePlus;
-import ij.gui.PolygonRoi;
-import ij.gui.Roi;
-import ij.process.ByteProcessor;
-
 import java.awt.Transparency;
 import java.awt.color.ColorSpace;
 import java.awt.image.ColorModel;
@@ -43,26 +38,39 @@ import java.awt.image.ComponentColorModel;
 import java.awt.image.DataBuffer;
 import java.util.Random;
 
+import org.scijava.Context;
+
+import ij.ImagePlus;
+import ij.gui.PolygonRoi;
+import ij.gui.Roi;
+import ij.process.ByteProcessor;
+import net.imagej.Dataset;
+import net.imagej.DatasetService;
+import net.imagej.ImgPlus;
+import net.imagej.axis.Axes;
+import net.imagej.axis.AxisType;
 import net.imagej.overlay.BinaryMaskOverlay;
 import net.imagej.overlay.PolygonOverlay;
 import net.imglib2.RandomAccess;
 import net.imglib2.RealPoint;
 import net.imglib2.img.Img;
 import net.imglib2.img.ImgView;
+import net.imglib2.img.NativeImg;
 import net.imglib2.img.array.ArrayImg;
+import net.imglib2.img.array.ArrayImgFactory;
 import net.imglib2.img.array.ArrayImgs;
+import net.imglib2.img.basictypeaccess.array.ByteArray;
 import net.imglib2.img.basictypeaccess.array.LongArray;
 import net.imglib2.roi.BinaryMaskRegionOfInterest;
 import net.imglib2.roi.PolygonRegionOfInterest;
 import net.imglib2.type.logic.BitType;
+import net.imglib2.type.numeric.integer.ByteType;
 import net.imglib2.view.Views;
-
-import org.scijava.Context;
 
 /**
  * This class exists purely so that the ij.ImagePlus class is not defined before
- * OverlayHarmonizerTest's methods call new ImageJ() which in turn
- * will initialize the LegacyService that wants to re-define the ImageJ class.
+ * OverlayHarmonizerTest's methods call new ImageJ() which in turn will
+ * initialize the LegacyService that wants to re-define the ImageJ class.
  * 
  * @author Johannes Schindelin
  */
@@ -88,8 +96,8 @@ public class Helper {
 	 * @param y - y coordinates of the pixels
 	 * @return a binary mask overlay with the ROI inside
 	 */
-	public static BinaryMaskOverlay<BitType, Img<BitType>> makeBinaryMaskOverlay(final Context context,
-		final int x, final int y, final boolean[][] mask)
+	public static BinaryMaskOverlay<BitType, Img<BitType>> makeBinaryMaskOverlay(
+		final Context context, final int x, final int y, final boolean[][] mask)
 	{
 		final long w = mask.length;
 		final long h = mask[0].length;
@@ -103,13 +111,36 @@ public class Helper {
 				ra.get().set(mask[i][j]);
 			}
 		}
-		final Img<BitType> offsetImg =
-			new ImgView<>(Views.translate(img, x, y), img.factory());
+		final Img<BitType> offsetImg = new ImgView<>(Views.translate(img, x, y), img
+			.factory());
 		final BinaryMaskOverlay<BitType, Img<BitType>> overlay =
-			new BinaryMaskOverlay<>(context,
-				new BinaryMaskRegionOfInterest<>(
-					offsetImg));
+			new BinaryMaskOverlay<>(context, new BinaryMaskRegionOfInterest<>(
+				offsetImg));
 		return overlay;
+	}
+
+	public static Dataset makeDataset(final Context context, final byte[][] data,
+		final String name)
+	{
+		final int w = data.length;
+		final int h = data[0].length;
+		final NativeImg<ByteType, ByteArray> img =
+			(NativeImg<ByteType, ByteArray>) new ArrayImgFactory<ByteType>().create(
+				new long[] { w, h }, new ByteType());
+		final ByteType t = new ByteType(img);
+		img.setLinkedType(t);
+		final RandomAccess<ByteType> ra = img.randomAccess();
+		for (int i = 0; i < w; i++) {
+			ra.setPosition(i, 0);
+			for (int j = 0; j < h; j++) {
+				ra.setPosition(j, 1);
+				ra.get().set(data[i][j]);
+			}
+		}
+		final DatasetService datasetService = context.getService(
+			DatasetService.class);
+		return datasetService.create(new ImgPlus<ByteType>(img, name,
+			new AxisType[] { Axes.X, Axes.Y }));
 	}
 
 	/**
@@ -119,8 +150,8 @@ public class Helper {
 	 * @param image - matrix containing image data
 	 * @return the newly created ImagePlus
 	 */
-	public static ImagePlus
-		makeImagePlus(final String name, final byte[][] image)
+	public static ImagePlus makeImagePlus(final String name,
+		final byte[][] image)
 	{
 		final int w = image.length;
 		final int h = image[0].length;
@@ -128,10 +159,9 @@ public class Helper {
 		for (int i = 0; i < data.length; i++) {
 			data[i] = image[i / h][i % h];
 		}
-		final ColorModel cm =
-			new ComponentColorModel(ColorSpace.getInstance(ColorSpace.CS_GRAY),
-				new int[] { 8 }, false, false, Transparency.OPAQUE,
-				DataBuffer.TYPE_BYTE);
+		final ColorModel cm = new ComponentColorModel(ColorSpace.getInstance(
+			ColorSpace.CS_GRAY), new int[] { 8 }, false, false, Transparency.OPAQUE,
+			DataBuffer.TYPE_BYTE);
 		final ByteProcessor ip = new ByteProcessor(w, h, data, cm);
 		final ImagePlus imp = new ImagePlus(name, ip);
 

@@ -182,6 +182,10 @@ public class OverlayHarmonizer extends AbstractContextual implements
 	public void setOverlays(List<Overlay> overlays, Overlay activeOverlay,
 		final ImagePlus imp)
 	{
+		// Ignore null overlays
+		if (activeOverlay == null) {
+			return;
+		}
 		final Roi roi = createRoi(activeOverlay);
 		final ij.gui.Overlay o = createIJ1Overlay(overlays, activeOverlay);
 		imp.setRoi(roi);
