@@ -184,13 +184,8 @@ public class IJ1Helper extends AbstractContextual {
 			ij1.exitWhenQuitting(true);
 
 			// make sure that the Event Dispatch Thread's class loader is set
-			SwingUtilities.invokeLater(new Runnable() {
-
-				@Override
-				public void run() {
-					Thread.currentThread().setContextClassLoader(IJ.getClassLoader());
-				}
-			});
+			SwingUtilities.invokeLater(() ->
+				Thread.currentThread().setContextClassLoader(IJ.getClassLoader()));
 
 			final LegacyImageMap imageMap = legacyService.getImageMap();
 			for (int i = 1; i <= WindowManager.getImageCount(); i++) {
