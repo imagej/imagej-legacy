@@ -38,7 +38,9 @@ import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import net.imagej.legacy.IJ1Helper;
 
@@ -66,24 +68,42 @@ class MacroAutoCompletionProvider extends DefaultCompletionProvider implements
 	private ModuleService moduleService;
 	private MacroExtensionAutoCompletionService macroExtensionAutoCompletionService;
 
-	private static MacroAutoCompletionProvider instance = null;
+	private static Map<Class<?>, MacroAutoCompletionProvider> instances = new HashMap<>();
 
 	private boolean sorted = false;
 	private final int maximumSearchResults = 100;
 
-	private MacroAutoCompletionProvider() {
-		parseFunctionsHtmlDoc("/doc/ij1macro/functions.html");
-		parseFunctionsHtmlDoc("/doc/ij1macro/functions_extd.html");
+	private MacroAutoCompletionProvider(final Class<?> base) {
+		// Keep track of whether we have success reading functions.html from the
+		// given base class, which will typically be the ij.ImageJ.class, if any,
+		// associated with the caller's SciJava context.
+		boolean success = false;
+		if (base != null) success = parseFunctionsHtmlDoc("/functions.html", base);
+		if (!success) {
+			// We were not able to parse functions.html from the base class; this
+			// could be because none was given, or because the ij.jar version is not
+			// recent enough. So now we parse the functions from the website instead.
+			parseFunctionsHtmlDoc("https://imagej.net/ij/developer/macro/functions.html", null);
+		}
+		parseFunctionsHtmlDoc("/doc/ij1macro/functions_extd.html", null);
 	}
 
+	/** @deprecated Use {@link #getInstance(Class)} instead. */
+	@Deprecated
 	public static synchronized MacroAutoCompletionProvider getInstance() {
+		return getInstance(null);
+	}
+
+	public static synchronized MacroAutoCompletionProvider getInstance(final Class<?> base) {
+		MacroAutoCompletionProvider instance = instances.get(base);
 		if (instance == null) {
-			instance = new MacroAutoCompletionProvider();
+			instance = new MacroAutoCompletionProvider(base);
+			instances.put(base, instance);
 		}
 		return instance;
 	}
 
-	private boolean parseFunctionsHtmlDoc(final String filename) {
+	private boolean parseFunctionsHtmlDoc(final String filename, final Class<?> base) {
 		InputStream resourceAsStream;
 
 		sorted = false;
@@ -93,7 +113,8 @@ class MacroAutoCompletionProvider extends DefaultCompletionProvider implements
 				resourceAsStream = url.openStream();
 			}
 			else {
-				resourceAsStream = getClass().getResourceAsStream(filename);
+				final Class<?> c = base == null ? getClass() : base;
+				resourceAsStream = c.getResourceAsStream(filename);
 			}
 			if (resourceAsStream == null) return false;
 			final BufferedReader br = //

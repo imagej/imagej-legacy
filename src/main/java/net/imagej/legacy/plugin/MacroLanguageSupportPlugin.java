@@ -37,6 +37,9 @@ import java.util.List;
 import javax.swing.SwingUtilities;
 import javax.swing.text.JTextComponent;
 
+import net.imagej.legacy.IJ1Helper;
+import net.imagej.legacy.LegacyService;
+
 import org.fife.rsta.ac.AbstractLanguageSupport;
 import org.fife.ui.autocomplete.AutoCompletion;
 import org.fife.ui.autocomplete.Completion;
@@ -60,11 +63,14 @@ import org.scijava.ui.swing.script.LanguageSupportPlugin;
 public class MacroLanguageSupportPlugin extends AbstractLanguageSupport
 	implements LanguageSupportPlugin
 {
-	@Parameter
-	ModuleService moduleService;
+	@Parameter(required = false)
+	private LegacyService legacyService;
 
 	@Parameter
-	MacroExtensionAutoCompletionService macroExtensionAutoCompletionService;
+	private ModuleService moduleService;
+
+	@Parameter
+	private MacroExtensionAutoCompletionService macroExtensionAutoCompletionService;
 
 	private final static int MINIMUM_WORD_LENGTH_TO_OPEN_PULLDOWN = 2;
 
@@ -107,8 +113,11 @@ public class MacroLanguageSupportPlugin extends AbstractLanguageSupport
 	}
 
 	private MacroAutoCompletionProvider getMacroAutoCompletionProvider() {
-		MacroAutoCompletionProvider provider = MacroAutoCompletionProvider
-				.getInstance();
+		IJ1Helper ij1Helper = legacyService == null ? null : legacyService.getIJ1Helper();
+		Object ij = ij1Helper == null ? null : ij1Helper.getIJ();
+		Class<?> base = ij == null ? null : ij.getClass();
+		MacroAutoCompletionProvider provider = //
+			MacroAutoCompletionProvider.getInstance(base);
 		provider.addModuleCompletions(moduleService);
 		provider.addMacroExtensionAutoCompletions(macroExtensionAutoCompletionService);
 		provider.sort();
