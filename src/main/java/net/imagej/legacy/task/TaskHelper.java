@@ -1,7 +1,6 @@
 package net.imagej.legacy.task;
 
 import net.imagej.legacy.LegacyService;
-import org.scijava.Context;
 import org.scijava.log.LogService;
 import org.scijava.object.ObjectService;
 import org.scijava.task.Task;
@@ -31,20 +30,48 @@ import java.util.stream.Collectors;
  */
 @SuppressWarnings("unused")
 public class TaskHelper {
+
     // Since the LegacyService exists only once, the LogService and the ObjectService can be accessed statically
-    static {
-        Context ctx = LegacyService.getInstance().context();
-        logService = ctx.getService(LogService.class);
-        objectService = ctx.getService(ObjectService.class);
-        taskService = ctx.getService(TaskService.class);
+    private static volatile LogService logService;
+    private static volatile ObjectService objectService;
+    private static volatile TaskService taskService;
+    public static LogService logService() {
+        if (logService == null) {
+            synchronized (LogService.class) {
+                if (logService == null) {
+                    logService = LegacyService.getInstance().log();
+                }
+            }
+        }
+        return logService;
     }
-    final private static LogService logService;
-    final private static ObjectService objectService;
-    final private static TaskService taskService;
+
+    public static ObjectService objectService() {
+        if (objectService == null) {
+            synchronized (ObjectService.class) {
+                if (objectService == null) {
+                    objectService = LegacyService.getInstance().context().getService(ObjectService.class);
+                }
+            }
+        }
+        return objectService;
+    }
+
+    public static TaskService taskService() {
+        if (taskService == null) {
+            synchronized (TaskService.class) {
+                if (taskService == null) {
+                    taskService = LegacyService.getInstance().context().getService(TaskService.class);
+                }
+            }
+        }
+        return taskService;
+    }
+
 
     private static Task getTaskNamed(String name) throws IllegalArgumentException {
 
-        List<Task> tasks = objectService.getObjects(Task.class)
+        List<Task> tasks = objectService().getObjects(Task.class)
                 .stream()
                 .filter(task -> task.getName().equals(name)).collect(Collectors.toList());
 
@@ -53,14 +80,14 @@ public class TaskHelper {
         }
 
         if (tasks.size() > 1) {
-            logService.warn("Multiple tasks named "+name+" found! Taking the first one.");
+            logService().warn("Multiple tasks named "+name+" found! Taking the first one.");
         }
 
         return tasks.get(0);
     }
 
     private static List<Task> getTasksNamed(String name) {
-        return objectService.getObjects(Task.class)
+        return objectService().getObjects(Task.class)
                 .stream()
                 .filter(task -> task.getName().equals(name)).collect(Collectors.toList());
     }
@@ -76,7 +103,7 @@ public class TaskHelper {
             Task task = getTaskNamed(taskName);
             return task.isCanceled()?"true":"false";
         } catch (IllegalArgumentException e) {
-            logService.error("Error: task not found. ("+e.getMessage()+")");
+            logService().error("Error: task not found. ("+e.getMessage()+")");
             return "Error: task not found. ("+e.getMessage()+")";
         }
     }
@@ -91,7 +118,7 @@ public class TaskHelper {
             Task task = getTaskNamed(taskName);
             return task.getCancelReason();
         } catch (IllegalArgumentException e) {
-            logService.error("Error: task not found. ("+e.getMessage()+")");
+            logService().error("Error: task not found. ("+e.getMessage()+")");
             return "Error: task not found. ("+e.getMessage()+")";
         }
     }
@@ -101,8 +128,8 @@ public class TaskHelper {
      * @param taskName name of the task to act on
      */
     public static void createTask(String taskName) {
-        Task task = taskService.createTask(taskName);
-        objectService.addObject(task);
+        Task task = taskService().createTask(taskName);
+        objectService().addObject(task);
     }
 
     /**
@@ -115,7 +142,7 @@ public class TaskHelper {
             Task task = getTaskNamed(taskName);
             task.setProgressMaximum(Long.parseLong(max));
         } catch (IllegalArgumentException e) {
-            logService.error("Error: task not found. ("+e.getMessage()+")");
+            logService().error("Error: task not found. ("+e.getMessage()+")");
         }
     }
 
@@ -129,7 +156,7 @@ public class TaskHelper {
             Task task = getTaskNamed(taskName);
             return Long.toString(task.getProgressMaximum());
         } catch (Exception e) {
-            logService.error("Error: task not found. ("+e.getMessage()+")");
+            logService().error("Error: task not found. ("+e.getMessage()+")");
             return "task "+taskName+" not found.";
         }
     }
@@ -144,7 +171,7 @@ public class TaskHelper {
             Task task = getTaskNamed(taskName);
             task.setStatusMessage(status);
         } catch (Exception e) {
-            logService.error("Error: task not found. ("+e.getMessage()+")");
+            logService().error("Error: task not found. ("+e.getMessage()+")");
         }
     }
 
@@ -158,7 +185,7 @@ public class TaskHelper {
             Task task = getTaskNamed(taskName);
             return task.getStatusMessage();
         } catch (Exception e) {
-            logService.error("Error: task not found. ("+e.getMessage()+")");
+            logService().error("Error: task not found. ("+e.getMessage()+")");
             return "task "+taskName+" not found.";
         }
     }
@@ -172,7 +199,7 @@ public class TaskHelper {
             Task task = getTaskNamed(taskName);
             task.start();
         } catch (Exception e) {
-            logService.error("Error: task not found. ("+e.getMessage()+")");
+            logService().error("Error: task not found. ("+e.getMessage()+")");
         }
     }
 
@@ -186,7 +213,7 @@ public class TaskHelper {
             Task task = getTaskNamed(taskName);
             task.setProgressValue(Long.parseLong(step));
         } catch (Exception e) {
-            logService.error("Error: task not found. ("+e.getMessage()+")");
+            logService().error("Error: task not found. ("+e.getMessage()+")");
         }
     }
 
@@ -198,9 +225,9 @@ public class TaskHelper {
         try {
             Task task = getTaskNamed(taskName);
             task.finish();
-            objectService.removeObject(task);
+            objectService().removeObject(task);
         } catch (Exception e) {
-            logService.error("Error: task not found. ("+e.getMessage()+")");
+            logService().error("Error: task not found. ("+e.getMessage()+")");
         }
     }
 
@@ -212,7 +239,7 @@ public class TaskHelper {
     public static void removeAll(String taskName) {
         for (Task task: getTasksNamed(taskName)) {
             task.finish();
-            objectService.removeObject(task);
+            objectService().removeObject(task);
         }
     }
 
