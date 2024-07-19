@@ -457,7 +457,7 @@ public final class LegacyService extends AbstractService implements
 				final ClassLoader loader = Context.getClassLoader();
 				ij1Helper = new IJ1Helper(this);
 				LegacyInjector.installHooks(loader, //
-					new DefaultLegacyHooks(this, ij1Helper));
+					new DefaultLegacyHooks(this));
 				instance = this;
 
 				// Initialize ImageJ 1.x, if needed.
