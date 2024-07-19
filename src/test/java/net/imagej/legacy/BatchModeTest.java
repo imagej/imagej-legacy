@@ -46,7 +46,8 @@ import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 import org.scijava.ui.UIService;
 
-import java.awt.GraphicsEnvironment;
+import java.awt.*;
+import java.lang.reflect.InvocationTargetException;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assume.assumeFalse;
@@ -110,7 +111,18 @@ public class BatchModeTest {
 		// TODO: This should be improved. The test should also work in headless mode, without the legacy ui visible.
 		assumeFalse(GraphicsEnvironment.isHeadless());
 		UIService service = context.service(UIService.class);
-		service.showUI();
+		Runnable showUI = new Runnable() {
+			@Override
+			public void run() {
+				service.showUI();
+			}
+		};
+		try {
+			EventQueue.invokeAndWait(showUI);
+		}
+		catch (InterruptedException | InvocationTargetException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	/** Simple command that outputs a {@link Dataset}. Used for testing. */
