@@ -44,6 +44,7 @@ import org.junit.Test;
 import org.scijava.Context;
 import org.scijava.module.Module;
 import org.scijava.module.process.AbstractPreprocessorPlugin;
+import org.scijava.module.process.PostprocessorPlugin;
 import org.scijava.module.process.PreprocessorPlugin;
 import org.scijava.plugin.PluginInfo;
 import org.scijava.plugin.PluginService;
@@ -85,6 +86,9 @@ public class MacroRecorderPostprocessorTest {
 		// and only later resolved around the time that input harvesting occurs.
 		context.service(PluginService.class).addPlugin(new PluginInfo<>(
 			MockInputHarvester.class, PreprocessorPlugin.class));
+
+		context.service(PluginService.class).addPlugin(new PluginInfo<>(
+				MacroRecorderPostprocessor.class, PostprocessorPlugin.class));
 
 		// NB: Override the IJ1Helper to remember which parameters get recorded.
 		final EideticIJ1Helper ij1Helper = new EideticIJ1Helper();
