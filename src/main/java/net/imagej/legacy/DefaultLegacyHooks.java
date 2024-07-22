@@ -139,7 +139,7 @@ public class DefaultLegacyHooks extends LegacyHooks {
 			return legacyService == null ? null : legacyService.getContext();
 		}
 
-		IJ1Helper helper = legacyService.getIJ1Helper();
+		IJ1Helper helper = helper();
 
 		// Intercept IJ1 commands
 		if (helper != null) {
@@ -335,6 +335,7 @@ public class DefaultLegacyHooks extends LegacyHooks {
 		final Pattern pattern = Pattern.compile(
 			"^\\s*([^,]*),\\s*\"([^\"]*)\",\\s*([^\\s]*(\\(.*\\))?)\\s*");
 		final ClassLoader cl = Context.getClassLoader();
+		final IJ1Helper helper = helper();
 		try {
 			final Enumeration<URL> pluginsConfigs = cl.getResources("plugins.config");
 			while (pluginsConfigs.hasMoreElements()) {
@@ -351,7 +352,7 @@ public class DefaultLegacyHooks extends LegacyHooks {
 						final String mPath = m.group(1);
 						final String label = m.group(2);
 						final String plugin = m.group(3);
-						legacyService.getIJ1Helper().addCommand(mPath, label, plugin);
+						helper.addCommand(mPath, label, plugin);
 					}
 				}
 			}
@@ -495,7 +496,7 @@ public class DefaultLegacyHooks extends LegacyHooks {
 			final Window win = windows[w];
 
 			// Skip the ImageJ 1.x main window
-			if (win == null || win == legacyService.getIJ1Helper().getIJ()) {
+			if (win == null || win == helper().getIJ()) {
 				continue;
 			}
 
@@ -544,7 +545,7 @@ public class DefaultLegacyHooks extends LegacyHooks {
 	@Override
 	public void interceptImageWindowClose(final Object window) {
 		final Frame w = (Frame)window;
-		final IJ1Helper helper = legacyService.getIJ1Helper();
+		final IJ1Helper helper = helper();
 		// When quitting, IJ1 doesn't dispose closing ImageWindows.
 		// If the quit is later canceled this would leave orphaned windows.
 		// Thus we queue any closed windows for disposal.
@@ -564,7 +565,7 @@ public class DefaultLegacyHooks extends LegacyHooks {
 		// within its ij.ImageJ#run() method, which is typically, but not always,
 		// called on a separate thread by ij.ImageJ#quit(). The question is: did
 		// the shutdown originate from an IJ1 code path, or a SciJava one?
-		if (legacyService.getIJ1Helper().isDisposing()) {
+		if (helper().isDisposing()) {
 			// NB: ImageJ1 is in the process of a hard shutdown via an API call on
 			// the SciJava level. It was probably either LegacyService#dispose() or
 			// LegacyUI#dispose(), either of which triggers IJ1Helper#dispose().
@@ -580,6 +581,17 @@ public class DefaultLegacyHooks extends LegacyHooks {
 	}
 
 	// -- Helper methods --
+
+	/**
+	 * Convenience method for accessing the attached {@link LegacyService}'s
+	 * {@link IJ1Helper}.
+	 */
+	private IJ1Helper helper() {
+		// NB: although there is a setter for the IJ1Helper, it is documented as
+		// "non-API" and thus the helper should never be null. If this changes at
+		// some point we should do null checking here.
+		return legacyService.getIJ1Helper();
+	}
 
 	/**
 	 * Determines whether a file is binary or text.
