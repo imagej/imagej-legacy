@@ -8,8 +8,11 @@ on:
       - "*-[0-9]+.*"
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
+  define-matrix:
+    runs-on: ${{ matrix.os }}
+    strategy:
+        matrix:
+          os: [ubuntu-latest, windows-latest, macOS-latest]
 
     steps:
       - uses: actions/checkout@v2
