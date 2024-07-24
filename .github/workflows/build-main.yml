@@ -8,7 +8,7 @@ on:
       - "*-[0-9]+.*"
 
 jobs:
-  define-matrix:
+  build:
     runs-on: ${{ matrix.os }}
     strategy:
         matrix:
@@ -26,6 +26,7 @@ jobs:
         run: .github/setup.sh
       - name: Execute the build
         run: .github/build.sh
+        shell: bash
         env:
           GPG_KEY_NAME: ${{ secrets.GPG_KEY_NAME }}
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
