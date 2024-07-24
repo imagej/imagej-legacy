@@ -24,3 +24,4 @@ jobs:
         run: .github/setup.sh
       - name: Execute the build
         run: .github/build.sh
+        shell: bash
