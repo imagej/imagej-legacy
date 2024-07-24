@@ -8,7 +8,7 @@ on:
       - "*-[0-9]+.*"
 
 jobs:
-  define-matrix:
+  build:
     runs-on: ${{ matrix.os }}
     strategy:
         matrix:

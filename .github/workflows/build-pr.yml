@@ -6,7 +6,7 @@ on:
       - master
 
 jobs:
-  define-matrix:
+  build:
     runs-on: ${{ matrix.os }}
     strategy:
         matrix:
