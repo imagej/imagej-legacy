@@ -24,6 +24,7 @@ jobs:
           cache: 'maven'
       - name: Set up CI environment
         run: .github/setup.sh
+        shell: bash
       - name: Execute the build
         run: .github/build.sh
         shell: bash
