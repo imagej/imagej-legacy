@@ -31,12 +31,9 @@ package net.imagej.legacy.convert;
 
 import ij.ImagePlus;
 
-import java.util.Collection;
-
 import net.imagej.Dataset;
 import net.imagej.display.ImageDisplay;
 import net.imagej.display.ImageDisplayService;
-import net.imagej.legacy.IJ1Helper;
 
 import org.scijava.Priority;
 import org.scijava.convert.Converter;
@@ -56,7 +53,7 @@ import org.scijava.plugin.Plugin;
  */
 @Plugin(type = Converter.class, priority = Priority.LOW)
 public class ImagePlusToDatasetConverter extends
-	AbstractLegacyConverter<ImagePlus, Dataset>
+	AbstractImagePlusLegacyConverter<Dataset>
 {
 
 	@Parameter(required = false)
@@ -77,25 +74,6 @@ public class ImagePlusToDatasetConverter extends
 
 		final Dataset dataset = imageDisplayService.getActiveDataset(display);
 		return (T) dataset;
-	}
-
-	@Override
-	public void populateInputCandidates(final Collection<Object> objects) {
-		if (!legacyEnabled()) return;
-
-		final IJ1Helper ij1Helper = legacyService.getIJ1Helper();
-
-		final int[] imageIDs = ij1Helper.getIDList();
-		if (imageIDs == null) return; // no image IDs
-
-		// Add any ImagePluses in the IJ1 WindowManager that are not already
-		// converted
-		for (final int id : imageIDs) {
-			final ImagePlus imgPlus = ij1Helper.getImage(id);
-			if (legacyService.getImageMap().lookupDisplay(imgPlus) == null) {
-				objects.add(imgPlus);
-			}
-		}
 	}
 
 	@Override

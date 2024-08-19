@@ -29,47 +29,41 @@
 
 package net.imagej.legacy.convert;
 
-import ij.ImagePlus;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
-import net.imagej.display.ImageDisplay;
-
-import org.scijava.Priority;
 import org.scijava.convert.Converter;
-import org.scijava.plugin.Plugin;
+
+import ij.ImagePlus;
+import net.imagej.legacy.IJ1Helper;
 
 /**
- * {@link Converter} implementation for converting {@link ImagePlus} to a
- * {@link ImageDisplay}.
- *
- * @author Curtis Rueden
+ * Base {@link Converter} class for converting {@link ImagePlus} to other
+ * classes.
  */
-@Plugin(type = Converter.class, priority = Priority.LOW)
-public class ImagePlusToImageDisplayConverter extends
-	AbstractImagePlusLegacyConverter<ImageDisplay>
+public abstract class AbstractImagePlusLegacyConverter<O> extends
+	AbstractLegacyConverter<ImagePlus, O>
 {
 
-	// -- Converter methods --
-
 	@Override
-	public <T> T convert(final Object src, final Class<T> dest) {
-		if (!legacyEnabled()) throw new UnsupportedOperationException();
+	public void populateInputCandidates(final Collection<Object> objects) {
+		if (!legacyEnabled()) return;
 
-		// Convert using the LegacyImageMap
-		final ImageDisplay display =
-			legacyService.getImageMap().registerLegacyImage((ImagePlus) src);
+		final IJ1Helper ij1Helper = legacyService.getIJ1Helper();
 
-		@SuppressWarnings("unchecked")
-		final T typedDisplay = (T) display;
-		return typedDisplay;
-	}
+		final int[] imageIDs = ij1Helper.getIDList();
+		if (imageIDs == null) return; // no image IDs
+		List<ImagePlus> candidates = new ArrayList<>();
 
-	@Override
-	public Class<ImageDisplay> getOutputType() {
-		return ImageDisplay.class;
-	}
-
-	@Override
-	public Class<ImagePlus> getInputType() {
-		return ImagePlus.class;
+		// Add any ImagePluses in the IJ1 WindowManager that are not already
+		// converted
+		for (final int id : imageIDs) {
+			final ImagePlus imgPlus = ij1Helper.getImage(id);
+			if (legacyService.getImageMap().lookupDisplay(imgPlus) == null) {
+				candidates.add(imgPlus);
+			}
+		}
+		populateInputCandidateHelper(objects, candidates);
 	}
 }
