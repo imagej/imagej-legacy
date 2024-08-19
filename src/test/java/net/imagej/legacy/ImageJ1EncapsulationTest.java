@@ -96,6 +96,7 @@ public class ImageJ1EncapsulationTest {
 					className.startsWith(net.imagej.legacy.convert.ImagePlusToImageDisplayConverter.class.getName()) ||
 					className.startsWith(net.imagej.legacy.convert.ImagePlusToImgPlusConverter.class.getName()) ||
 					className.startsWith(net.imagej.legacy.convert.ImageTitleToImagePlusConverter.class.getName()) ||
+					className.startsWith(net.imagej.legacy.convert.ImgPlusToImagePlusConverter.class.getName()) ||
 					className.startsWith(net.imagej.legacy.convert.OverlayToROITreeConverter.class.getName()) ||
 					className.startsWith(net.imagej.legacy.convert.ResultsTableColumnWrapper.class.getName()) ||
 					className.startsWith(net.imagej.legacy.convert.ResultsTableToGenericTableConverter.class.getName()) ||
