@@ -40,7 +40,6 @@ import net.imagej.legacy.IJ1Helper;
 
 import org.scijava.Priority;
 import org.scijava.convert.Converter;
-import org.scijava.object.ObjectService;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 
@@ -62,9 +61,6 @@ public class ImagePlusToDatasetConverter extends
 
 	@Parameter(required = false)
 	private ImageDisplayService imageDisplayService;
-
-	@Parameter(required = false)
-	private ObjectService objectService;
 
 	// -- Converter methods --
 
