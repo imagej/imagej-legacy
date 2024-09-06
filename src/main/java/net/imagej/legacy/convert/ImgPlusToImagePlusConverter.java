@@ -81,8 +81,7 @@ public class ImgPlusToImagePlusConverter extends
 	@Override
 	public void populateInputCandidates(final Collection<Object> objects) {
 		if (objectService == null) return;
-		populateInputCandidateHelper(objects, objectService.getObjects(
-			ImgPlus.class));
+		objects.addAll(objectService.getObjects(ImgPlus.class));
 	}
 
 	@Override
