@@ -29,9 +29,7 @@
 
 package net.imagej.legacy.convert;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 import org.scijava.convert.Converter;
 
@@ -54,16 +52,14 @@ public abstract class AbstractImagePlusLegacyConverter<O> extends
 
 		final int[] imageIDs = ij1Helper.getIDList();
 		if (imageIDs == null) return; // no image IDs
-		List<ImagePlus> candidates = new ArrayList<>();
 
 		// Add any ImagePluses in the IJ1 WindowManager that are not already
 		// converted
 		for (final int id : imageIDs) {
 			final ImagePlus imgPlus = ij1Helper.getImage(id);
 			if (legacyService.getImageMap().lookupDisplay(imgPlus) == null) {
-				candidates.add(imgPlus);
+				objects.add(imgPlus);
 			}
 		}
-		populateInputCandidateHelper(objects, candidates);
 	}
 }
