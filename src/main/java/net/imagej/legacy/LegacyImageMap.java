@@ -425,7 +425,7 @@ public class LegacyImageMap extends AbstractContextual {
 	/**
 	 * Creates a mapping between a given {@link ImageDisplay} and
 	 * {@link ImagePlus}. If {@code createLegacyMappings} is true, the mappings
-	 * will be added to the leagcy mode maps.
+	 * will be added to the legacy mode maps.
 	 */
 	private void addMapping(final ImageDisplay display, final ImagePlus imp,
 		final boolean createLegacyMappings)
