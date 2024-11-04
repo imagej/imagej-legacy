@@ -36,6 +36,7 @@ import java.util.Iterator;
 import net.imagej.legacy.convert.roi.MaskPredicateWrapper;
 import net.imglib2.RealLocalizable;
 import net.imglib2.RealPoint;
+import net.imglib2.RealPositionable;
 import net.imglib2.roi.geom.real.WritableRealPointCollection;
 import net.imglib2.roi.util.RealLocalizableRealPositionable;
 import net.imglib2.roi.util.RealLocalizableRealPositionableWrapper;
@@ -100,12 +101,12 @@ public final class RealPointCollectionWrapper extends PointRoi implements
 
 	// -- Helper methods --
 
-	private static <L extends RealLocalizable> float[] getCoors(
-		final WritableRealPointCollection<RealLocalizableRealPositionable> rpc,
+	private static <L extends RealLocalizable & RealPositionable> float[] getCoors(
+		final WritableRealPointCollection<L> rpc,
 		final int d)
 	{
 		final FloatArray coor = new FloatArray();
-		final Iterator<RealLocalizableRealPositionable> itr = rpc.points()
+		final Iterator<L> itr = rpc.points()
 			.iterator();
 		while (itr.hasNext())
 			coor.addValue(itr.next().getFloatPosition(d));
@@ -113,10 +114,10 @@ public final class RealPointCollectionWrapper extends PointRoi implements
 		return coor.getArray();
 	}
 
-	private static <L extends RealLocalizable> int countPoints(
-		final WritableRealPointCollection<RealLocalizableRealPositionable> rpc)
+	private static <L extends RealLocalizable & RealPositionable> int countPoints(
+		final WritableRealPointCollection<L> rpc)
 	{
-		final Iterator<RealLocalizableRealPositionable> itr = rpc.points()
+		final Iterator<L> itr = rpc.points()
 			.iterator();
 		int count = 0;
 		while (itr.hasNext()) {
