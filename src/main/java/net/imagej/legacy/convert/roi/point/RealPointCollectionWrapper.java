@@ -32,10 +32,12 @@ package net.imagej.legacy.convert.roi.point;
 import ij.gui.PointRoi;
 
 import java.util.Iterator;
+import java.util.function.Supplier;
 
 import net.imagej.legacy.convert.roi.MaskPredicateWrapper;
 import net.imglib2.RealLocalizable;
 import net.imglib2.RealPoint;
+import net.imglib2.RealPositionable;
 import net.imglib2.roi.geom.real.WritableRealPointCollection;
 import net.imglib2.roi.util.RealLocalizableRealPositionable;
 import net.imglib2.roi.util.RealLocalizableRealPositionableWrapper;
@@ -47,17 +49,38 @@ import org.scijava.util.FloatArray;
  *
  * @author Alison Walter
  */
-public final class RealPointCollectionWrapper extends PointRoi implements
-	MaskPredicateWrapper<WritableRealPointCollection<RealLocalizableRealPositionable>>
+public final class RealPointCollectionWrapper<L extends RealLocalizable & RealPositionable>
+	extends PointRoi implements
+	MaskPredicateWrapper<WritableRealPointCollection<L>>
 {
 
-	private final WritableRealPointCollection<RealLocalizableRealPositionable> rpc;
+	private final WritableRealPointCollection<L> rpc;
+	private final Supplier<L> newPointCreator;
 	private int numPoints;
 
-	public RealPointCollectionWrapper(
-		final WritableRealPointCollection<RealLocalizableRealPositionable> p)
+	/**
+	 * @deprecated because adding new points through the wrapper is prone to
+	 *             {@link ClassCastException}s. Use
+	 *             {@link #RealPointCollectionWrapper(WritableRealPointCollection, Supplier)}
+	 *             instead.
+	 * @param p the {@link WritableRealPointCollection} that will be wrapped
+	 */
+	@Deprecated
+	@SuppressWarnings("unchecked")
+	public RealPointCollectionWrapper(final WritableRealPointCollection<L> p) {
+		this(p, () -> (L) new RealPoint(2));
+	}
+
+	/**
+	 * @param p the {@link WritableRealPointCollection} that will be wrapped
+	 * @param ptCreator defines how new points will be created when added to the
+	 *          wrapper.
+	 */
+	public RealPointCollectionWrapper(final WritableRealPointCollection<L> p,
+		final Supplier<L> ptCreator)
 	{
 		super(getCoors(p, 0), getCoors(p, 1), countPoints(p));
+		newPointCreator = ptCreator;
 		numPoints = getFloatPolygon().npoints;
 		rpc = p;
 	}
@@ -65,9 +88,7 @@ public final class RealPointCollectionWrapper extends PointRoi implements
 	// -- MaskPredicateWrapper methods --
 
 	@Override
-	public WritableRealPointCollection<RealLocalizableRealPositionable>
-		getSource()
-	{
+	public WritableRealPointCollection<L> getSource() {
 		return rpc;
 	}
 
@@ -76,8 +97,7 @@ public final class RealPointCollectionWrapper extends PointRoi implements
 		// Check if points were added
 		if (getNCoordinates() > numPoints) {
 			while (getNCoordinates() != numPoints) {
-				rpc.addPoint(new RealLocalizableRealPositionableWrapper<>(new RealPoint(
-					2)));
+				rpc.addPoint(newPointCreator.get());
 				numPoints++;
 			}
 		}
@@ -90,8 +110,7 @@ public final class RealPointCollectionWrapper extends PointRoi implements
 		}
 
 		// Update point locations
-		final Iterator<RealLocalizableRealPositionable> itr = rpc.points()
-			.iterator();
+		final Iterator<L> itr = rpc.points().iterator();
 		final float[] xCoor = getContainedFloatPoints().xpoints;
 		final float[] yCoor = getContainedFloatPoints().ypoints;
 		for (int i = 0; i < numPoints; i++)
@@ -100,24 +119,21 @@ public final class RealPointCollectionWrapper extends PointRoi implements
 
 	// -- Helper methods --
 
-	private static <L extends RealLocalizable> float[] getCoors(
-		final WritableRealPointCollection<RealLocalizableRealPositionable> rpc,
-		final int d)
+	private static <L extends RealLocalizable & RealPositionable> float[]
+		getCoors(final WritableRealPointCollection<L> rpc, final int d)
 	{
 		final FloatArray coor = new FloatArray();
-		final Iterator<RealLocalizableRealPositionable> itr = rpc.points()
-			.iterator();
+		final Iterator<L> itr = rpc.points().iterator();
 		while (itr.hasNext())
 			coor.addValue(itr.next().getFloatPosition(d));
 
 		return coor.getArray();
 	}
 
-	private static <L extends RealLocalizable> int countPoints(
-		final WritableRealPointCollection<RealLocalizableRealPositionable> rpc)
+	private static <L extends RealLocalizable & RealPositionable> int countPoints(
+		final WritableRealPointCollection<L> rpc)
 	{
-		final Iterator<RealLocalizableRealPositionable> itr = rpc.points()
-			.iterator();
+		final Iterator<L> itr = rpc.points().iterator();
 		int count = 0;
 		while (itr.hasNext()) {
 			itr.next();

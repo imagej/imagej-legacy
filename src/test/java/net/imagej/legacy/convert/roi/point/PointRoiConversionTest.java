@@ -71,7 +71,7 @@ import org.scijava.convert.Converter;
 public class PointRoiConversionTest {
 
 	private PointRoi point;
-	private WritableRealPointCollection<RealLocalizableRealPositionable> rpc;
+	private WritableRealPointCollection<RealPoint> rpc;
 	private WritableRealPointCollection<RealLocalizable> pointRoiWrap;
 	private PointRoi rpcWrap;
 	private ConvertService convertService;
@@ -80,16 +80,13 @@ public class PointRoiConversionTest {
 	public void setup() {
 		point = new PointRoi(new float[] { 12.125f, 17, 1 }, new float[] { -4, 6.5f,
 			30 });
-		final List<RealLocalizableRealPositionable> c = new ArrayList<>();
-		c.add(new RealLocalizableRealPositionableWrapper<>(new RealPoint(
-			new double[] { 12.125, -4 })));
-		c.add(new RealLocalizableRealPositionableWrapper<>(new RealPoint(
-			new double[] { 17, 6.5 })));
-		c.add(new RealLocalizableRealPositionableWrapper<>(new RealPoint(
-			new double[] { 1, 30 })));
+		final List<RealPoint> c = new ArrayList<>();
+		c.add(new RealPoint(12.125, -4));
+		c.add(new RealPoint(17, 6.5 ));
+		c.add(new RealPoint(1, 30));
 		rpc = new DefaultWritableRealPointCollection<>(c);
 		pointRoiWrap = new PointRoiWrapper(point);
-		rpcWrap = new RealPointCollectionWrapper(rpc);
+		rpcWrap = new RealPointCollectionWrapper<>(rpc, () -> new RealPoint(2));
 
 		final Context context = new Context(ConvertService.class);
 		convertService = context.service(ConvertService.class);
@@ -199,8 +196,7 @@ public class PointRoiConversionTest {
 
 		final float[] xp = p.getContainedFloatPoints().xpoints;
 		final float[] yp = p.getContainedFloatPoints().ypoints;
-		final Iterator<RealLocalizableRealPositionable> points = rpc.points()
-			.iterator();
+		final Iterator<RealPoint> points = rpc.points().iterator();
 		int count = 0;
 
 		while (points.hasNext()) {
@@ -215,6 +211,16 @@ public class PointRoiConversionTest {
 		assertEquals(rpc.realMin(1), p.getYBase(), 0);
 		assertEquals(rpc.realMax(0), p.getXBase() + p.getFloatWidth(), 0);
 		assertEquals(rpc.realMax(1), p.getYBase() + p.getFloatHeight(), 0);
+
+		// Add a new point in the wrapper and check for it in the wrapped object
+		p.addPoint(1.0, 1.0);
+		assertEquals(rpc.size(), 3);
+		((RealPointCollectionWrapper<?>) p).synchronize();
+		assertEquals(rpc.size(), 4);
+		Iterator<RealPoint> itr = rpc.points().iterator();
+		for (int i = 0; i < 3; i++)
+			itr.next();
+		assertEquals(new RealPoint(1, 1), itr.next());
 	}
 
 	@Test

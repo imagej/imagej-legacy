@@ -32,11 +32,17 @@ package net.imagej.legacy.convert.roi.point;
 import ij.gui.PointRoi;
 
 import net.imagej.legacy.convert.roi.AbstractMaskPredicateToRoiConverter;
+import net.imglib2.RealLocalizable;
+import net.imglib2.RealPositionable;
 import net.imglib2.roi.geom.real.WritableRealPointCollection;
-import net.imglib2.roi.util.RealLocalizableRealPositionable;
 
+import org.scijava.convert.ConvertService;
 import org.scijava.convert.Converter;
+import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
+
+import java.lang.reflect.Type;
+import java.util.function.Supplier;
 
 /**
  * Converts a {@link WritableRealPointCollection} to a {@link PointRoi}. This
@@ -46,9 +52,13 @@ import org.scijava.plugin.Plugin;
  * @author Alison Walter
  */
 @Plugin(type = Converter.class)
-public class WritableRealPointCollectionToPointRoiConverter extends
-	AbstractMaskPredicateToRoiConverter<WritableRealPointCollection<RealLocalizableRealPositionable>, PointRoi>
+public class WritableRealPointCollectionToPointRoiConverter<L extends RealLocalizable & RealPositionable>
+	extends
+	AbstractMaskPredicateToRoiConverter<WritableRealPointCollection<L>, PointRoi>
 {
+
+	@Parameter
+	public ConvertService convert;
 
 	@Override
 	public Class<PointRoi> getOutputType() {
@@ -57,17 +67,18 @@ public class WritableRealPointCollectionToPointRoiConverter extends
 
 	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public Class<WritableRealPointCollection<RealLocalizableRealPositionable>>
-		getInputType()
-	{
+	public Class<WritableRealPointCollection<L>> getInputType() {
 		return (Class) WritableRealPointCollection.class;
 	}
 
 	@Override
-	public PointRoi convert(
-		final WritableRealPointCollection<RealLocalizableRealPositionable> mask)
-	{
-		return new RealPointCollectionWrapper(mask);
+	public PointRoi convert(final WritableRealPointCollection<L> mask) {
+		float[] srcArray = { 0f, 0f };
+		Class<?> ptClass = mask.points().iterator().next().getClass();
+		Converter<float[], L> c = (Converter<float[], L>) convert.getHandler(
+			srcArray, ptClass);
+		Supplier<L> ptCreator = () -> (L) c.convert(srcArray, ptClass);
+		return new RealPointCollectionWrapper<>(mask, ptCreator);
 	}
 
 	@Override
