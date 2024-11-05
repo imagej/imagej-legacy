@@ -59,19 +59,6 @@ public final class RealPointCollectionWrapper<L extends RealLocalizable & RealPo
 	private int numPoints;
 
 	/**
-	 * @deprecated because adding new points through the wrapper is prone to
-	 *             {@link ClassCastException}s. Use
-	 *             {@link #RealPointCollectionWrapper(WritableRealPointCollection, Supplier)}
-	 *             instead.
-	 * @param p the {@link WritableRealPointCollection} that will be wrapped
-	 */
-	@Deprecated
-	@SuppressWarnings("unchecked")
-	public RealPointCollectionWrapper(final WritableRealPointCollection<L> p) {
-		this(p, () -> (L) new RealPoint(2));
-	}
-
-	/**
 	 * @param p the {@link WritableRealPointCollection} that will be wrapped
 	 * @param ptCreator defines how new points will be created when added to the
 	 *          wrapper.
