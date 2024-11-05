@@ -29,49 +29,51 @@
 
 package net.imagej.legacy.convert.roi.point;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
 import ij.IJ;
 import ij.ImagePlus;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
 import net.imglib2.RealLocalizable;
 import net.imglib2.RealPoint;
+import net.imglib2.RealRandomAccess;
+import net.imglib2.RealRandomAccessible;
+import net.imglib2.img.array.ArrayImgs;
+import net.imglib2.interpolation.randomaccess.NearestNeighborInterpolatorFactory;
 import net.imglib2.roi.geom.real.DefaultWritableRealPointCollection;
 import net.imglib2.roi.geom.real.WritableRealPointCollection;
-import net.imglib2.roi.util.RealLocalizableRealPositionable;
-import net.imglib2.roi.util.RealLocalizableRealPositionableWrapper;
 
+import net.imglib2.type.numeric.integer.UnsignedByteType;
+import net.imglib2.view.Views;
 import org.junit.Before;
 import org.junit.Test;
+
+import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
 
 /**
  * Tests {@link RealPointCollectionWrapper}
  *
  * @author Alison Walter
+ * @author Gabriel Selzer
  */
 public class RealPointCollectionWrapperTest {
 
-	private WritableRealPointCollection<RealLocalizableRealPositionable> rpc;
-	private RealPointCollectionWrapper wrap;
+	private WritableRealPointCollection<RealPoint> rpc;
+	private RealPointCollectionWrapper<RealPoint> wrap;
 
 	@Before
 	public void setup() {
-		final List<RealLocalizableRealPositionable> pts = new ArrayList<>(3);
-		pts.add(new RealLocalizableRealPositionableWrapper<>(new RealPoint(
-			new double[] { 12, 3 })));
-		pts.add(new RealLocalizableRealPositionableWrapper<>(new RealPoint(
-			new double[] { 0.25, 6.5 })));
-		pts.add(new RealLocalizableRealPositionableWrapper<>(new RealPoint(
-			new double[] { -107, 33 })));
+		final List<RealPoint> pts = new ArrayList<>(3);
+		pts.add(new RealPoint(12, 3));
+		pts.add(new RealPoint(0.25, 6.5));
+		pts.add(new RealPoint(-107, 33));
 
 		rpc = new DefaultWritableRealPointCollection<>(pts);
-		wrap = new RealPointCollectionWrapper(rpc);
+		wrap = new RealPointCollectionWrapper<>(rpc, () -> new RealPoint(2));
 
 		// NB: can't remove points without associated image
 		final ImagePlus i = IJ.createImage("Ramp", "8-bit ramp", 128, 128, 1);
@@ -138,6 +140,39 @@ public class RealPointCollectionWrapperTest {
 		assertTrue(pointsEqual());
 	}
 
+	/**
+	 * Ensures that {@link WritableRealPointCollection}s can wrap
+	 * {@link RealRandomAccess}es (i.e. something that is not a {@link RealPoint})
+	 */
+	@Test
+	public void testRPCOfRandomAccesses() {
+		RealRandomAccessible<UnsignedByteType> testImg = Views.interpolate(ArrayImgs
+			.unsignedBytes(10, 10), new NearestNeighborInterpolatorFactory<>());
+		RealRandomAccess<UnsignedByteType> ra1 = testImg.realRandomAccess();
+		ra1.setPosition(new int[] { 1, 1 });
+		WritableRealPointCollection<RealRandomAccess<UnsignedByteType>> rpc =
+			new DefaultWritableRealPointCollection<>(Collections.singletonList(ra1));
+
+		RealPointCollectionWrapper<RealRandomAccess<UnsignedByteType>> wrapped =
+			new RealPointCollectionWrapper<>(rpc, testImg::realRandomAccess);
+
+		// add a new point
+		wrapped.addPoint(2.0, 3.0);
+		wrapped.synchronize();
+
+		// assert there are now two RRAs
+		assertEquals(2, rpc.size());
+		Iterator<RealRandomAccess<UnsignedByteType>> iw = rpc.points().iterator();
+		RealRandomAccess<UnsignedByteType> ra = iw.next();
+		assertArrayEquals(new double[] { 1.0, 1.0 }, ra.positionAsDoubleArray(),
+			1e-6);
+		ra = iw.next();
+		assertArrayEquals(new double[] { 2.0, 3.0 }, ra.positionAsDoubleArray(),
+			1e-6);
+		assertFalse(iw.hasNext());
+
+	}
+
 	// -- Helper methods --
 
 	private boolean pointsEqual() {
@@ -146,8 +181,7 @@ public class RealPointCollectionWrapperTest {
 		final float[] yp = wrap.getFloatPolygon().ypoints;
 
 		int count = 0;
-		final Iterator<RealLocalizableRealPositionable> itr = rpc.points()
-			.iterator();
+		final Iterator<RealPoint> itr = rpc.points().iterator();
 		while (itr.hasNext()) {
 			final RealLocalizable pt = itr.next();
 			boolean match = false;
