@@ -184,6 +184,8 @@
 
 		<!-- NB: Deploy releases to the SciJava Maven repository. -->
 		<releaseProfiles>sign,deploy-to-scijava</releaseProfiles>
+
+		<scijava-search.version>3.0.0</scijava-search.version>
 	</properties>
 
 	<repositories>

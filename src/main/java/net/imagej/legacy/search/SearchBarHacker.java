@@ -93,6 +93,9 @@ public class SearchBarHacker {
 				resultLimit);
 		}
 
+		// Scale search result icons to match original ImageJ settings.
+		int iconSize = (int) (16 * ij1Helper.guiScale());
+
 		final Component[] ijc = ((Container) imagej).getComponents();
 		if (ijc.length < 2) return null;
 		final Component ijc1 = ijc[1];
@@ -168,6 +171,7 @@ public class SearchBarHacker {
 		}
 		searchBar.setMouseoverEnabled(mouseoverEnabled);
 		searchBar.setResultLimit(resultLimit);
+		searchBar.setIconSize(iconSize);
 
 		// add toolbar buttons
 		// NB: Unfortunately, the gear (\u2699) does not appear on MacOS.

@@ -284,6 +284,10 @@ public class IJ1Helper extends AbstractContextual {
 		return Prefs.runSocketListener;
 	}
 
+	public double guiScale() {
+		return Prefs.getGuiScale();
+	}
+
 	private boolean batchMode;
 
 	void setBatchMode(final boolean batch) {
