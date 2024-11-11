@@ -11,7 +11,7 @@
 
 	<groupId>net.imagej</groupId>
 	<artifactId>imagej-legacy</artifactId>
-	<version>2.0.1-SNAPSHOT</version>
+	<version>2.0.2-SNAPSHOT</version>
 
 	<name>ImageJ Legacy Bridge</name>
 	<description>The legacy component enables backward compatibility with the original version of ImageJ (1.x). It contains the code necessary to translate between ImageJ and ImageJ2 images, so that ImageJ plugins can be executed faithfully.</description>
