@@ -54,15 +54,7 @@ import ij.plugin.frame.PlugInDialog;
 import ij.plugin.frame.Recorder;
 import ij.plugin.frame.RoiManager;
 
-import java.awt.Component;
-import java.awt.EventQueue;
-import java.awt.Frame;
-import java.awt.Image;
-import java.awt.Menu;
-import java.awt.MenuBar;
-import java.awt.MenuItem;
-import java.awt.Panel;
-import java.awt.Window;
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -238,20 +230,44 @@ public class IJ1Helper extends AbstractContextual {
 	 * in the process of quitting (i.e., {@link ij.ImageJ#quitting()} returns
 	 * {@code true}), then this method does nothing.
 	 */
-	public synchronized void dispose() {
-		final ImageJ ij = IJ.getInstance();
-		if (ij != null && ij.quitting()) return; // IJ1 is already on its way out
-
-		disposing = true;
-
-		closeImageWindows();
-		disposeNonImageWindows();
-
-		if (ij != null) {
-			// quit legacy ImageJ on the same thread
-			ij.exitWhenQuitting(false); // do *not* quit the JVM!
-			ij.run();
+	public void dispose() {
+		boolean otherThreadDisposing = false;
+		synchronized (IJ1Helper.class) {
+			if (disposing) otherThreadDisposing = true;
+			else disposing = true;
 		}
+
+		final ImageJ ij = IJ.getInstance();
+		System.out.println("IJ1 helper quitting. Thread is: " + Thread.currentThread() + " IJ is: " + ij + (ij == null ? "" : " IJ is quitting? " + ij.quitting()) + " Is displayable? " + ij.isDisplayable());
+		// IJ1 is already on its way out or another thread is handling the disposal
+		if (otherThreadDisposing || (ij != null && ij.quitting())) return;
+
+		boolean[] complete = { false };
+		Runnable doIJ1Dispose = () -> {
+			closeImageWindows();
+			disposeNonImageWindows();
+			if(ij !=null)
+			{
+				// quit legacy ImageJ on the same thread
+				ij.exitWhenQuitting(false); // do *not* quit the JVM!
+				ij.run();
+			}
+			System.out.println("ij1 disposal complete");
+			complete[0] = true;
+		};
+
+		if (EventQueue.isDispatchThread()) {
+			doIJ1Dispose.run();
+		} else {
+			// invokeAndWait acquires an AWTInvocationLock which can still deadlock
+			// as components are hidden
+			EventQueue.invokeLater(doIJ1Dispose);
+		}
+
+		while (!complete[0]) {
+			// Wait for disposal
+		}
+
 		disposing = false;
 	}
 
@@ -1410,31 +1426,11 @@ public class IJ1Helper extends AbstractContextual {
 
 	/** Closes all image windows on the event dispatch thread. */
 	private void closeImageWindows() {
-		// TODO: Consider using ThreadService#invoke to simplify this logic.
-		final Runnable run = new Runnable() {
-
-			@Override
-			public void run() {
-				// close out all image windows, without dialog prompts
-				while (true) {
-					final ImagePlus imp = WindowManager.getCurrentImage();
-					if (imp == null) break;
-					imp.changes = false;
-					imp.close();
-				}
-			}
-		};
-		if (EventQueue.isDispatchThread()) {
-			run.run();
-		}
-		else {
-			try {
-				EventQueue.invokeAndWait(run);
-			}
-			catch (final Exception e) {
-				// report & ignore
-				log.error(e);
-			}
+		while (true) {
+			final ImagePlus imp = WindowManager.getCurrentImage();
+			if (imp == null) break;
+			imp.changes = false;
+			imp.close();
 		}
 	}
 
