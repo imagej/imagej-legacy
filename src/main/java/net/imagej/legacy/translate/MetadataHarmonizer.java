@@ -36,7 +36,7 @@ import net.imagej.Dataset;
 import net.imagej.axis.Axes;
 import net.imagej.axis.CalibratedAxis;
 import net.imagej.axis.LinearAxis;
-import net.imglib2.img.display.imagej.CalibrationUtils;
+import net.imglib2.imagej.display.CalibrationUtils;
 
 /**
  * Synchronizes metadata bidirectionally between a {@link Dataset} and an
