@@ -104,6 +104,17 @@ public class DefaultLegacyOpener implements LegacyOpener {
 	public Object open(String path, final int planeIndex,
 		final boolean displayResult)
 	{
+		// There are many ways this code can get hit and the return value is
+		// critical in ensuring the proper subsequent behavior is taken.
+		// In the cases of Open Recent, path will be non-null. HOWEVER, if we do
+		// not handle the opening here we MUST return null to ensure the original
+		// ImageJ picks it up appropriately.
+		// In cases of File > Open..., path will be null and we will display a file
+		// chooser. If we do not handle the opening here, we MUST return the path
+		// that was selected - otherwise a second file chooser will be displayed
+		// when falling back to the original ImageJ.
+		// See https://github.com/imagej/imagej-legacy/issues/314
+		String returnPath = null;
 		final Context c = IJ1Helper.getLegacyContext();
 
 		legacyService = getCached(legacyService, LegacyService.class, c);
@@ -139,6 +150,9 @@ public class DefaultLegacyOpener implements LegacyOpener {
 				return Boolean.TRUE; // cancel the operation
 			}
 			path = selectedPath[0];
+			// Since we displayed an opener dialog to the user, here we do want to
+			// update the returnPath, to avoid triggering a second opener dialog
+			returnPath = path;
 		}
 		if (path == null) return Boolean.TRUE; // cancel the operation
 
@@ -151,12 +165,12 @@ public class DefaultLegacyOpener implements LegacyOpener {
 				final IOPlugin<?> opener = ioService.getOpener(path);
 				if (opener == null) {
 					logService.warn("No appropriate format found: " + path);
-					return path;
+					return returnPath;
 				}
 				data = opener.open(path);
 				if (data == null) {
 					logService.warn("Opening was canceled.");
-					return path;
+					return returnPath;
 				}
 			}
 			else {
@@ -173,23 +187,23 @@ public class DefaultLegacyOpener implements LegacyOpener {
 					final IOPlugin<?> io = getEagerHandler(path);
 					if (io == null) {
 						logService.debug("No appropriate eager I/O plugin found: " + path);
-						return path; // fall back to original ImageJ
+						return returnPath; // fall back to original ImageJ
 					}
 					data = io.open(path);
 					if (data == null) {
 						logService.debug("Eager I/O plugin '" + io.getClass().getName() + "' opened nothing.");
-						return path; // fall back to original ImageJ
+						return returnPath; // fall back to original ImageJ
 					}
 				}
 				catch (final IOException exc) {
 					legacyService.handleException(exc);
-					return path; // fall back to original ImageJ
+					return returnPath; // fall back to original ImageJ
 				}
 			}
 		}
 		catch (final IOException exc) {
 			legacyService.handleException(exc);
-			return path; // fall back to original ImageJ
+			return returnPath; // fall back to original ImageJ
 		}
 
 		return handleData(c, data, path, displayResult);
