@@ -129,19 +129,21 @@ public class LegacyUI extends AbstractUserInterface implements SwingUI {
 	public void show() {
 		if (ij1Helper() == null) return;
 
-		ij1Helper.setVisible(true);
-		if (ij1Helper.isVisible()) {
-			// NB: This check avoids creating a console UI while in headless mode.
-			//
-			// The ImageJ 1.x headless mode works by pretending to show the UI
-			// (i.e., walking through very similar code paths), but without
-			// actually instantiating or showing any UI components.
-			//
-			// So, even though we write ij1Helper.setVisible(true) above, the
-			// ImageJ1 user interface will not actually be shown when running
-			// in headless mode, and ij1Helper.isVisible() will return false.
-			createConsole();
-		}
+		runOnDispatchThreadIfNeeded(() -> {
+			ij1Helper.setVisible(true);
+			if (ij1Helper.isVisible()) {
+				// NB: This check avoids creating a console UI while in headless mode.
+				//
+				// The ImageJ 1.x headless mode works by pretending to show the UI
+				// (i.e., walking through very similar code paths), but without
+				// actually instantiating or showing any UI components.
+				//
+				// So, even though we write ij1Helper.setVisible(true) above, the
+				// ImageJ1 user interface will not actually be shown when running
+				// in headless mode, and ij1Helper.isVisible() will return false.
+				createConsole();
+			}
+		});
 	}
 
 	private synchronized void createConsole() {
@@ -164,48 +166,35 @@ public class LegacyUI extends AbstractUserInterface implements SwingUI {
 			return;
 		}
 
-		final List<PluginInfo<DisplayViewer<?>>> viewers =
-			uiService.getViewerPlugins();
+		runOnDispatchThreadIfNeeded(() -> {
+			final List<PluginInfo<DisplayViewer<?>>> viewers =
+				uiService.getViewerPlugins();
 
-		DisplayViewer<?> displayViewer = null;
-		for (final PluginInfo<DisplayViewer<?>> info : viewers) {
-			// check that viewer can actually handle the given display
-			final DisplayViewer<?> viewer = pluginService.createInstance(info);
-			if (viewer == null) continue;
-			if (!viewer.canView(display)) continue;
-			if (!viewer.isCompatible(this)) continue;
-			displayViewer = viewer;
-			break; // found a suitable viewer; we are done
-		}
-		if (displayViewer == null) {
-			log.warn("For UI '" + getClass().getName() +
-				"': no suitable viewer for display: " + display);
-			return;
-		}
+			DisplayViewer<?> displayViewer = null;
+			for (final PluginInfo<DisplayViewer<?>> info : viewers) {
+				// check that viewer can actually handle the given display
+				final DisplayViewer<?> viewer = pluginService.createInstance(info);
+				if (viewer == null) continue;
+				if (!viewer.canView(display)) continue;
+				if (!viewer.isCompatible(this)) continue;
+				displayViewer = viewer;
+				break; // found a suitable viewer; we are done
+			}
+			if (displayViewer == null) {
+				log.warn("For UI '" + getClass().getName() +
+					"': no suitable viewer for display: " + display);
+				return;
+			}
 
-		// LegacyDisplayViewers will display through ImagePlus.show, so they don't
-		// need DisplayWindows and extra processing that other viewers might..
-		if (LegacyDisplayViewer.class.isAssignableFrom(displayViewer.getClass())) {
-			final DisplayViewer<?> finalViewer = displayViewer;
-			try {
-				threadService.invoke(new Runnable() {
-
-					@Override
-					public void run() {
-						finalViewer.view(LegacyUI.this, display);
-					}
-				});
+			// LegacyDisplayViewers will display through ImagePlus.show, so they don't
+			// need DisplayWindows and extra processing that other viewers might..
+			if (LegacyDisplayViewer.class.isAssignableFrom(displayViewer.getClass())) {
+				displayViewer.view(LegacyUI.this, display);
 			}
-			catch (final InterruptedException e) {
-				legacyService.handleException(e);
+			else {
+				super.show(display);
 			}
-			catch (final InvocationTargetException e) {
-				legacyService.handleException(e);
-			}
-		}
-		else {
-			super.show(display);
-		}
+		});
 	}
 
 	@Override
@@ -272,94 +261,76 @@ public class LegacyUI extends AbstractUserInterface implements SwingUI {
 		final File[] chosenFile = new File[1];
 
 		// Run on the EDT to avoid deadlocks, per ij.io.Opener
-		try {
-			threadService.invoke(new Runnable() {
-
-				@Override
-				public void run() {
-					if (FileWidget.DIRECTORY_STYLE.equals(style)) {
-						// Use ImageJ1's DirectoryChooser.
-						final String dir = ij1Helper().getDirectory(title, file);
-						if (dir != null) {
-							chosenFile[0] = new File(dir);
-						}
-					}
-					else if (FileWidget.SAVE_STYLE.equals(style)) {
-						// Use ImageJ1's SaveDialog.
-						final File chosen = ij1Helper().saveDialog(title, file, null);
-						if (chosen != null) {
-							chosenFile[0] = chosen;
-						}
-					}
-					else { // FileWidget.OPEN_STYLE / default behavior
-						// Use ImageJ1's OpenDialog.
-						final File chosen = ij1Helper().openDialog(title, file);
-						if (chosen != null) {
-							chosenFile[0] = chosen;
-						}
-					}
+		runOnDispatchThreadIfNeeded(() -> {
+			if (FileWidget.DIRECTORY_STYLE.equals(style)) {
+				// Use ImageJ1's DirectoryChooser.
+				final String dir = ij1Helper().getDirectory(title, file);
+				if (dir != null) {
+					chosenFile[0] = new File(dir);
 				}
-			});
-		}
-		catch (final InterruptedException e) {
-			legacyService.handleException(e);
-		}
-		catch (final InvocationTargetException e) {
-			legacyService.handleException(e);
-		}
+			}
+			else if (FileWidget.SAVE_STYLE.equals(style)) {
+				// Use ImageJ1's SaveDialog.
+				final File chosen = ij1Helper().saveDialog(title, file, null);
+				if (chosen != null) {
+					chosenFile[0] = chosen;
+				}
+			}
+			else { // FileWidget.OPEN_STYLE / default behavior
+				// Use ImageJ1's OpenDialog.
+				final File chosen = ij1Helper().openDialog(title, file);
+				if (chosen != null) {
+					chosenFile[0] = chosen;
+				}
+			}
+		});
 		return chosenFile[0];
 	}
 
 	@Override
 	public File[] chooseFiles(final File parent, final File[] files, final FileFilter filter, final String style) {
 		final File[][] result = new File[1][];
-		try {
-			// NB: Show JFileChooser on the EDT to avoid deadlocks
-			threadService.invoke(() -> {
-				final JFileChooser chooser = new JFileChooser(parent);
-				chooser.setMultiSelectionEnabled(true);
-				if (style != null && style.equals(FileListWidget.FILES_AND_DIRECTORIES)) {
-					chooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
-				}
-				else if (style != null && style.equals(FileListWidget.DIRECTORIES_ONLY)) {
-					chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-				}
-				else {
-					chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-				}
-				chooser.setSelectedFiles(files);
-				// add the possibility to filter by images and for common spreadsheet formats:
-				//chooser.addChoosableFileFilter(new FileNameExtensionFilter("All supported formats", formatService.getSuffixes()));
-				//chooser.addChoosableFileFilter(new FileNameExtensionFilter("Table data", "csv", "tsv", "xls", " xlsx", "txt"));
-				if (filter != null) {
-					javax.swing.filechooser.FileFilter fileFilter = new javax.swing.filechooser.FileFilter() {
+		runOnDispatchThreadIfNeeded(() -> {
+			final JFileChooser chooser = new JFileChooser(parent);
+			chooser.setMultiSelectionEnabled(true);
+			if (style != null && style.equals(FileListWidget.FILES_AND_DIRECTORIES)) {
+				chooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+			}
+			else if (style != null && style.equals(FileListWidget.DIRECTORIES_ONLY)) {
+				chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+			}
+			else {
+				chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+			}
+			chooser.setSelectedFiles(files);
+			// add the possibility to filter by images and for common spreadsheet formats:
+			//chooser.addChoosableFileFilter(new FileNameExtensionFilter("All supported formats", formatService.getSuffixes()));
+			//chooser.addChoosableFileFilter(new FileNameExtensionFilter("Table data", "csv", "tsv", "xls", " xlsx", "txt"));
+			if (filter != null) {
+				javax.swing.filechooser.FileFilter fileFilter = new javax.swing.filechooser.FileFilter() {
 
-						@Override
-						public String getDescription() {
-							// return filter.toString();
-							return "Custom filter"; // TODO get better description
-						}
+					@Override
+					public String getDescription() {
+						// return filter.toString();
+						return "Custom filter"; // TODO get better description
+					}
 
-						@Override
-						public boolean accept(File f) {
-							if (filter.accept(f)) return true;
-							// directories should always be displayed
-							// independent from selection mode
-							return f.isDirectory();
-						}
-					};
-					chooser.setFileFilter(fileFilter);
-					chooser.setAcceptAllFileFilterUsed(false);
-				}
-				int rval = chooser.showOpenDialog(ij1Helper().getIJ());
-				if (rval == JFileChooser.APPROVE_OPTION) {
-					result[0] = chooser.getSelectedFiles();
-				}
-			});
-		}
-		catch (final InvocationTargetException | InterruptedException exc) {
-			legacyService.handleException(exc);
-		}
+					@Override
+					public boolean accept(File f) {
+						if (filter.accept(f)) return true;
+						// directories should always be displayed
+						// independent from selection mode
+						return f.isDirectory();
+					}
+				};
+				chooser.setFileFilter(fileFilter);
+				chooser.setAcceptAllFileFilterUsed(false);
+			}
+			int rval = chooser.showOpenDialog(ij1Helper().getIJ());
+			if (rval == JFileChooser.APPROVE_OPTION) {
+				result[0] = chooser.getSelectedFiles();
+			}
+		});
 		return result[0];
 	}
 
@@ -403,4 +374,18 @@ public class LegacyUI extends AbstractUserInterface implements SwingUI {
 		return menuBar;
 	}
 
+	private void runOnDispatchThreadIfNeeded(Runnable r) {
+		if (requiresEDT()) {
+			try {
+				// Note: Blocks until execution is complete!
+				threadService.invoke(r);
+			}
+			catch (InterruptedException | InvocationTargetException e) {
+				legacyService.handleException(e);
+			}
+		}
+		else {
+			r.run();
+		}
+	}
 }
