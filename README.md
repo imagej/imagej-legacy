@@ -4,8 +4,8 @@ ImageJ Legacy Bridge
 --------------------
 
 The legacy component enables backward compatibility between
-[ImageJ2](https://github.com/imagej/imagej) and
-[ImageJ 1.x](https://github.com/imagej/ImageJA).
+[ImageJ2](https://github.com/imagej/imagej2) and
+[ImageJ 1.x](https://github.com/imagej/ImageJ).
 
-It contains the code necessary to translate ImageJ images into ImageJ1 format
-and back, so that legacy plugins can be executed faithfully.
+It contains the code necessary to translate ImageJ2 images into the original
+ImageJ (1.x) format and back, so that legacy plugins can execute faithfully.
