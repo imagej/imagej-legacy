@@ -118,7 +118,7 @@ public class ImageJ2Options extends OptionsPlugin {
 	static {
 		URL url = null;
 		try {
-			url = new URL("https://github.com/imagej/imagej/blob/master/WELCOME.md#welcome-to-imagej2");
+			url = new URL("https://github.com/imagej/imagej2/blob/master/WELCOME.md#welcome-to-imagej2");
 		}
 		catch (final MalformedURLException e) {
 			e.printStackTrace();
