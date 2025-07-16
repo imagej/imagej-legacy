@@ -1,4 +1,4 @@
-[![](https://github.com/imagej/imagej-legacy/actions/workflows/build-main.yml/badge.svg)](https://github.com/imagej/imagej-legacy/actions/workflows/build-main.yml)
+[![](https://github.com/imagej/imagej-legacy/actions/workflows/build.yml/badge.svg)](https://github.com/imagej/imagej-legacy/actions/workflows/build.yml)
 
 ImageJ Legacy Bridge
 --------------------
