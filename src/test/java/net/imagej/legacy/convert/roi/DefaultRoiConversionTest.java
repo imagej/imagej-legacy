@@ -378,7 +378,7 @@ public class DefaultRoiConversionTest {
 		assertTrue(c instanceof WrapperToRotatedRectRoiConverter);
 
 		final RotatedRectRoi crrr = convertService.convert(m, RotatedRectRoi.class);
-		assertEquals(Roi.FREEROI, crrr.getType());
+		assertEquals(Roi.POLYGON, crrr.getType());
 		assertTrue(rrr == crrr);
 	}
 }
