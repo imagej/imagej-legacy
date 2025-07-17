@@ -180,6 +180,9 @@
 
 		<!-- NB: Deploy releases to the SciJava Maven repository. -->
 		<releaseProfiles>sign,deploy-to-scijava</releaseProfiles>
+
+		<!-- TEMP: Until pom-scijava 42.0.0 is released. -->
+		<ij1-patcher.version>2.0.0</ij1-patcher.version>
 	</properties>
 
 	<repositories>
