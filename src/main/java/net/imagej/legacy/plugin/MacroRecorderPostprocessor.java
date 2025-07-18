@@ -42,6 +42,7 @@ import org.scijava.module.process.AbstractPostprocessorPlugin;
 import org.scijava.module.process.PostprocessorPlugin;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
+import org.scijava.widget.Button;
 import org.scijava.widget.TextWidget;
 
 /**
@@ -73,11 +74,16 @@ public class MacroRecorderPostprocessor extends AbstractPostprocessorPlugin {
 			final String name = input.getName();
 			if (excludedInputs != null && excludedInputs.contains(name)) continue;
 			if (excludedFromRecording(input)) continue;
+			if (isButton(input)) ij1Helper.recordOption(name, "0");
 			final Object value = module.getInput(name);
 			if (value != null) ij1Helper.recordOption(name, toString(value));
 		}
 
 		ij1Helper.finishRecording();
+	}
+
+	private boolean isButton(ModuleItem<?> input) {
+		return input.getType().equals(Button.class);
 	}
 
 	// -- Helper methods --
