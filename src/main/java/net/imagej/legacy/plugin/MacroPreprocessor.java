@@ -67,12 +67,18 @@ public class MacroPreprocessor extends AbstractPreprocessorPlugin {
 		if (!ij1Helper.isMacro()) return;
 		for (final ModuleItem<?> input : module.getInfo().inputs()) {
 			final String name = input.getName();
+			final Class<?> type = input.getType();
+			if (Button.class.equals(type) || ColorTable.class.equals(type) || ItemVisibility.MESSAGE.equals(input.getVisibility())) {
+				// resolve buttons, display messages, and color tables. For the latter a parameter
+				// value is provided but IJM cannot do anything with it. See #239 for details
+				module.resolveInput(name);
+				continue;
+			}
 			final String value = ij1Helper.getMacroParameter(name);
 			if (value == null) {
 				// no macro parameter value provided
 				continue;
 			}
-			final Class<?> type = input.getType();
 			if (!convertService.supports(value, type)) {
 				// cannot convert macro value into the input's actual type
 				continue;
