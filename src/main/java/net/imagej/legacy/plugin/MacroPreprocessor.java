@@ -32,6 +32,9 @@ package net.imagej.legacy.plugin;
 import net.imagej.legacy.IJ1Helper;
 import net.imagej.legacy.LegacyService;
 
+import net.imglib2.display.ColorTable;
+
+import org.scijava.ItemVisibility;
 import org.scijava.Priority;
 import org.scijava.convert.ConvertService;
 import org.scijava.module.Module;
@@ -40,6 +43,7 @@ import org.scijava.module.process.AbstractPreprocessorPlugin;
 import org.scijava.module.process.PreprocessorPlugin;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
+import org.scijava.widget.Button;
 
 /**
  * Populates the module's input values, when the command is invoked from an
