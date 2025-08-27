@@ -63,6 +63,7 @@ import org.scijava.options.OptionsService;
 import org.scijava.plugin.Plugin;
 import org.scijava.plugin.PluginService;
 import org.scijava.service.Service;
+import org.scijava.ui.SelfShowableContent;
 
 /**
  * The default {@link LegacyOpener} plugin.
@@ -214,6 +215,10 @@ public class DefaultLegacyOpener implements LegacyOpener {
 	private Object handleData(Context c, Object data, String path, boolean displayResult) {
 		if (data == null) return path;
 
+		if (displayResult && data instanceof SelfShowableContent) {
+			((SelfShowableContent)data).show();
+			return data;
+		}
 		if (data instanceof Dataset) {
 			final Dataset d = (Dataset) data;
 			ImagePlus imp = null;
