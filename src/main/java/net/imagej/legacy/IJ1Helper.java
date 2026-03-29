@@ -133,6 +133,7 @@ public class IJ1Helper extends AbstractContextual {
 
 	/** Task bar in the main window. */
 	private Object taskBar;
+	private TaskMonitorButtonHacker taskMonitorHacker;
 
 	/** Whether we are in the process of forcibly shutting down ImageJ1. */
 	private boolean disposing;
@@ -155,14 +156,8 @@ public class IJ1Helper extends AbstractContextual {
 			log.error(t);
 		}
 
-		// add the task monitor icon
-		try {
-			taskBar = new TaskMonitorButtonHacker(getContext()).addTaskBar(ij1);
-		}
-		catch (final Throwable t) {
-			// NB: Do not let this crash ImageJ on startup!
-			log.error(t);
-		}
+		// NB: Task monitor icon is added later in setVisible(),
+		// after the Look and Feel has been initialized.
 
 		if (getCommands() == null) {
 			IJ.runPlugIn("ij.IJ.init", "");
@@ -323,6 +318,18 @@ public class IJ1Helper extends AbstractContextual {
 				final SwingLookAndFeelService lafService = //
 					legacyService.context().getService(SwingLookAndFeelService.class);
 				if (lafService != null) lafService.initLookAndFeel();
+
+				// Add the task monitor icon after the LaF is initialized,
+				// so that all components are created with the correct theme.
+				if (taskBar == null) {
+					try {
+						taskMonitorHacker = new TaskMonitorButtonHacker(getContext());
+						taskBar = taskMonitorHacker.addTaskBar(ij);
+					}
+					catch (final Throwable t) {
+						log.error(t);
+					}
+				}
 
 				ij.pack();
 			}
