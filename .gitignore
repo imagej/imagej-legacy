@@ -1,7 +1,7 @@
-.classpath
-.metadata
-.project
-.settings/
-/target/
+/.classpath
+/.factorypath
 /.idea/
+/.project
+/.settings/
 /imagej-legacy.iml
+/target/
