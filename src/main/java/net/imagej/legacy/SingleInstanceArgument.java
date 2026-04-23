@@ -213,7 +213,19 @@ public class SingleInstanceArgument extends AbstractConsoleArgument {
 			otherArgs = Collections.emptyList();
 
 			// And this instance should now terminate.
+			// NB: context().dispose() alone is insufficient: it does not call
+			// System.exit(), and AbstractGateway.launch() continues executing
+			// after processArgs() returns, which would show a second Fiji window.
+			// Additionally, if no single-instance-specific flags were given,
+			// result==false here, meaning handle() would never be called and
+			// the args list would not be cleared -- so other ConsoleArgument
+			// plugins would still process the original arguments (e.g. opening
+			// the file) in this second instance. We fix both issues by returning
+			// true (so handle() is called and clears the list) and then calling
+			// System.exit(0) to immediately terminate this redundant instance.
 			context().dispose();
+			System.exit(0);
+			return true; // NB: Unreachable, but satisfies the compiler.
 		}
 
 		return result;
