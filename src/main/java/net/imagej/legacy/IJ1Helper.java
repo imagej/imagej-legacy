@@ -197,15 +197,6 @@ public class IJ1Helper extends AbstractContextual {
 				if (iconURL != null) try {
 					final Image image = ImageIO.read(iconURL);
 					ij1.setIconImage(image);
-					if (IJ.isMacOSX()) try {
-						// NB: We also need to set the dock icon
-						final Class<?> clazz = Class.forName("com.apple.eawt.Application");
-						final Object app = clazz.getMethod("getApplication").invoke(null);
-						clazz.getMethod("setDockIconImage", Image.class).invoke(app, image);
-					}
-					catch (final Throwable t) {
-						t.printStackTrace();
-					}
 				}
 				catch (final IOException e) {
 					IJ.handleException(e);
