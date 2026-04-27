@@ -406,6 +406,26 @@ Adds a popup menu to the dialog, where <i>items</i> is a string array containing
 Adds a popup menu, where <i>items</i> is a string array containing the choices
 and <i>default</i> is the default choice.
 <br>
+<a name="Dialog.addDirectory"></a>
+<b>Dialog.addDirectory(label, defaultPath)</b> -
+Adds a directory field and "Browse" button. The
+field width is determined by the length of 'defaultPath',
+with a minimum of 25 columns. Use Dialog getString
+to retrieve the directory path. Requires 1.53d.
+<br>
+<a name="Dialog.addFile"></a>
+<b>Dialog.addFile(label, defaultPath)</b> -
+Adds a file field and "Browse" button. The
+field width is determined by the length of 'defaultPath',
+with a minimum of 25 columns. Use Dialog getString
+to retrieve the file path. Requires 1.53d.
+<br>
+<a name="Dialog.addImageChoice"></a>
+<b>Dialog.addImageChoice(label)</b> -
+Adds a popup menu that lists the currently open images.
+Use Dialog getImageChoice() to retrieve the title of
+the selected image. Requires 1.53d.
+<br>
 <a name="Dialog.addHelp"></a>
 <b>Dialog.addHelp(url)</b> -
 Adds a "Help" button that opens the specified URL in the default browser. This can be used to supply
@@ -421,7 +441,6 @@ addMessage, and before the showDialog() method. In the latter case,
 the buttons appear to the right of the previous item.
 Note that <i>addMessage</i> (and <i>addString</i> if a width of more than 8 is specified)
 use the remaining width, so it must be the last item of a row.
-Requires 1.51r.
 <br>
 <a name="Dialog.setInsets"></a>
 <b>Dialog.setInsets(top, left, bottom)</b> -
@@ -446,7 +465,8 @@ terminates if the user clicks "Cancel".
 <br>
 <a name="Dialog.getString"></a>
 <b>Dialog.getString()</b> -
-Returns a string containing the contents of the next text field.
+Returns a string containing the contents of the next text,
+directory or file field.
 <br>
 <a name="Dialog.getNumber"></a>
 <b>Dialog.getNumber()</b> -
@@ -463,6 +483,11 @@ Returns the selected item (a string) from the next popup menu.
 <a name="Dialog.getRadioButton"></a>
 <b>Dialog.getRadioButton()</b> -
 Returns the selected item (a string) from the next radio button group.
+<br>
+<a name="Dialog.getImageChoice"></a>
+<b>Dialog.getImageChoice()</b> -
+Returns the title of the image selected in the next image
+choice popup menu.
 <br>
 
 </blockquote>
@@ -911,7 +936,12 @@ Returns the number of equations.
 
 <a name="Fit.getEquation"></a>
 <b>Fit.getEquation(index, name, formula)</b> - 
-Gets the name and formula of the specified equation.
+Returns the name and formula of the specified equation.
+<br>
+
+<a name="Fit.getEquation2"></a>
+<b>Fit.getEquation(index, name, formula, macroCode)</b> - 
+Returns the name, formula and macro code of the specified equation.
 <br>
 
 <a name="Fit.plot"></a>
@@ -1007,58 +1037,53 @@ Returns the dimensions of the current image.
 </p><p>
 
 <a name="getDirectory"></a>
-<b>getDirectory(string)</b><br>
-Displays a "choose directory" dialog and returns the selected directory, or returns
-the path to a specified directory, such as "plugins", "home", etc.
-The returned path ends with a file separator, either "\" (Windows) or "/".
-Returns an empty string if the specified directory is not found or 
-aborts the macro if the user cancels the "choose directory" dialog box.
-For examples, see the
-<a href="https://imagej.net/macros/GetDirectoryDemo.txt">GetDirectoryDemo</a> and
-<a href="https://imagej.net/macros/ListFilesRecursively.txt">ListFilesRecursively</a> macros.
-See also: <a href="https://imagej.net/developer/macro/functions.html#getFileList">getFileList</a> and the <a href="https://imagej.net/developer/macro/functions.html#file">File functions</a>.
-
 <a name="getDir"></a>
-<b>getDir(string)</b><br>
+<b>getDirectory(string)</b> or <b>getDir(string)</b><br>
 Displays a "choose directory" dialog and returns the selected directory, or returns
 the path to a specified directory, such as "plugins", "home", etc.
-The returned path ends with a file separator, either "\" (Windows) or "/".
+The returned path ends with the file separator ("/").
 Returns an empty string if the specified directory is not found or 
 aborts the macro if the user cancels the "choose directory" dialog box.
 For examples, see the
 <a href="https://imagej.net/macros/GetDirectoryDemo.txt">GetDirectoryDemo</a> and
 <a href="https://imagej.net/macros/ListFilesRecursively.txt">ListFilesRecursively</a> macros.
-See also: <a href="https://imagej.net/ij/developer/macro/functions.html#getFileList">getFileList</a> and the <a href="https://imagej.nih.gov/ij/developer/macro/functions.html#file">File functions</a>.
+See also: <a href="https://imagej.net/developer/macro/functions.html#getFileList">getFileList</a> and the <a href="https://imagej.nih.gov/ij/developer/macro/functions.html#file">File functions</a>.
 
-<b>getDirectory("Choose a Directory")</b> - 
+</p><blockquote>
+
+<a name="getDirectory1"></a>
+<b>getDir("Choose a Directory")</b> - 
 Displays a file open dialog, using the argument as a title, and
 returns the path to the directory selected by the user.<br>
-<a name="getDirectory1"></a>
-<b>getDirectory("plugins")</b> -
-Returns the path to the plugins directory.<br>
 <a name="getDirectory2"></a>
-<b>getDirectory("macros")</b> - 
-Returns the path to the macros directory.<br>
+<b>getDir("downloads")</b> - 
+Returns the path to the Downloads directory.<br>
 <a name="getDirectory3"></a>
-<b>getDirectory("luts")</b> - 
-Returns the path to the luts directory.<br>
+<b>getDir("file")</b> - 
+Returns the path most recently used to open or save a file.<br>
 <a name="getDirectory4"></a>
-<b>getDirectory("image")</b> - 
-Returns the path to the directory that the active image was loaded from.<br>
+<b>getDir("home")</b> - 
+Returns the path to the Home directory.<br>
 <a name="getDirectory5"></a>
-<b>getDirectory("imagej")</b> - 
-Returns the path to the ImageJ directory.<br>
+<b>getDir("image")</b> - 
+Returns the path to the directory that the active image was loaded from.<br>
 <a name="getDirectory6"></a>
-<b>getDirectory("startup")</b> - 
-Returns the path to the directory that ImageJ was launched from.<br>
+<b>getDir("imagej")</b> - 
+Returns the path to the ImageJ directory.<br>
 <a name="getDirectory7"></a>
-<b>getDirectory("home")</b> - 
-Returns the path to users home directory.<br>
+<b>getDir("luts")</b> - 
+Returns the path to the luts directory.<br>
 <a name="getDirectory8"></a>
-<b>getDirectory("downloads")</b> - 
-Returns the path to users downloads directory.<br>
+<b>getDir("macros")</b> - 
+Returns the path to the macros directory.<br>
 <a name="getDirectory9"></a>
-<b>getDirectory("temp")</b> - 
+<b>getDir("plugins")</b> - 
+Returns the path to the plugins directory.<br>
+<a name="getDirectory10"></a>
+<b>getDir("startup")</b> - 
+Returns the path to the directory that ImageJ was launched from.<br>
+<a name="getDirectory11"></a>
+<b>getDir("temp")</b> - 
 Returns the path to the temporary directory (/tmp on Linux and Mac OS X).<br>
 </blockquote>
 
@@ -1123,7 +1148,8 @@ To retrieve the contents of a text window, use
 <a href="https://imagej.net/developer/macro/functions.html#getInfo">getInfo("window.contents")</a>. 
 For an example, see the
 <a href="https://imagej.net/macros/ListDicomTags.txt">ListDicomTags</a> macros.
-See also: <a href="https://imagej.net/developer/macro/functions.html#getMetadata">getMetadata</a>.
+See also: <a href="https://imagej.net/developer/macro/functions.html#getMetadata">getMetadata</a> and
+<a href="https://imagej.net/developer/macro/functions.html#Property.getInfo">Property.getInfo</a>.
 </p><p>
 
 <a name="getInfo"></a>
@@ -1167,7 +1193,7 @@ from, or an empty string if the file name is not available.
 
 <b>getInfo("image.title")</b><br>
 Returns the title of the current image. Same as
-<a href="https://imagej.net/ij/developer/macro/functions.html#getTitle">getTitle</a>.
+<a href="https://imagej.net/developer/macro/functions.html#getTitle">getTitle</a>.
 </p><p>
 
 <b>getInfo("image.subtitle")</b><br>
@@ -1335,15 +1361,17 @@ macros for examples.
 <b>getMetadata("Info")</b><br>
 Returns the metadata (a string) from the "Info" property of the current image.
 With DICOM images, this is the information (tags) in the DICOM header.
-See also: <a href="https://imagej.net/developer/macro/functions.html#setMetadata">setMetadata</a>. 
+See also: <a href="https://imagej.net/developer/macro/functions.html#setMetadata">setMetadata</a>  and
+<a href="https://imagej.net/developer/macro/functions.html#Property.getInfo">Property.getInfo</a>.
 </p><p>
 
 <b>getMetadata("Label")</b><br>
 Returns the current slice label.
 The first line of the this label (up to 60 characters) is display
 as part of the image subtitle. 
-With DICOM stacks, returns the metadata from the DICOM header.
-See also: <a href="https://imagej.net/developer/macro/functions.html#setMetadata">setMetadata</a>. 
+With DICOM stacks, returns the metadata (tags) from the DICOM header.
+See also: <a href="https://imagej.net/developer/macro/functions.html#Property.getSliceLabel">Property.getSliceLabel</a> and
+<a href="https://imagej.net/developer/macro/functions.html#Property.setSliceLabel">Property.setSliceLabel</a>.
 </p><p>
 
 <a name="getMinAndMax"></a>
@@ -2156,6 +2184,11 @@ than or equal to <i>n</i> and is an integer.
 Returns the cosine of an angle (in radians).
 <br>
 
+<a name="Math.erf"></a>
+<b>Math.erf(x)</b><br>
+Returns an approximation of the error function.
+<br>
+
 <a name="Math.exp"></a>
 <b>Math.exp(n)</b><br>
 Returns the exponential number e (i.e., 2.718...) raised to the power of <i>n</i>.
@@ -2221,11 +2254,13 @@ Returns the tangent of an angle (in radians).
 <a name="maxOff"></a>
 <b>maxOf(n1, n2)</b><br>
 Returns the greater of two values.
-</p><p>
+See also: <a href="https://imagej.net/developer/macro/functions.html#Math.max">Math.max</a>.
+<p>
 
 <a name="minOff"></a>
 <b>minOf(n1, n2)</b><br>
 Returns the smaller of two values.
+See also: <a href="https://imagej.net/developer/macro/functions.html#Math.min">Math.min</a>.
 </p><p>
 
 <a name="moveTo"></a>
@@ -2452,6 +2487,12 @@ and adds it to the overlay.
 Activates the specified overlay selection.
 <br>
 
+<a name="Overlay.activateSelectionAndWait"></a>
+<b>Overlay.activateSelectionAndWait(index)</b><br>
+Activates the specified overlay selection and waits
+for the display to finish updating.
+<br>
+
 <a name="Overlay.moveSelection"></a>
 <b>Overlay.moveSelection(index, x, y)</b><br>
 Moves the specified selection to the specified location.
@@ -2460,6 +2501,26 @@ Moves the specified selection to the specified location.
 <a name="Overlay.removeSelection"></a>
 <b>Overlay.removeSelection(index)</b><br>
 Removes the specified selection from the overlay.
+<br>
+
+
+<a name="Overlay.indexAt"></a>
+<b>Overlay.indexAt(x,y)</b><br>
+Returns the index of the last selection in the overlay containing the point (x,y),
+or an empty string if no selection contains the point.
+Requires 1.53b.
+<br>
+
+<a name="Overlay.getBounds"></a>
+<b>Overlay.getBounds(index,x,y,width,height)</b><br>
+Returns the bounding rectangle of the selection in the overlay specified by 'index'.
+Requires 1.53b.
+<br>
+
+<a name="Overlay.Overlay.removeRois"></a>
+<b>Overlay.removeRois(name)</b><br>
+Removes the selections named 'name' from the overlay.
+Requires 1.53b.
 <br>
 
 <a name="Overlay.copy"></a>
@@ -2490,11 +2551,16 @@ background color.
 Sets the color used to draw labels.
 <br>
 
+<a name="Overlay.useNamesAsLabels"></a>
+<b>Overlay.useNamesAsLabels(boolean)</b><br>
+Controls whether ROI names or index numbers 
+are used as labels.
+<br>
+
 <a name="Overlay.selectable"></a>
 <b>Overlay.selectable(false)</b><br>
 Prevents the selections in this overlay from being activated 
 by clicking on their labels or by long clicking.
-Requires 1.51r.
 <br>
 
 <a name="Overlay.measure"></a>
@@ -2515,6 +2581,14 @@ Sets the stroke width all the selections in the current overlay.
 <a name="Overlay.flatten"></a>
 <b>Overlay.flatten</b><br>
 Creates a new RGB image that has the overlay rendered as pixel data.
+<br>
+
+<a name="Overlay.cropAndSave"></a>
+<b>Overlay.cropAndSave(dir, format)</b><br>
+Saves the contents of the overlay selections as separate images, 
+where 'dir' is the directory path and 'format' is "tif", "png" or "jpg".
+Set 'format' to "show" and the images will be displayed in a stack
+and not saved. Requires 1.53d.
 <br>
 
 </blockquote>
@@ -2747,6 +2821,29 @@ For an example, run the <i>Help&gt;Examples&gt;Plots&gt;Plot Styles</i>
 command. Requires 1.52h.
 <br>
 
+<a name="Plot.setOptions"></a>
+<b>Plot.setOptions(string)</b><br>
+Sets options for the plot. Multiple options may be separated by
+whitespace or commas. Note that whitespace surrounding the '='
+characters is not allowed. Currently recognized options are:<br>
+    "addhspace=10 addvspace=5" - Increases the left and right or top and bottom
+      margins by the given number of pixels.<br>
+   "xinterval=30 yinterval=90" - Sets interval between numbers, major ticks and grid lines
+     (default intervals are used if the custom intervals would be too dense or too sparse)<br>
+   "xdecimals=2 ydecimals=-1" - Sets the minimum number of decimals; use negative
+   numbers for scientific notation.<br>
+   "msymbol=' \\u00d7" - Sets multiplication symbol for scientific notation,
+   here a cross with spaces.<br>
+For an example, run the <i>Help&gt;Examples&gt;Plots&gt;Plot Results</i> command.
+Requires 1.53a.
+<br>
+
+<a name="Plot.replace"></a>
+<b>Plot.replace(index, type, xValues, yValues)</b><br>
+Replaces the plot object (curve, Label, etc.) with the specified index
+by points or a curve as specified in Plot.add(type, xValues, yValues).
+<br>
+
 <a name="Plot.useTemplate"></a>
 <b>Plot.useTemplate("plot name" or id)</b><br>
 Transfers the formatting of an open plot window to the current plot.
@@ -2852,6 +2949,76 @@ Refer to the
 macros for examples.
 </p><p>
 
+<a name="Property"></a>
+ <b>Property Functions</b><br>
+Functions for reading and writing image properties,
+available in ImageJ 1.53a or later.
+</p><blockquote>
+
+<a name="Property.get"></a>
+<b>Property.get(key)</b><br>
+Returns the image property (a string) associated with <i>key</i>,
+or an empty string if <i>key</i> is not found.
+<br>
+
+<a name="Property.getNumber"></a>
+<b>Property.getNumber(key)</b><br>
+Returns the image property associated with <i>key</i>,
+as a number, or returns NaN if <i>key</i> is not found
+or the property cannot be converted into a number.
+Requires 1.53b.
+<br>
+
+<a name="Property.set"></a>
+<b>Property.set(key, property)</b><br>
+Adds a key-value pair to the property list of the current image.
+<i>key</i> must be a string but <i>property</i> can be either a
+string or a number.
+The key-value pair is removed if <i>property</i> is an empty string.
+Add a "ShowInfo" property (e.g. Property.set("ShowInfo","true")) and
+the property list will be displayed by the <i>Image&gt;Show Info</i> 
+command (requires 1.53b). The property list is persistent when the
+image is saved in TIFF format.
+<br>
+
+<a name="Property.getInfo"></a>
+<b>Property.getInfo()</b><br>
+Returns the image "info" property string (e.g. DICOM tags or Bio-Formats metadara),
+or an empty string if there is no "Info" property.
+<br>
+
+<a name="Property.getSliceLabel"></a>
+<b>Property.getSliceLabel</b><br>
+Returns the current slice label.
+The first line of the label (up to 60 characters) is displayed
+as part of the image subtitle. 
+With DICOM stacks, returns the DICOM header metadata (tags).
+<br>
+
+<a name="Property.setSliceLabel"></a>
+<b>Property.setSliceLabel(string, slice)</b><br>
+Sets <i>string</i> as the label of the specified stack slice,
+were 1&lt;=<i>slice</i>&lt;=nslices.
+The first 60 characters, up to the first newline, 
+of the label are displayed as part of the image subtitle.
+Slice labels are saved in the TIFF header.
+<br>
+
+<a name="Property.getList"></a>
+<b>Property.getList</b><br>
+Returns the properties as a string (e.g.
+"key1=value1\nkey2=value2").
+Requires 1.53b.
+<br>
+
+<a name="Property.setList(string)"></a>
+<b>Property.setList(string)</b><br>
+Sets the properties from the key/value pairs in 'string'.
+Requires 1.53b.
+<br>
+
+</blockquote>
+
 <a name="Q"></a>
  <b> R  </b><a name="R"></a><a href="https://imagej.net/developer/macro/functions.html#Top">[&nbsp;Top&nbsp;]</a></p><p>
  
@@ -2879,8 +3046,8 @@ Changes the title of the active image to the string <i>name</i>.
 <a name="replace"></a>
 <b>replace(string, old, new)</b><br>
 Returns a string that results from replacing all occurrences of
-<i>old</i> in <i>string</i> with <i>new</i>, where <i>old</i> and <i>new</i> 
-are single character strings. If <i>old</i> or <i>new</i> are longer than
+<i>old</i> in <i>string</i> with <i>new</i>, where <i>old</i>
+is a single character string. If <i>old</i> is  longer than
 one character, each substring of 
 <i>string</i> that matches the 
 <a href="http://en.wikipedia.org/wiki/Regular_expression">regular expression</a>
@@ -3098,6 +3265,8 @@ Requires 1.52r.
 <a name="Roi.setGroup"></a>
 <b>Roi.setGroup(group)</b> - 
 Sets the group (a positive number) of the current selection. Zero sets the group to "none".
+See also: <a href="https://imagej.net/developer/macro/functions.html#RoiManager.selectGroup">RoiManager.selectGroup</a>
+and <a href="https://imagej.net/developer/macro/functions.html#RoiManager.setGroup">RoiManager.setGroup</a>.
 Requires 1.52t.
 <br>
 
@@ -3108,13 +3277,33 @@ the selection is not in a group.
 Requires 1.52t.
 <br>
 
+<a name="Roi.setDefaultGroup"></a>
+<b>Roi.setDefaultGroup(group)</b> - 
+Sets the default group (a positive number) of the current selection.
+Zero sets the default group to "none".
+Requires 1.52t.
+<br>
+
+<a name="Roi.getDefaultGroup"></a>
+<b>Roi.getDefaultGroup</b> - 
+Returns the default group (a positive number) of the current selection,
+or zero if the selection is not in a group.
+Requires 1.52t.
+<br>
+
 <a name="Roi.setPosition"></a>
+<b>Roi.setPosition(slice)</b> - 
+Sets the selection position.
+Requires 1.53b.
+<br>
+
+<a name="Roi.setPosition1"></a>
 <b>Roi.setPosition(channel, slice, frame)</b> - 
 Sets the selection position.
 Requires 1.52r.
 <br>
 
-<a name="Roi.getPosition"></a>
+<a name="Roi.getPosition2"></a>
 <b>Roi.getPosition(channel, slice, frame)</b> - 
 Returns the selection position.
 Requires 1.52r.
@@ -3125,6 +3314,33 @@ Requires 1.52r.
 Returns the stack position of the point with the
 specified index in the current point selection.
 Requires 1.52r.
+<br>
+
+
+<a name="Roi.setJustification"></a>
+<b>Roi.setJustification(str)</b> - 
+Sets the justification ("left","center" or "right")
+of the current text selection.
+Requires 1.53b.
+<br>
+
+<a name="Roi.setFontSize"></a>
+<b>Roi.setFontSize(size)</b> - 
+Sets the font size (in points)
+of the current text selection.
+Requires 1.53b.
+<br>
+
+<a name="Roi.getGroupNames"></a>
+<b>Roi.getGroupNames</b> - 
+Returns the group names as a comma-delimeted string.
+Requires 1.53b.
+<br>
+
+<a name="Roi.setGroupNames"></a>
+<b>Roi.setGroupNames(string)</b> - 
+Sets the group names from a comma-delimeted string.
+Requires 1.53b.
 <br>
 
 <a name="Roi.remove"></a>
@@ -3314,6 +3530,58 @@ Replaces the selected ROI on the list with the current selection.</p><p>
 
 </p></blockquote>
 
+<a name="RoiManager2"></a>
+ <b>Additional ROI Manager Functions</b><br>
+ These functions for working with the ROI Manager are available
+ in ImageJ 1.52u and later.
+<blockquote>
+
+<a name="RoiManager.multiCrop"></a>
+<b>RoiManager.multiCrop(dir, options)</b><br>
+If 'options' contains "save", saves the contents of the selected ROIs
+in TIFF format as separate images, where 'dir' is the directory path.
+Add " png" or " jpg" to save in PNG or JPEG format.
+Add ' show' and the images will be displayed in a stack.
+Requires 1.53d.
+<br>
+
+<a name="RoiManager.getName"></a>
+<b>RoiManager.getName(index)</b><br>
+Returns the name of the selection with the specified index, or an empty string
+if the selection does not have a name..
+<br>
+
+<a name="RoiManager.select"></a>
+<b>RoiManager.select(index)</b><br>
+Activates the selection at the specidied index.
+<br>
+
+<a name="RoiManager.selectGroup"></a>
+<b>RoiManager.selectGroup(group)</b><br>
+Selects all ROIs in the ROI Manager that belong to <i>group</i>.
+<br>
+
+<a name="RoiManager.setGroup"></a>
+<b>RoiManager.setGroup(group)</b><br>
+Sets the group of the selected ROIs.
+See also: <a href="https://imagej.net/developer/macro/functions.html#Roi.setGroup">Roi.setGroup</a>,
+<a href="https://imagej.net/developer/macro/functions.html#Roi.getGroup">Roi.getGroup</a>,
+<a href="https://imagej.net/developer/macro/functions.html#Roi.setDefaultGroup">Roi.setDefaultGroup</a> and
+<a href="https://imagej.net/developer/macro/functions.html#Roi.getDefaultGroup">Roi.getDefaultGroup</a>.
+<br>
+
+<a name="RoiManager.setPosition&lt;/a">
+<b>RoiManager.setPosition</b><br>
+Sets the position of the selected selections..
+<br>
+
+</a><a name="RoiManager.size"></a>
+<b>RoiManager.size</b><br>
+Returns the ROI Manager selection count.
+<br>
+
+</blockquote>
+
 <a name="round"></a>
 <b>round(n)</b><br>
 Returns the closest integer to <i>n</i>.
@@ -3322,14 +3590,22 @@ See also:
 <p>
 
 <a name="run"></a>
-<b>run("command"[, "options"])</b><br>
-Executes an ImageJ menu command. The optional second argument contains values that 
-are automatically entered into dialog boxes (must be GenericDialog or OpenDialog). Use
-the Command Recorder (<i>Plugins&gt;Macros&gt;Record</i>) to generate run() function calls.
+<b>run(command)</b><br>
+Executes an ImageJ menu command.  Use the Command Recorder
+(<i>Plugins&gt;Macros&gt;Record</i>) to generate run() function calls.
+</p><p>
+
+<a name="run1"></a>
+<b>run(command, options)</b><br>
+Executes an ImageJ menu command with arguments. The 'options' string
+contains values that are automatically entered into dialog boxes
+(must be GenericDialog or OpenDialog). Use the Command Recorder
+(<i>Plugins&gt;Macros&gt;Record</i>) to generate run() function calls.
 Use string concatenation to pass a variable as an argument. With ImageJ 1.43 and later,
 variables can be passed without using string concatenation by adding "&amp;" to the variable name.
 For examples, see the
 <a href="https://imagej.net/macros/ArgumentPassingDemo.txt">ArgumentPassingDemo</a> macro.
+Plugins can directly retrieve the 'options' string by calling Macro.getOptions().
 </p><p>
 
 <a name="runMacro"></a>
@@ -3400,6 +3676,8 @@ Returns the name of the current selection, or an empty string
 if the selection does not have a name.
 Aborts the macro if there is no selection.
 See also:
+<a href="https://imagej.net/developer/macro/functions.html#Roi.getName">Roi.getName</a>,
+<a href="https://imagej.net/developer/macro/functions.html#Roi.setName">Roi.setName</a>,
 <a href="https://imagej.net/developer/macro/functions.html#setSelectionName">setSelectionName</a> and
 <a href="https://imagej.net/developer/macro/functions.html#selectionType">selectionType</a>. 
 </p><p>
@@ -3410,6 +3688,7 @@ Returns the selection type, where 0=rectangle, 1=oval, 2=polygon, 3=freehand, 4=
 5=straight line, 6=segmented line, 7=freehand line, 8=angle, 9=composite and 10=point. 
 Returns -1 if there is no selection. For an example, see the
 <a href="https://imagej.net/macros/ShowImageInfo.txt">ShowImageInfo</a> macro.
+See also: <a href="https://imagej.net/developer/macro/functions.html#Roi.getType">Roi.getType</a>,
 </p><p>
 
 <a name="selectImage"></a>
@@ -3593,6 +3872,7 @@ Moves the active window to a new location. Use
  to set the location of the next opened window.
 See also: 
 <a href="https://imagej.net/developer/macro/functions.html#getLocationAndSize">getLocationAndSize</a>,
+<a href="https://imagej.net/developer/macro/functions.html#Table.setLocationAndSize">Table.setLocationAndSize</a>,
 <a href="https://imagej.net/developer/macro/functions.html#screenWidth">screenWidth</a>,
 <a href="https://imagej.net/developer/macro/functions.html#screenHeight">screenHeight</a>. 
 </p><p>
@@ -3622,7 +3902,8 @@ Assigns the metadata in <i>string</i> to the "Info"
 image property of the current image.
 This metadata is displayed by <i>Image&gt;Show Info</i> and
 saved as part of the TIFF header.
-See also: <a href="https://imagej.net/developer/macro/functions.html#getMetadata">getMetadata</a>. 
+See also: <a href="https://imagej.net/developer/macro/functions.html#getMetadata">getMetadata</a> and
+<a href="https://imagej.net/developer/macro/functions.html#Property.getInfo">Property.getInfo</a>. 
 </p><p>
 
 <a name="setMetadata2"></a>
@@ -3631,7 +3912,8 @@ Sets <i>string</i> as the label of the current image or stack slice.
 The first 60 characters, or up to the first newline, 
 of the label are displayed as part of the image subtitle.
 The labels are saved as part of the TIFF header.
-See also: <a href="https://imagej.net/developer/macro/functions.html#getMetadata">getMetadata</a>. 
+See also: <a href="https://imagej.net/developer/macro/functions.html#Property.setSliceLabel">Property.setSliceLabel</a> and
+<a href="https://imagej.net/developer/macro/functions.html#Property.getSliceLabel">Property.getSliceLabel</a>. 
 </p><p>
 
 <a name="setMinAndMax"></a>
@@ -3727,7 +4009,15 @@ you right click on an image.
 Enables/disables support for auto-expanding arrays
   (<a href="https://imagej.net/macros/examples/ExpandableArrays.txt">example</a>).
 <br>
-<a name="setOption10"></a>
+<a name="setOption9a"></a>
+<b>setOption("FlipFitsImages",boolean)</b><br>
+Controls whether images are flipped vertically by the FITS reader.
+<br>
+<a name="setOption9b"></a>
+<b>setOption("InterpolateLines",boolean)</b><br>
+Sets/resets the 'Interpolate line profiles' option in <i>Edit&gt;Options&gt;Plots</i>.
+<br>
+<a name="setOption9c"></a>
 <b>setOption("InvertY", boolean)</b><br>
 Sets/resets the 'invertY' option of the active image.
 <br>
@@ -3880,6 +4170,8 @@ See also:
 <a name="setSlice"></a>
 <b>setSlice(n)</b><br>
 Displays the <i>n</i>th slice of the active stack. Does nothing if the active image is not a stack.
+Use <a href="https://imagej.net/developer/macro/functions.html#Stack.setPosition">Stack.setPosition(channel,slice,frame)</a>
+to set hyperstack positions.
 For an example, see the
 <a href="https://imagej.net/macros/MeasureStack.txt">MeasureStack</a>
 macros.
@@ -4271,6 +4563,13 @@ Returns the Results window headers.
 <a href="https://imagej.net/macros/examples/PrintResults.txt">Example</a>.
 <br>
 
+<a name="String.format"></a>
+<b>String.format(format, number)</b> - 
+Returns a formatted string using the specified
+<a href="https://docs.oracle.com/javase/7/docs/api/java/util/Formatter.html#syntax">format</a>
+and number.
+<br>
+
 <a name="String.paste"></a>
 <b>String.paste</b> - 
 Returns the contents of the clipboard.
@@ -4438,6 +4737,10 @@ Enable/disable display of row numbers. Default is 'false'.
 <a name="Table.showRowIndexes"></a>
 <b>Table.showRowIndexes(boolean)</b> - 
 Enable/disable display of row indexes.
+<br>
+<a name="Table.saveColumnHeader"></a>
+<b>Table.saveColumnHeader(boolean)</b> - 
+The column header row is not saved if the argument is 'false' (default is 'true').
 <br>
 <a name="Table.showArrays"></a>
 <b> Table.showArrays(title, array1, array2, ...)</b> - 
