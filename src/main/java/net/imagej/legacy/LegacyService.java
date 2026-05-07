@@ -523,9 +523,6 @@ public final class LegacyService extends AbstractService implements
 			LegacyInjector.installHooks(loader, null);
 			instance = null;
 		}
-
-		// clean up SingleInstance remote objects
-		SingleInstance.shutDown();
 	}
 
 	// -- Versioned methods --
