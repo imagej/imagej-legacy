@@ -86,6 +86,7 @@ import javax.swing.SwingUtilities;
 import net.imagej.display.ImageDisplay;
 import net.imagej.legacy.search.SearchBarHacker;
 import net.imagej.legacy.task.TaskMonitorButtonHacker;
+import net.imagej.legacy.ui.LegacyTheme;
 import net.imagej.legacy.task.TaskStatusAggregator;
 import net.imagej.patcher.LegacyHooks;
 
@@ -311,6 +312,7 @@ public class IJ1Helper extends AbstractContextual {
 				final SwingLookAndFeelService lafService = //
 					legacyService.context().getService(SwingLookAndFeelService.class);
 				if (lafService != null) lafService.initLookAndFeel();
+				LegacyTheme.applyToStatusBar(getStatusBar());
 
 				// Add the task monitor icon after the LaF is initialized,
 				// so that all components are created with the correct theme.

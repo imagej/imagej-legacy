@@ -29,18 +29,23 @@
 
 package net.imagej.legacy.task;
 
+import ij.gui.ProgressBar;
 import net.miginfocom.swing.MigLayout;
 import org.scijava.Context;
 import org.scijava.prefs.PrefService;
 import org.scijava.ui.swing.task.SwingTaskMonitorComponent;
 
 import javax.swing.JComponent;
+import javax.swing.JLabel;
 import javax.swing.JLayer;
+import javax.swing.JTextField;
+import javax.swing.UIManager;
 import javax.swing.plaf.LayerUI;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
+import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
@@ -98,16 +103,55 @@ public class TaskMonitorButtonHacker {
 		buttonTaskMonitor.setToolTipText("Tasks: click to show running tasks");
 
 		// Overlay a task list icon, so the button is recognizable when idle.
+		// It is square, with sides equal to the height of the status bar.
 		final JLayer<JComponent> layer = new JLayer<>(buttonTaskMonitor,
-			new TaskListIconUI());
+			new TaskListIconUI(panel));
 		layer.setToolTipText(buttonTaskMonitor.getToolTipText());
-		panel.add(layer, "height 20:20:20");
+		panel.add(layer, "growy");
 
 		return layer;
 	}
 
 	/** Paints a small "bulleted list" glyph centered on top of the view. */
 	private static class TaskListIconUI extends LayerUI<JComponent> {
+
+		private final Container panel;
+
+		TaskListIconUI(final Container panel) {
+			this.panel = panel;
+		}
+
+		@Override
+		public Dimension getPreferredSize(final JComponent c) {
+			return squareSize(c);
+		}
+
+		// Note: The circular progress bar UI reports a bogus minimum height (146px
+		// in practice), which MigLayout then honors, inflating the whole status bar.
+		@Override
+		public Dimension getMinimumSize(final JComponent c) {
+			return squareSize(c);
+		}
+
+		@Override
+		public Dimension getMaximumSize(final JComponent c) {
+			return squareSize(c);
+		}
+
+		private Dimension squareSize(final JComponent c) {
+			int h = 0;
+			// Note: Only consider the components that determine the status bar
+			// height. Other siblings (e.g., an embedded search results pane) are
+			// laid out outside the status row and must not be counted.
+			for (final Component sibling : panel.getComponents()) {
+				if (sibling instanceof JLabel || sibling instanceof JTextField ||
+					sibling instanceof ProgressBar)
+				{
+					h = Math.max(h, sibling.getPreferredSize().height);
+				}
+			}
+			return new Dimension(h, h);
+		}
 
 		@Override
 		public void paint(final Graphics g, final JComponent c) {
@@ -116,8 +160,10 @@ public class TaskMonitorButtonHacker {
 			try {
 				g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
 					RenderingHints.VALUE_ANTIALIAS_ON);
-				g2.setColor(c.getForeground() == null ? Color.DARK_GRAY
-					: c.getForeground());
+				// Note: Follow the look and feel; the parent is an AWT panel with
+				// hardcoded colors, so its foreground cannot be trusted.
+				final Color fg = UIManager.getColor("Label.foreground");
+				g2.setColor(fg == null ? Color.DARK_GRAY : fg);
 				g2.setStroke(new BasicStroke(1.2f, BasicStroke.CAP_ROUND,
 					BasicStroke.JOIN_ROUND));
 				final double s = Math.min(c.getWidth(), c.getHeight());
