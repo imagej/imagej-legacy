@@ -86,6 +86,7 @@ import javax.swing.SwingUtilities;
 import net.imagej.display.ImageDisplay;
 import net.imagej.legacy.search.SearchBarHacker;
 import net.imagej.legacy.task.TaskMonitorButtonHacker;
+import net.imagej.legacy.task.TaskStatusAggregator;
 import net.imagej.patcher.LegacyHooks;
 
 import org.scijava.AbstractContextual;
@@ -133,6 +134,7 @@ public class IJ1Helper extends AbstractContextual {
 
 	/** Task bar in the main window. */
 	private Object taskBar;
+	private TaskStatusAggregator taskStatus;
 	private TaskMonitorButtonHacker taskMonitorHacker;
 
 	/** Whether we are in the process of forcibly shutting down ImageJ1. */
@@ -316,6 +318,9 @@ public class IJ1Helper extends AbstractContextual {
 					try {
 						taskMonitorHacker = new TaskMonitorButtonHacker(getContext());
 						taskBar = taskMonitorHacker.addTaskBar(ij);
+						if (taskBar != null && taskStatus == null) {
+							taskStatus = new TaskStatusAggregator(legacyService, this);
+						}
 					}
 					catch (final Throwable t) {
 						log.error(t);

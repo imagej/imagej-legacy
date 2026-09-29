@@ -35,8 +35,15 @@ import org.scijava.prefs.PrefService;
 import org.scijava.ui.swing.task.SwingTaskMonitorComponent;
 
 import javax.swing.JComponent;
+import javax.swing.JLayer;
+import javax.swing.plaf.LayerUI;
+import java.awt.BasicStroke;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.awt.Window;
 import java.util.Arrays;
 
@@ -88,9 +95,46 @@ public class TaskMonitorButtonHacker {
 
 		JComponent buttonTaskMonitor = new SwingTaskMonitorComponent(context,estimateTime,confirmCancel, 20, mini).getComponent();
 		buttonTaskMonitor.setDoubleBuffered(true); // Flickers otherwise
-		panel.add(buttonTaskMonitor,"height 20:20:20");
+		buttonTaskMonitor.setToolTipText("Tasks: click to show running tasks");
 
-		return buttonTaskMonitor;
+		// Overlay a task list icon, so the button is recognizable when idle.
+		final JLayer<JComponent> layer = new JLayer<>(buttonTaskMonitor,
+			new TaskListIconUI());
+		layer.setToolTipText(buttonTaskMonitor.getToolTipText());
+		panel.add(layer, "height 20:20:20");
+
+		return layer;
+	}
+
+	/** Paints a small "bulleted list" glyph centered on top of the view. */
+	private static class TaskListIconUI extends LayerUI<JComponent> {
+
+		@Override
+		public void paint(final Graphics g, final JComponent c) {
+			super.paint(g, c);
+			final Graphics2D g2 = (Graphics2D) g.create();
+			try {
+				g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+					RenderingHints.VALUE_ANTIALIAS_ON);
+				g2.setColor(c.getForeground() == null ? Color.DARK_GRAY
+					: c.getForeground());
+				g2.setStroke(new BasicStroke(1.2f, BasicStroke.CAP_ROUND,
+					BasicStroke.JOIN_ROUND));
+				final double s = Math.min(c.getWidth(), c.getHeight());
+				final double cx = c.getWidth() / 2.0, cy = c.getHeight() / 2.0;
+				final double dot = s * 0.07, gap = s * 0.16;
+				for (int i = -1; i <= 1; i++) {
+					final double y = cy + i * gap;
+					g2.fill(new java.awt.geom.Ellipse2D.Double(cx - s * 0.22 - dot,
+						y - dot, 2 * dot, 2 * dot));
+					g2.draw(new java.awt.geom.Line2D.Double(cx - s * 0.10, y,
+						cx + s * 0.22, y));
+				}
+			}
+			finally {
+				g2.dispose();
+			}
+		}
 	}
 
 }
