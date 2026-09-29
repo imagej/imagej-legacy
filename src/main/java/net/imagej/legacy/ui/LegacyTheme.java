@@ -33,7 +33,6 @@ import java.awt.Component;
 import java.awt.Container;
 import java.lang.reflect.Field;
 
-import ij.gui.ProgressBar;
 
 import javax.swing.UIManager;
 
@@ -71,7 +70,7 @@ public final class LegacyTheme {
 		if (fg != null) statusBar.setForeground(fg);
 		if (statusBar instanceof Container) {
 			for (final Component c : ((Container) statusBar).getComponents()) {
-				if (c instanceof ProgressBar) applyToProgressBar((ProgressBar) c);
+				if (isProgressBar(c)) applyToProgressBar(c);
 			}
 		}
 	}
@@ -80,13 +79,21 @@ public final class LegacyTheme {
 	 * HACK: The legacy progress bar paints its idle state as a rectangle in a
 	 * private, hardcoded light color, which is visible in dark themes.
 	 */
-	private static void applyToProgressBar(final ProgressBar bar) {
+	private static void applyToProgressBar(final Component bar) {
 		final Color bg = UIManager.getColor("Panel.background");
 		setField(bar, "backgroundColor", bg);
 		setField(bar, "frameBrighter", bg.brighter());
 		setField(bar, "frameDarker", bg.darker());
 		bar.setBackground(bg);
 		bar.repaint();
+	}
+
+	/**
+	 * Note: We compare the class name rather than using {@code instanceof}, to
+	 * avoid referencing ImageJ 1.x classes directly (see ImageJ1EncapsulationTest).
+	 */
+	public static boolean isProgressBar(final Component c) {
+		return c != null && "ij.gui.ProgressBar".equals(c.getClass().getName());
 	}
 
 	private static void setField(final Object o, final String name,

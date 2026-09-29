@@ -29,7 +29,7 @@
 
 package net.imagej.legacy.task;
 
-import ij.gui.ProgressBar;
+import net.imagej.legacy.ui.LegacyTheme;
 import net.miginfocom.swing.MigLayout;
 import org.scijava.Context;
 import org.scijava.prefs.PrefService;
@@ -145,7 +145,7 @@ public class TaskMonitorButtonHacker {
 			// laid out outside the status row and must not be counted.
 			for (final Component sibling : panel.getComponents()) {
 				if (sibling instanceof JLabel || sibling instanceof JTextField ||
-					sibling instanceof ProgressBar)
+					LegacyTheme.isProgressBar(sibling))
 				{
 					h = Math.max(h, sibling.getPreferredSize().height);
 				}
